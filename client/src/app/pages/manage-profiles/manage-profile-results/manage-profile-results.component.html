@@ -26,7 +26,7 @@
     </div>
     <button type="button" data-testid="manage-profiles-results-clear" [disabled]="clearing() || !hasClearableResults()" (click)="requestClear()" class="group inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-red-400/25 bg-red-500/[0.06] px-2.5 text-[11px] font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] hover:border-red-400/45 hover:bg-red-500/[0.12] focus-visible:ring-1 focus-visible:ring-red-400/55 disabled:cursor-not-allowed disabled:opacity-60" [title]="selectedProfileId() ? 'Clear results for the selected profile' : 'Clear all results'">
       <i class="bi bi-trash3 text-[11px] text-red-400 transition-colors group-hover:text-red-300" aria-hidden="true"></i>
-      <span>{{ (clearing() ? 'Clearing' : (selectedProfileId() ? 'Clear Profile Results' : 'Clear All Results')) | translate }}</span>
+      <span>{{ (clearing() ? 'Clearing' : clearLabel()) | translate }}</span>
     </button>
   </div>
   <div data-testid="manage-profiles-results-list" class="overflow-hidden rounded-xl border border-[var(--ui-table-shell-border)] bg-[var(--ui-table-row-odd)] shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
@@ -74,6 +74,9 @@
           @if (row.ads.length || row.posts.length) {
             <i class="bi text-[12px] text-[var(--color-text4)]" [ngClass]="isResultExpanded(row.key) ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
           }
+          <button type="button" data-testid="manage-profiles-result-delete" [disabled]="row.running || isDeleting(row.key)" (click)="deleteRecord(row.key, row.activity, row.profileId, row.dateTime, $event)" class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] border outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-red-400/55 disabled:cursor-not-allowed disabled:opacity-40 border-[#5c2121] bg-[linear-gradient(135deg,rgba(235,120,120,0.22),rgba(238,68,68,0.12))] text-[#ff9e9e] hover:border-[#7d2828] hover:bg-[linear-gradient(135deg,rgba(235,120,120,0.30),rgba(238,68,68,0.18))] hover:text-white [.light-theme_&]:border-[#e1b7b7] [.light-theme_&]:bg-[#fceeee] [.light-theme_&]:text-[#c0392b] [.light-theme_&]:hover:border-[#d88f8f] [.light-theme_&]:hover:bg-[#fae4e4] [.light-theme_&]:hover:text-[#b02a2a]" [title]="'Remove this record' | translate" [attr.aria-label]="'Remove this record' | translate">
+            <i class="bi bi-trash3 text-[11px]" aria-hidden="true"></i>
+          </button>
         </div>
         @if (isResultExpanded(row.key) && (row.ads.length || row.posts.length)) {
           <div class="border-t border-[var(--ui-table-row-border)] bg-[var(--color-blue-820)] px-3 py-2 sm:px-4 [body.light-theme_&]:bg-[#f5f9fe]">
@@ -120,9 +123,14 @@
       @for (post of visiblePosts(); track post.key) {
         <section data-testid="manage-profiles-post-row" class="group relative border-b border-[var(--ui-table-row-border)] odd:bg-[var(--ui-table-row-odd)] even:bg-[var(--ui-table-row-even)] last:border-b-0">
           <div class="pointer-events-none absolute inset-y-0 left-0 w-0 bg-[var(--color-blue-640)] transition-[width] group-hover:w-0.5"></div>
-          <div class="grid items-stretch gap-3 px-3 py-3 hover:bg-[var(--ui-table-row-hover)] sm:px-4" [ngClass]="post.imageUrl ? 'grid-cols-[auto_1fr]' : 'grid-cols-1'">
+          @if (post.source === 'published') {
+            <button type="button" data-testid="manage-profiles-post-delete" [disabled]="isDeleting(post.key)" (click)="deleteRecord(post.key, 'posting', post.profileId, post.dateTime, $event)" class="absolute right-3 top-1/2 z-[2] inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-[7px] border outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-red-400/55 disabled:cursor-not-allowed disabled:opacity-40 sm:right-4 border-[#5c2121] bg-[linear-gradient(135deg,rgba(235,120,120,0.22),rgba(238,68,68,0.12))] text-[#ff9e9e] hover:border-[#7d2828] hover:bg-[linear-gradient(135deg,rgba(235,120,120,0.30),rgba(238,68,68,0.18))] hover:text-white [.light-theme_&]:border-[#e1b7b7] [.light-theme_&]:bg-[#fceeee] [.light-theme_&]:text-[#c0392b] [.light-theme_&]:hover:border-[#d88f8f] [.light-theme_&]:hover:bg-[#fae4e4] [.light-theme_&]:hover:text-[#b02a2a]" [title]="'Remove this record' | translate" [attr.aria-label]="'Remove this record' | translate">
+              <i class="bi bi-trash3 text-[11px]" aria-hidden="true"></i>
+            </button>
+          }
+          <div class="grid items-center gap-3 px-3 py-3 pr-10 hover:bg-[var(--ui-table-row-hover)] sm:px-4 sm:pr-12" [ngClass]="post.imageUrl ? 'grid-cols-[auto_1fr]' : 'grid-cols-1'">
             @if (post.imageUrl) {
-              <a [href]="post.imageUrl" target="_blank" rel="noopener noreferrer" class="relative block aspect-[1.3/1] h-full overflow-hidden rounded-md border border-[var(--color-border)]"><img [src]="post.imageUrl" alt="" class="absolute inset-0 h-full w-full object-cover" loading="lazy"></a>
+              <a [href]="post.imageUrl" target="_blank" rel="noopener noreferrer" class="relative block h-[72px] w-24 shrink-0 self-start overflow-hidden rounded-md border border-[var(--color-border)]"><img [src]="post.imageUrl" alt="" class="absolute inset-0 h-full w-full object-cover" loading="lazy"></a>
             }
             <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-2">

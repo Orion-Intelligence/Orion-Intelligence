@@ -56,6 +56,7 @@ export class ManageProfilesComponent {
   readonly maxSessions = MAX_SESSIONS_PER_PLATFORM;
   readonly sessionFetching = signal<Set<string>>(new Set<string>());
   readonly sessionVerifying = signal<Set<string>>(new Set<string>());
+  readonly sessionUploading = signal<Set<string>>(new Set<string>());
   readonly sessions = signal<Record<string, SessionEntry[]>>({});
   readonly expanded = signal<Set<string>>(new Set<string>());
   readonly modalMode = signal<ManageProfilesModalMode | null>(null);
@@ -137,6 +138,57 @@ export class ManageProfilesComponent {
 
   isVerifying(sessionId: string): boolean {
     return this.sessionVerifying().has(sessionId);
+  }
+
+  isUploading(platform: string): boolean {
+    return this.sessionUploading().has(platform);
+  }
+
+  downloadSession(entry: PlatformEntry, sessionId: string): void {
+    this.service.downloadSession(entry.platform, sessionId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${this.safePlatform(entry.platform)}-${sessionId.slice(0, 8)}.zip`;
+        link.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.notification.show(`Failed to download session for ${entry.platform}.`, 'fail');
+      },
+    });
+  }
+
+  uploadSession(entry: PlatformEntry, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files[0];
+    input.value = '';
+    if (!file || this.sessionUploading().has(entry.platform)) {
+      return;
+    }
+    if (this.sessionCount(entry.platform) >= this.maxSessions) {
+      this.notification.show(`Maximum of ${this.maxSessions} sessions reached for ${entry.platform}.`, 'fail');
+      return;
+    }
+    this.sessionUploading.update(current => new Set(current).add(entry.platform));
+    this.service.uploadSession(entry.platform, file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(result => {
+      this.sessionUploading.update(current => {
+        const next = new Set(current);
+        next.delete(entry.platform);
+        return next;
+      });
+      if (result.error) {
+        this.notification.show(result.error === 'session_limit' ? `Maximum sessions reached for ${entry.platform}.` : `Session upload failed for ${entry.platform}.`, 'fail');
+        return;
+      }
+      this.expanded.update(current => new Set(current).add(this.safePlatform(entry.platform)));
+      this.loadCapturedSessions();
+      this.notification.show(`Session uploaded for ${entry.platform}.`, 'success');
+      if (result.saved && result.session_id) {
+        this.verifySession(entry, result.session_id);
+      }
+    });
   }
 
   verifySession(entry: PlatformEntry, sessionId: string): void {
@@ -386,6 +438,14 @@ export class ManageProfilesComponent {
     this.selectedProfile.set(profile);
     this.confirmationAction.set('assignment');
     this.confirmationMessage.set('Are you sure you want to remove this assignment?');
+  }
+
+  removeOrDeleteProfile(profile: SocialProfile): void {
+    if (profile.assigned_persona_id) {
+      this.removeAssignment(profile);
+      return;
+    }
+    this.deleteProfile(profile);
   }
 
   runningScans(profileId: string): SocialProfileActiveRun[] {

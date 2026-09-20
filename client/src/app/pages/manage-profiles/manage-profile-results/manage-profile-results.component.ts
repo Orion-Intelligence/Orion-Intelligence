@@ -34,6 +34,7 @@ export class ManageProfileResultsComponent implements OnInit {
   readonly viewOptions: UiDropdownOption[] = RESULTS_VIEW_OPTIONS;
   readonly clearing = signal(false);
   readonly confirmClear = signal(false);
+  readonly deletingKeys = signal<Set<string>>(new Set<string>());
   readonly profileOptions = computed<UiDropdownOption[]>(() => this.profiles().map(profile => ({ key: profile.profile_id, label: profileOptionLabel(this.platforms(), profile) })));
   readonly profileRows = computed(() => {
     const profileId = this.selectedProfileId();
@@ -46,7 +47,10 @@ export class ManageProfileResultsComponent implements OnInit {
     return this.profileRows().filter(row => row.activity === 'ad_detection');
   });
   readonly visiblePosts = computed<ManageProfilePostRow[]>(() => this.view() === 'posts' ? flattenPostRows(this.profileRows(), this.profiles()) : []);
-  readonly hasClearableResults = computed(() => this.profileRows().some(row => !row.running));
+  readonly hasClearableResults = computed(() => {
+    const activity = this.view() === 'posts' ? 'posting' : 'ad_detection';
+    return this.profileRows().some(row => !row.running && row.activity === activity);
+  });
   readonly shimmerRows = SHIMMER_ROWS;
 
   constructor(private service: ManageProfilesService, private notification: MessageNotificationService) {}
@@ -89,8 +93,14 @@ export class ManageProfileResultsComponent implements OnInit {
   }
 
   clearConfirmationMessage(): string {
+    const kind = this.view() === 'posts' ? 'post' : 'ad';
     const label = this.selectedProfileLabel();
-    return label ? `Clear all results for "${label}"? This cannot be undone.` : 'Clear all results for every profile? This cannot be undone.';
+    return label ? `Clear all ${kind} results for "${label}"? This cannot be undone.` : `Clear all ${kind} results for every profile? This cannot be undone.`;
+  }
+
+  clearLabel(): string {
+    const kind = this.view() === 'posts' ? 'Posts' : 'Ads';
+    return this.selectedProfileId() ? `Clear Profile ${kind}` : `Clear All ${kind}`;
   }
 
   requestClear(): void {
@@ -106,7 +116,7 @@ export class ManageProfileResultsComponent implements OnInit {
       return;
     }
     this.clearing.set(true);
-    this.service.clearResults(this.selectedProfileId()).pipe(takeUntilDestroyed(this.destroyRef), finalize(() => {
+    this.service.clearResults(this.selectedProfileId(), this.view()).pipe(takeUntilDestroyed(this.destroyRef), finalize(() => {
       this.clearing.set(false);
     })).subscribe({
       next: () => {
@@ -116,6 +126,34 @@ export class ManageProfileResultsComponent implements OnInit {
       },
       error: (error) => {
         this.notification.show(error?.error?.detail ?? 'Failed to clear results', 'fail');
+      },
+    });
+  }
+
+  isDeleting(key: string): boolean {
+    return this.deletingKeys().has(key);
+  }
+
+  deleteRecord(key: string, activity: string, profileId: string, dateTime: string, event: Event): void {
+    event.stopPropagation();
+    if (this.deletingKeys().has(key)) {
+      return;
+    }
+    this.deletingKeys.update(current => new Set(current).add(key));
+    this.service.deleteResultItem(activity, profileId, dateTime).pipe(takeUntilDestroyed(this.destroyRef), finalize(() => {
+      this.deletingKeys.update(current => {
+        const next = new Set(current);
+        next.delete(key);
+        return next;
+      });
+    })).subscribe({
+      next: () => {
+        this.notification.show('Record removed', 'success');
+        this.pending?.unsubscribe();
+        this.loadResults(false);
+      },
+      error: (error) => {
+        this.notification.show(error?.error?.detail ?? 'Failed to remove record', 'fail');
       },
     });
   }

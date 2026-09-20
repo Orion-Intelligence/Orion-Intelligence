@@ -52,6 +52,17 @@ export class ManageProfilesService {
       catchError(() => of(undefined)));
   }
 
+  downloadSession(platform: string, sessionId: string): Observable<Blob> {
+    return this.http.get(`/api/manage-profiles/session/${encodeURIComponent(platform)}/${encodeURIComponent(sessionId)}/download`, { withCredentials: true, responseType: 'blob' });
+  }
+
+  uploadSession(platform: string, file: File): Observable<{ platform?: string; session_id?: string; saved?: boolean; error?: string }> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<{ result?: { platform?: string; session_id?: string; saved?: boolean }; error?: string }>(`/api/manage-profiles/session/${encodeURIComponent(platform)}/upload`, form, { withCredentials: true }).pipe(map(response => ({ platform: response?.result?.platform, session_id: response?.result?.session_id, saved: response?.result?.saved, error: response?.error })),
+      catchError(() => of<{ platform?: string; session_id?: string; saved?: boolean; error?: string }>({ error: 'upload_failed' })));
+  }
+
   getPersonas(): Observable<SocialPersonaListResponse> {
     return this.http.get<SocialPersonaListResponse>('/api/manage-profiles/personas', { withCredentials: true });
   }
@@ -100,8 +111,19 @@ export class ManageProfilesService {
     return this.http.get<SocialProfileResultsOverview>('/api/manage-profiles/results', { withCredentials: true });
   }
 
-  clearResults(profileId = ''): Observable<void> {
-    return this.http.delete<void>('/api/manage-profiles/results', { withCredentials: true, params: profileId ? { profile_id: profileId } : {} });
+  clearResults(profileId = '', kind = ''): Observable<void> {
+    const params: Record<string, string> = {};
+    if (profileId) {
+      params.profile_id = profileId;
+    }
+    if (kind) {
+      params.kind = kind;
+    }
+    return this.http.delete<void>('/api/manage-profiles/results', { withCredentials: true, params });
+  }
+
+  deleteResultItem(activity: string, profileId: string, dateTime: string): Observable<void> {
+    return this.http.delete<void>('/api/manage-profiles/results/item', { withCredentials: true, params: { activity, profile_id: profileId, date_time: dateTime } });
   }
 
   stopRun(runId: string): Observable<void> {

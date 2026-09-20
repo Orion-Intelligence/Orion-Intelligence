@@ -321,6 +321,73 @@ class ProfileManager:
                     await self._engine.save(social_record)
         return {"result": {"deleted": True}}
 
+    async def download_session(self, current_user, platform: str, session_id: str):
+        user_key = self._user_key(current_user)
+        safe_platform, safe_session, record = await self._find_session_record(user_key, platform, session_id)
+        if record is None:
+            return None
+        path = CONSTANTS.S_SESSION_RESOURCE_DIR / user_key / safe_platform / record.file_name
+        if not path.exists():
+            return None
+        try:
+            cipher = await self._tenant_cipher(current_user)
+            raw = cipher.decrypt(path.read_bytes())
+        except Exception:
+            return None
+        return {"filename": f"{safe_platform}-{safe_session[:8]}.zip", "content": raw}
+
+    @staticmethod
+    def _normalize_session_upload(raw_bytes: bytes):
+        try:
+            with zipfile.ZipFile(io.BytesIO(raw_bytes)) as archive:
+                state = json.loads(archive.read("session.json").decode("utf-8"))
+            if isinstance(state, dict):
+                return raw_bytes, str(state.get("username") or "")
+        except Exception:
+            pass
+        try:
+            state = json.loads(raw_bytes.decode("utf-8"))
+            if not isinstance(state, dict):
+                return None, ""
+            buffer = io.BytesIO()
+            with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr("session.json", json.dumps(state))
+            return buffer.getvalue(), str(state.get("username") or "")
+        except Exception:
+            return None, ""
+
+    async def upload_session(self, current_user, platform: str, raw_bytes: bytes):
+        user_key = self._user_key(current_user)
+        if not user_key:
+            return {"error": "no_session_data"}
+        safe_platform = re.sub(r"[^a-z0-9]", "", str(platform or "").lower())
+        if not safe_platform:
+            return {"error": "invalid_platform"}
+        zip_bytes, username = self._normalize_session_upload(raw_bytes or b"")
+        if zip_bytes is None:
+            return {"error": "invalid_session_file"}
+        existing = await self._engine.count(db_social_session_model, {"user_id": user_key, "platform": safe_platform})
+        if existing >= MAX_SESSIONS_PER_PLATFORM:
+            return {"error": "session_limit"}
+        try:
+            cipher = await self._tenant_cipher(current_user)
+            session_id = uuid4().hex
+            encrypted = cipher.encrypt(zip_bytes)
+            path = CONSTANTS.S_SESSION_RESOURCE_DIR / user_key / safe_platform / f"{session_id}.enc"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(encrypted)
+            await self._engine.save(db_social_session_model(
+                user_id=user_key,
+                platform=safe_platform,
+                session_id=session_id,
+                file_name=path.name,
+                byte_size=len(encrypted),
+                username=username,
+            ))
+        except Exception:
+            return {"error": "session_store_failed"}
+        return {"result": {"platform": safe_platform, "session_id": session_id, "saved": True}}
+
     async def create_persona(self, current_user, data: SocialPersonaCreateRequest) -> SocialPersonaResponse:
         record = await self._get_or_create_social_record(current_user)
         now = datetime.now(UTC)
@@ -602,6 +669,10 @@ class ProfileManager:
         profile = next((item for item in record.profiles if item.profile_id == profile_id), None)
         if profile is None or not profile.session_id:
             return
+        manager = extension_socket_manager.get_instance()
+        if await manager.is_inflight(user_id, f"session:{profile.platform}") or await manager.is_inflight(user_id, f"verify:{profile.platform}"):
+            log.g().i(f"Skipped session-expiry for profile {profile_id}: capture/verify popup open for {profile.platform}")
+            return
         session = await self._engine.find_one(
             db_social_session_model,
             {"user_id": user_id, "platform": self._safe_platform(profile.platform), "session_id": profile.session_id},
@@ -648,22 +719,72 @@ class ProfileManager:
             hate_speech_results=sorted(results.hate_speech_results, key=lambda item: item.date_time, reverse=True),
         )
 
-    async def clear_results(self, current_user, profile_id: str = ""):
+    async def clear_results(self, current_user, profile_id: str = "", kind: str = ""):
         user_id = str(current_user.id)
         results = await self._engine.find_one(db_social_automation_result_model, db_social_automation_result_model.user_id == user_id)
         if results is None:
             return {"status": "success", "message": "Results cleared"}
-        if profile_id:
-            results.ad_detection_results = [item for item in results.ad_detection_results if item.profile_id != profile_id]
-            results.post_results = [item for item in results.post_results if item.profile_id != profile_id]
-            results.hate_speech_results = [item for item in results.hate_speech_results if item.profile_id != profile_id]
+
+        def prune(items):
+            return [item for item in items if item.profile_id != profile_id] if profile_id else []
+
+        if kind == "ads":
+            results.ad_detection_results = prune(results.ad_detection_results)
+        elif kind == "posts":
+            results.post_results = prune(results.post_results)
         else:
-            results.ad_detection_results = []
-            results.post_results = []
-            results.hate_speech_results = []
+            results.ad_detection_results = prune(results.ad_detection_results)
+            results.post_results = prune(results.post_results)
+            results.hate_speech_results = prune(results.hate_speech_results)
         results.updated_at = datetime.now(UTC)
         await self._engine.save(results)
         return {"status": "success", "message": "Results cleared"}
+
+    @staticmethod
+    def _parse_iso(value: str):
+        if not value:
+            return None
+        try:
+            return datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        except Exception:
+            return None
+
+    @staticmethod
+    def _same_instant(stored, target) -> bool:
+        if stored is None or target is None:
+            return False
+        left = stored if stored.tzinfo else stored.replace(tzinfo=UTC)
+        right = target if target.tzinfo else target.replace(tzinfo=UTC)
+        return abs((left - right).total_seconds()) < 0.001
+
+    async def delete_result(self, current_user, activity: str, profile_id: str, date_time: str):
+        user_id = str(current_user.id)
+        results = await self._engine.find_one(db_social_automation_result_model, db_social_automation_result_model.user_id == user_id)
+        if results is None:
+            return {"status": "success", "removed": 0}
+        target = self._parse_iso(date_time)
+
+        def drop_first(items):
+            out = []
+            removed = 0
+            for item in items:
+                if not removed and item.profile_id == profile_id and self._same_instant(item.date_time, target):
+                    removed = 1
+                    continue
+                out.append(item)
+            return out, removed
+
+        removed = 0
+        if activity == "posting":
+            results.post_results, removed = drop_first(results.post_results)
+        elif activity == "ad_detection":
+            results.ad_detection_results, removed = drop_first(results.ad_detection_results)
+        elif activity == "hate_speech":
+            results.hate_speech_results, removed = drop_first(results.hate_speech_results)
+        if removed:
+            results.updated_at = datetime.now(UTC)
+            await self._engine.save(results)
+        return {"status": "success", "removed": removed}
 
     async def get_profile_results(self, current_user, profile_id: str) -> SocialProfileResultsResponse:
         user_id = str(current_user.id)

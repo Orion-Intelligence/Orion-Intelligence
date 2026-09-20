@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Body, Depends, File, HTTPException, Response, UploadFile
 
 from configs.app_dependency import get_current_user, license_required, role_required, status_required
 from orion.api.interactive.profile_manager.model.models import (
@@ -45,6 +45,20 @@ async def manage_profiles_sessions(current_user=Depends(get_current_user)):
 @manage_profiles_routes.delete("/api/manage-profiles/session/{platform}/{session_id}", include_in_schema=False)
 async def manage_profiles_session_delete(platform: str, session_id: str, current_user=Depends(get_current_user)):
     return await ProfileManager.get_instance().delete_session(current_user, platform, session_id)
+
+
+@manage_profiles_routes.get("/api/manage-profiles/session/{platform}/{session_id}/download", include_in_schema=False)
+async def manage_profiles_session_download(platform: str, session_id: str, current_user=Depends(get_current_user)):
+    data = await ProfileManager.get_instance().download_session(current_user, platform, session_id)
+    if not data:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return Response(content=data["content"], media_type="application/zip", headers={"Content-Disposition": f'attachment; filename="{data["filename"]}"'})
+
+
+@manage_profiles_routes.post("/api/manage-profiles/session/{platform}/upload", include_in_schema=False)
+async def manage_profiles_session_upload(platform: str, file: UploadFile = File(...), current_user=Depends(get_current_user)):
+    raw = await file.read()
+    return await ProfileManager.get_instance().upload_session(current_user, platform, raw)
 
 @manage_profiles_routes.post("/api/manage-profiles/session/verify", include_in_schema=False)
 async def manage_profiles_session_verify(payload: dict = Body(default={}), current_user=Depends(get_current_user)):
@@ -113,8 +127,13 @@ async def get_results_overview(current_user=Depends(get_current_user)):
 
 
 @manage_profiles_routes.delete("/api/manage-profiles/results", dependencies=route_permissions)
-async def clear_results(profile_id: str = "", current_user=Depends(get_current_user)):
-    return await ProfileManager.get_instance().clear_results(current_user, profile_id)
+async def clear_results(profile_id: str = "", kind: str = "", current_user=Depends(get_current_user)):
+    return await ProfileManager.get_instance().clear_results(current_user, profile_id, kind)
+
+
+@manage_profiles_routes.delete("/api/manage-profiles/results/item", dependencies=route_permissions)
+async def delete_result_item(activity: str = "", profile_id: str = "", date_time: str = "", current_user=Depends(get_current_user)):
+    return await ProfileManager.get_instance().delete_result(current_user, activity, profile_id, date_time)
 
 
 @manage_profiles_routes.post("/api/manage-profiles/results/runs/{run_id}/stop", dependencies=route_permissions)
