@@ -17,13 +17,13 @@ from pymongo.errors import DuplicateKeyError
 
 from orion.api.interactive.extension_manager.extension_socket_manager import extension_socket_manager
 from orion.api.interactive.profile_manager.constants.constant import MAX_SESSIONS_PER_PLATFORM, PLATFORMS_RESULT_KEY
-from orion.api.interactive.profile_manager.model.models import SocialAutomationResultRequest, SocialPersonaCreateRequest, SocialPersonaListResponse, SocialPersonaResponse, SocialPersonaUpdateRequest, SocialProfileAssignmentRequest, SocialProfileAssignmentResponse, SocialProfileCallbackRequest, SocialProfileCallbackResponse, SocialProfileConnectRequest, SocialProfileListResponse, SocialProfileResponse, SocialProfileResultsResponse, SocialProfileUpdateRequest
+from orion.api.interactive.profile_manager.model.models import SocialAutomationResultRequest, SocialPersonaCreateRequest, SocialPersonaListResponse, SocialPersonaResponse, SocialPersonaUpdateRequest, SocialProfileAssignmentRequest, SocialProfileAssignmentResponse, SocialProfileCallbackRequest, SocialProfileCallbackResponse, SocialProfileConnectRequest, SocialProfileListResponse, SocialProfileResponse, SocialProfileResultsOverviewResponse, SocialProfileResultsResponse, SocialProfileUpdateRequest
 from orion.constants.constant import CONSTANTS
 from orion.services.encryption_manager.key_manager import KeyManager
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.shared_model.db_social_profile_management_model import ManagedSocialProfile, SocialPersona, SocialPersonaAgeGroup, SocialProfileAssignmentStatus, SocialProfileConnectionStatus, db_social_profile_management_model
 from orion.services.mongo_manager.shared_model.db_social_session_model import db_social_session_model
-from orion.services.mongo_manager.shared_model.db_social_automation_result_model import SocialAdDetectionResult, SocialDetectedAd, SocialPostResult, db_social_automation_result_model
+from orion.services.mongo_manager.shared_model.db_social_automation_result_model import SocialAdDetectionResult, SocialDetectedAd, SocialHateSpeechResult, SocialPostResult, db_social_automation_result_model
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 
 
@@ -416,9 +416,27 @@ class ProfileManager:
             return SocialProfileListResponse()
         return SocialProfileListResponse(profiles=[self._profile_response(profile) for profile in record.profiles])
 
+    def _apply_platform_change(self, record: db_social_profile_management_model, profile: ManagedSocialProfile, data: SocialProfileUpdateRequest) -> None:
+        platform = self._safe_platform(data.platform)
+        if not platform:
+            raise HTTPException(status_code=400, detail="Platform is required")
+        if platform == profile.platform:
+            return
+        if profile.assigned_persona_id and any(
+            other.profile_id != profile.profile_id and other.platform == platform and other.assigned_persona_id == profile.assigned_persona_id
+            for other in record.profiles
+        ):
+            raise HTTPException(status_code=400, detail="This persona is already assigned to a profile on the selected platform")
+        profile.platform = platform
+        if data.session_id is None:
+            profile.session_id = None
+            profile.connection_status = SocialProfileConnectionStatus.DISCONNECTED
+
     async def update_profile(self, current_user, profile_id: str, data: SocialProfileUpdateRequest) -> SocialProfileResponse:
         record = await self._get_or_create_social_record(current_user)
         profile = self._find_profile(record, profile_id)
+        if data.platform is not None:
+            self._apply_platform_change(record, profile, data)
         if data.profile_name is not None:
             profile.profile_name = data.profile_name.strip() or None
         if data.profile_username is not None:
@@ -494,6 +512,8 @@ class ProfileManager:
                 profile_id=result.profile_id,
                 date_time=result.date_time or now,
                 post_url=result.post_url,
+                post_text=result.post_text,
+                image_url=result.image_url,
                 error=result.error,
                 error_reason=result.error_reason,
                 session_expired=result.session_expired,
@@ -592,6 +612,59 @@ class ProfileManager:
         await self._engine.save(session)
         log.g().i(f"Social session {session.session_id} marked unverified after expired session on profile {profile_id}")
 
+    async def stop_run(self, current_user, run_id: str):
+        from orion.management.jobs.social_profile.social_profile_job import social_profile_job
+        if not social_profile_job.get_instance().cancel_run(str(current_user.id), run_id):
+            raise HTTPException(status_code=404, detail="This run is no longer active")
+        return {"status": "success", "message": "Run is stopping"}
+
+    async def store_run_failure(self, user_id: str, profile_id: str, activity: str, reason: str, is_manual: bool = False):
+        record = await self._get_or_create_automation_result_record(user_id)
+        now = datetime.now(UTC)
+        if activity == "posting":
+            record.post_results.append(SocialPostResult(profile_id=profile_id, date_time=now, error=True, error_reason=reason, is_manual=is_manual))
+        elif activity == "ad_detection":
+            record.ad_detection_results.append(SocialAdDetectionResult(profile_id=profile_id, date_time=now, error=True, error_reason=reason, is_manual=is_manual))
+        elif activity == "hate_speech":
+            record.hate_speech_results.append(SocialHateSpeechResult(profile_id=profile_id, date_time=now, error=True, error_reason=reason, is_manual=is_manual))
+        else:
+            return
+        record.updated_at = now
+        await self._engine.save(record)
+
+    async def get_results_overview(self, current_user) -> SocialProfileResultsOverviewResponse:
+        from orion.management.jobs.social_profile.social_profile_job import social_profile_job
+        user_id = str(current_user.id)
+        active_runs = social_profile_job.get_instance().active_runs(user_id)
+
+        results = await self._engine.find_one(db_social_automation_result_model, db_social_automation_result_model.user_id == user_id)
+        if results is None:
+            return SocialProfileResultsOverviewResponse(active_runs=active_runs)
+
+        return SocialProfileResultsOverviewResponse(
+            active_runs=active_runs,
+            ad_detection_results=sorted(results.ad_detection_results, key=lambda item: item.date_time, reverse=True),
+            post_results=sorted(results.post_results, key=lambda item: item.date_time, reverse=True),
+            hate_speech_results=sorted(results.hate_speech_results, key=lambda item: item.date_time, reverse=True),
+        )
+
+    async def clear_results(self, current_user, profile_id: str = ""):
+        user_id = str(current_user.id)
+        results = await self._engine.find_one(db_social_automation_result_model, db_social_automation_result_model.user_id == user_id)
+        if results is None:
+            return {"status": "success", "message": "Results cleared"}
+        if profile_id:
+            results.ad_detection_results = [item for item in results.ad_detection_results if item.profile_id != profile_id]
+            results.post_results = [item for item in results.post_results if item.profile_id != profile_id]
+            results.hate_speech_results = [item for item in results.hate_speech_results if item.profile_id != profile_id]
+        else:
+            results.ad_detection_results = []
+            results.post_results = []
+            results.hate_speech_results = []
+        results.updated_at = datetime.now(UTC)
+        await self._engine.save(results)
+        return {"status": "success", "message": "Results cleared"}
+
     async def get_profile_results(self, current_user, profile_id: str) -> SocialProfileResultsResponse:
         user_id = str(current_user.id)
         record = await self._engine.find_one(db_social_profile_management_model, db_social_profile_management_model.user_id == user_id)
@@ -670,6 +743,15 @@ class ProfileManager:
     def _profile_response(self, profile: ManagedSocialProfile) -> SocialProfileResponse:
         return SocialProfileResponse(**profile.model_dump())
 
+    @staticmethod
+    def _no_runnable_profile_detail(record, persona_id: str) -> str:
+        assigned = [profile for profile in record.profiles if profile.assigned_persona_id == persona_id]
+        if not assigned:
+            return "No profile is assigned to this persona yet."
+        if not any(profile.session_id for profile in assigned):
+            return "No session is attached to the profile assigned to this persona. Capture a session and attach it to the profile first."
+        return "The session attached to this profile could not be read. Capture the session again."
+
     async def trigger_post_monitoring(self, current_user, persona_id: str):
         from orion.services.mongo_manager.shared_model.db_cronjob_status_model import CronjobName, CronjobStatus, db_cronjob_status_model
         cron_record = await self._engine.find_one(db_cronjob_status_model, db_cronjob_status_model.job_name == CronjobName.SOCIAL_JOB)
@@ -680,24 +762,47 @@ class ProfileManager:
         persona = self._find_persona(record, persona_id)
         
         now = datetime.now(UTC)
-        if persona.last_manual_post_trigger:
-            if persona.last_manual_post_trigger.date() == now.date():
-                raise HTTPException(status_code=400, detail="Manual post can only be publish once a day for a profile.")
-                
-        persona.last_manual_post_trigger = now
-        await self._engine.save(record)
-        
         from orion.management.jobs.social_profile.social_profile_job import social_profile_job
         job = social_profile_job.get_instance()
-        
+        if not await job.has_post_data(persona):
+            raise HTTPException(status_code=400, detail=f"No post content is available for this persona ({job.persona_post_key_label(persona)}). Adjust the persona's age group or interests.")
+
+        posted_today = await self._profiles_with_manual_post_today(record.user_id, now)
+        dispatched = 0
+        blocked = 0
         for profile in record.profiles:
             if profile.assigned_persona_id == persona_id and profile.session_id:
+                if profile.profile_id in posted_today:
+                    blocked += 1
+                    continue
                 session_state = await self.read_profile_session_state(current_user, profile)
                 if session_state:
                     run_id = str(uuid4())
                     asyncio.create_task(job.run_posting(profile, persona, session_state, run_id, record.user_id, is_manual=True))
+                    dispatched += 1
 
-        return {"status": "success", "message": "Post monitoring triggered"}
+        if not dispatched:
+            if blocked:
+                raise HTTPException(status_code=400, detail="Manual post can only be publish once a day for a profile.")
+            raise HTTPException(status_code=400, detail=self._no_runnable_profile_detail(record, persona_id))
+
+        persona.last_manual_post_trigger = now
+        await self._engine.save(record)
+
+        return {"status": "success", "message": f"Post monitoring triggered for {dispatched} profile(s)"}
+
+    async def _profiles_with_manual_post_today(self, user_id: str, now: datetime) -> set[str]:
+        results = await self._engine.find_one(db_social_automation_result_model, db_social_automation_result_model.user_id == user_id)
+        if results is None:
+            return set()
+        posted: set[str] = set()
+        for item in results.post_results:
+            if item.error or not item.is_manual or not item.post_url:
+                continue
+            stamped = item.date_time if item.date_time.tzinfo else item.date_time.replace(tzinfo=UTC)
+            if stamped.date() == now.date():
+                posted.add(item.profile_id)
+        return posted
 
     async def trigger_ad_monitoring(self, current_user, persona_id: str):
         from orion.services.mongo_manager.shared_model.db_cronjob_status_model import CronjobName, CronjobStatus, db_cronjob_status_model
@@ -711,14 +816,19 @@ class ProfileManager:
         from orion.management.jobs.social_profile.social_profile_job import social_profile_job
         job = social_profile_job.get_instance()
         
+        dispatched = 0
         for profile in record.profiles:
             if profile.assigned_persona_id == persona_id and profile.session_id:
                 session_state = await self.read_profile_session_state(current_user, profile)
                 if session_state:
                     run_id = str(uuid4())
                     asyncio.create_task(job.run_ad_monitoring(profile, persona, session_state, run_id, record.user_id, is_manual=True))
+                    dispatched += 1
 
-        return {"status": "success", "message": "Ad monitoring triggered"}
+        if not dispatched:
+            raise HTTPException(status_code=400, detail=self._no_runnable_profile_detail(record, persona_id))
+
+        return {"status": "success", "message": f"Ad monitoring triggered for {dispatched} profile(s)"}
 
     async def trigger_hate_speech_monitoring(self, current_user, profile_id: str):
         from orion.services.mongo_manager.shared_model.db_cronjob_status_model import CronjobName, CronjobStatus, db_cronjob_status_model
@@ -739,4 +849,4 @@ class ProfileManager:
                     asyncio.create_task(job.run_hate_speech_monitoring(profile, None, session_state, run_id, record.user_id, is_manual=True))
                     return {"status": "success", "message": "Hate speech monitoring triggered"}
         
-        raise HTTPException(status_code=404, detail="Profile not found or no session state available")
+        raise HTTPException(status_code=400, detail="This profile has no usable captured session. Capture a session and attach it to the profile first.")

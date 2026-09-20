@@ -26,7 +26,7 @@
             <div>
               <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Age Group' | translate }}</label>
               <div class="mt-1">
-                <app-ui-dropdown [options]="ageGroups" [selected]="personaForm().age_group" [searchable]="false" (valueChange)="onPersonaField('age_group', $event || '18-24')"></app-ui-dropdown>
+                <app-ui-dropdown menuPlacement="static" [options]="ageGroups" [selected]="personaForm().age_group" [searchable]="false" (valueChange)="onPersonaField('age_group', $event || '18-24')"></app-ui-dropdown>
               </div>
             </div>
             <div>
@@ -36,7 +36,7 @@
             <div>
               <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Gender' | translate }}</label>
               <div class="mt-1">
-                <app-ui-dropdown [options]="genders" [selected]="personaForm().gender" [searchable]="false" (valueChange)="onPersonaField('gender', $event || 'unspecified')"></app-ui-dropdown>
+                <app-ui-dropdown menuPlacement="static" [options]="genders" [selected]="personaForm().gender" [searchable]="false" (valueChange)="onPersonaField('gender', $event || 'unspecified')"></app-ui-dropdown>
               </div>
             </div>
             <div>
@@ -52,7 +52,7 @@
           <div>
             <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Interests' | translate }}</label>
             <div class="mt-1">
-              <app-ui-dropdown [options]="interests" [selectedValues]="personaForm().interests" [multiSelect]="true" [showSelectedChips]="true" placeholder="Select up to 3 interests" (valuesChange)="onInterestChange($event)"></app-ui-dropdown>
+              <app-ui-dropdown menuPlacement="static" [options]="interests" [selectedValues]="personaForm().interests" [multiSelect]="true" [showSelectedChips]="true" placeholder="Select up to 3 interests" (valuesChange)="onInterestChange($event)"></app-ui-dropdown>
             </div>
           </div>
         </div>
@@ -65,7 +65,7 @@
           <div>
             <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Platform' | translate }} <span class="text-red-500 [body.light-theme_&]:text-red-700">*</span></label>
             <div class="mt-1">
-              <app-ui-dropdown [options]="platformOptions()" [selected]="profileForm().platform" [searchable]="true" placeholder="Select platform" (valueChange)="onProfilePlatform($event)"></app-ui-dropdown>
+              <app-ui-dropdown menuPlacement="static" [options]="platformOptions()" [selected]="profileForm().platform" [searchable]="true" placeholder="Select platform" (valueChange)="onProfilePlatform($event)"></app-ui-dropdown>
             </div>
           </div>
 
@@ -73,7 +73,7 @@
             <div>
               <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Session' | translate }} <span class="text-red-500 [body.light-theme_&]:text-red-700">*</span></label>
               <div class="mt-1">
-                <app-ui-dropdown [options]="availableSessionOptions()" [selected]="profileForm().session_id || ''" [searchable]="true" placeholder="Select session" (valueChange)="onProfileSession($event)"></app-ui-dropdown>
+                <app-ui-dropdown menuPlacement="static" [options]="availableSessionOptions()" [selected]="profileForm().session_id || ''" [searchable]="true" placeholder="Select session" (valueChange)="onProfileSession($event)"></app-ui-dropdown>
               </div>
             </div>
           } @else {
@@ -97,7 +97,7 @@
           <div>
             <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Actions / Purposes' | translate }} <span class="text-red-500 [body.light-theme_&]:text-red-700">*</span></label>
             <div class="mt-1">
-              <app-ui-dropdown [options]="purposes" [selectedValues]="profileForm().purposes" [multiSelect]="true" [showSelectedChips]="true" placeholder="Select actions" (valuesChange)="onProfilePurposes($event)"></app-ui-dropdown>
+              <app-ui-dropdown menuPlacement="static" [options]="purposes" [selectedValues]="profileForm().purposes" [multiSelect]="true" [showSelectedChips]="true" placeholder="Select actions" (valuesChange)="onProfilePurposes($event)"></app-ui-dropdown>
             </div>
           </div>
         </div>

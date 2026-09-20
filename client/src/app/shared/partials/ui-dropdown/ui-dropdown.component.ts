@@ -14,11 +14,11 @@ export type { UiDropdownMenuOption, UiDropdownOption } from './model/ui-dropdown
 
 const UI_DROPDOWN_THEME = {
   ring: 'focus-visible:ring-[rgba(87,165,235,0.4)] [body.light-theme_&]:focus-visible:ring-[rgba(17,118,212,0.3)]',
-  trigger: 'border-[#2c3d58] !bg-[#131e30] text-[#e6edf6] hover:border-[#3d5175] hover:!bg-[#131e30] focus:border-[#3d5175] focus:!bg-[#131e30] [body.light-theme_&]:border-[#c5d4e6] [body.light-theme_&]:!bg-[#e9f0f8] [body.light-theme_&]:text-[#243b53] [body.light-theme_&]:hover:border-[#9fb6cf] [body.light-theme_&]:hover:!bg-[#e3ecf6] [body.light-theme_&]:focus:border-[#9fb6cf] [body.light-theme_&]:focus:!bg-[#e9f0f8]',
+  trigger: 'border-[#465b78] !bg-[#1b293c] text-[#e6edf6] enabled:hover:border-[#6483a7] enabled:hover:!bg-[#22344b] focus:border-[#79a7d8] focus:!bg-[#1b293c] [body.light-theme_&]:border-[#a9bdd3] [body.light-theme_&]:!bg-[#f8fafc] [body.light-theme_&]:text-[#243b53] [body.light-theme_&]:enabled:hover:border-[#7899bc] [body.light-theme_&]:enabled:hover:!bg-[#eef4fb] [body.light-theme_&]:focus:border-[#1176d4] [body.light-theme_&]:focus:!bg-[#f8fafc]',
   triggerOpen: '!border-[#d0d5dd] !border-b-white !bg-white !shadow-none text-[#344054] hover:!border-[#d0d5dd] hover:!border-b-white hover:!bg-white focus:!border-[#d0d5dd] focus:!border-b-white focus:!bg-white [body.light-theme_&]:!border-[#d0d5dd] [body.light-theme_&]:!border-b-white [body.light-theme_&]:!bg-white [body.light-theme_&]:text-[#344054] [body.light-theme_&]:hover:!border-[#d0d5dd] [body.light-theme_&]:hover:!border-b-white [body.light-theme_&]:hover:!bg-white [body.light-theme_&]:focus:!border-[#d0d5dd] [body.light-theme_&]:focus:!border-b-white [body.light-theme_&]:focus:!bg-white',
   selectedText: 'text-[#e6edf6] [body.light-theme_&]:text-[#243b53]',
   selectedTextOpen: 'text-[#344054]',
-  placeholder: 'text-[#7f93ac] [body.light-theme_&]:text-[#8aa0b8]',
+  placeholder: 'text-[#afbed0] [body.light-theme_&]:text-[#60758d]',
   placeholderOpen: 'text-[#98a2b3]',
   chevron: 'border-[#9fb3c8] [body.light-theme_&]:border-[#7c93ab]',
   chevronOpen: 'border-[#667085]',
@@ -105,7 +105,7 @@ export class UiDropdownComponent implements OnDestroy {
   readonly menuPlacement = input<'absolute' | 'static'>('absolute');
   readonly surface = input<'default' | 'alert'>('default');
   readonly disabled = input(false);
-  readonly size = input<'default' | 'large'>('default');
+  readonly size = input<'small' | 'default' | 'large'>('default');
   readonly loading = input(false);
   readonly valueChange = output<string | null>();
   readonly valuesChange = output<string[]>();
@@ -358,7 +358,9 @@ export class UiDropdownComponent implements OnDestroy {
       : (this.size() === 'large' ? 'rounded-[10px]' : 'rounded-[7px]');
     const sizeClass = this.size() === 'large'
       ? `h-11 ${radiusClass} px-3 text-sm`
-      : `h-10 ${radiusClass} px-[13px] text-xs`;
+      : this.size() === 'small'
+        ? `h-8 ${radiusClass} px-2.5 text-xs`
+        : `h-10 ${radiusClass} px-[13px] text-xs`;
 
 
     return `${sizeClass} ${this.theme.ring} ${this.isOpen ? this.theme.triggerOpen : this.theme.trigger}`;
@@ -366,7 +368,7 @@ export class UiDropdownComponent implements OnDestroy {
 
   selectedLabelClass(): string {
     const hasSelection = this.multiSelect() ? !!(this.selectedValues() ?? []).length : !!this.selected();
-    const labelSizeClass = this.size() === 'large' ? 'text-sm' : 'text-[13px]';
+    const labelSizeClass = this.size() === 'large' ? 'text-sm' : this.size() === 'small' ? 'text-xs' : 'text-[13px]';
     if (this.isOpen) {
       return hasSelection ? `${this.theme.selectedTextOpen} ${labelSizeClass}` : `${this.theme.placeholderOpen} ${labelSizeClass}`;
     }

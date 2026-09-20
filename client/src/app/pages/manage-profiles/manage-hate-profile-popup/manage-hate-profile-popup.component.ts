@@ -65,7 +65,7 @@ export class ManageHateProfilePopupComponent {
         this.saved.emit(); 
       },
       error: (error) => {
-        this.formError.set(error?.error?.detail ?? 'Failed to save hate monitoring profile');
+        this.formError.set(error?.error?.detail ?? 'Failed to save monitoring profile');
       },
     });
   }
@@ -104,7 +104,7 @@ export class ManageHateProfilePopupComponent {
   }
 
   title(): string {
-    return this.profile() ? 'Edit Hate Profile' : 'Add Hate Profile';
+    return this.profile() ? 'Edit Monitoring Profile' : 'Add Monitoring Profile';
   }
 
   private safePlatform(platform: string): string {

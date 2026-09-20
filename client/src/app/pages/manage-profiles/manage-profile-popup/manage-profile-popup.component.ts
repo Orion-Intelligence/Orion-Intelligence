@@ -10,8 +10,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { getOwnProperty } from '../../../shared/utils/type-guards.util';
 import { safePlatform } from '../manage-profiles.util';
 
-export type ManageProfilePopupMode = 'persona' | 'profile';
-export type ManageProfilePopupSaveEvent = 'persona' | 'profile';
+import { ManageProfilePopupMode, ManageProfilePopupSaveEvent } from '../model/manage-profiles.interfaces.model';
 
 @Component({
   selector: 'app-manage-profile-popup',
@@ -115,7 +114,7 @@ export class ManageProfilePopupComponent {
     const currentProfileId = this.profile()?.profile_id ?? '';
     const regularProfiles = this.profiles().filter(p => !(p.purposes || []).includes('hate_speech_monitoring'));
     const used = new Set(regularProfiles.filter(profile => profile.profile_id !== currentProfileId).map(profile => profile.session_id).filter(Boolean));
-    
+
     return (getOwnProperty(this.sessions(), platform) ?? [])
       .filter(session => !used.has(session.id))
       .map(session => ({ key: session.id, label: `Session #${session.id.slice(0, 8)} - ${new Date(session.capturedAt).toLocaleString()}` }));

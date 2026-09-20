@@ -3,7 +3,7 @@
     <app-confirmation-popup [message]="confirmationMessage()" (confirmed)="confirmAction($event)"></app-confirmation-popup>
   }
 
-  <div data-testid="manage-profiles-page" class="relative overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-700)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4 shadow-[0_10px_28px_var(--color-shadow-light)] sm:p-5 [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-white [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_8px_24px_rgba(15,23,42,0.07)]">
+  <div data-testid="manage-profiles-page" class="relative rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-700)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4 shadow-[0_10px_28px_var(--color-shadow-light)] sm:p-5 [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-white [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_8px_24px_rgba(15,23,42,0.07)]">
     <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-400/45 to-transparent"></div>
 
     <header class="mb-3 flex flex-wrap items-center justify-between gap-4 pb-1">
@@ -19,7 +19,7 @@
           <button type="button" data-testid="manage-profiles-add-profile" (click)="openProfileModal()" class="inline-flex h-8 items-center justify-center rounded-lg border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-[11px] font-semibold text-[var(--color-text1)] transition enabled:hover:-translate-y-px enabled:hover:border-[#28557d] enabled:hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc]">{{ 'Add Profile' | translate }}</button>
         }
         @if (activeTab() === 'hate_monitoring') {
-          <button type="button" data-testid="manage-profiles-add-hate-profile" (click)="openHateProfileModal()" class="inline-flex h-8 items-center justify-center rounded-lg border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-[11px] font-semibold text-[var(--color-text1)] transition enabled:hover:-translate-y-px enabled:hover:border-[#28557d] enabled:hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc]">{{ 'Add Hate Profile' | translate }}</button>
+          <button type="button" data-testid="manage-profiles-add-hate-profile" (click)="openHateProfileModal()" class="inline-flex h-8 items-center justify-center rounded-lg border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-[11px] font-semibold text-[var(--color-text1)] transition enabled:hover:-translate-y-px enabled:hover:border-[#28557d] enabled:hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc]">{{ 'Add Monitoring Profile' | translate }}</button>
         }
       </div>
     </header>
@@ -27,8 +27,12 @@
     <div class="ui-result-tabs-strip mb-5 flex items-end overflow-x-auto border-b pb-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden !border-b-[var(--color-divider)] [.light-theme_&]:!border-b-[#0f172a26] [.dark-theme_&]:!border-b-[#ffffff20]">
       <div class="inline-flex flex-nowrap items-center gap-[2px] bg-transparent p-0">
         @for (tab of tabs; track tab.key) {
-          <button type="button" [attr.data-testid]="'manage-profiles-tab-' + tab.key" (click)="setTab(tab.key)" [disabled]="!canOpenTab(tab.key)" class="inline-flex h-[46px] shrink-0 cursor-pointer items-center whitespace-nowrap border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color] disabled:cursor-not-allowed disabled:opacity-45" [ngClass]="activeTab() === tab.key ? 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]'">
+          <button type="button" [attr.data-testid]="'manage-profiles-tab-' + tab.key" [attr.aria-describedby]="tab.description ? 'manage-profiles-tab-info-' + tab.key : null" [title]="tab.description ? (tab.description | translate) : ''" (click)="setTab(tab.key)" [disabled]="!canOpenTab(tab.key)" class="inline-flex h-[46px] shrink-0 cursor-pointer items-center whitespace-nowrap border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color] disabled:cursor-not-allowed disabled:opacity-45" [ngClass]="activeTab() === tab.key ? 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]'">
             {{ tab.label | translate }}
+            @if (tab.description) {
+              <i class="bi bi-info-circle ml-1.5 text-[12px] text-[var(--color-text4)]" aria-hidden="true"></i>
+              <span class="sr-only" [id]="'manage-profiles-tab-info-' + tab.key">{{ tab.description | translate }}</span>
+            }
           </button>
         }
       </div>
@@ -210,8 +214,8 @@
                     <p class="mb-0 mt-1 line-clamp-1 text-[11px] text-[var(--color-text3)]">{{ persona.interests.join(', ') || 'No interests selected' }}</p>
                   </div>
                   <div class="flex shrink-0 items-center gap-1.5">
-                    <button type="button" (click)="openPersonaModal(persona)" class="inline-flex h-7 w-7 items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-transparent text-[var(--color-text2)] transition hover:border-sky-400/25 hover:bg-sky-400/[0.07] hover:text-[var(--color-blue-640)]" title="Edit persona"><i class="bi bi-pencil-square text-[12px]"></i></button>
-                    <button type="button" (click)="deletePersona(persona)" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-[var(--color-text4)] transition hover:bg-red-500/10 hover:text-red-500" title="Delete persona"><i class="bi bi-trash3 text-sm"></i></button>
+                    <button type="button" data-testid="manage-profiles-persona-edit" (click)="openPersonaModal(persona)" class="group inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] border outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 disabled:cursor-not-allowed disabled:opacity-65 border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[#8ec8ff] hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] hover:text-white [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:text-[#2563a6] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa] [.light-theme_&]:hover:text-[#1d4ed8]" title="Edit persona" aria-label="Edit persona"><i class="bi bi-pencil-square text-[12px]"></i></button>
+                    <button type="button" data-testid="manage-profiles-persona-delete" (click)="deletePersona(persona)" class="group inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] border border-[var(--color-border)] bg-transparent text-[var(--color-text4)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-red-400/55 hover:border-red-400/35 hover:bg-red-500/[0.08] hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-40" title="Delete persona" aria-label="Delete persona"><i class="bi bi-trash3 text-[12px]"></i></button>
                   </div>
                 </div>
               </section>
@@ -241,8 +245,8 @@
                   <p class="mb-0 mt-1 line-clamp-1 text-[11px] text-[var(--color-text3)]">{{ (profile.purposes || []).map(purposeLabel.bind(this)).join(', ') || 'No actions selected' }}</p>
                 </div>
                 <div class="flex shrink-0 items-center gap-1.5">
-                  <button type="button" (click)="openProfileModal(profile)" class="inline-flex h-7 w-7 items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-transparent text-[var(--color-text2)] hover:border-sky-400/25 hover:bg-sky-400/[0.07] hover:text-[var(--color-blue-640)]" title="Edit profile"><i class="bi bi-pencil-square text-[12px]"></i></button>
-                  <button type="button" (click)="deleteProfile(profile)" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-[var(--color-text4)] hover:bg-red-500/10 hover:text-red-500" title="Delete profile"><i class="bi bi-trash3 text-sm"></i></button>
+                  <button type="button" data-testid="manage-profiles-profile-edit" (click)="openProfileModal(profile)" class="group inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] border outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 disabled:cursor-not-allowed disabled:opacity-65 border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[#8ec8ff] hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] hover:text-white [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:text-[#2563a6] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa] [.light-theme_&]:hover:text-[#1d4ed8]" title="Edit profile" aria-label="Edit profile"><i class="bi bi-pencil-square text-[12px]"></i></button>
+                  <button type="button" data-testid="manage-profiles-profile-delete" (click)="deleteProfile(profile)" class="group inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] border border-[var(--color-border)] bg-transparent text-[var(--color-text4)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-red-400/55 hover:border-red-400/35 hover:bg-red-500/[0.08] hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-40" title="Delete profile" aria-label="Delete profile"><i class="bi bi-trash3 text-[12px]"></i></button>
                 </div>
               </div>
             </section>
@@ -256,11 +260,6 @@
       }
 
       @if (activeTab() === 'assignments') {
-        <div class="mb-4 grid grid-cols-[minmax(160px,1fr)_minmax(220px,1fr)_auto] gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-820)] p-3 max-[760px]:grid-cols-1 [body.light-theme_&]:bg-[#f5f9fe]">
-          <app-ui-dropdown data-testid="manage-profiles-assign-persona" [options]="personaOptions()" [selected]="assignmentPersonaId()" placeholder="Select persona" [searchable]="true" (valueChange)="assignmentPersonaId.set($event || '')"></app-ui-dropdown>
-          <app-ui-dropdown data-testid="manage-profiles-assign-profile" [options]="assignmentProfileOptions()" [selected]="assignmentProfileId()" placeholder="Select profile" [searchable]="true" (valueChange)="assignmentProfileId.set($event || '')"></app-ui-dropdown>
-          <button type="button" data-testid="manage-profiles-assign-btn" (click)="assignProfile()" class="h-10 rounded-lg border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-4 text-[12px] font-semibold text-[var(--color-text1)] hover:border-[#28557d]">{{ 'Assign' | translate }}</button>
-        </div>
         <div class="overflow-hidden rounded-xl border border-[var(--ui-table-shell-border)] bg-[var(--ui-table-row-odd)] shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
           @for (profile of regularProfiles(); track profile.profile_id) {
             <section class="group relative border-b border-[var(--ui-table-row-border)] odd:bg-[var(--ui-table-row-odd)] even:bg-[var(--ui-table-row-even)] last:border-b-0">
@@ -269,15 +268,53 @@
                   <div class="flex flex-wrap items-center gap-2">
                     <h2 class="mb-0 truncate text-[13px] font-semibold text-[var(--color-text1)]">{{ personaName(profile.assigned_persona_id) }}</h2>
                     <span class="rounded-full border border-[var(--color-border)] px-2 py-0.5 text-[10px] font-semibold capitalize text-[var(--color-text4)]">{{ statusLabel(profile.assignment_status) }}</span>
+                    @if (!profile.session_id) {
+                      <span data-testid="manage-profiles-assignment-no-session" class="rounded-full border border-amber-400/25 bg-amber-400/[0.08] px-2 py-0.5 text-[10px] font-semibold text-amber-400">{{ 'No session attached' | translate }}</span>
+                    }
                   </div>
                   <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ platformLabel(profile.platform) }} · {{ profile.profile_name || profile.profile_username || 'Profile' }} · {{ statusLabel(profile.connection_status) }}</p>
+                  @if (!profile.session_id) {
+                    <p class="mb-0 mt-1 text-[11px] text-[var(--color-text3)]">{{ (verifiedSessionFor(profile) ? 'Monitoring cannot run until a session is attached.' : 'No verified session exists for this platform. Capture and verify one in the Sessions tab.') | translate }}</p>
+                  }
+                  @if (runningScans(profile.profile_id); as scans) {
+                    @if (scans.length) {
+                      <div data-testid="manage-profiles-running-scans" class="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] text-[var(--color-blue-640)]" role="status">
+                        <span class="h-2 w-2 rounded-full bg-current motion-safe:animate-pulse" aria-hidden="true"></span>
+                        <span class="font-semibold">{{ scans.length }} {{ (scans.length === 1 ? 'scan running' : 'scans running') | translate }}</span>
+                        @for (scan of scans; track scan.run_id) {
+                          <span class="max-w-full truncate" [title]="scan.step">{{ scanLabel(scan.activity) | translate }}{{ scan.step ? ' · ' + scan.step : '' }}</span>
+                        }
+                      </div>
+                    }
+                  }
                 </div>
-                <div class="flex shrink-0 items-center gap-1.5">
-                  <button type="button" [disabled]="!profile.assigned_persona_id" (click)="triggerPostMonitoring(profile.assigned_persona_id!, personaName(profile.assigned_persona_id))" class="inline-flex h-7 px-2 items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-transparent text-[11px] font-medium text-[var(--color-text2)] transition hover:border-sky-400/25 hover:bg-sky-400/[0.07] hover:text-[var(--color-blue-640)] disabled:cursor-not-allowed disabled:opacity-40" title="Trigger Post Monitoring">Post</button>
-                  <button type="button" [disabled]="!profile.assigned_persona_id" (click)="triggerAdMonitoring(profile.assigned_persona_id!, personaName(profile.assigned_persona_id))" class="inline-flex h-7 px-2 items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-transparent text-[11px] font-medium text-[var(--color-text2)] transition hover:border-sky-400/25 hover:bg-sky-400/[0.07] hover:text-[var(--color-blue-640)] disabled:cursor-not-allowed disabled:opacity-40" title="Trigger Ad Monitoring">Ad</button>
+                <div class="flex max-w-full flex-wrap items-center gap-1.5">
+                  @if (!profile.assigned_persona_id) {
+                    <app-ui-dropdown class="w-44" data-testid="manage-profiles-assign-persona" [id]="'assign-persona-' + profile.profile_id" [options]="personaOptions()" [disabled]="assignmentPending().has(profile.profile_id)" placeholder="Select persona" size="small" [searchable]="true" menuPlacement="static" (valueChange)="assignProfile(profile.profile_id, $event)"></app-ui-dropdown>
+                  }
+                  @if (!profile.session_id) {
+                    <button type="button" data-testid="manage-profiles-assignment-connect-session" [disabled]="isSessionConnecting(profile.profile_id) || !verifiedSessionFor(profile)" (click)="connectProfileSession(profile)" class="group inline-flex h-7 shrink-0 items-center gap-1.5 rounded-[7px] border px-1.5 pr-2 text-[10px] font-semibold outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-amber-400/55 disabled:cursor-not-allowed disabled:opacity-65 border-amber-400/30 bg-amber-400/[0.08] text-amber-400 hover:border-amber-400/45 hover:bg-amber-400/[0.14]" [title]="verifiedSessionFor(profile) ? 'Attach the verified session captured for this platform' : 'No verified session available for this platform'">
+                      <span aria-hidden="true" class="inline-flex h-[18px] w-[18px] items-center justify-center">
+                        @if (isSessionConnecting(profile.profile_id)) {
+                          <span class="h-3 w-3 animate-spin rounded-full border-2 border-amber-400/30 border-t-amber-400"></span>
+                        } @else {
+                          <i class="bi bi-link-45deg text-[12px]"></i>
+                        }
+                      </span>
+                      <span>{{ (isSessionConnecting(profile.profile_id) ? 'Attaching' : 'Attach session') | translate }}</span>
+                    </button>
+                  }
+                  <button type="button" data-testid="manage-profiles-assignment-post" [disabled]="!profile.assigned_persona_id || !profile.session_id" (click)="triggerPostMonitoring(profile.assigned_persona_id!, personaName(profile.assigned_persona_id))" class="group inline-flex h-7 shrink-0 items-center gap-1.5 rounded-[7px] border px-1.5 pr-2 text-[10px] font-semibold outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 disabled:cursor-not-allowed disabled:opacity-65 border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[var(--color-text1)] hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa]" title="Trigger Post Monitoring" aria-label="Trigger Post Monitoring">
+                    <span aria-hidden="true" class="inline-flex h-[18px] w-[18px] items-center justify-center text-[#8ec8ff] transition-colors group-hover:text-white [.light-theme_&]:text-[#2563a6] [.light-theme_&]:group-hover:text-[#1d4ed8]"><i class="bi bi-chat-left-text text-[11px]"></i></span>
+                    <span>{{ 'Post' | translate }}</span>
+                  </button>
+                  <button type="button" data-testid="manage-profiles-assignment-ad" [disabled]="!profile.assigned_persona_id || !profile.session_id" (click)="triggerAdMonitoring(profile.assigned_persona_id!, personaName(profile.assigned_persona_id))" class="group inline-flex h-7 shrink-0 items-center gap-1.5 rounded-[7px] border px-1.5 pr-2 text-[10px] font-semibold outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 disabled:cursor-not-allowed disabled:opacity-65 border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[var(--color-text1)] hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa]" title="Trigger Ad Monitoring" aria-label="Trigger Ad Monitoring">
+                    <span aria-hidden="true" class="inline-flex h-[18px] w-[18px] items-center justify-center text-[#8ec8ff] transition-colors group-hover:text-white [.light-theme_&]:text-[#2563a6] [.light-theme_&]:group-hover:text-[#1d4ed8]"><i class="bi bi-bullseye text-[11px]"></i></span>
+                    <span>{{ 'Ad' | translate }}</span>
+                  </button>
                   <!-- <button type="button" [disabled]="!profile.assigned_persona_id" (click)="triggerHateSpeechMonitoring(profile.assigned_persona_id!, personaName(profile.assigned_persona_id))" class="inline-flex h-7 px-2 items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-transparent text-[11px] font-medium text-[var(--color-text2)] transition hover:border-sky-400/25 hover:bg-sky-400/[0.07] hover:text-[var(--color-blue-640)] disabled:cursor-not-allowed disabled:opacity-40" title="Trigger Hate Speech Monitoring">Hate</button> -->
                   <span class="h-4 w-px bg-[var(--color-border)] mx-0.5"></span>
-                  <button type="button" [disabled]="!profile.assigned_persona_id" (click)="removeAssignment(profile)" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-[var(--color-text4)] hover:bg-red-500/10 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-40" title="Remove assignment"><i class="bi bi-trash3 text-sm"></i></button>
+                  <button type="button" data-testid="manage-profiles-assignment-remove" [disabled]="!profile.assigned_persona_id" (click)="removeAssignment(profile)" class="group inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] border border-[var(--color-border)] bg-transparent text-[var(--color-text4)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-red-400/55 hover:border-red-400/35 hover:bg-red-500/[0.08] hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-40" title="Remove assignment" aria-label="Remove assignment"><i class="bi bi-trash3 text-[12px]"></i></button>
                 </div>
               </div>
             </section>
@@ -303,19 +340,30 @@
                   </div>
                   <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ platformLabel(profile.platform) }} · Session #{{ (profile.session_id || '').slice(0, 8) || 'None' }} · {{ profile.profile_url || profile.profile_username || 'No URL' }}</p>
                   <p class="mb-0 mt-1 line-clamp-1 text-[11px] text-[var(--color-text3)]">Hate Speech Monitoring</p>
+                  @if (runningScans(profile.profile_id); as scans) {
+                    @if (scans.length) {
+                      <div data-testid="manage-profiles-running-scans" class="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] text-[var(--color-blue-640)]" role="status">
+                        <span class="h-2 w-2 rounded-full bg-current motion-safe:animate-pulse" aria-hidden="true"></span>
+                        <span class="font-semibold">{{ scans.length }} {{ (scans.length === 1 ? 'scan running' : 'scans running') | translate }}</span>
+                        @for (scan of scans; track scan.run_id) {
+                          <span class="max-w-full truncate" [title]="scan.step">{{ scanLabel(scan.activity) | translate }}{{ scan.step ? ' · ' + scan.step : '' }}</span>
+                        }
+                      </div>
+                    }
+                  }
                 </div>
                 <div class="flex shrink-0 items-center gap-1.5">
                   <button type="button" (click)="triggerHateSpeechMonitoring(profile.profile_id, profile.profile_name || profile.profile_username || 'Profile')" class="inline-flex h-7 px-2 items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-transparent text-[11px] font-medium text-[var(--color-text2)] transition hover:border-sky-400/25 hover:bg-sky-400/[0.07] hover:text-[var(--color-blue-640)]" title="Trigger Hate Speech Monitoring">Run</button>
                   <span class="h-4 w-px bg-[var(--color-border)] mx-0.5"></span>
-                  <button type="button" (click)="openHateProfileModal(profile)" class="inline-flex h-7 w-7 items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-transparent text-[var(--color-text2)] hover:border-sky-400/25 hover:bg-sky-400/[0.07] hover:text-[var(--color-blue-640)]" title="Edit profile"><i class="bi bi-pencil-square text-[12px]"></i></button>
-                  <button type="button" (click)="deleteProfile(profile)" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-[var(--color-text4)] hover:bg-red-500/10 hover:text-red-500" title="Delete profile"><i class="bi bi-trash3 text-sm"></i></button>
+                  <button type="button" data-testid="manage-profiles-hate-profile-edit" (click)="openHateProfileModal(profile)" class="group inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] border outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 disabled:cursor-not-allowed disabled:opacity-65 border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[#8ec8ff] hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] hover:text-white [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:text-[#2563a6] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa] [.light-theme_&]:hover:text-[#1d4ed8]" title="Edit profile" aria-label="Edit profile"><i class="bi bi-pencil-square text-[12px]"></i></button>
+                  <button type="button" data-testid="manage-profiles-profile-delete" (click)="deleteProfile(profile)" class="group inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] border border-[var(--color-border)] bg-transparent text-[var(--color-text4)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-red-400/55 hover:border-red-400/35 hover:bg-red-500/[0.08] hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-40" title="Delete profile" aria-label="Delete profile"><i class="bi bi-trash3 text-[12px]"></i></button>
                 </div>
               </div>
             </section>
           } @empty {
             <div class="p-8 text-center text-sm text-[var(--color-text3)]">
-              <p class="mb-3">{{ 'No hate monitoring profiles created yet.' | translate }}</p>
-              <button type="button" (click)="openHateProfileModal()" class="h-8 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820)] px-3 text-[12px] font-semibold text-[var(--color-text2)] hover:bg-[var(--color-blue-810)]">{{ 'Add Hate Profile' | translate }}</button>
+              <p class="mb-3">{{ 'No real profiles added for monitoring yet.' | translate }}</p>
+              <button type="button" (click)="openHateProfileModal()" class="h-8 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820)] px-3 text-[12px] font-semibold text-[var(--color-text2)] hover:bg-[var(--color-blue-810)]">{{ 'Add Monitoring Profile' | translate }}</button>
             </div>
           }
         </div>

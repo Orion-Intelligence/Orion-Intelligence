@@ -1,73 +1,61 @@
-import { Component, input, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe, NgClass } from '@angular/common';
-import { finalize } from 'rxjs';
-import { UiDropdownComponent, UiDropdownOption } from '../../../shared/partials/ui-dropdown/ui-dropdown.component';
+import { Subscription, finalize, interval } from 'rxjs';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { ManageProfilesService } from '../manage-profiles.service';
-import { PlatformEntry, SocialAdDetectionResult, SocialPostResult, SocialProfile, SocialHateSpeechResult } from '../model/manage-profiles.model';
+import { PlatformEntry, SocialProfile } from '../model/manage-profiles.model';
+import { ManageProfilePostRow, ManageProfileResultRow, ManageProfileResultsView } from '../model/manage-profiles.interfaces.model';
+import { RESULTS_DEFAULT_VIEW, RESULTS_REFRESH_INTERVAL_MS, RESULTS_VIEW_OPTIONS, SHIMMER_ROWS } from '../constants/manage-profiles.constants';
+import { buildResultRows, flattenPostRows, profileOptionLabel } from '../manage-profiles.util';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { safePlatform } from '../manage-profiles.util';
-
-export type ManageProfileResultsActivity = 'ad_detection' | 'posting' | 'hate_speech';
+import { UiDropdownComponent, UiDropdownOption } from '../../../shared/partials/ui-dropdown/ui-dropdown.component';
+import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
 
 @Component({
   selector: 'app-manage-profile-results',
   standalone: true,
-  imports: [DatePipe, NgClass, UiDropdownComponent, TranslatePipe],
+  imports: [DatePipe, NgClass, TranslatePipe, UiDropdownComponent, ConfirmationPopupComponent],
   templateUrl: './manage-profile-results.component.html',
 })
-export class ManageProfileResultsComponent {
+export class ManageProfileResultsComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+  private pending: Subscription | null = null;
+
   readonly profiles = input<SocialProfile[]>([]);
   readonly platforms = input<PlatformEntry[]>([]);
-  readonly activities: { key: ManageProfileResultsActivity; label: string }[] = [{ key: 'ad_detection', label: 'Ad Detection' }, { key: 'posting', label: 'Posting' }, { key: 'hate_speech', label: 'Hate Speech' }];
-  readonly activeActivity = signal<ManageProfileResultsActivity>('ad_detection');
-  readonly resultsProfileId = signal('');
   readonly resultsLoading = signal(false);
-  readonly adDetectionResults = signal<SocialAdDetectionResult[]>([]);
-  readonly postResults = signal<SocialPostResult[]>([]);
-  readonly hateSpeechResults = signal<SocialHateSpeechResult[]>([]);
+  readonly rows = signal<ManageProfileResultRow[]>([]);
+  readonly runningCount = signal(0);
   readonly expandedResults = signal<Set<string>>(new Set<string>());
-  readonly shimmerRows = [1, 2, 3, 4, 5];
+  readonly stoppingRuns = signal<Set<string>>(new Set<string>());
+  readonly selectedProfileId = signal('');
+  readonly view = signal<ManageProfileResultsView>(RESULTS_DEFAULT_VIEW);
+  readonly viewOptions: UiDropdownOption[] = RESULTS_VIEW_OPTIONS;
+  readonly clearing = signal(false);
+  readonly confirmClear = signal(false);
+  readonly profileOptions = computed<UiDropdownOption[]>(() => this.profiles().map(profile => ({ key: profile.profile_id, label: profileOptionLabel(this.platforms(), profile) })));
+  readonly profileRows = computed(() => {
+    const profileId = this.selectedProfileId();
+    return profileId ? this.rows().filter(row => row.profileId === profileId) : this.rows();
+  });
+  readonly visibleRows = computed(() => {
+    if (this.view() === 'posts') {
+      return this.profileRows().filter(row => row.activity !== 'ad_detection' && (row.running || row.error));
+    }
+    return this.profileRows().filter(row => row.activity === 'ad_detection');
+  });
+  readonly visiblePosts = computed<ManageProfilePostRow[]>(() => this.view() === 'posts' ? flattenPostRows(this.profileRows(), this.profiles()) : []);
+  readonly hasClearableResults = computed(() => this.profileRows().some(row => !row.running));
+  readonly shimmerRows = SHIMMER_ROWS;
 
   constructor(private service: ManageProfilesService, private notification: MessageNotificationService) {}
 
-  selectResultsProfile(profileId: string): void {
-    this.resultsProfileId.set(profileId);
-    this.adDetectionResults.set([]);
-    this.postResults.set([]);
-    this.hateSpeechResults.set([]);
-    this.expandedResults.set(new Set<string>());
-    if (!profileId) {
-      return;
-    }
-    this.resultsLoading.set(true);
-    this.service.getProfileResults(profileId).pipe(finalize(() => {
-      this.resultsLoading.set(false); 
-    })).subscribe({
-      next: (response) => {
-        this.adDetectionResults.set(response?.ad_detection_results || []);
-        this.postResults.set(response?.post_results || []);
-        this.hateSpeechResults.set(response?.hate_speech_results || []);
-      },
-      error: (error) => {
-        this.notification.show(error?.error?.detail ?? 'Failed to load results');
-      },
+  ngOnInit(): void {
+    this.loadResults(true);
+    interval(RESULTS_REFRESH_INTERVAL_MS).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.loadResults(false);
     });
-  }
-
-  setActivity(activity: ManageProfileResultsActivity): void {
-    this.activeActivity.set(activity);
-  }
-
-  resultsProfileOptions(): UiDropdownOption[] {
-    return this.profiles().map(profile => ({ key: profile.profile_id, label: `${this.platformLabel(profile.platform)} - ${this.profileDisplayName(profile)}` }));
-  }
-
-  private profileDisplayName(profile: SocialProfile): string {
-    if (profile.profile_name?.trim()) {
-      return profile.profile_name;
-    }
-    return profile.profile_username?.trim() ? profile.profile_username : 'Profile';
   }
 
   toggleResult(key: string): void {
@@ -87,7 +75,103 @@ export class ManageProfileResultsComponent {
     return this.expandedResults().has(key);
   }
 
-  private platformLabel(platform: string): string {
-    return this.platforms().find(entry => safePlatform(entry.platform) === safePlatform(platform))?.platform ?? platform;
+  selectProfile(profileId: string | null): void {
+    this.selectedProfileId.set(profileId ?? '');
+  }
+
+  selectView(view: string | null): void {
+    this.view.set(view === 'posts' ? 'posts' : RESULTS_DEFAULT_VIEW);
+  }
+
+  selectedProfileLabel(): string {
+    const profile = this.profiles().find(entry => entry.profile_id === this.selectedProfileId());
+    return profile ? profileOptionLabel(this.platforms(), profile) : '';
+  }
+
+  clearConfirmationMessage(): string {
+    const label = this.selectedProfileLabel();
+    return label ? `Clear all results for "${label}"? This cannot be undone.` : 'Clear all results for every profile? This cannot be undone.';
+  }
+
+  requestClear(): void {
+    if (this.clearing() || !this.hasClearableResults()) {
+      return;
+    }
+    this.confirmClear.set(true);
+  }
+
+  handleClearConfirmation(confirmed: boolean): void {
+    this.confirmClear.set(false);
+    if (!confirmed) {
+      return;
+    }
+    this.clearing.set(true);
+    this.service.clearResults(this.selectedProfileId()).pipe(takeUntilDestroyed(this.destroyRef), finalize(() => {
+      this.clearing.set(false);
+    })).subscribe({
+      next: () => {
+        this.notification.show('Results cleared', 'success');
+        this.pending?.unsubscribe();
+        this.loadResults(false);
+      },
+      error: (error) => {
+        this.notification.show(error?.error?.detail ?? 'Failed to clear results', 'fail');
+      },
+    });
+  }
+
+  isRunStopping(runId: string): boolean {
+    return this.stoppingRuns().has(runId);
+  }
+
+  stopRun(row: ManageProfileResultRow, event: Event): void {
+    event.stopPropagation();
+    if (!row.runId || this.isRunStopping(row.runId)) {
+      return;
+    }
+    this.stoppingRuns.update(current => new Set(current).add(row.runId));
+    this.service.stopRun(row.runId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.notification.show('Run is stopping', 'success');
+        this.loadResults(false);
+      },
+      error: (error) => {
+        this.releaseStopping(row.runId);
+        this.notification.show(error?.error?.detail ?? 'Failed to stop this run', 'fail');
+      },
+    });
+  }
+
+  private releaseStopping(runId: string): void {
+    this.stoppingRuns.update(current => {
+      const next = new Set(current);
+      next.delete(runId);
+      return next;
+    });
+  }
+
+  private loadResults(showLoader: boolean): void {
+    if (this.pending && !this.pending.closed) {
+      return;
+    }
+    if (showLoader) {
+      this.resultsLoading.set(true);
+    }
+    this.pending = this.service.getResultsOverview().pipe(takeUntilDestroyed(this.destroyRef), finalize(() => {
+      this.resultsLoading.set(false);
+    })).subscribe({
+      next: (response) => {
+        const { running, finished } = buildResultRows(response, this.profiles(), this.platforms());
+        this.runningCount.set(running.length);
+        this.rows.set([...running, ...finished]);
+        const liveIds = new Set(running.map(row => row.runId));
+        this.stoppingRuns.update(current => new Set([...current].filter(runId => liveIds.has(runId))));
+      },
+      error: (error) => {
+        if (showLoader) {
+          this.notification.show(error?.error?.detail ?? 'Failed to load results');
+        }
+      },
+    });
   }
 }

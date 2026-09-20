@@ -13,6 +13,7 @@ from orion.api.interactive.profile_manager.model.models import (
     SocialProfileConnectRequest,
     SocialProfileListResponse,
     SocialProfileResponse,
+    SocialProfileResultsOverviewResponse,
     SocialProfileResultsResponse,
     SocialProfileUpdateRequest,
 )
@@ -104,6 +105,21 @@ async def remove_assignment(profile_id: str, current_user=Depends(get_current_us
 @manage_profiles_routes.post("/api/manage-profiles/callback", response_model=SocialProfileCallbackResponse, dependencies=route_permissions)
 async def social_profile_callback(data: SocialProfileCallbackRequest = Body(...), current_user=Depends(get_current_user)):
     return await ProfileManager.get_instance().callback(current_user, data)
+
+
+@manage_profiles_routes.get("/api/manage-profiles/results", response_model=SocialProfileResultsOverviewResponse, dependencies=route_permissions)
+async def get_results_overview(current_user=Depends(get_current_user)):
+    return await ProfileManager.get_instance().get_results_overview(current_user)
+
+
+@manage_profiles_routes.delete("/api/manage-profiles/results", dependencies=route_permissions)
+async def clear_results(profile_id: str = "", current_user=Depends(get_current_user)):
+    return await ProfileManager.get_instance().clear_results(current_user, profile_id)
+
+
+@manage_profiles_routes.post("/api/manage-profiles/results/runs/{run_id}/stop", dependencies=route_permissions)
+async def stop_results_run(run_id: str, current_user=Depends(get_current_user)):
+    return await ProfileManager.get_instance().stop_run(current_user, run_id)
 
 
 @manage_profiles_routes.get("/api/manage-profiles/results/{profile_id}", response_model=SocialProfileResultsResponse, dependencies=route_permissions)

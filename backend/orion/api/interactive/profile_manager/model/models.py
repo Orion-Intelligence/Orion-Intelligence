@@ -62,6 +62,7 @@ class SocialProfileConnectRequest(BaseModel):
 
 
 class SocialProfileUpdateRequest(BaseModel):
+    platform: str | None = None
     profile_name: str | None = None
     profile_username: str | None = None
     profile_url: str | None = None
@@ -129,6 +130,8 @@ class SocialAutomationPostResultRequest(BaseModel):
     profile_id: str
     date_time: datetime | None = None
     post_url: str = ""
+    post_text: str = ""
+    image_url: str = ""
     error: bool = False
     error_reason: str = ""
     session_expired: bool = False
@@ -183,6 +186,23 @@ class SocialAutomationResultRequest(BaseModel):
 
 class SocialProfileResultsResponse(BaseModel):
     profile_id: str
+    ad_detection_results: List[SocialAdDetectionResult] = Field(default_factory=list)
+    post_results: List[SocialPostResult] = Field(default_factory=list)
+    hate_speech_results: List[SocialHateSpeechResult] = Field(default_factory=list)
+
+
+class SocialProfileActiveRun(BaseModel):
+    run_id: str = ""
+    profile_id: str = ""
+    platform: str = ""
+    activity: str = ""
+    is_manual: bool = False
+    started_at: str = ""
+    step: str = ""
+
+
+class SocialProfileResultsOverviewResponse(BaseModel):
+    active_runs: List[SocialProfileActiveRun] = Field(default_factory=list)
     ad_detection_results: List[SocialAdDetectionResult] = Field(default_factory=list)
     post_results: List[SocialPostResult] = Field(default_factory=list)
     hate_speech_results: List[SocialHateSpeechResult] = Field(default_factory=list)

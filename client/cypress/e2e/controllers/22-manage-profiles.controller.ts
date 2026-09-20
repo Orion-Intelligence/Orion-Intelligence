@@ -42,9 +42,25 @@ export function setupManageProfilesStubs() {
     body: { status: 'assigned' }
   }).as('manageProfilesAssignmentCreate');
 
-  cy.intercept('GET', '**/api/manage-profiles/results/*', {
+  cy.intercept('DELETE', '**/api/manage-profiles/results*', {
+    statusCode: 200,
+    body: { status: 'success', message: 'Results cleared' }
+  }).as('manageProfilesResultsClear');
+
+  cy.intercept('GET', '**/api/manage-profiles/results', {
     statusCode: 200,
     body: {
+      active_runs: [
+        {
+          run_id: 'run1',
+          profile_id: 'prof1',
+          platform: 'twitter',
+          activity: 'posting',
+          is_manual: false,
+          started_at: '2026-09-04T12:05:00Z',
+          step: 'opening composer'
+        }
+      ],
       ad_detection_results: [
         {
           date_time: '2026-09-04T12:00:00Z',
@@ -149,24 +165,20 @@ export function assertProfilesTab() {
 
 export function assertAssignmentsTab() {
   cy.get('[data-testid="manage-profiles-tab-assignments"]').click();
-  
-  cy.get('[data-testid="manage-profiles-assign-persona"]').click();
-  cy.get('button[role="option"]').contains('Test Persona').click();
-  cy.get('[data-testid="manage-profiles-assign-persona"]').should('contain.text', 'Test Persona');
-  
-  cy.get('[data-testid="manage-profiles-assign-profile"]').click();
-  cy.get('button[role="option"]').contains('testuser').click();
-  cy.get('[data-testid="manage-profiles-assign-profile"]').should('contain.text', 'testuser');
+  cy.get('[data-testid="manage-profiles-running-scans"]').should('contain.text', '1 scan running').and('contain.text', 'Post').and('contain.text', 'opening composer');
   
   cy.intercept('GET', '**/api/manage-profiles/profiles', {
     statusCode: 200,
-    body: { profiles: [{ profile_id: 'prof1', platform: 'twitter', profile_username: 'testuser', connection_status: 'connected', assigned_persona_id: 'p1' }] }
+    body: { profiles: [{ profile_id: 'prof1', platform: 'twitter', profile_username: 'testuser', connection_status: 'connected', assigned_persona_id: 'p1', session_id: 'sess-1' }] }
   }).as('manageProfilesProfilesAssigned');
 
-  cy.get('[data-testid="manage-profiles-assign-btn"]').click();
-  cy.wait('@manageProfilesAssignmentCreate');
+  cy.get('[data-testid="manage-profiles-assign-btn"]').should('not.exist');
+  cy.get('[data-testid="manage-profiles-assign-persona"]').click();
+  cy.get('button[role="option"]').contains('Test Persona').click();
+  cy.wait('@manageProfilesAssignmentCreate').its('request.body').should('deep.equal', { persona_id: 'p1', profile_id: 'prof1' });
   
   cy.wait('@manageProfilesProfilesAssigned');
+  cy.get('[data-testid="manage-profiles-assign-persona"]').should('not.exist');
   
   cy.get('[data-testid="manage-profiles-page"]').should('contain.text', 'Test Persona');
   cy.get('[data-testid="manage-profiles-page"]').should('contain.text', 'twitter');
@@ -190,21 +202,34 @@ export function assertAssignmentsTab() {
 
 export function assertResultsTab() {
   cy.get('[data-testid="manage-profiles-tab-results"]').click();
-  
-  cy.get('[data-testid="manage-profiles-results-profile"]').click();
-  cy.get('button[role="option"]').contains('testuser').click();
   cy.wait('@manageProfilesResults');
-  
+
+  cy.get('[data-testid="manage-profiles-result-row"][data-running="true"]').should('have.length', 1);
+  cy.get('[data-testid="manage-profiles-result-row"][data-running="true"]').should('contain.text', 'Running');
+  cy.get('[data-testid="manage-profiles-result-row"][data-running="true"]').should('contain.text', 'Publishing post');
+  cy.get('[data-testid="manage-profiles-result-row"][data-running="true"]').should('contain.text', 'opening composer');
+
   cy.get('[data-testid="manage-profiles-page"]').should('contain.text', '2 ads detected');
   cy.get('[data-testid="manage-profiles-page"]').should('contain.text', 'Completed');
   cy.get('[data-testid="manage-profiles-page"]').should('contain.text', 'Manual');
-  
+  cy.get('[data-testid="manage-profiles-page"]').should('not.contain.text', 'https://twitter.com/post1');
+
   cy.get('[data-testid="manage-profiles-page"]').contains('2 ads detected').click();
   cy.get('[data-testid="manage-profiles-page"]').should('contain.text', 'AdAuthor1');
   cy.get('[data-testid="manage-profiles-page"]').should('contain.text', 'https://twitter.com/ad1');
-  
-  cy.contains('button', 'Posting').click();
-  cy.get('[data-testid="manage-profiles-page"]').should('contain.text', 'Post published');
-  cy.get('[data-testid="manage-profiles-page"]').should('contain.text', 'Manual');
-  cy.get('[data-testid="manage-profiles-page"]').should('contain.text', 'https://twitter.com/post1');
+
+  cy.get('[data-testid="manage-profiles-results-profile-filter"]').should('be.visible');
+  cy.get('[data-testid="manage-profiles-results-view"]').should('be.visible').click();
+  cy.get('button[role="option"]').contains('Posts').click();
+  cy.get('[data-testid="manage-profiles-post-row"]').should('have.length', 1);
+  cy.get('[data-testid="manage-profiles-post-row"]').should('contain.text', 'Published');
+  cy.get('[data-testid="manage-profiles-post-row"]').should('contain.text', 'https://twitter.com/post1');
+  cy.get('[data-testid="manage-profiles-page"]').should('not.contain.text', '2 ads detected');
+  cy.get('[data-testid="manage-profiles-results-view"]').click();
+  cy.get('button[role="option"]').contains('Ads').click();
+  cy.get('[data-testid="manage-profiles-page"]').should('contain.text', '2 ads detected');
+  cy.get('[data-testid="manage-profiles-results-clear"]').should('be.enabled').click();
+  cy.get('[data-testid="confirmation-popup"]').should('be.visible');
+  cy.get('[data-testid="confirmation-yes-button"]').click();
+  cy.wait('@manageProfilesResultsClear');
 }

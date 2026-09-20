@@ -50,6 +50,8 @@ class SocialPostResult(EmbeddedModel):
     profile_id: str
     date_time: datetime = Field(default_factory=utc_now)
     post_url: str = ""
+    post_text: str = ""
+    image_url: str = ""
     error: bool = False
     error_reason: str = ""
     session_expired: bool = False

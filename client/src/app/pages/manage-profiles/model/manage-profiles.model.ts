@@ -78,6 +78,7 @@ export interface SocialProfileConnectRequest {
 }
 
 export interface SocialProfileUpdateRequest {
+  platform?: SocialPlatform | null;
   profile_name?: string | null;
   profile_username?: string | null;
   profile_url?: string | null;
@@ -123,6 +124,8 @@ export interface SocialPostResult {
   profile_id: string;
   date_time: string;
   post_url: string;
+  post_text?: string;
+  image_url?: string;
   error: boolean;
   error_reason: string;
   session_expired: boolean;
@@ -155,6 +158,23 @@ export interface SocialHateSpeechResult {
 
 export interface SocialProfileResultsResponse {
   profile_id: string;
+  ad_detection_results: SocialAdDetectionResult[];
+  post_results: SocialPostResult[];
+  hate_speech_results: SocialHateSpeechResult[];
+}
+
+export interface SocialProfileActiveRun {
+  run_id: string;
+  profile_id: string;
+  platform: string;
+  activity: string;
+  is_manual: boolean;
+  started_at: string;
+  step: string;
+}
+
+export interface SocialProfileResultsOverview {
+  active_runs: SocialProfileActiveRun[];
   ad_detection_results: SocialAdDetectionResult[];
   post_results: SocialPostResult[];
   hate_speech_results: SocialHateSpeechResult[];

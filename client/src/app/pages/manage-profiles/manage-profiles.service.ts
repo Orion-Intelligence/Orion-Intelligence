@@ -1,10 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, filter, map, of, switchMap, take, timer } from 'rxjs';
-import { PlatformEntry, SessionEntry, SocialPersona, SocialPersonaCreateRequest, SocialPersonaListResponse, SocialPersonaUpdateRequest, SocialProfile, SocialProfileAssignmentRequest, SocialProfileAssignmentResponse, SocialProfileConnectRequest, SocialProfileListResponse, SocialProfileResultsResponse, SocialProfileUpdateRequest } from './model/manage-profiles.model';
+import { PlatformEntry, SessionEntry, SocialPersona, SocialPersonaCreateRequest, SocialPersonaListResponse, SocialPersonaUpdateRequest, SocialProfile, SocialProfileAssignmentRequest, SocialProfileAssignmentResponse, SocialProfileConnectRequest, SocialProfileListResponse, SocialProfileResultsOverview, SocialProfileResultsResponse, SocialProfileUpdateRequest } from './model/manage-profiles.model';
 import { SocialExtensionService } from '../../shared/services/social-extension.service';
 
-export type ManageProfilesExtensionState = 'checking' | 'ready' | 'signin' | 'install' | 'update' | 'unsupported';
+import { ManageProfilesExtensionState } from './model/manage-profiles.interfaces.model';
 
 @Injectable({ providedIn: 'root' })
 export class ManageProfilesService {
@@ -24,13 +24,13 @@ export class ManageProfilesService {
       catchError(() => of<{ items: PlatformEntry[]; error?: string }>({ items: [], error: 'load_failed' })));
   }
 
-  fetchSession(platform: string, url: string, sessionId = ''): Observable<{ platform?: string; saved?: boolean; error?: string }> {
-    return timer(0, 2500).pipe(switchMap(() => this.http.post<{ result?: { platform?: string; saved?: boolean }; error?: string; status?: string }>('/api/manage-profiles/session', { platform, url, session_id: sessionId }, { withCredentials: true })),
-      map(response => ({ pending: response?.status === 'pending', platform: response?.result?.platform, saved: response?.result?.saved, error: response?.error })),
+  fetchSession(platform: string, url: string, sessionId = ''): Observable<{ platform?: string; session_id?: string; saved?: boolean; error?: string }> {
+    return timer(0, 2500).pipe(switchMap(() => this.http.post<{ result?: { platform?: string; session_id?: string; saved?: boolean }; error?: string; status?: string }>('/api/manage-profiles/session', { platform, url, session_id: sessionId }, { withCredentials: true })),
+      map(response => ({ pending: response?.status === 'pending', platform: response?.result?.platform, session_id: response?.result?.session_id, saved: response?.result?.saved, error: response?.error })),
       filter(result => !result.pending),
       take(1),
-      map(result => ({ platform: result.platform, saved: result.saved, error: result.error })),
-      catchError(() => of<{ platform?: string; saved?: boolean; error?: string }>({ error: 'session_failed' })));
+      map(result => ({ platform: result.platform, session_id: result.session_id, saved: result.saved, error: result.error })),
+      catchError(() => of<{ platform?: string; session_id?: string; saved?: boolean; error?: string }>({ error: 'session_failed' })));
   }
 
   verifySession(platform: string, url: string, sessionId: string): Observable<{ verified?: boolean; username?: string; error?: string }> {
@@ -94,6 +94,18 @@ export class ManageProfilesService {
 
   getProfileResults(profileId: string): Observable<SocialProfileResultsResponse> {
     return this.http.get<SocialProfileResultsResponse>(`/api/manage-profiles/results/${profileId}`, { withCredentials: true });
+  }
+
+  getResultsOverview(): Observable<SocialProfileResultsOverview> {
+    return this.http.get<SocialProfileResultsOverview>('/api/manage-profiles/results', { withCredentials: true });
+  }
+
+  clearResults(profileId = ''): Observable<void> {
+    return this.http.delete<void>('/api/manage-profiles/results', { withCredentials: true, params: profileId ? { profile_id: profileId } : {} });
+  }
+
+  stopRun(runId: string): Observable<void> {
+    return this.http.post<void>(`/api/manage-profiles/results/runs/${encodeURIComponent(runId)}/stop`, {}, { withCredentials: true });
   }
 
   triggerPostMonitoring(personaId: string): Observable<void> {

@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed } from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
-import { finalize } from 'rxjs';
+import { EMPTY, Subject, catchError, finalize, merge } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { timer } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
-import { ManageProfilesExtensionState, ManageProfilesService } from './manage-profiles.service';
-import { PlatformEntry, SessionEntry } from './model/manage-profiles.model';
+import { ManageProfilesService } from './manage-profiles.service';
+import { PlatformEntry, SessionEntry, SocialProfileActiveRun } from './model/manage-profiles.model';
 import { SocialExtensionManagerComponent } from '../../shared/partials/extension-manager/extension-manager.component';
 import { SocialIconComponent } from '../../shared/partials/social-icon/social-icon.component';
 import { UiDropdownComponent, UiDropdownOption } from '../../shared/partials/ui-dropdown/ui-dropdown.component';
@@ -14,15 +14,12 @@ import { ConfirmationPopupComponent } from '../../shared/partials/confirmation-p
 
 import { MessageNotificationService } from '../../services/message_notification/message-notification.service';
 import { SocialPersona, SocialPlatform, SocialProfile } from './model/manage-profiles.model';
-import { ManageProfilePopupComponent, ManageProfilePopupSaveEvent } from './manage-profile-popup/manage-profile-popup.component';
+import { ManageProfilePopupComponent } from './manage-profile-popup/manage-profile-popup.component';
 import { ManageHateProfilePopupComponent } from './manage-hate-profile-popup/manage-hate-profile-popup.component';
 import { ManageProfileResultsComponent } from './manage-profile-results/manage-profile-results.component';
 
-type ManageProfilesTab = 'personas' | 'sessions' | 'profiles' | 'assignments' | 'results' | 'hate_monitoring';
-type ModalMode = 'persona' | 'profile' | 'hate_profile';
-
-import type { PendingSessionDelete } from './model/manage-profiles.interfaces.model';
-export type { PendingSessionDelete } from './model/manage-profiles.interfaces.model';
+import { ManageProfilePopupSaveEvent, ManageProfilesConfirmationAction, ManageProfilesExtensionState, ManageProfilesModalMode, ManageProfilesTab, ManageProfilesTabEntry, PendingSessionDelete } from './model/manage-profiles.interfaces.model';
+import { MANAGE_PROFILES_TABS, MAX_SESSIONS_PER_PLATFORM, PROFILE_PURPOSE_OPTIONS, SHIMMER_ROWS } from './constants/manage-profiles.constants';
 
 
 
@@ -40,9 +37,10 @@ export class ManageProfilesComponent {
   private readonly service = inject(ManageProfilesService);
   private readonly notification = inject(MessageNotificationService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly refreshRuns = new Subject<void>();
 
   readonly activeTab = signal<ManageProfilesTab>('sessions');
-  readonly tabs: { key: ManageProfilesTab; label: string }[] = [ { key: 'sessions', label: 'Sessions' }, { key: 'personas', label: 'Personas' }, { key: 'profiles', label: 'Profiles' }, { key: 'assignments', label: 'Persona Assignments' }, { key: 'hate_monitoring', label: 'Hate Monitoring Profile' }, { key: 'results', label: 'Results' }, ];
+  readonly tabs: ManageProfilesTabEntry[] = MANAGE_PROFILES_TABS;
   readonly state = signal<ManageProfilesExtensionState | null>(null);
   readonly loading = signal(false);
   readonly socialLoading = signal(false);
@@ -53,24 +51,29 @@ export class ManageProfilesComponent {
   readonly profiles = signal<SocialProfile[]>([]);
   readonly hateProfiles = computed(() => this.profiles().filter(p => (p.purposes || []).includes('hate_speech_monitoring')));
   readonly regularProfiles = computed(() => this.profiles().filter(p => !(p.purposes || []).includes('hate_speech_monitoring')));
-  readonly shimmerRows = [1, 2, 3, 4, 5];
-  readonly maxSessions = 10;
+  readonly activeRuns = signal<SocialProfileActiveRun[]>([]);
+  readonly shimmerRows = SHIMMER_ROWS;
+  readonly maxSessions = MAX_SESSIONS_PER_PLATFORM;
   readonly sessionFetching = signal<Set<string>>(new Set<string>());
   readonly sessionVerifying = signal<Set<string>>(new Set<string>());
   readonly sessions = signal<Record<string, SessionEntry[]>>({});
   readonly expanded = signal<Set<string>>(new Set<string>());
-  readonly modalMode = signal<ModalMode | null>(null);
+  readonly modalMode = signal<ManageProfilesModalMode | null>(null);
   readonly selectedPersona = signal<SocialPersona | null>(null);
   readonly selectedProfile = signal<SocialProfile | null>(null);
   readonly confirmationMessage = signal('');
-  readonly confirmationAction = signal<'persona' | 'profile' | 'assignment' | ''>('');
-  readonly assignmentPersonaId = signal('');
-  readonly assignmentProfileId = signal('');
-  readonly purposes: UiDropdownOption[] = [ { key: 'posting', label: 'Posting' }, { key: 'ad_monitoring', label: 'Ad Monitoring' } ];
+  readonly confirmationAction = signal<ManageProfilesConfirmationAction>('');
+  readonly assignmentPending = signal(new Set<string>());
+  readonly purposes: UiDropdownOption[] = PROFILE_PURPOSE_OPTIONS;
   readonly sessionPendingDelete = signal<PendingSessionDelete | null>(null);
+  readonly sessionConnecting = signal<Set<string>>(new Set<string>());
 
   constructor() {
     this.loadSocialData();
+    merge(timer(0, 3000), this.refreshRuns).pipe(exhaustMap(() => this.service.getResultsOverview().pipe(catchError(() => EMPTY))),
+      takeUntilDestroyed(this.destroyRef)).subscribe(result => {
+      this.activeRuns.set(result.active_runs ?? []);
+    });
     timer(0, 3000).pipe(exhaustMap(() => this.service.detectExtension()), takeUntilDestroyed(this.destroyRef)).subscribe(state => {
       const previous = this.state();
       this.state.set(state);
@@ -126,6 +129,9 @@ export class ManageProfilesComponent {
       this.expanded.update(current => new Set(current).add(this.safePlatform(entry.platform)));
       this.loadCapturedSessions();
       this.notification.show(`Session data for ${entry.platform} was fetched successfully.`, 'success');
+      if (result.saved && result.session_id) {
+        this.verifySession(entry, result.session_id);
+      }
     });
   }
 
@@ -339,21 +345,34 @@ export class ManageProfilesComponent {
     }
   }
 
-  assignProfile(): void {
-    if (!this.assignmentPersonaId() || !this.assignmentProfileId()) {
-      this.formError.set('Select a persona and profile');
+  personaOptions(): UiDropdownOption[] {
+    return this.personas().map(persona => ({ key: persona.persona_id, label: persona.name }));
+  }
+
+  assignProfile(profileId: string, personaId: string | null): void {
+    if (!personaId || this.assignmentPending().has(profileId)) {
       return;
     }
-    const profile = this.profiles().find(item => item.profile_id === this.assignmentProfileId());
-    if (profile && this.hasPlatformAssignment(this.assignmentPersonaId(), profile.platform, profile.profile_id)) {
+    const profile = this.profiles().find(item => item.profile_id === profileId);
+    if (profile && this.hasPlatformAssignment(personaId, profile.platform, profile.profile_id)) {
       this.formError.set('This persona is already assigned to a profile on the selected platform');
       return;
     }
-    this.service.assignProfile({ persona_id: this.assignmentPersonaId(), profile_id: this.assignmentProfileId() }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    if (!profile || profile.assigned_persona_id) {
+      return;
+    }
+    this.assignmentPending.update(current => new Set(current).add(profileId));
+    this.service.assignProfile({ persona_id: personaId, profile_id: profileId }).pipe(takeUntilDestroyed(this.destroyRef),
+      finalize(() => {
+        this.assignmentPending.update(current => {
+          const next = new Set(current);
+          next.delete(profileId);
+          return next;
+        });
+      }),).subscribe({
       next: () => {
+        this.profiles.update(current => current.map(item => item.profile_id === profileId ? { ...item, assigned_persona_id: personaId, assignment_status: 'assigned' } : item));
         this.formError.set('');
-        this.assignmentPersonaId.set('');
-        this.assignmentProfileId.set('');
         this.notification.show('Persona assigned successfully', 'success');
         this.loadSocialData();
       },
@@ -369,6 +388,14 @@ export class ManageProfilesComponent {
     this.confirmationMessage.set('Are you sure you want to remove this assignment?');
   }
 
+  runningScans(profileId: string): SocialProfileActiveRun[] {
+    return this.activeRuns().filter(run => run.profile_id === profileId);
+  }
+
+  scanLabel(activity: string): string {
+    return activity === 'posting' ? 'Post' : activity === 'ad_detection' ? 'Ad' : 'Profile';
+  }
+
   triggerPostMonitoring(personaId: string, name: string): void {
     this.triggerMonitoring('post', personaId, name);
   }
@@ -380,6 +407,7 @@ export class ManageProfilesComponent {
   triggerHateSpeechMonitoring(profileId: string, name: string): void {
     this.service.triggerHateSpeechMonitoring(profileId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
+        this.refreshRuns.next();
         this.notification.show(`Hate speech monitoring triggered for ${name}`, 'success'); 
       },
       error: (err) => {
@@ -392,6 +420,7 @@ export class ManageProfilesComponent {
     if (type === 'post') {
       this.service.triggerPostMonitoring(personaId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
+          this.refreshRuns.next();
           this.notification.show(`Post monitoring triggered for ${name}`, 'success'); 
         },
         error: (err) => {
@@ -402,6 +431,7 @@ export class ManageProfilesComponent {
     else if (type === 'ad') {
       this.service.triggerAdMonitoring(personaId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
+          this.refreshRuns.next();
           this.notification.show(`Ad monitoring triggered for ${name}`, 'success'); 
         },
         error: (err) => {
@@ -411,16 +441,52 @@ export class ManageProfilesComponent {
     }
   }
 
+  isSessionConnecting(profileId: string): boolean {
+    return this.sessionConnecting().has(profileId);
+  }
+
+  connectProfileSession(profile: SocialProfile): void {
+    if (this.isSessionConnecting(profile.profile_id)) {
+      return;
+    }
+    const available = this.verifiedSessionFor(profile);
+    if (!available) {
+      this.notification.show(`No verified session is available for ${this.platformLabel(profile.platform)}. Capture and verify one in the Sessions tab.`, 'fail');
+      return;
+    }
+    this.sessionConnecting.update(current => new Set(current).add(profile.profile_id));
+    this.attachProfileSession(profile, available.id);
+  }
+
+  private attachProfileSession(profile: SocialProfile, sessionId: string): void {
+    this.service.updateProfile(profile.profile_id, { session_id: sessionId }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.releaseSessionConnecting(profile.profile_id);
+        this.loadSocialData();
+        this.notification.show(`Session connected to ${profile.profile_name ?? profile.profile_username ?? 'profile'}.`, 'success');
+      },
+      error: (error) => {
+        this.releaseSessionConnecting(profile.profile_id);
+        this.notification.show(error?.error?.detail ?? 'Failed to connect the session to this profile', 'fail');
+      },
+    });
+  }
+
+  verifiedSessionFor(profile: SocialProfile): SessionEntry | null {
+    const used = new Set(this.profiles().filter(item => item.profile_id !== profile.profile_id).map(item => item.session_id).filter(Boolean));
+    return this.sessionsFor(profile.platform).find(session => session.verified && !used.has(session.id)) ?? null;
+  }
+
+  private releaseSessionConnecting(profileId: string): void {
+    this.sessionConnecting.update(current => {
+      const next = new Set(current);
+      next.delete(profileId);
+      return next;
+    });
+  }
+
   platformOptions(): UiDropdownOption[] {
     return this.platforms().map(p => ({ key: p.platform, label: p.platform }));
-  }
-
-  personaOptions(): UiDropdownOption[] {
-    return this.personas().map(persona => ({ key: persona.persona_id, label: persona.name }));
-  }
-
-  assignmentProfileOptions(): UiDropdownOption[] {
-    return this.regularProfiles().map(profile => ({ key: profile.profile_id, label: `${this.platformLabel(profile.platform)} - ${profile.profile_name ?? profile.profile_username ?? 'Profile'}` }));
   }
 
   personaName(personaId?: string | null): string {

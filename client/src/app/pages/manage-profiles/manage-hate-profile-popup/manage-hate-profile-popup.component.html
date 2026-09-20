@@ -1,6 +1,6 @@
 <app-case-edit-drawer
   [title]="title() | translate"
-  subtitle="{{ 'Create and update hate monitoring profiles.' | translate }}"
+  subtitle="{{ 'Monitor a real social media profile for hate speech.' | translate }}"
   [saveLabel]="saving() ? ('Saving...' | translate) : ('Save' | translate)"
   saveTestId="manage-hate-profile-popup-save"
   cancelTestId="manage-hate-profile-popup-cancel"
@@ -14,12 +14,12 @@
       }
 
       <div class="space-y-5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
-        <h3 class="mb-4 text-[15px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Hate Profile Details' | translate }}</h3>
+        <h3 class="mb-4 text-[15px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Real Profile Details' | translate }}</h3>
 
         <div>
           <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Platform' | translate }} <span class="text-red-500 [body.light-theme_&]:text-red-700">*</span></label>
           <div class="mt-1">
-            <app-ui-dropdown [options]="platformOptions()" [selected]="profileForm().platform" [searchable]="true" placeholder="Select platform" (valueChange)="onProfilePlatform($event)"></app-ui-dropdown>
+            <app-ui-dropdown menuPlacement="static" [options]="platformOptions()" [selected]="profileForm().platform" [searchable]="true" placeholder="Select platform" (valueChange)="onProfilePlatform($event)"></app-ui-dropdown>
           </div>
         </div>
 
@@ -27,7 +27,7 @@
           <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Session ' | translate }}</label>
           <div class="mt-1">
             @if (availableSessionOptions().length > 0) {
-              <app-ui-dropdown [options]="availableSessionOptions()" [selected]="profileForm().session_id || ''" [searchable]="true" placeholder="Select session" (valueChange)="onProfileSession($event)"></app-ui-dropdown>
+              <app-ui-dropdown menuPlacement="static" [options]="availableSessionOptions()" [selected]="profileForm().session_id || ''" [searchable]="true" placeholder="Select session" (valueChange)="onProfileSession($event)"></app-ui-dropdown>
             } @else {
               <div class="rounded-[8px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-820)] p-4 text-center text-sm text-[var(--color-text3)] [body.light-theme_&]:bg-[#f5f9fe]">
                 <p class="mb-3">{{ selectedPlatformEmptyText() }}</p>
