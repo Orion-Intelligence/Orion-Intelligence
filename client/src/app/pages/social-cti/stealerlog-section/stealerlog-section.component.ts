@@ -4,14 +4,12 @@ import { Subscription } from 'rxjs';
 import { social_exposure_signals, social_profile, social_stealer_log } from '../models/social.models';
 import { SocialFetchService } from '../services/social-fetch.service';
 import { SocialStorageService } from '../services/social-storage.service';
-import { ExportBrandingService } from '../../../shared/services/export/export-branding.service';
 import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { STEALERLOG_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { TranslationService } from '../../../shared/services/translation.service';
-import { buildStealerLogExportRow, STEALER_LOG_EXPORT_COLUMNS } from '../utils/stealer-log-export.util';
+import { buildStealerRecordBlocksTable } from '../utils/stealer-log-export.util';
 
 @Component({
   selector: 'app-social-stealerlog-section',
@@ -24,9 +22,7 @@ export class StealerlogSectionComponent implements OnDestroy {
   private readonly fetchService = inject(SocialFetchService);
   private readonly storageService = inject(SocialStorageService);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly exportBranding = inject(ExportBrandingService);
   private readonly reportExportService = inject(ReportExportService);
-  private readonly translationService = inject(TranslationService);
   private requestId = 0;
   private activeProfileKey = '';
   private subscription: Subscription | null = null;
@@ -123,25 +119,21 @@ export class StealerlogSectionComponent implements OnDestroy {
     this.closeExportChoice();
   }
 
-  private buildExportRows(): Record<string, string>[] {
-    const searchQuery = this.searchIdentity() || '-';
-    return this.records().map((item, index) => buildStealerLogExportRow(this.exportBranding, item, index, searchQuery));
-  }
-
   private exportRecords(type: 'csv' | 'json' | 'report'): void {
-    const rows = this.buildExportRows();
+    const searchQuery = this.searchIdentity() || '-';
     const payload: GraphReportPayload = {
-      graphKind: 'social',
-      title: this.translationService.translate('Stealer Logs Export'),
+      graphKind: 'cti',
+      title: 'Credentials Export',
       sessionName: this.searchIdentity() || 'stealerlogs',
       generatedAtIso: new Date().toISOString(),
       nodes: [],
       edges: [],
       summary: {
-        search_query: this.searchIdentity() || '-',
-        total_records: rows.length
+        search_query: searchQuery,
+        total_records: this.records().length,
+        stealer_records: this.records().length
       },
-      tables: [{ title: this.translationService.translate('Stealer Logs'), values: {}, columns: [...STEALER_LOG_EXPORT_COLUMNS], rows }]
+      tables: [buildStealerRecordBlocksTable(this.records())]
     };
     this.reportExportService.exportByType(payload, type === 'report' ? 'doc_pdf' : type);
   }

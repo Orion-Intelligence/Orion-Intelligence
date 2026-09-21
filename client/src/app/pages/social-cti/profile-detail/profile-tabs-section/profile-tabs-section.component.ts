@@ -11,13 +11,11 @@ import { SocialFetchService } from '../../services/social-fetch.service';
 import { take } from 'rxjs/operators';
 import { buildSocialProfileUrl } from '../../utils/profile-url.util';
 import { applyImageFallback } from '../../utils/image-fallback.util';
-import { ExportBrandingService } from '../../../../shared/services/export/export-branding.service';
 import { ExportChoiceModalComponent } from '../../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { PROFILE_STEALERLOG_EXPORT_OPTIONS } from '../../../../shared/model/report/export-choice.model';
 import { ReportExportService } from '../../../../shared/services/report-export.service';
 import { GraphReportPayload } from '../../../../shared/model/report/report-export.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { TranslationService } from '../../../../shared/services/translation.service';
 import { SectionStateComponent } from '../../../../shared/partials/section-state/section-state.component';
 import { categoryFor, primaryKeysFor } from '../../constants/resource-category.constants';
 import { SocialResourceWorkSectionComponent } from '../resource-work-section/resource-work-section.component';
@@ -27,7 +25,7 @@ import { SocialResourceMediaSectionComponent } from '../resource-media-section/r
 import { asUnknownRecord, getOwnProperty } from '../../../../shared/utils/type-guards.util';
 import { getInputValue } from '../../../../shared/utils/event-input.util';
 import { toggleKey } from '../../utils/resource-view.util';
-import { buildStealerLogExportRow, STEALER_LOG_EXPORT_COLUMNS } from '../../utils/stealer-log-export.util';
+import { buildStealerRecordBlocksTable } from '../../utils/stealer-log-export.util';
 import { ExpandedRowComponent } from '../../../root-searches/credentials/expanded-row/expanded-row.component';
 import { CredentialResultItem } from '../../../../shared/model/results/credentials/credential.callback.model';
 import { expandFadeRow } from '../../../../shared/animations/row.animations';
@@ -41,9 +39,7 @@ import { expandFadeRow } from '../../../../shared/animations/row.animations';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialProfileTabsSectionComponent {
-  private readonly exportBranding = inject(ExportBrandingService);
   private readonly reportExportService = inject(ReportExportService);
-  private readonly translationService = inject(TranslationService);
   private failedProfileImages = signal<Set<string>>(new Set<string>());
   private readonly expandedCrawlDescriptions = signal<Set<string>>(new Set<string>());
   private readonly expandedCrawlProperties = signal<Set<string>>(new Set<string>());
@@ -206,6 +202,25 @@ export class SocialProfileTabsSectionComponent {
       window.open(url, '_blank', 'noopener,noreferrer');
     }
     this.refetchTab.emit(this.activeTab());
+  }
+
+  isLoginError(): boolean {
+    const result = this.crawlResult();
+    return !!result.login_url || (!!result.error && /log\s*in|logged|sign\s*in|not authenticated|session expired/i.test(result.error));
+  }
+
+  loginTargetUrl(): string {
+    const result = this.crawlResult();
+    if (result.login_url) {
+      return result.login_url;
+    }
+    const platform = this.platformData();
+    try {
+      return new URL(buildSocialProfileUrl(platform.meta.platform, platform.meta.username || 'orion', platform.meta.url)).origin;
+    }
+    catch {
+      return '';
+    }
   }
 
   getTabLabel(tabKey: FetchTabKey): string {
@@ -417,11 +432,30 @@ export class SocialProfileTabsSectionComponent {
   }
 
   getStealerLogs(platformData: social_profile): social_stealer_log[] {
-    return platformData.stealer_logs ?? [];
+    const baseHost = this.platformBaseHost(platformData);
+    const records = platformData.stealer_logs ?? [];
+    if (!baseHost) {
+      return records;
+    }
+    return records.filter(record => this.stealerRecordMatchesHost(record, baseHost));
+  }
+
+  private platformBaseHost(platformData: social_profile): string {
+    try {
+      return new URL(buildSocialProfileUrl(platformData.meta.platform, 'orion', platformData.meta.url)).hostname.replace(/^www\./, '').toLowerCase();
+    }
+    catch {
+      return '';
+    }
+  }
+
+  private stealerRecordMatchesHost(record: social_stealer_log, baseHost: string): boolean {
+    return [record?.domain, record?.m_domain, record?.source_domain, record?.m_source_domain, record?.url, record?.m_url, record?.host, record?.m_host]
+      .some(value => String(value ?? '').toLowerCase().includes(baseHost));
   }
 
   getPlatformStealerDomain(platformData: social_profile): string {
-    return platformData.meta.url || platformData.meta.platform;
+    return this.platformBaseHost(platformData) || platformData.meta.platform;
   }
 
   getStealerRecordHost(record: social_stealer_log): string {
@@ -518,26 +552,22 @@ export class SocialProfileTabsSectionComponent {
     this.closeStealerLogExportChoice();
   }
 
-  private buildStealerLogRows(platformData: social_profile): Record<string, string>[] {
-    const searchQuery = `${platformData.meta.username} ${this.getPlatformStealerDomain(platformData)}`.trim();
-    return this.getStealerLogs(platformData).map((item, index) => buildStealerLogExportRow(this.exportBranding, item, index, searchQuery));
-  }
-
   private exportStealerLogs(platformData: social_profile, type: 'csv' | 'json' | 'report'): void {
-    const rows = this.buildStealerLogRows(platformData);
     const query = `${platformData.meta.username} ${this.getPlatformStealerDomain(platformData)}`.trim();
+    const records = this.getStealerLogs(platformData);
     const payload: GraphReportPayload = {
-      graphKind: 'social',
-      title: this.translationService.translate('Stealer Logs Export'),
+      graphKind: 'cti',
+      title: 'Credentials Export',
       sessionName: query || 'profile-stealerlogs',
       generatedAtIso: new Date().toISOString(),
       nodes: [],
       edges: [],
       summary: {
         search_query: query || '-',
-        total_records: rows.length
+        total_records: records.length,
+        stealer_records: records.length
       },
-      tables: [{ title: this.translationService.translate('Stealer Logs'), values: {}, columns: [...STEALER_LOG_EXPORT_COLUMNS], rows }]
+      tables: [buildStealerRecordBlocksTable(records)]
     };
     this.reportExportService.exportByType(payload, type === 'report' ? 'doc_pdf' : type);
   }

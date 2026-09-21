@@ -218,16 +218,18 @@ export class SocialProfileListingComponent {
     if (active && this.getResultSource(active) === 'darkweb') {
       return [this.detailsTab, this.onlinePresenceTab];
     }
+    const rawTypes = this.activeProfilePlatform()?.profile_details?.crawl_type ?? [];
     const appended = new Set(['following', 'connections', 'onlinePresence', 'stealerLogs']);
-    const types = (this.activeProfilePlatform()?.profile_details?.crawl_type ?? []).filter(type => !appended.has(type));
+    const types = rawTypes.filter(type => !appended.has(type));
+    const connectionTabs = rawTypes.includes('connections') ? [this.connectionsTab] : [];
     if (!types.length) {
-      return this.profileFetchTabs;
+      return [this.detailsTab, ...connectionTabs, this.onlinePresenceTab, this.stealerLogsTab];
     }
     const crawlTabs: FetchTab[] = types.map(type => ({ key: type as FetchTabKey, label: type.charAt(0).toUpperCase() + type.slice(1), icon: type === 'details' ? 'bi bi-person-badge' : 'bi bi-collection' }));
 
 
     const withDetails = crawlTabs.some(tab => tab.key === 'details') ? crawlTabs : [this.detailsTab, ...crawlTabs];
-    return [...withDetails, this.connectionsTab, this.onlinePresenceTab, this.stealerLogsTab];
+    return [...withDetails, ...connectionTabs, this.onlinePresenceTab, this.stealerLogsTab];
   }
 
   crawlResultFor(platformData: social_profile, type: FetchTabKey): CrawlResultView {

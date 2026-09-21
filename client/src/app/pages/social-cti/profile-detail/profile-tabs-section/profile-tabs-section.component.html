@@ -63,9 +63,32 @@
               <div class="mb-3 flex items-center justify-between gap-3">
                 <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Details' | translate }}</p>
                 <button data-testid="social-details-reload" type="button" (click)="refetchTab.emit('details')" [disabled]="isTabLoading('details')" class="inline-flex h-8 flex-shrink-0 items-center justify-center gap-2 rounded-[8px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-xs font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa] disabled:cursor-not-allowed disabled:opacity-60">
+                  @if (isTabLoading('details')) {
+                    <span class="h-3.5 w-3.5 flex-shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true"></span>
+                  } @else {
+                    <i class="bi bi-arrow-clockwise text-[12px]" aria-hidden="true"></i>
+                  }
                   {{ (isTabLoading('details') ? 'Reloading' : 'Reload') | translate }}
                 </button>
               </div>
+              @if (isLoginError() && !isDarkweb()) {
+                <div data-testid="social-details-login-required" role="status" aria-atomic="true" class="mb-3 grid w-full grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 rounded-[10px] border border-amber-400/20 bg-amber-500/[0.07] px-3.5 py-2.5 [.light-theme_&]:border-amber-200 [.light-theme_&]:bg-amber-50/80 max-[480px]:grid-cols-[32px_minmax(0,1fr)] max-[480px]:items-start">
+                  <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-400/10 text-amber-300 ring-1 ring-inset ring-amber-400/15 [.light-theme_&]:bg-amber-100 [.light-theme_&]:text-amber-700 [.light-theme_&]:ring-amber-200/80" aria-hidden="true">
+                    <svg aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 24 24" fill="none" class="shrink-0">
+                      <path d="M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5M4 12h11m-4-4 4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </span>
+                  <span class="min-w-0">
+                    <span class="block text-[12px] font-semibold leading-[1.5] tracking-[-0.01em] text-amber-100 [.light-theme_&]:text-amber-900">{{ 'Login required' | translate }}</span>
+                    <span class="mt-0.5 block text-[12px] font-normal leading-[1.5] text-amber-200/80 [overflow-wrap:anywhere] [.light-theme_&]:text-amber-800/90">Log in to {{ platformData.meta.platform }} in your browser to fetch live data. Saved results are shown below.</span>
+                  </span>
+                  <button data-testid="social-details-login" type="button" (click)="openLogin(loginTargetUrl())" class="inline-flex min-h-9 shrink-0 items-center justify-center gap-2 rounded-[8px] border border-amber-400/30 bg-amber-400/10 px-3 py-1.5 text-xs font-semibold text-amber-100 outline-none transition-colors duration-150 hover:border-amber-400/50 hover:bg-amber-400/20 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-blue-820-light)] motion-reduce:transition-none [.light-theme_&]:border-amber-300 [.light-theme_&]:bg-white/80 [.light-theme_&]:text-amber-900 [.light-theme_&]:hover:border-amber-400 [.light-theme_&]:hover:bg-amber-100 [.light-theme_&]:focus-visible:ring-amber-600 max-[480px]:col-start-2 max-[480px]:min-h-11 max-[480px]:justify-self-start">
+                    <svg aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 24 24" fill="none" class="shrink-0">
+                      <path d="M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5M4 12h11m-4-4 4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>{{ 'Login' | translate }}
+                  </button>
+                </div>
+              }
               <ng-template #detailRow let-item>
                 <div class="group grid grid-cols-[minmax(0,1fr)_32px] gap-x-3 gap-y-1.5 border-b border-[rgba(148,163,184,0.10)] bg-transparent px-3.5 py-3 transition-colors last:border-b-0 hover:bg-[rgba(87,165,235,0.065)] sm:grid-cols-[144px_minmax(0,1fr)_32px] sm:items-center sm:gap-x-4 [body.light-theme_&]:border-[#dce6f1] [body.light-theme_&]:hover:bg-[#edf5fd]">
                   <div class="flex min-w-0 items-center">
@@ -144,6 +167,11 @@
                     <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text3)]">{{ presence.length }} {{ 'results' | translate }}</span>
                   }
                   <button data-testid="social-online-presence-reload" type="button" (click)="refetchTab.emit('onlinePresence')" [disabled]="isTabLoading('onlinePresence')" class="inline-flex h-8 flex-shrink-0 items-center justify-center gap-2 rounded-[8px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-xs font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa] disabled:cursor-not-allowed disabled:opacity-60">
+                    @if (isTabLoading('onlinePresence')) {
+                      <span class="h-3.5 w-3.5 flex-shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true"></span>
+                    } @else {
+                      <i class="bi bi-arrow-clockwise text-[12px]" aria-hidden="true"></i>
+                    }
                     {{ (isTabLoading('onlinePresence') ? 'Reloading' : 'Reload') | translate }}
                   </button>
                 </div>
@@ -192,6 +220,11 @@
                 </div>
                 <div class="flex flex-shrink-0 items-center gap-2">
                   <button data-testid="social-stealer-logs-reload" type="button" (click)="refetchTab.emit('stealerLogs')" [disabled]="isTabLoading('stealerLogs')" class="inline-flex h-8 flex-shrink-0 items-center justify-center gap-2 rounded-[8px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-xs font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa] disabled:cursor-not-allowed disabled:opacity-60">
+                    @if (isTabLoading('stealerLogs')) {
+                      <span class="h-3.5 w-3.5 flex-shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true"></span>
+                    } @else {
+                      <i class="bi bi-arrow-clockwise text-[12px]" aria-hidden="true"></i>
+                    }
                     {{ (isTabLoading('stealerLogs') ? 'Reloading' : 'Reload') | translate }}
                   </button>
                   @if (getStealerLogs(platformData).length > 0) {
@@ -451,8 +484,8 @@
                   {{ 'Load more' | translate }}
                 </button>
                 }
-              } @else if (crawlResult().login_url) {
-                <app-section-state state="error" [title]="'Login required for ' + getTabLabel(activeTab())" [description]="'You must be logged in to ' + platformData.meta.platform + ' to load this section.'" actionLabel="Login" (action)="openLogin(crawlResult().login_url!)"></app-section-state>
+              } @else if (isLoginError()) {
+                <app-section-state state="error" [title]="'Login required for ' + getTabLabel(activeTab())" [description]="'You must be logged in to ' + platformData.meta.platform + ' to load this section.'" actionLabel="Login" (action)="openLogin(loginTargetUrl())"></app-section-state>
               } @else if (crawlResult().error) {
                 <app-section-state state="error" [title]="'Unable to load ' + getTabLabel(activeTab())" description="Try fetching this section again." actionLabel="Sync all" (action)="syncAllNow()"></app-section-state>
               } @else if (activeTab() !== 'connections') {
@@ -465,8 +498,8 @@
           <div data-testid="social-profile-fetch-gate" class="flex min-h-[220px] items-center justify-center bg-[var(--color-blue-820-light)] px-4 py-8">
             @if (isTabLoading('details')) {
               <app-section-state state="loading" title="Fetching Profile" description="Loading profile details and available sections."></app-section-state>
-            } @else if (crawlResult().login_url) {
-              <app-section-state state="error" title="Login required" [description]="'You must be logged in to ' + platformData.meta.platform + ' in your browser to fetch this profile.'" actionLabel="Login" (action)="openLogin(crawlResult().login_url!)"></app-section-state>
+            } @else if (isLoginError()) {
+              <app-section-state state="error" title="Login required" [description]="'You must be logged in to ' + platformData.meta.platform + ' in your browser to fetch this profile.'" actionLabel="Login" (action)="openLogin(loginTargetUrl())"></app-section-state>
             } @else if (crawlResult().error) {
               <app-section-state state="error" title="Unable to fetch profile" description="The extension could not load this profile. Try again." actionLabel="Retry fetch" (action)="refetchTab.emit('details')"></app-section-state>
             } @else {

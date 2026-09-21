@@ -189,6 +189,7 @@ export class SocialLiveSyncService {
     const url = urlOverride ?? buildSocialProfileUrl(platformData.meta.platform, platformData.meta.username, platformData.meta.url);
     const stopped = () => this.liveStop.has(stopKey) || this.stoppedPlatformIds.has(cardId);
     let pendingLoginUrl: string | undefined;
+    let pendingError: string | undefined;
     const runPage = async (cursor: string): Promise<{ items: social_resource[]; next?: string; more: boolean } | 'error' | null> => {
       let result;
       try {
@@ -202,6 +203,7 @@ export class SocialLiveSyncService {
       }
       if (result.error) {
         pendingLoginUrl = result.login_url ? String(result.login_url) : undefined;
+        pendingError = String(result.error);
         return 'error';
       }
       const items = ((result.items ?? []) as social_resource[]).map(item => type === 'connections' && urlOverride ? { ...item, parent_url: urlOverride } : item);
@@ -217,7 +219,7 @@ export class SocialLiveSyncService {
           break;
         }
         if (page === 'error') {
-          this.crawlResults.update(current => ({ ...current, [key]: { loading: false, error: 'crawl_failed', login_url: pendingLoginUrl } }));
+          this.crawlResults.update(current => ({ ...current, [key]: { loading: false, error: pendingError ?? 'crawl_failed', login_url: pendingLoginUrl } }));
           if (trackStatus) {
             this.setSectionStatus(platformData, type, 'failed');
           }
