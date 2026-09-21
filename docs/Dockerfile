@@ -2,7 +2,7 @@ FROM python:3.12-slim@sha256:57cd7c3a7a273101a6485ba99423ee568157882804b1124b4dd
 
 WORKDIR /docs
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --require-hashes -r requirements.txt
 COPY . .
 RUN if [ -d screenshots-neutral ] && ls screenshots-neutral/*.png >/dev/null 2>&1; then \
         cp -f screenshots-neutral/*.png screenshots/; \
