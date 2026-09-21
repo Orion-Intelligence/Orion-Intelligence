@@ -111,10 +111,12 @@ client_build() {
     rm -rf backend/build
     mkdir -p backend/build
     cp -r client/build/* backend/build/
-    mkdir -p backend/backups
-    if [ "$(stat -c %u backend/backups)" != "${APP_UID:-1000}" ]; then
-        sudo chown -R "${APP_UID:-1000}:${APP_GID:-1000}" backend/backups
-    fi
+    mkdir -p backend/backups backend/backups_test
+    for backup_dir in backend/backups backend/backups_test; do
+        if [ "$(stat -c %u "$backup_dir")" != "${APP_UID:-1000}" ]; then
+            sudo chown -R "${APP_UID:-1000}:${APP_GID:-1000}" "$backup_dir"
+        fi
+    done
     rm -rf backend/workspace/build
     mkdir -p backend/workspace/build
     cp -r client/build/* backend/workspace/build/

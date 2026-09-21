@@ -60,8 +60,9 @@ class service_manager:
                 await config_controller.getInstance().load_config(force_db=True)
                 await asyncio.sleep(5)
 
-                await BackupManager.get_instance().resolve_interrupted_restore()
-                await BackupManager.get_instance().resolve_interrupted_tenant_restore()
+                async with redis_controller.getInstance().lock("backup:startup_recovery", timeout=3600, blocking_timeout=3600):
+                    await BackupManager.get_instance().resolve_interrupted_restore()
+                    await BackupManager.get_instance().resolve_interrupted_tenant_restore()
 
                 await arango_controller.get_instance().link_connection()
                 await arango_controller.get_instance().initialize()

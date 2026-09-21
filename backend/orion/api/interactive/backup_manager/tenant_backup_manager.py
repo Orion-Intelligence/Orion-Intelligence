@@ -40,8 +40,7 @@ class TenantBackupManager:
         if self.tenant_restore_marker.exists():
             raise HTTPException(status_code=409, detail="A previous tenant restore was interrupted. Resolve it before running another restore.")
         if not await self._owner._job_store.begin("restore", "Starting tenant restore"):
-            log.g().i("TENANT RESTORE: request ignored, another backup or restore is already running")
-            return await self._owner.job_status()
+            raise HTTPException(status_code=409, detail="Another backup or restore is already running")
         self._owner._spawn(self._run_tenant_restore(backup_id, tenant_id))
         return await self._owner.job_status()
 
@@ -49,12 +48,17 @@ class TenantBackupManager:
         heartbeat = asyncio.create_task(self._owner._job_store.keep_alive())
         try:
             result = await self.restore_tenant_by_id(backup_id, tenant_id)
-            await self._owner._job_store.finish(BackupJobStatus.DONE, "Tenant restored successfully", result.get("filename", ""))
+            await self._owner._job_store.finish(BackupJobStatus.DONE, self._outcome_message("Tenant restored successfully", result), result.get("filename", ""))
         except Exception as exc:
             log.g().e(f"TENANT RESTORE FAILED: {exc}")
             await self._owner._job_store.finish(BackupJobStatus.FAILED, str(getattr(exc, "detail", exc)))
         finally:
             await self._owner._stop_heartbeat(heartbeat)
+
+    @staticmethod
+    def _outcome_message(message: str, result: dict) -> str:
+        skipped = sum(int(counts.get("skipped", 0)) for counts in (result.get("mongo") or {}).values())
+        return f"{message} ({skipped} records belonged to another tenant and were left out, see the server log)" if skipped else message
 
     async def start_tenant_import(self, upload, owner_tenant_id: str | None = None) -> dict:
         if self._owner.restore_marker.exists():
@@ -85,7 +89,7 @@ class TenantBackupManager:
         heartbeat = asyncio.create_task(self._owner._job_store.keep_alive())
         try:
             result = await self.restore_tenant(stage_name, tenant_id, source="import")
-            await self._owner._job_store.finish(BackupJobStatus.DONE, "Tenant imported successfully", result.get("filename", ""))
+            await self._owner._job_store.finish(BackupJobStatus.DONE, self._outcome_message("Tenant imported successfully", result), result.get("filename", ""))
         except Exception as exc:
             log.g().e(f"TENANT IMPORT FAILED: {exc}")
             await self._owner._job_store.finish(BackupJobStatus.FAILED, str(getattr(exc, "detail", exc)))
@@ -413,6 +417,11 @@ class TenantBackupManager:
     async def resolve_interrupted_tenant_restore(self) -> bool:
         marker = self._owner._io.read_json_file(self.tenant_restore_marker)
         if not marker:
+            maintenance_state.get_instance().release_all_tenants()
+            return False
+        job = await self._owner._job_store.read()
+        if job.get("status") == BackupJobStatus.RUNNING.value and job.get("operation") == "restore":
+            log.g().w("TENANT RESTORE: a restore is still running in another worker, leaving its marker alone")
             return False
         tenant_id = str(marker.get("tenant") or "")
         rollback_name = str(marker.get("rollback") or "")
@@ -423,6 +432,18 @@ class TenantBackupManager:
             f"Only that tenant is affected and the rest of the platform is untouched. Rolling it back automatically."
         )
         rollback_dir = self._owner.backup_root / rollback_name
+        if not rollback_dir.is_dir():
+            log.g().c(
+                f"TENANT RESTORE CRITICAL: the rollback snapshot {rollback_name} for tenant {tenant_id} no longer exists, nothing can be rolled back. "
+                f"Check the tenant and restore it from a backup if needed."
+            )
+            self.tenant_restore_marker.unlink(missing_ok=True)
+            await self._owner._job_store.finish(
+                BackupJobStatus.FAILED,
+                f"Tenant restore was interrupted for {tenant_id} and its rollback snapshot is missing. Verify the tenant and restore it from a backup if needed.",
+                backup_name,
+            )
+            return True
         snapshot_ids = [snapshot.name for snapshot in self._rollback_snapshots(rollback_dir)]
         maintenance_state.get_instance().fence_tenants(snapshot_ids)
         try:
@@ -840,4 +861,9 @@ class TenantBackupManager:
             return False, f"MongoDB validation failed: {exc}"
         if not found:
             return False, f"tenant {scope.tenant_id} is missing after restore"
+        tenant = await self._owner._engine.database[CONSTANTS.BACKUP_TENANT_COLLECTION].find_one({"_id": scope.object_id}, {"is_default": 1}) or {}
+        owner_query = {"role": "admin"} if tenant.get("is_default") else {"licenses": "maintainer"}
+        owners = await self._owner._engine.database[CONSTANTS.BACKUP_TENANT_USER_COLLECTION].count_documents({CONSTANTS.BACKUP_TENANT_USER_FIELD: scope.tenant_id, **owner_query})
+        if not owners:
+            return False, f"tenant {scope.tenant_id} would have no maintainer after restore"
         return True, "ok"

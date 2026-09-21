@@ -90,6 +90,7 @@ class CONSTANTS:
     RESTORE_ROLLBACK_MAX_AGE_HOURS = 12
     RESTORE_QUIESCE_DRAIN_SECONDS = 3
     MAINTENANCE_FLAG = BASE_DIR / "static" / ".maintenance"
+    TENANT_FENCE_FILE = BASE_DIR / "backups" / ".fenced_tenants"
     MAINTENANCE_CACHE_TTL_SECONDS = 1.0
 
 allowed_key_titles: dict[str, str] = {}

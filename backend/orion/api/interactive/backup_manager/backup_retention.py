@@ -24,12 +24,17 @@ class BackupRetention:
             await self._owner._engine.delete(oldest)
             log.g().i(f"BACKUP: limit of {CONSTANTS.MAX_BACKUPS} reached, removed oldest backup {oldest.filename}")
 
+    def _pending_tenant_rollback(self) -> str:
+        marker = self._owner._io.read_json_file(self._owner.tenant_restore_marker) or {}
+        return str(marker.get("rollback") or "")
+
     async def sweep_stale_rollbacks(self) -> None:
         if not self._owner.backup_root.is_dir() or self._owner.restore_marker.exists():
             return
         cutoff = datetime.now(timezone.utc) - timedelta(hours=CONSTANTS.RESTORE_ROLLBACK_MAX_AGE_HOURS)
+        pending = self._pending_tenant_rollback()
         for entry in self._owner.backup_root.iterdir():
-            if not entry.is_dir() or not entry.name.startswith(CONSTANTS.RESTORE_ROLLBACK_PREFIX):
+            if not entry.is_dir() or not entry.name.startswith(CONSTANTS.RESTORE_ROLLBACK_PREFIX) or entry.name == pending:
                 continue
             try:
                 modified_at = datetime.fromtimestamp(entry.stat().st_mtime, tz=timezone.utc)
@@ -67,8 +72,9 @@ class BackupRetention:
             return
         recorded = {backup.filename for backup in await self._owner._engine.find(db_backup_model)}
         cutoff = datetime.now(timezone.utc) - timedelta(hours=CONSTANTS.RESTORE_ROLLBACK_MAX_AGE_HOURS)
+        pending = self._pending_tenant_rollback()
         for entry in self._owner.backup_root.iterdir():
-            if not entry.is_dir() or entry.name in recorded or entry.name.startswith(CONSTANTS.RESTORE_ROLLBACK_PREFIX):
+            if not entry.is_dir() or entry.name in recorded or entry.name.startswith(CONSTANTS.RESTORE_ROLLBACK_PREFIX) or entry.name == pending:
                 continue
             manifest = self._owner._io.read_json_file(entry / CONSTANTS.BACKUP_MANIFEST_NAME)
             if manifest and manifest.get("completed"):

@@ -9,6 +9,7 @@ backend/workspace/ssl/
 !client/package-lock.json
 backend/build/backups/*
 backend/backups/
+backend/backups_test/
 backend/workspace/parser/parser_files/*
 backend/static/.maintenance
 backend/backend_cov_app/*

@@ -35,8 +35,8 @@ class SignupManager:
             quota_tenant, quota_tenant_ids = await TenantManager.get_instance().get_quota_scope(tenant)
             if not TenantManager._tenant_quota_available(quota_tenant_ids, tenant.tenant_quota):
                 raise HTTPException(status_code=400, detail="Tenant quota exceeded")
-            pool_user_count = await TenantManager.get_instance().count_pool_users(quota_tenant_ids)
-            if pool_user_count < quota_tenant.user_quota:
+            pool_usage = await TenantManager.get_instance().count_quota_tenant_usage(quota_tenant, quota_tenant, quota_tenant_ids)
+            if pool_usage < quota_tenant.user_quota:
                 default_child_user_quota = 1
         await mail_manager.get_instance().validate_mail_configuration(tenant_id=parent_tenant_id)
         username, email, password = helper_controller.extract_user_mail_fields(data)

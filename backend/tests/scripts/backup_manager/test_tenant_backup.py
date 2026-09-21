@@ -35,8 +35,8 @@ def _collections():
             {"_id": ObjectId(TENANT_B), "name": "Beta", "slug": "beta"},
         ]),
         "db_user_account": _FakeTenantCollection([
-            {"_id": ObjectId(USER_A), "tenant_id": TENANT_A, "username": "alpha-admin"},
-            {"_id": ObjectId(USER_B), "tenant_id": TENANT_B, "username": "beta-admin"},
+            {"_id": ObjectId(USER_A), "tenant_id": TENANT_A, "username": "alpha-admin", "licenses": ["maintainer"]},
+            {"_id": ObjectId(USER_B), "tenant_id": TENANT_B, "username": "beta-admin", "licenses": ["maintainer"]},
         ]),
         "cases": _FakeTenantCollection([
             {"_id": ObjectId(), "tenant_id": TENANT_A, "title": "alpha case"},
@@ -568,3 +568,18 @@ def test_restore_leaves_out_a_user_whose_username_now_belongs_to_another_tenant(
     owners = [document["tenant_id"] for document in collections["db_user_account"].documents if document["username"] == "alpha-admin"]
     assert owners == [TENANT_B]
     assert report["mongo"]["db_user_account"] == {"removed": 0, "written": 0, "skipped": 1}
+
+
+def test_restore_rolls_back_an_archive_that_would_leave_the_tenant_without_a_maintainer(tmp_path, monkeypatch):
+    collections = _collections()
+    manager = _make_tenant_manager(tmp_path, collections, monkeypatch)
+    _export(manager, tmp_path)
+    user_file = tmp_path / "backups" / "snapshot" / CONSTANTS.BACKUP_TENANTS_DIR / TENANT_A / CONSTANTS.BACKUP_TENANT_MONGO_DIR / "db_user_account.ndjson"
+    user_file.write_text("", encoding="utf-8")
+
+    with pytest.raises(HTTPException) as exc:
+        _run(manager._tenant.restore_tenant("snapshot", TENANT_A))
+
+    assert "no maintainer" in exc.value.detail
+    assert [document["username"] for document in collections["db_user_account"].documents if document["tenant_id"] == TENANT_A] == ["alpha-admin"]
+    assert not manager.tenant_restore_marker.exists()

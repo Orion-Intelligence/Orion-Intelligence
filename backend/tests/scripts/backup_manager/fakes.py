@@ -105,6 +105,9 @@ def _matches(document, query):
                 return False
             if "$ne" in expected and value == expected["$ne"]:
                 return False
+        elif isinstance(value, list) and not isinstance(expected, list):
+            if expected not in value:
+                return False
         elif value != expected:
             return False
     return True

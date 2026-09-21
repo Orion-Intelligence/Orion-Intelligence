@@ -28,13 +28,16 @@ def _patch_signup(monkeypatch, engine, child_tenant_ids=None, pool_user_count=0)
     async def count_pool_users(_tenant_ids, active_only=False):
         return pool_user_count
 
+    async def count_quota_tenant_usage(_tenant, _quota_tenant, _tenant_ids, active_only=False):
+        return pool_user_count
+
     async def create_tenant(tenant):
         created_tenants.append(tenant)
 
     monkeypatch.setattr(signup_module.mongo_controller, "get_instance", staticmethod(lambda: SimpleNamespace(get_engine=lambda: engine)))
     monkeypatch.setattr(signup_module.mail_manager, "get_instance", staticmethod(lambda: mail))
     monkeypatch.setattr(signup_module.session_manager, "get_instance", staticmethod(lambda: SimpleNamespace(generate_verification_token=lambda: "verify-token")))
-    monkeypatch.setattr(signup_module.TenantManager, "get_instance", staticmethod(lambda: SimpleNamespace(get_quota_scope=get_quota_scope, create_tenant=create_tenant, count_pool_users=count_pool_users)))
+    monkeypatch.setattr(signup_module.TenantManager, "get_instance", staticmethod(lambda: SimpleNamespace(get_quota_scope=get_quota_scope, create_tenant=create_tenant, count_pool_users=count_pool_users, count_quota_tenant_usage=count_quota_tenant_usage)))
     monkeypatch.setattr(signup_module.env_handler, "get_instance", staticmethod(lambda: SimpleNamespace(env=lambda key, default=None: "http://localhost:4200" if key == "APP_URL" else "")))
     monkeypatch.setattr(signup_module.constant, "mail_template", SimpleNamespace(render=lambda **kwargs: kwargs["url"]))
     return mail, created_tenants
