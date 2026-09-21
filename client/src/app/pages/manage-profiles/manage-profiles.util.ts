@@ -35,12 +35,16 @@ export function profileName(profiles: SocialProfile[], profileId: string): strin
   return profile ? profileDisplayName(profile) : RESULTS_FALLBACK_PROFILE_LABEL;
 }
 
+export function profilePlatform(profiles: SocialProfile[], profileId: string, fallback = ''): string {
+  return profiles.find(entry => entry.profile_id === profileId)?.platform ?? fallback;
+}
+
 export function activityLabel(activity: ManageProfileResultsActivity): string {
   return getOwnProperty(RESULTS_ACTIVITY_LABELS, activity) ?? '';
 }
 
 export function emptyResultRow(): ManageProfileResultRow {
-  return { key: '', runId: '', profileId: '', activity: 'posting', activityLabel: '', profileLabel: '', title: '', dateTime: '', running: false, isManual: false, error: false, sessionExpired: false, errorReason: '', step: '', postUrl: '', postText: '', imageUrl: '', ads: [], posts: [] };
+  return { key: '', runId: '', profileId: '', platform: '', activity: 'posting', activityLabel: '', profileLabel: '', title: '', dateTime: '', running: false, isManual: false, error: false, sessionExpired: false, errorReason: '', step: '', postUrl: '', postText: '', imageUrl: '', ads: [], posts: [] };
 }
 
 export function pluralize(count: number, singular: string, plural: string): string {
@@ -54,6 +58,7 @@ export function runResultRow(run: SocialProfileActiveRun, profiles: SocialProfil
     key: `run-${run.run_id}`,
     runId: run.run_id,
     profileId: run.profile_id,
+    platform: profilePlatform(profiles, run.profile_id, run.platform),
     activity,
     activityLabel: activityLabel(activity),
     profileLabel: profileLabel(profiles, platforms, run.profile_id, run.platform),
@@ -70,6 +75,7 @@ export function postResultRow(result: SocialPostResult, index: number, profiles:
     ...emptyResultRow(),
     key: `post-${index}`,
     profileId: result.profile_id,
+    platform: profilePlatform(profiles, result.profile_id),
     activity: 'posting',
     activityLabel: activityLabel('posting'),
     profileLabel: profileLabel(profiles, platforms, result.profile_id),
@@ -90,6 +96,7 @@ export function adResultRow(result: SocialAdDetectionResult, index: number, prof
     ...emptyResultRow(),
     key: `ad-${index}`,
     profileId: result.profile_id,
+    platform: profilePlatform(profiles, result.profile_id),
     activity: 'ad_detection',
     activityLabel: activityLabel('ad_detection'),
     profileLabel: profileLabel(profiles, platforms, result.profile_id),
@@ -108,6 +115,7 @@ export function hateSpeechResultRow(result: SocialHateSpeechResult, index: numbe
     ...emptyResultRow(),
     key: `hate-${index}`,
     profileId: result.profile_id,
+    platform: profilePlatform(profiles, result.profile_id),
     activity: 'hate_speech',
     activityLabel: activityLabel('hate_speech'),
     profileLabel: profileLabel(profiles, platforms, result.profile_id),
@@ -144,7 +152,7 @@ export function flattenPostRows(rows: ManageProfileResultRow[], profiles: Social
       return;
     }
     seen.add(dedupeKey);
-    posts.push({ ...post, key: `${row.key}-${posts.length}`, profileId: row.profileId, profileLabel: row.profileLabel, dateTime: String(post.detected_at || row.dateTime), source, imageUrl });
+    posts.push({ ...post, key: `${row.key}-${posts.length}`, profileId: row.profileId, platform: row.platform, profileLabel: row.profileLabel, dateTime: String(post.detected_at || row.dateTime), source, imageUrl });
   };
   for (const row of rows) {
     if (row.running || row.error) {

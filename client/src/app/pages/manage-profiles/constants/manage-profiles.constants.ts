@@ -18,7 +18,7 @@ export const SHIMMER_ROWS = [1, 2, 3, 4, 5];
 
 export const RESULTS_REFRESH_INTERVAL_MS = 5000;
 
-export const RESULTS_VIEW_OPTIONS: (UiDropdownOption & { key: ManageProfileResultsView })[] = [ { key: 'ads', label: 'Ads' }, { key: 'posts', label: 'Posts' } ];
+export const RESULTS_VIEW_OPTIONS: (UiDropdownOption & { key: ManageProfileResultsView })[] = [ { key: 'ads', label: 'Ads' }, { key: 'posts', label: 'Posts' }, { key: 'hate_speech', label: 'Profile Monitoring' } ];
 
 export const RESULTS_DEFAULT_VIEW: ManageProfileResultsView = 'ads';
 

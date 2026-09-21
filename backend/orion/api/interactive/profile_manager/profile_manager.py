@@ -732,6 +732,8 @@ class ProfileManager:
             results.ad_detection_results = prune(results.ad_detection_results)
         elif kind == "posts":
             results.post_results = prune(results.post_results)
+        elif kind == "hate_speech":
+            results.hate_speech_results = prune(results.hate_speech_results)
         else:
             results.ad_detection_results = prune(results.ad_detection_results)
             results.post_results = prune(results.post_results)

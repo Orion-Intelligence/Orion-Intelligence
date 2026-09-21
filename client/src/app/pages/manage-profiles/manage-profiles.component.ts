@@ -38,6 +38,7 @@ export class ManageProfilesComponent {
   private readonly notification = inject(MessageNotificationService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly refreshRuns = new Subject<void>();
+  private readonly postUnsupportedPlatforms = new Set(['reddit', 'mewe', 'behance', 'hashnode']);
 
   readonly activeTab = signal<ManageProfilesTab>('sessions');
   readonly tabs: ManageProfilesTabEntry[] = MANAGE_PROFILES_TABS;
@@ -454,6 +455,10 @@ export class ManageProfilesComponent {
 
   scanLabel(activity: string): string {
     return activity === 'posting' ? 'Post' : activity === 'ad_detection' ? 'Ad' : 'Profile';
+  }
+
+  isPostSupported(platform?: string | null): boolean {
+    return !this.postUnsupportedPlatforms.has(this.safePlatform(platform ?? ''));
   }
 
   triggerPostMonitoring(personaId: string, name: string): void {

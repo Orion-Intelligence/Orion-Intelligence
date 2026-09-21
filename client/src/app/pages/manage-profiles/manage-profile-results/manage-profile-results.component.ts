@@ -4,18 +4,19 @@ import { DatePipe, NgClass } from '@angular/common';
 import { Subscription, finalize, interval } from 'rxjs';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { ManageProfilesService } from '../manage-profiles.service';
-import { PlatformEntry, SocialProfile } from '../model/manage-profiles.model';
+import { PlatformEntry, SocialPersona, SocialProfile } from '../model/manage-profiles.model';
 import { ManageProfilePostRow, ManageProfileResultRow, ManageProfileResultsView } from '../model/manage-profiles.interfaces.model';
 import { RESULTS_DEFAULT_VIEW, RESULTS_REFRESH_INTERVAL_MS, RESULTS_VIEW_OPTIONS, SHIMMER_ROWS } from '../constants/manage-profiles.constants';
-import { buildResultRows, flattenPostRows, profileOptionLabel } from '../manage-profiles.util';
+import { buildResultRows, flattenPostRows, platformLabel, profileOptionLabel, safePlatform } from '../manage-profiles.util';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { UiDropdownComponent, UiDropdownOption } from '../../../shared/partials/ui-dropdown/ui-dropdown.component';
 import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
+import { SocialIconComponent } from '../../../shared/partials/social-icon/social-icon.component';
 
 @Component({
   selector: 'app-manage-profile-results',
   standalone: true,
-  imports: [DatePipe, NgClass, TranslatePipe, UiDropdownComponent, ConfirmationPopupComponent],
+  imports: [DatePipe, NgClass, TranslatePipe, UiDropdownComponent, ConfirmationPopupComponent, SocialIconComponent],
   templateUrl: './manage-profile-results.component.html',
 })
 export class ManageProfileResultsComponent implements OnInit {
@@ -24,6 +25,7 @@ export class ManageProfileResultsComponent implements OnInit {
 
   readonly profiles = input<SocialProfile[]>([]);
   readonly platforms = input<PlatformEntry[]>([]);
+  readonly personas = input<SocialPersona[]>([]);
   readonly resultsLoading = signal(false);
   readonly rows = signal<ManageProfileResultRow[]>([]);
   readonly runningCount = signal(0);
@@ -41,14 +43,19 @@ export class ManageProfileResultsComponent implements OnInit {
     return profileId ? this.rows().filter(row => row.profileId === profileId) : this.rows();
   });
   readonly visibleRows = computed(() => {
-    if (this.view() === 'posts') {
-      return this.profileRows().filter(row => row.activity !== 'ad_detection' && (row.running || row.error));
+    const view = this.view();
+    if (view === 'ads') {
+      return this.profileRows().filter(row => row.activity === 'ad_detection');
     }
-    return this.profileRows().filter(row => row.activity === 'ad_detection');
+    if (view === 'hate_speech') {
+      return this.profileRows().filter(row => row.activity === 'hate_speech');
+    }
+    return this.profileRows().filter(row => row.activity === 'posting' && (row.running || row.error));
   });
-  readonly visiblePosts = computed<ManageProfilePostRow[]>(() => this.view() === 'posts' ? flattenPostRows(this.profileRows(), this.profiles()) : []);
+  readonly visiblePosts = computed<ManageProfilePostRow[]>(() => this.view() === 'posts' ? flattenPostRows(this.profileRows(), this.profiles()).filter(post => post.source === 'published') : []);
   readonly hasClearableResults = computed(() => {
-    const activity = this.view() === 'posts' ? 'posting' : 'ad_detection';
+    const view = this.view();
+    const activity = view === 'ads' ? 'ad_detection' : view === 'hate_speech' ? 'hate_speech' : 'posting';
     return this.profileRows().some(row => !row.running && row.activity === activity);
   });
   readonly shimmerRows = SHIMMER_ROWS;
@@ -84,7 +91,7 @@ export class ManageProfileResultsComponent implements OnInit {
   }
 
   selectView(view: string | null): void {
-    this.view.set(view === 'posts' ? 'posts' : RESULTS_DEFAULT_VIEW);
+    this.view.set(view === 'posts' || view === 'hate_speech' ? view : RESULTS_DEFAULT_VIEW);
   }
 
   selectedProfileLabel(): string {
@@ -92,14 +99,30 @@ export class ManageProfileResultsComponent implements OnInit {
     return profile ? profileOptionLabel(this.platforms(), profile) : '';
   }
 
+  safePlatform(platform: string): string {
+    return safePlatform(platform ?? '');
+  }
+
+  platformLabel(platform: string): string {
+    return platformLabel(this.platforms(), platform ?? '');
+  }
+
+  personaName(profileId: string): string {
+    const personaId = this.profiles().find(entry => entry.profile_id === profileId)?.assigned_persona_id;
+    if (!personaId) {
+      return '';
+    }
+    return this.personas().find(entry => entry.persona_id === personaId)?.name ?? '';
+  }
+
   clearConfirmationMessage(): string {
-    const kind = this.view() === 'posts' ? 'post' : 'ad';
+    const kind = this.view() === 'ads' ? 'ad' : this.view() === 'hate_speech' ? 'profile monitoring' : 'post';
     const label = this.selectedProfileLabel();
     return label ? `Clear all ${kind} results for "${label}"? This cannot be undone.` : `Clear all ${kind} results for every profile? This cannot be undone.`;
   }
 
   clearLabel(): string {
-    const kind = this.view() === 'posts' ? 'Posts' : 'Ads';
+    const kind = this.view() === 'ads' ? 'Ads' : this.view() === 'hate_speech' ? 'Profile Monitoring' : 'Posts';
     return this.selectedProfileId() ? `Clear Profile ${kind}` : `Clear All ${kind}`;
   }
 

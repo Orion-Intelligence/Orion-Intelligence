@@ -34,6 +34,9 @@
       <section data-testid="manage-profiles-result-row" [attr.data-running]="row.running ? 'true' : 'false'" class="group relative border-b border-[var(--ui-table-row-border)] odd:bg-[var(--ui-table-row-odd)] even:bg-[var(--ui-table-row-even)] last:border-b-0">
         <div class="pointer-events-none absolute inset-y-0 left-0 w-0 bg-[var(--color-blue-640)] transition-[width] group-hover:w-0.5"></div>
         <div (click)="toggleResult(row.key)" (keydown.enter)="toggleResult(row.key)" (keydown.space)="toggleResult(row.key)" role="button" tabindex="0" [attr.aria-expanded]="isResultExpanded(row.key)" class="flex flex-wrap items-center gap-3 px-3 py-3 hover:bg-[var(--ui-table-row-hover)] sm:px-4" [ngClass]="row.ads.length || row.posts.length ? 'cursor-pointer' : 'cursor-default'">
+          @if (row.platform) {
+            <span [attr.data-platform]="safePlatform(row.platform)" class="manage-profile-logo-tile flex h-8 w-8 flex-shrink-0 self-start items-center justify-center overflow-hidden rounded-[9px] p-1 text-white shadow-[0_4px_12px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.08)] ring-1 ring-inset ring-white/[0.06] [body.light-theme_&]:text-[var(--color-text2)] [body.light-theme_&]:shadow-[0_3px_8px_rgba(15,23,42,0.09),inset_0_1px_0_rgba(255,255,255,0.85)] [body.light-theme_&]:ring-[#d5e2ee]/70"><app-social-icon [platformName]="platformLabel(row.platform)"></app-social-icon></span>
+          }
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-2">
               @if (row.running) {
@@ -54,7 +57,7 @@
                 <span class="rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-2 py-0.5 text-[10px] font-semibold text-emerald-300">{{ (row.activity === 'posting' ? 'Published' : 'Completed') | translate }}</span>
               }
             </div>
-            <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ row.profileLabel }} · {{ row.dateTime | date: 'medium' }}</p>
+            <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ row.profileLabel }}@if (personaName(row.profileId); as pn) { · <span class="text-[var(--color-text3)]">{{ pn }}</span>} · {{ row.dateTime | date: 'medium' }}</p>
             @if (row.running && row.step) {
               <p class="mb-0 mt-1 truncate text-[11px] text-[var(--color-text3)]">{{ row.step }}</p>
             }
@@ -146,7 +149,7 @@
                 <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-text3)] [body.light-theme_&]:bg-[#eef4fb]">{{ post.label }}</span>
               }
             </div>
-            <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ post.profileLabel }} · {{ post.dateTime | date: 'medium' }}</p>
+            <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ post.profileLabel }}@if (personaName(post.profileId); as pn) { · <span class="text-[var(--color-text3)]">{{ pn }}</span>} · {{ post.dateTime | date: 'medium' }}</p>
             @if (post.url) {
               <a [href]="post.url" target="_blank" rel="noopener noreferrer" class="mt-1 inline-flex max-w-full items-center gap-1 text-[11px] font-medium text-[var(--color-blue-640)] hover:underline"><span class="truncate">{{ post.url }}</span></a>
             }
@@ -162,7 +165,7 @@
       }
     }
     @if (!visibleRows().length && !visiblePosts().length) {
-      <div class="p-8 text-center text-sm text-[var(--color-text3)]">{{ (view() === 'posts' ? (selectedProfileId() ? 'No posts for this profile yet.' : 'No posts yet.') : (selectedProfileId() ? 'No activity for this profile yet.' : 'No activity yet.')) | translate }}</div>
+      <div class="p-8 text-center text-sm text-[var(--color-text3)]">{{ (view() === 'posts' ? (selectedProfileId() ? 'No posts for this profile yet.' : 'No posts yet.') : view() === 'hate_speech' ? (selectedProfileId() ? 'No profile monitoring results for this profile yet.' : 'No profile monitoring results yet.') : (selectedProfileId() ? 'No activity for this profile yet.' : 'No activity yet.')) | translate }}</div>
     }
   </div>
 }

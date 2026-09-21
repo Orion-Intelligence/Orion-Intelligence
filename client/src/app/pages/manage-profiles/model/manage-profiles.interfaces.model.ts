@@ -19,12 +19,13 @@ export interface ManageProfilesTabEntry {
 }
 
 export type ManageProfileResultsActivity = 'ad_detection' | 'posting' | 'hate_speech';
-export type ManageProfileResultsView = 'ads' | 'posts';
+export type ManageProfileResultsView = 'ads' | 'posts' | 'hate_speech';
 export type ManageProfilePostSource = 'published' | 'crawled';
 
 export interface ManageProfilePostRow extends SocialHateSpeechDetectedPost {
   key: string;
   profileId: string;
+  platform: string;
   profileLabel: string;
   dateTime: string;
   source: ManageProfilePostSource;
@@ -35,6 +36,7 @@ export interface ManageProfileResultRow {
   key: string;
   runId: string;
   profileId: string;
+  platform: string;
   activity: ManageProfileResultsActivity;
   activityLabel: string;
   profileLabel: string;
