@@ -866,53 +866,46 @@ class ProfileManager:
     def _profile_response(self, profile: ManagedSocialProfile) -> SocialProfileResponse:
         return SocialProfileResponse(**profile.model_dump())
 
-    @staticmethod
-    def _no_runnable_profile_detail(record, persona_id: str) -> str:
-        assigned = [profile for profile in record.profiles if profile.assigned_persona_id == persona_id]
-        if not assigned:
-            return "No profile is assigned to this persona yet."
-        if not any(profile.session_id for profile in assigned):
-            return "No session is attached to the profile assigned to this persona. Capture a session and attach it to the profile first."
-        return "The session attached to this profile could not be read. Capture the session again."
+    def _runnable_persona(self, record: db_social_profile_management_model, profile: ManagedSocialProfile) -> SocialPersona:
+        if not profile.assigned_persona_id:
+            raise HTTPException(status_code=400, detail="No persona is assigned to this profile yet.")
+        if not profile.session_id:
+            raise HTTPException(status_code=400, detail="No session is attached to this profile. Capture a session and attach it to the profile first.")
+        return self._find_persona(record, profile.assigned_persona_id)
 
-    async def trigger_post_monitoring(self, current_user, persona_id: str):
+    async def _ensure_social_scheduler_idle(self) -> None:
         from orion.services.mongo_manager.shared_model.db_cronjob_status_model import CronjobName, CronjobStatus, db_cronjob_status_model
         cron_record = await self._engine.find_one(db_cronjob_status_model, db_cronjob_status_model.job_name == CronjobName.SOCIAL_JOB)
         if cron_record and cron_record.status == CronjobStatus.RUNNING:
             raise HTTPException(status_code=400, detail="Daily run scheduler is currently running. Please try again 5 minutes later.")
 
+    async def trigger_post_monitoring(self, current_user, profile_id: str):
+        await self._ensure_social_scheduler_idle()
+
         record = await self._get_or_create_social_record(current_user)
-        persona = self._find_persona(record, persona_id)
-        
+        profile = self._find_profile(record, profile_id)
+        persona = self._runnable_persona(record, profile)
+
         now = datetime.now(UTC)
         from orion.management.jobs.social_profile.social_profile_job import social_profile_job
         job = social_profile_job.get_instance()
         if not await job.has_post_data(persona):
             raise HTTPException(status_code=400, detail=f"No post content is available for this persona ({job.persona_post_key_label(persona)}). Adjust the persona's age group or interests.")
 
-        posted_today = await self._profiles_with_manual_post_today(record.user_id, now)
-        dispatched = 0
-        blocked = 0
-        for profile in record.profiles:
-            if profile.assigned_persona_id == persona_id and profile.session_id:
-                if profile.profile_id in posted_today:
-                    blocked += 1
-                    continue
-                session_state = await self.read_profile_session_state(current_user, profile)
-                if session_state:
-                    run_id = str(uuid4())
-                    asyncio.create_task(job.run_posting(profile, persona, session_state, run_id, record.user_id, is_manual=True))
-                    dispatched += 1
+        if profile.profile_id in await self._profiles_with_manual_post_today(record.user_id, now):
+            raise HTTPException(status_code=400, detail="Manual post can only be publish once a day for a profile.")
 
-        if not dispatched:
-            if blocked:
-                raise HTTPException(status_code=400, detail="Manual post can only be publish once a day for a profile.")
-            raise HTTPException(status_code=400, detail=self._no_runnable_profile_detail(record, persona_id))
+        session_state = await self.read_profile_session_state(current_user, profile)
+        if not session_state:
+            raise HTTPException(status_code=400, detail="The session attached to this profile could not be read. Capture the session again.")
+
+        run_id = str(uuid4())
+        asyncio.create_task(job.run_posting(profile, persona, session_state, run_id, record.user_id, is_manual=True))
 
         persona.last_manual_post_trigger = now
         await self._engine.save(record)
 
-        return {"status": "success", "message": f"Post monitoring triggered for {dispatched} profile(s)"}
+        return {"status": "success", "message": "Post monitoring triggered for 1 profile"}
 
     async def _profiles_with_manual_post_today(self, user_id: str, now: datetime) -> set[str]:
         results = await self._engine.find_one(db_social_automation_result_model, db_social_automation_result_model.user_id == user_id)
@@ -927,31 +920,24 @@ class ProfileManager:
                 posted.add(item.profile_id)
         return posted
 
-    async def trigger_ad_monitoring(self, current_user, persona_id: str):
-        from orion.services.mongo_manager.shared_model.db_cronjob_status_model import CronjobName, CronjobStatus, db_cronjob_status_model
-        cron_record = await self._engine.find_one(db_cronjob_status_model, db_cronjob_status_model.job_name == CronjobName.SOCIAL_JOB)
-        if cron_record and cron_record.status == CronjobStatus.RUNNING:
-            raise HTTPException(status_code=400, detail="Daily run scheduler is currently running. Please try again 5 minutes later.")
+    async def trigger_ad_monitoring(self, current_user, profile_id: str):
+        await self._ensure_social_scheduler_idle()
 
         record = await self._get_or_create_social_record(current_user)
-        persona = self._find_persona(record, persona_id)
-        
+        profile = self._find_profile(record, profile_id)
+        persona = self._runnable_persona(record, profile)
+
         from orion.management.jobs.social_profile.social_profile_job import social_profile_job
         job = social_profile_job.get_instance()
-        
-        dispatched = 0
-        for profile in record.profiles:
-            if profile.assigned_persona_id == persona_id and profile.session_id:
-                session_state = await self.read_profile_session_state(current_user, profile)
-                if session_state:
-                    run_id = str(uuid4())
-                    asyncio.create_task(job.run_ad_monitoring(profile, persona, session_state, run_id, record.user_id, is_manual=True))
-                    dispatched += 1
 
-        if not dispatched:
-            raise HTTPException(status_code=400, detail=self._no_runnable_profile_detail(record, persona_id))
+        session_state = await self.read_profile_session_state(current_user, profile)
+        if not session_state:
+            raise HTTPException(status_code=400, detail="The session attached to this profile could not be read. Capture the session again.")
 
-        return {"status": "success", "message": f"Ad monitoring triggered for {dispatched} profile(s)"}
+        run_id = str(uuid4())
+        asyncio.create_task(job.run_ad_monitoring(profile, persona, session_state, run_id, record.user_id, is_manual=True))
+
+        return {"status": "success", "message": "Ad monitoring triggered for 1 profile"}
 
     async def trigger_hate_speech_monitoring(self, current_user, profile_id: str):
         from orion.services.mongo_manager.shared_model.db_cronjob_status_model import CronjobName, CronjobStatus, db_cronjob_status_model

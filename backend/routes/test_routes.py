@@ -643,10 +643,10 @@ async def test_manage_profiles_results(profile_id: str):
 async def test_extension_session():
     return {"extension_connected": True}
 
-@test_routes.post("/api/manage-profiles/personas/{persona_id}/trigger-post-monitoring", dependencies=SCAN_DEPS)
-async def test_manage_profiles_trigger_post_monitoring(persona_id: str):
+@test_routes.post("/api/manage-profiles/profiles/{profile_id}/trigger-post-monitoring", dependencies=SCAN_DEPS)
+async def test_manage_profiles_trigger_post_monitoring(profile_id: str):
     return {"status": "triggered"}
 
-@test_routes.post("/api/manage-profiles/personas/{persona_id}/trigger-ad-monitoring", dependencies=SCAN_DEPS)
-async def test_manage_profiles_trigger_ad_monitoring(persona_id: str):
+@test_routes.post("/api/manage-profiles/profiles/{profile_id}/trigger-ad-monitoring", dependencies=SCAN_DEPS)
+async def test_manage_profiles_trigger_ad_monitoring(profile_id: str):
     return {"status": "triggered"}

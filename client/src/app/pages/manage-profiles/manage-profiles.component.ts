@@ -461,12 +461,12 @@ export class ManageProfilesComponent {
     return !this.postUnsupportedPlatforms.has(this.safePlatform(platform ?? ''));
   }
 
-  triggerPostMonitoring(personaId: string, name: string): void {
-    this.triggerMonitoring('post', personaId, name);
+  triggerPostMonitoring(profileId: string, name: string): void {
+    this.triggerMonitoring('post', profileId, name);
   }
 
-  triggerAdMonitoring(personaId: string, name: string): void {
-    this.triggerMonitoring('ad', personaId, name);
+  triggerAdMonitoring(profileId: string, name: string): void {
+    this.triggerMonitoring('ad', profileId, name);
   }
 
   triggerHateSpeechMonitoring(profileId: string, name: string): void {
@@ -481,9 +481,9 @@ export class ManageProfilesComponent {
     });
   }
 
-  private triggerMonitoring(type: 'post' | 'ad', personaId: string, name: string): void {
+  private triggerMonitoring(type: 'post' | 'ad', profileId: string, name: string): void {
     if (type === 'post') {
-      this.service.triggerPostMonitoring(personaId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      this.service.triggerPostMonitoring(profileId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.refreshRuns.next();
           this.notification.show(`Post monitoring triggered for ${name}`, 'success'); 
@@ -494,7 +494,7 @@ export class ManageProfilesComponent {
       });
     }
     else if (type === 'ad') {
-      this.service.triggerAdMonitoring(personaId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      this.service.triggerAdMonitoring(profileId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.refreshRuns.next();
           this.notification.show(`Ad monitoring triggered for ${name}`, 'success'); 

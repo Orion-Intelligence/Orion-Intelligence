@@ -116,6 +116,9 @@ class BackupManager:
     async def start_tenant_restore(self, backup_id: str, tenant_id: str) -> dict:
         return await self._tenant.start_tenant_restore(backup_id, tenant_id)
 
+    async def start_tenant_import(self, upload, owner_tenant_id: str | None = None) -> dict:
+        return await self._tenant.start_tenant_import(upload, owner_tenant_id)
+
     async def list_backup_tenants(self, backup_id: str):
         return await self._tenant.list_backup_tenants(backup_id)
 

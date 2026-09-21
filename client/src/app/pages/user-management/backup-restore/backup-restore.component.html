@@ -7,12 +7,19 @@
           <h1 class="text-[20px] font-semibold leading-[1.2] text-[var(--color-text1)]">{{ 'Backup & Restore' | translate }}</h1>
           <p class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ (isTenantScope ? 'Restore your organisation from a system backup.' : 'Manage system backups and scheduled backup status.') | translate }}</p>
         </div>
-        @if (!isTenantScope) {
-        <button type="button" data-testid="instant-backup-button" [disabled]="isCreating" class="inline-flex h-7 shrink-0 appearance-none items-center justify-center gap-1.5 border-0 rounded-[8px] px-3 text-[11px] font-semibold leading-none transition-[background-color] duration-150 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)] disabled:cursor-not-allowed disabled:opacity-65" (click)="openInstantConfirmation()">
-          @if (isCreating) { <svg class="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z"></path></svg> }
-          {{ (isCreating ? 'Creating...' : 'Instant Backup') | translate }}
-        </button>
-        }
+        <div class="flex shrink-0 items-center gap-2">
+          <input #importInput type="file" accept=".zip,application/zip" class="hidden" (change)="onImportFileSelected($event)" />
+          <button type="button" data-testid="import-backup-button" [disabled]="isImporting || isRestoring || isCreating" class="group inline-flex h-7 shrink-0 items-center justify-center gap-1.5 rounded-[8px] border px-3 text-[11px] font-semibold leading-none outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 disabled:cursor-not-allowed disabled:opacity-65 border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[var(--color-text1)] hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa]" (click)="importInput.click()">
+            @if (isImporting) { <svg class="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z"></path></svg> }
+            {{ (isImporting ? 'Uploading...' : 'Import') | translate }}
+          </button>
+          @if (!isTenantScope) {
+          <button type="button" data-testid="instant-backup-button" [disabled]="isCreating" class="inline-flex h-7 shrink-0 appearance-none items-center justify-center gap-1.5 border-0 rounded-[8px] px-3 text-[11px] font-semibold leading-none transition-[background-color] duration-150 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)] disabled:cursor-not-allowed disabled:opacity-65" (click)="openInstantConfirmation()">
+            @if (isCreating) { <svg class="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z"></path></svg> }
+            {{ (isCreating ? 'Creating...' : 'Instant Backup') | translate }}
+          </button>
+          }
+        </div>
       </div>
 
       @if (job && job.status === 'running') {
@@ -110,5 +117,8 @@
   }
   @if (isRestoreConfirmationOpen()) {
     <app-confirmation-popup [message]="isTenantScope ? 'Restore your organisation from this backup? Only your own data is replaced.' : 'Restore this backup? The site will enter maintenance mode until the restore completes.'" [warning]="true" [confirmLabel]="'Restore'" (confirmed)="confirmRestoreBackup($event)"></app-confirmation-popup>
+  }
+  @if (isImportConfirmationOpen()) {
+    <app-confirmation-popup [message]="'Import this tenant export? The tenant in the file (and its sub tenants, if any) will be restored and its current data replaced.'" [warning]="true" [confirmLabel]="'Import'" (confirmed)="confirmImportBackup($event)"></app-confirmation-popup>
   }
 </ng-container>

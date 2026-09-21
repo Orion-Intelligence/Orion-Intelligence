@@ -164,6 +164,14 @@ async def restore_backup_tenant(backup_id: str, tenant_id: str):
     return await BackupManager.get_instance().start_tenant_restore(backup_id, tenant_id)
 
 
+@admin_routes.post(
+    "/api/admin/backups/import",
+    dependencies=[Depends(root_admin_required)],
+)
+async def import_backup_tenant(file: UploadFile):
+    return await BackupManager.get_instance().start_tenant_import(file)
+
+
 @admin_routes.get(
     "/api/admin/backups/{backup_id}/download",
     dependencies=[Depends(role_required([user_role.ADMIN]))],

@@ -483,6 +483,16 @@ async def restore_tenant_backup(backup_id: str, current_user=Depends(get_current
     )
 
 
+@tenant_routes.post(
+    "/api/tenant/backups/import",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), Depends(tenant_backup_allowed), ], )
+async def import_tenant_backup(file: UploadFile, current_user=Depends(get_current_user)):
+    return await BackupManager.get_instance().start_tenant_import(
+        file, str(getattr(current_user, "tenant_id", "") or "")
+    )
+
+
 @tenant_routes.get(
     "/api/tenant/backups/{backup_id}/download",
     include_in_schema=False,

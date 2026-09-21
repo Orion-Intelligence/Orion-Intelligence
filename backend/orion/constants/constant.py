@@ -73,6 +73,7 @@ class CONSTANTS:
     BACKUP_TENANT_FILES_DIR = "files"
     RESTORE_TENANT_MARKER_NAME = ".restore_tenant_in_progress"
     RESTORE_TENANT_ROLLBACK_PREFIX = "rollback_tenant_"
+    IMPORT_TENANT_STAGE_PREFIX = "import_tenant_"
     BACKUP_DISK_HEADROOM = 1.5
     BACKUP_EXCLUDED_ELASTIC_INDICES = {ELASTIC_INDEX.S_STEALERLOGS_INDEX}
     BACKUP_UNSETTABLE_INDEX_SETTINGS = {"creation_date", "uuid", "version", "provided_name", "resize", "routing"}

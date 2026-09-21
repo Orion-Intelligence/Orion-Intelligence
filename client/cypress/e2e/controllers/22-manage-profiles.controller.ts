@@ -183,12 +183,12 @@ export function assertAssignmentsTab() {
   cy.get('[data-testid="manage-profiles-page"]').should('contain.text', 'Test Persona');
   cy.get('[data-testid="manage-profiles-page"]').should('contain.text', 'twitter');
 
-  cy.intercept('POST', '**/api/manage-profiles/personas/p1/trigger-post-monitoring', {
+  cy.intercept('POST', '**/api/manage-profiles/profiles/prof1/trigger-post-monitoring', {
     statusCode: 200,
     body: {}
   }).as('manageProfilesTriggerPostMonitoring');
 
-  cy.intercept('POST', '**/api/manage-profiles/personas/p1/trigger-ad-monitoring', {
+  cy.intercept('POST', '**/api/manage-profiles/profiles/prof1/trigger-ad-monitoring', {
     statusCode: 200,
     body: {}
   }).as('manageProfilesTriggerAdMonitoring');

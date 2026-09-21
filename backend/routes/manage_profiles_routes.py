@@ -148,14 +148,14 @@ async def get_profile_results(profile_id: str, current_user=Depends(get_current_
 
 
 
-@manage_profiles_routes.post("/api/manage-profiles/personas/{persona_id}/trigger-post-monitoring", dependencies=route_permissions)
-async def trigger_post_monitoring(persona_id: str, current_user=Depends(get_current_user)):
-    return await ProfileManager.get_instance().trigger_post_monitoring(current_user, persona_id)
+@manage_profiles_routes.post("/api/manage-profiles/profiles/{profile_id}/trigger-post-monitoring", dependencies=route_permissions)
+async def trigger_post_monitoring(profile_id: str, current_user=Depends(get_current_user)):
+    return await ProfileManager.get_instance().trigger_post_monitoring(current_user, profile_id)
 
 
-@manage_profiles_routes.post("/api/manage-profiles/personas/{persona_id}/trigger-ad-monitoring", dependencies=route_permissions)
-async def trigger_ad_monitoring(persona_id: str, current_user=Depends(get_current_user)):
-    return await ProfileManager.get_instance().trigger_ad_monitoring(current_user, persona_id)
+@manage_profiles_routes.post("/api/manage-profiles/profiles/{profile_id}/trigger-ad-monitoring", dependencies=route_permissions)
+async def trigger_ad_monitoring(profile_id: str, current_user=Depends(get_current_user)):
+    return await ProfileManager.get_instance().trigger_ad_monitoring(current_user, profile_id)
 
 
 @manage_profiles_routes.post("/api/manage-profiles/profiles/{profile_id}/trigger-hate-speech-monitoring", dependencies=route_permissions)

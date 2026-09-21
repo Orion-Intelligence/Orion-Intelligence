@@ -29,11 +29,14 @@ export class BackupRestoreComponent implements OnInit, OnDestroy {
   isLoading = true;
   backupToDelete: BackupRecord | null = null;
   backupToRestore: BackupRecord | null = null;
+  fileToImport: File | null = null;
   isInstantConfirmationOpen = signal<boolean>(false);
   isDeleteConfirmationOpen = signal<boolean>(false);
   isRestoreConfirmationOpen = signal<boolean>(false);
+  isImportConfirmationOpen = signal<boolean>(false);
   isRestoring = false;
   isCreating = false;
+  isImporting = false;
   job: BackupJob | null = null;
   readonly MAX_BACKUPS = 2;
   instantConfirmationMessage = 'Start instant backup now?';
@@ -200,6 +203,40 @@ export class BackupRestoreComponent implements OnInit, OnDestroy {
         this.messageNotificationService.show(this.translationService.translate('Failed to restore backup'));
       }
     });
+  }
+
+  onImportFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    input.value = '';
+    if (!file) {
+      return;
+    }
+    this.fileToImport = file;
+    this.isImportConfirmationOpen.set(true);
+  }
+
+  confirmImportBackup(value: boolean): void {
+    this.isImportConfirmationOpen.set(false);
+    const file = this.fileToImport;
+    this.fileToImport = null;
+    if (!value || !file) {
+      return;
+    }
+    const payload = new FormData();
+    payload.append('file', file, file.name);
+    this.isImporting = true;
+    this.http.post<BackupJob>(`/api/${this.basePath}/import`, payload)
+      .pipe(finalize(() => (this.isImporting = false)))
+      .subscribe({
+        next: (job) => {
+          this.applyJob(job);
+          this.schedulePoll(1000);
+        },
+        error: (error) => {
+          this.messageNotificationService.show(this.translationService.translate(error?.error?.detail ?? 'Failed to import backup'), 'fail');
+        }
+      });
   }
 
   downloadBackup(backup: BackupRecord): void {

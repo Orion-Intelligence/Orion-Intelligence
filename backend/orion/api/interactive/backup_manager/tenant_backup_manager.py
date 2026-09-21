@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import asyncio
 import shutil
+import uuid
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-from bson import json_util
+from bson import ObjectId, json_util
+from bson.errors import InvalidId
 from elasticsearch import helpers as es_helpers
 from fastapi import HTTPException
 
@@ -49,6 +52,102 @@ class TenantBackupManager:
             await self._owner._job_store.finish(BackupJobStatus.FAILED, str(getattr(exc, "detail", exc)))
         finally:
             await self._owner._stop_heartbeat(heartbeat)
+
+    async def start_tenant_import(self, upload, owner_tenant_id: str | None = None) -> dict:
+        if self._owner.restore_marker.exists():
+            raise HTTPException(status_code=409, detail="A previous restore was interrupted. Resolve it before running another restore.")
+        if self.tenant_restore_marker.exists():
+            raise HTTPException(status_code=409, detail="A previous tenant restore was interrupted. Resolve it before running another restore.")
+        stage_name = f"{CONSTANTS.IMPORT_TENANT_STAGE_PREFIX}{datetime.now(timezone.utc).strftime('%Y_%m_%d_%H_%M_%S')}_{uuid.uuid4().hex[:8]}"
+        stage_dir = self._owner.backup_root / stage_name
+        try:
+            tenant_id = await self._stage_tenant_import(upload, stage_dir)
+            if owner_tenant_id is not None:
+                await self._ensure_import_allowed(owner_tenant_id, tenant_id)
+        except Exception:
+            await self._owner._remove_tree(stage_dir)
+            raise
+        if not await self._owner._job_store.begin("restore", "Starting tenant import"):
+            log.g().i("TENANT IMPORT: request ignored, another backup or restore is already running")
+            await self._owner._remove_tree(stage_dir)
+            return await self._owner.job_status()
+        self._owner._spawn(self._run_tenant_import(stage_name, tenant_id))
+        return await self._owner.job_status()
+
+    async def _run_tenant_import(self, stage_name: str, tenant_id: str) -> None:
+        heartbeat = asyncio.create_task(self._owner._job_store.keep_alive())
+        try:
+            result = await self.restore_tenant(stage_name, tenant_id, source="import")
+            await self._owner._job_store.finish(BackupJobStatus.DONE, "Tenant imported successfully", result.get("filename", ""))
+        except Exception as exc:
+            log.g().e(f"TENANT IMPORT FAILED: {exc}")
+            await self._owner._job_store.finish(BackupJobStatus.FAILED, str(getattr(exc, "detail", exc)))
+        finally:
+            await self._owner._remove_tree(self._owner.backup_root / stage_name)
+            await self._owner._stop_heartbeat(heartbeat)
+
+    async def _stage_tenant_import(self, upload, stage_dir: Path) -> str:
+        unpacked = stage_dir / "unpacked"
+        await asyncio.to_thread(unpacked.mkdir, parents=True, exist_ok=True)
+        archive_path = stage_dir / "import.zip"
+        await self._save_upload(upload, archive_path)
+        await asyncio.to_thread(self._extract_archive, archive_path, unpacked)
+        archive_path.unlink(missing_ok=True)
+        source = await asyncio.to_thread(self._locate_imported_tenant_dir, unpacked)
+        if source is None:
+            raise HTTPException(status_code=422, detail="Uploaded file is not a tenant export")
+        document = await asyncio.to_thread(
+            self._read_first_document,
+            source / CONSTANTS.BACKUP_TENANT_MONGO_DIR / f"{CONSTANTS.BACKUP_TENANT_COLLECTION}.ndjson",
+        )
+        tenant_id = str((document or {}).get("_id") or "")
+        try:
+            ObjectId(tenant_id)
+        except (InvalidId, TypeError) as exc:
+            raise HTTPException(status_code=422, detail="Tenant identifier in the export is not a valid object id") from exc
+        tenants_dir = stage_dir / CONSTANTS.BACKUP_TENANTS_DIR
+        await asyncio.to_thread(tenants_dir.mkdir, parents=True, exist_ok=True)
+        await asyncio.to_thread(shutil.move, str(source), str(tenants_dir / tenant_id))
+        await self._owner._remove_tree(unpacked)
+        return tenant_id
+
+    async def _ensure_import_allowed(self, owner_tenant_id: str, tenant_id: str) -> None:
+        if tenant_id == owner_tenant_id:
+            return
+        parents = await self._tenant_parents(self._owner._engine.database)
+        if parents.get(tenant_id) == owner_tenant_id:
+            return
+        raise HTTPException(status_code=403, detail="This export does not belong to your tenant")
+
+    @staticmethod
+    async def _save_upload(upload, path: Path) -> None:
+        with path.open("wb") as handle:
+            while True:
+                chunk = await upload.read(1024 * 1024)
+                if not chunk:
+                    break
+                handle.write(chunk)
+        await upload.close()
+
+    @staticmethod
+    def _extract_archive(archive_path: Path, destination: Path) -> None:
+        root = destination.resolve()
+        try:
+            with zipfile.ZipFile(archive_path) as archive:
+                for member in archive.infolist():
+                    target = (destination / member.filename).resolve()
+                    if target != root and root not in target.parents:
+                        raise HTTPException(status_code=422, detail="Uploaded archive contains an invalid path")
+                archive.extractall(destination)
+        except zipfile.BadZipFile as exc:
+            raise HTTPException(status_code=422, detail="Uploaded file is not a valid zip archive") from exc
+
+    @classmethod
+    def _locate_imported_tenant_dir(cls, unpacked: Path):
+        if cls._is_tenant_dir(unpacked):
+            return unpacked
+        candidates = [entry for entry in sorted(unpacked.iterdir()) if entry.is_dir() and cls._is_tenant_dir(entry)]
+        return candidates[0] if len(candidates) == 1 else None
 
     async def list_backups_for_tenant(self, tenant_id: str):
         backups = await self._owner._engine.find(db_backup_model, sort=db_backup_model.created_at.desc())
