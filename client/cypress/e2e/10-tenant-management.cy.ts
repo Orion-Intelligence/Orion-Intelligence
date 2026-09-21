@@ -102,7 +102,6 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.docsScreenshot('tenant-administration');
     openTenantEditor(tenant);
     setTenantEditorToggle('tenant-verified-toggle', true);
-    setTenantEditorToggle('tenant-status-toggle', true);
     setTenantEditorToggle('tenant-password-reset-required-toggle', false);
     setTenantEditorToggle('tenant-privileged-ioc-toggle', true);
     setTenantLicense('free', false);
@@ -683,7 +682,6 @@ describe('Tenant Management - Primary and Sub-Tenant Provisioning', () => {
     openTenantsPage();
     openTenantEditor(primaryTenant);
     setTenantEditorToggle('tenant-verified-toggle', true);
-    setTenantEditorToggle('tenant-status-toggle', true);
     setTenantEditorToggle('tenant-primary-toggle', true);
     saveTenantEditor('savePrimaryTenantToggle');
     cy.logout();
@@ -719,7 +717,6 @@ describe('Tenant Management - Primary and Sub-Tenant Provisioning', () => {
     openTenantsPage();
     openTenantEditor(subTenant);
     setTenantEditorToggle('tenant-verified-toggle', true);
-    setTenantEditorToggle('tenant-status-toggle', true);
     setTenantEditorQuota('tenant-user-quota-input', '2');
     saveTenantEditor('saveSubTenantVerify');
     cy.logout();
