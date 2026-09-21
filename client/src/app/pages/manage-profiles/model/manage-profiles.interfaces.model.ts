@@ -6,7 +6,7 @@ export interface PendingSessionDelete {
 }
 
 export type ManageProfilesExtensionState = 'checking' | 'ready' | 'signin' | 'install' | 'update' | 'unsupported';
-export type ManageProfilesTab = 'personas' | 'sessions' | 'profiles' | 'assignments' | 'results' | 'hate_monitoring';
+export type ManageProfilesTab = 'personas' | 'sessions' | 'assignments' | 'results' | 'hate_monitoring';
 export type ManageProfilesModalMode = 'persona' | 'profile' | 'hate_profile';
 export type ManageProfilesConfirmationAction = 'persona' | 'profile' | 'assignment' | '';
 export type ManageProfilePopupMode = 'persona' | 'profile';

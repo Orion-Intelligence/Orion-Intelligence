@@ -74,6 +74,7 @@ class sso_manager:
             "username": str(user.username),
             "email": str(user.email or "").strip().lower(),
             "full_name": str(user.username),
+            "session": hashlib.sha256(str(user.current_session_id or "").encode("utf-8")).hexdigest() if user.current_session_id else "",
         }
 
     async def _consume_code(self, code: str) -> dict | None:

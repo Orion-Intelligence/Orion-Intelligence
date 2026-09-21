@@ -390,17 +390,6 @@ export class ManageProfilesComponent {
         },
       });
     }
-    if (action === 'assignment' && this.selectedProfile()) {
-      this.service.removeAssignment(this.selectedProfile()!.profile_id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-        next: () => {
-          this.notification.show('Assignment removed successfully', 'success');
-          this.loadSocialData();
-        },
-        error: (error) => {
-          this.notification.show(error?.error?.detail ?? 'Failed to remove assignment');
-        },
-      });
-    }
   }
 
   personaOptions(): UiDropdownOption[] {
@@ -438,20 +427,6 @@ export class ManageProfilesComponent {
         this.formError.set(error?.error?.detail ?? 'Failed to assign persona');
       },
     });
-  }
-
-  removeAssignment(profile: SocialProfile): void {
-    this.selectedProfile.set(profile);
-    this.confirmationAction.set('assignment');
-    this.confirmationMessage.set('Are you sure you want to remove this assignment?');
-  }
-
-  removeOrDeleteProfile(profile: SocialProfile): void {
-    if (profile.assigned_persona_id) {
-      this.removeAssignment(profile);
-      return;
-    }
-    this.deleteProfile(profile);
   }
 
   runningScans(profileId: string): SocialProfileActiveRun[] {

@@ -131,7 +131,7 @@ export function assertPersonasTab() {
 }
 
 export function assertProfilesTab() {
-  cy.get('[data-testid="manage-profiles-tab-profiles"]').click();
+  cy.get('[data-testid="manage-profiles-tab-assignments"]').click();
   cy.wait('@manageProfilesProfiles');
   
   cy.get('[data-testid="manage-profiles-add-profile"]').click();
