@@ -136,6 +136,12 @@ class BackupManager:
     async def resolve_tenant_download(self, backup_id: str, tenant_id: str):
         return await self._tenant.resolve_download(backup_id, tenant_id)
 
+    async def resolve_latest_tenant_download(self, tenant_id: str, owner_tenant_id: str | None = None):
+        return await self._tenant.resolve_latest_tenant_download(tenant_id, owner_tenant_id)
+
+    async def latest_tenant_export_info(self, tenant_id: str, owner_tenant_id: str | None = None) -> dict:
+        return await self._tenant.latest_tenant_export_info(tenant_id, owner_tenant_id)
+
     async def restore_tenant(self, filename: str, tenant_id: str, source: str = "cli"):
         return await self._tenant.restore_tenant(filename, tenant_id, source)
 

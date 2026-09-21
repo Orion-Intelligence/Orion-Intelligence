@@ -61,9 +61,11 @@ class TenantBackupManager:
         stage_name = f"{CONSTANTS.IMPORT_TENANT_STAGE_PREFIX}{datetime.now(timezone.utc).strftime('%Y_%m_%d_%H_%M_%S')}_{uuid.uuid4().hex[:8]}"
         stage_dir = self._owner.backup_root / stage_name
         try:
-            tenant_id = await self._stage_tenant_import(upload, stage_dir)
+            tenant_id, document = await self._stage_tenant_import(upload, stage_dir)
             if owner_tenant_id is not None:
-                await self._ensure_import_allowed(owner_tenant_id, tenant_id)
+                await self._ensure_import_allowed(owner_tenant_id, tenant_id, document)
+            elif await self._is_secondary_tenant(tenant_id, document):
+                raise HTTPException(status_code=403, detail="Secondary tenants are imported through their primary tenant")
         except Exception:
             await self._owner._remove_tree(stage_dir)
             raise
@@ -86,7 +88,7 @@ class TenantBackupManager:
             await self._owner._remove_tree(self._owner.backup_root / stage_name)
             await self._owner._stop_heartbeat(heartbeat)
 
-    async def _stage_tenant_import(self, upload, stage_dir: Path) -> str:
+    async def _stage_tenant_import(self, upload, stage_dir: Path) -> tuple[str, dict]:
         unpacked = stage_dir / "unpacked"
         await asyncio.to_thread(unpacked.mkdir, parents=True, exist_ok=True)
         archive_path = stage_dir / "import.zip"
@@ -109,13 +111,22 @@ class TenantBackupManager:
         await asyncio.to_thread(tenants_dir.mkdir, parents=True, exist_ok=True)
         await asyncio.to_thread(shutil.move, str(source), str(tenants_dir / tenant_id))
         await self._owner._remove_tree(unpacked)
-        return tenant_id
+        return tenant_id, document or {}
 
-    async def _ensure_import_allowed(self, owner_tenant_id: str, tenant_id: str) -> None:
+    async def _is_secondary_tenant(self, tenant_id: str, document: dict | None = None) -> bool:
+        parents = await self._tenant_parents(self._owner._engine.database)
+        if parents.get(tenant_id):
+            return True
+        return bool((document or {}).get(CONSTANTS.BACKUP_TENANT_PARENT_FIELD))
+
+    async def _ensure_import_allowed(self, owner_tenant_id: str, tenant_id: str, document: dict | None = None) -> None:
         if tenant_id == owner_tenant_id:
             return
         parents = await self._tenant_parents(self._owner._engine.database)
-        if parents.get(tenant_id) == owner_tenant_id:
+        if tenant_id in parents:
+            if parents[tenant_id] == owner_tenant_id:
+                return
+        elif str((document or {}).get(CONSTANTS.BACKUP_TENANT_PARENT_FIELD) or "") == owner_tenant_id:
             return
         raise HTTPException(status_code=403, detail="This export does not belong to your tenant")
 
@@ -186,6 +197,29 @@ class TenantBackupManager:
              "tenants": {"layout": block.get("layout") or {}, "tenants": {tenant_id: summary}}},
         )
         return tenant_dir, f"{backup.filename}_{tenant_id}"
+
+    async def _latest_tenant_backup(self, tenant_id: str, owner_tenant_id: str | None = None) -> dict:
+        backups = await self.list_backups_for_tenant(tenant_id)
+        if not backups:
+            raise HTTPException(status_code=404, detail="No backup contains this tenant yet")
+        tenant_dir = self._tenant_backup_dir(self._owner.backup_root / backups[0]["filename"] / CONSTANTS.BACKUP_TENANTS_DIR, tenant_id)
+        document = await asyncio.to_thread(
+            self._read_first_document,
+            tenant_dir / CONSTANTS.BACKUP_TENANT_MONGO_DIR / f"{CONSTANTS.BACKUP_TENANT_COLLECTION}.ndjson",
+        ) or {}
+        if owner_tenant_id is not None:
+            await self._ensure_import_allowed(owner_tenant_id, tenant_id, document)
+        elif await self._is_secondary_tenant(tenant_id, document):
+            raise HTTPException(status_code=403, detail="Secondary tenants are exported through their primary tenant")
+        return backups[0]
+
+    async def resolve_latest_tenant_download(self, tenant_id: str, owner_tenant_id: str | None = None):
+        backup = await self._latest_tenant_backup(tenant_id, owner_tenant_id)
+        return await self.resolve_download(backup["id"], tenant_id)
+
+    async def latest_tenant_export_info(self, tenant_id: str, owner_tenant_id: str | None = None) -> dict:
+        backup = await self._latest_tenant_backup(tenant_id, owner_tenant_id)
+        return {"backup_id": backup["id"], "filename": backup["filename"], "created_at": backup["created_at"]}
 
     async def list_backup_tenants(self, backup_id: str):
         backup = await self._owner._load_backup_by_id(backup_id)
@@ -314,18 +348,58 @@ class TenantBackupManager:
         marker = self._owner._io.read_json_file(self.tenant_restore_marker)
         if not marker:
             return False
+        tenant_id = str(marker.get("tenant") or "")
+        rollback_name = str(marker.get("rollback") or "")
+        backup_name = str(marker.get("backup") or "")
         log.g().c(
             f"TENANT RESTORE CRITICAL: an interrupted tenant restore was detected on startup. "
-            f"backup={marker.get('backup')} tenant={marker.get('tenant')} rollback={marker.get('rollback')}. "
-            f"Only that tenant is affected and the rest of the platform is untouched. "
-            f"Recover with: python restore_tenant.py {marker.get('rollback')} {marker.get('tenant')}"
+            f"backup={backup_name} tenant={tenant_id} rollback={rollback_name}. "
+            f"Only that tenant is affected and the rest of the platform is untouched. Rolling it back automatically."
         )
+        rollback_dir = self._owner.backup_root / rollback_name
+        try:
+            restored = await self._restore_from_rollback(rollback_dir)
+        except Exception as exc:
+            log.g().c(
+                f"TENANT RESTORE CRITICAL: automatic rollback FAILED for tenant {tenant_id} from {rollback_name}: {exc}. "
+                f"The rollback snapshot is kept in the backups folder for manual recovery."
+            )
+            await self._owner._job_store.finish(
+                BackupJobStatus.FAILED,
+                f"Tenant restore was interrupted for {tenant_id} and the automatic rollback failed. Manual recovery required.",
+                backup_name,
+            )
+            return True
+        self.tenant_restore_marker.unlink(missing_ok=True)
+        await self._owner._remove_tree(rollback_dir)
+        for restored_id in restored:
+            await self._owner._refresh_caches(restored_id)
+        log.g().i(f"TENANT RESTORE: interrupted restore of {tenant_id} was rolled back automatically from {rollback_name} ({restored})")
         await self._owner._job_store.finish(
             BackupJobStatus.FAILED,
-            f"Tenant restore was interrupted for {marker.get('tenant')}. Manual recovery required.",
-            str(marker.get("backup") or ""),
+            f"Tenant restore was interrupted for {tenant_id} and was rolled back automatically.",
+            backup_name,
         )
         return True
+
+    async def _restore_from_rollback(self, rollback_dir: Path) -> list[str]:
+        tenants_dir = rollback_dir / CONSTANTS.BACKUP_TENANTS_DIR
+        if not tenants_dir.is_dir():
+            raise RuntimeError(f"rollback snapshot {rollback_dir.name} is missing")
+        database = self._owner._engine.database
+        restored = []
+        for snapshot in sorted(tenants_dir.iterdir()):
+            if not self._is_tenant_dir(snapshot):
+                continue
+            scope = await self._tenant_restore_scope(database, snapshot.name, snapshot)
+            await self._run_tenant_restore_engine(snapshot, scope)
+            valid, details = await self._validate_tenant_restore(scope)
+            if not valid:
+                raise RuntimeError(f"rollback validation failed for {snapshot.name}: {details}")
+            restored.append(snapshot.name)
+        if not restored:
+            raise RuntimeError(f"rollback snapshot {rollback_dir.name} has no tenant data")
+        return restored
 
     async def _collect_ids(self, database, collection_name: str, query: dict) -> list[str]:
         ids = []

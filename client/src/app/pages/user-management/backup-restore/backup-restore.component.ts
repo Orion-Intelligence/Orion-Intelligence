@@ -11,6 +11,7 @@ import { ApiService } from '../../../shared/services/api.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../shared/services/translation.service';
+import { formatRelativeAge, parseBackupTimestamp } from '../../../shared/utils/backup-age.util';
 import type { BackupJob, BackupRecord } from './model/backup-restore.model';
 
 @Component({
@@ -30,6 +31,7 @@ export class BackupRestoreComponent implements OnInit, OnDestroy {
   backupToDelete: BackupRecord | null = null;
   backupToRestore: BackupRecord | null = null;
   fileToImport: File | null = null;
+  importConfirmationMessage = '';
   isInstantConfirmationOpen = signal<boolean>(false);
   isDeleteConfirmationOpen = signal<boolean>(false);
   isRestoreConfirmationOpen = signal<boolean>(false);
@@ -212,6 +214,11 @@ export class BackupRestoreComponent implements OnInit, OnDestroy {
     if (!file) {
       return;
     }
+    const takenAt = parseBackupTimestamp(file.name);
+    const when = takenAt
+      ? `${this.translationService.translate('This export is from')} ${takenAt.toLocaleString()} (${formatRelativeAge(takenAt)}).`
+      : this.translationService.translate('The date of this export is unknown (the file was renamed), so it may be older than it looks.');
+    this.importConfirmationMessage = `${when} ${this.translationService.translate('Restoring replaces the tenant (and its sub tenants, if any) with that state - anything changed since is lost.')}`;
     this.fileToImport = file;
     this.isImportConfirmationOpen.set(true);
   }

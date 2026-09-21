@@ -119,6 +119,6 @@
     <app-confirmation-popup [message]="isTenantScope ? 'Restore your organisation from this backup? Only your own data is replaced.' : 'Restore this backup? The site will enter maintenance mode until the restore completes.'" [warning]="true" [confirmLabel]="'Restore'" (confirmed)="confirmRestoreBackup($event)"></app-confirmation-popup>
   }
   @if (isImportConfirmationOpen()) {
-    <app-confirmation-popup [message]="'Import this tenant export? The tenant in the file (and its sub tenants, if any) will be restored and its current data replaced.'" [warning]="true" [confirmLabel]="'Import'" (confirmed)="confirmImportBackup($event)"></app-confirmation-popup>
+    <app-confirmation-popup [message]="importConfirmationMessage" [warning]="true" [confirmLabel]="'Import'" (confirmed)="confirmImportBackup($event)"></app-confirmation-popup>
   }
 </ng-container>
