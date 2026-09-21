@@ -11,6 +11,7 @@ from configs.app_dependency import get_extension_user
 from configs.auth_cookie import clear_extension_cookie, extension_token_from_request, set_extension_cookie
 from configs.limiter_dependency import auth_rate_limit
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
+from orion.services.log_manager.log_controller import log
 from orion.api.interactive.case_manager.case_communication_manager import CaseCommunicationManager
 from orion.api.interactive.extension_manager.extension_socket_manager import extension_socket_manager
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
@@ -224,8 +225,8 @@ async def extension_socket(websocket: WebSocket):
                         case_id, communication_id = captured
                         try:
                             await websocket.send_json({"type": "comm-captured", "caseId": case_id, "communicationId": communication_id, "hasSession": True})
-                        except Exception:
-                            pass
+                        except Exception as exc:
+                            log.g().w(f"EXTENSION SOCKET: capture acknowledgement not delivered for case {case_id}: {exc}")
     except WebSocketDisconnect:
         return
     finally:

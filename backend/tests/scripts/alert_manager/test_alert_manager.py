@@ -118,7 +118,7 @@ def test_alert_ioc_rows_dedup_and_limit():
     )
     rows = AlertManager._alert_ioc_rows(alert)
     values = [row["value"] for row in rows]
-    assert "1.1.1.1" in values and "2.2.2.2" in values and "x.com" in values
+    assert {"1.1.1.1", "2.2.2.2", "x.com"} <= set(values)
     assert values.count("1.1.1.1") == 1
 
 

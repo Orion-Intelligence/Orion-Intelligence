@@ -1,4 +1,5 @@
 import datetime
+import re
 import inspect
 import logging
 import os
@@ -95,7 +96,16 @@ class log:
         except Exception:
             pass
 
+    SENSITIVE_VALUE = re.compile(r"(?i)\b(password|passwd|pwd|secret|token|authorization|cookie|api[_-]?key|access_token|refresh_token)\b([\"']?\s*[=:]\s*)(\"[^\"]*\"|'[^']*'|[^\s,;&}]+)")
+    BEARER_VALUE = re.compile(r"(?i)\bbearer\s+[A-Za-z0-9._~+/=-]+")
+
+    @classmethod
+    def redact(cls, text) -> str:
+        text = cls.BEARER_VALUE.sub("Bearer ***", str(text))
+        return cls.SENSITIVE_VALUE.sub(lambda match: f"{match.group(1)}{match.group(2)}***", text)
+
     def __format_log_message(self, log_type, p_log, include_caller=False):
+        p_log = self.redact(p_log)
         current_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         if include_caller:
             caller_class, caller_file, caller_line = self.get_caller_info()

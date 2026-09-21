@@ -146,7 +146,7 @@ def test_send_takedown_mail_inline_attachments(monkeypatch):
         )
     )
     payload = sent["msg"].as_string()
-    assert "evil.com" in payload
+    assert payload.count("evil.com") >= 1
 
 
 def test_send_takedown_mail_fetches_via_urllib(monkeypatch):

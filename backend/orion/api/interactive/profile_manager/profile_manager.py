@@ -23,7 +23,7 @@ from orion.services.encryption_manager.key_manager import KeyManager
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.shared_model.db_social_profile_management_model import ManagedSocialProfile, SocialPersona, SocialPersonaAgeGroup, SocialProfileAssignmentStatus, SocialProfileConnectionStatus, db_social_profile_management_model
 from orion.services.mongo_manager.shared_model.db_social_session_model import db_social_session_model
-from orion.services.mongo_manager.shared_model.db_social_automation_result_model import SocialAdDetectionResult, SocialDetectedAd, SocialHateSpeechResult, SocialPostResult, db_social_automation_result_model
+from orion.services.mongo_manager.shared_model.db_social_automation_result_model import SocialAdDetectionResult, SocialDetectedAd, SocialHateSpeechDetectedPost, SocialHateSpeechResult, SocialPostResult, db_social_automation_result_model
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 
 
@@ -343,8 +343,8 @@ class ProfileManager:
                 state = json.loads(archive.read("session.json").decode("utf-8"))
             if isinstance(state, dict):
                 return raw_bytes, str(state.get("username") or "")
-        except Exception:
-            pass
+        except Exception as exc:
+            log.g().w(f"SOCIAL SESSION: archive did not contain a readable session.json: {exc}")
         try:
             state = json.loads(raw_bytes.decode("utf-8"))
             if not isinstance(state, dict):
@@ -611,7 +611,6 @@ class ProfileManager:
             ))
             session_expired = result.session_expired
         elif data.result_type == "hate_speech" and data.hate_speech_result is not None:
-            from orion.services.mongo_manager.shared_model.db_social_automation_result_model import SocialHateSpeechResult, SocialHateSpeechDetectedPost
             result = data.hate_speech_result
             record.hate_speech_results.append(SocialHateSpeechResult(
                 profile_id=result.profile_id,

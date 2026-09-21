@@ -53,7 +53,7 @@ function embedded(){
   try{
     const raw=document.getElementById('embedded').textContent.trim();
     if(!raw||raw==='null') return null;
-    return JSON.parse(raw.replace(/<\//g,'</'));
+    return JSON.parse(raw);
   }catch(e){ return null; }
 }
 let TAB='overview', QUERY='', HIDE_ZERO=false;
