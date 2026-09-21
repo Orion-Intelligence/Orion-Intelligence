@@ -3,7 +3,7 @@
     "orionsocial@orionintelligence.org": {
       "updates": [
         {
-          "version": "0.6.4",
+          "version": "0.6.5",
           "update_link": "https://try.orionintelligence.org/ext/firefox/orion-social-firefox.xpi",
           "applications": {
             "gecko": {
