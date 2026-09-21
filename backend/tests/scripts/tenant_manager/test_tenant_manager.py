@@ -24,6 +24,10 @@ from orion.services.mongo_manager.shared_model.db_tenant_model import (
     TenantStatus,
     db_tenant_model,
 )
+from orion.services.mongo_manager.shared_model.db_case_model import db_case_model
+from orion.services.mongo_manager.shared_model.db_audit_log import db_audit_log
+from orion.services.mongo_manager.shared_model.db_takedown_request_model import db_takedown_request_model
+from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.permission_manager.permission_models import UserPermission
 from tests.scripts.tenant_manager.fakes import DEK, FakeCollection, ModelEngine
 from tests.scripts.tenant_manager.helpers import (
@@ -1327,7 +1331,8 @@ def test_create_tenant_user_license_not_allowed(monkeypatch):
     assert exc.value.status_code == 400
 
 
-def test_create_tenant_user_orion_mail_denied(monkeypatch):
+def test_create_tenant_user_orion_mail_allowed(monkeypatch):
+    _set_env(monkeypatch, APP_URL="http://localhost:4200", TENANT_BASE_DOMAIN="")
     tenant = _make_tenant()
     engine = ModelEngine()
     engine.set_find_one(db_user_account, [None, None])
@@ -1335,11 +1340,11 @@ def test_create_tenant_user_orion_mail_denied(monkeypatch):
     engine.count_result = 0
     _patch_managers(monkeypatch, engine=engine)
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="admin", tenant_id=str(tenant.id), id="u1", username="admin")
+    current = SimpleNamespace(role="member", tenant_id=str(tenant.id), id="u1", username="owner", licenses=["maintainer"])
     data = _new_user_model(permissions=[UserPermission.ORION_MAIL])
-    with pytest.raises(HTTPException) as exc:
-        _run(manager.create_tenant_user(data, current))
-    assert exc.value.status_code == 403
+    result = _run(manager.create_tenant_user(data, current))
+    assert result["username"] == "newuser01"
+    assert UserPermission.ORION_MAIL in engine.saved[-1].permissions
 
 
 def test_create_tenant_user_generic_error_wrapped(monkeypatch):
@@ -1587,7 +1592,7 @@ def test_update_child_tenant_quota_accepts_remaining_pool(monkeypatch):
     primary = _make_tenant(is_primary=True, user_quota=15)
     child = _make_tenant(parent_tenant_id=str(primary.id))
     engine = ModelEngine().set_find_one(db_tenant_model, [child, primary, primary]).set_find(db_tenant_model, [child])
-    engine.count_results = [10, 3]
+    engine.count_results = [7]
     manager = _make_manager(engine)
 
     _run(manager.update_tenant(_tenant_request(str(child.id), user_quota=8), _primary_maintainer_user(primary)))
@@ -1698,3 +1703,89 @@ def test_sub_tenant_quota_is_capped_by_the_remaining_pool(monkeypatch):
     engine.set_find_one(db_tenant_model, [child, primary, primary]).set_find(db_tenant_model, [child])
     _run(_make_manager(engine).update_tenant(_tenant_request(str(child.id), user_quota=8), maintainer))
     assert child.user_quota == 8
+
+
+def test_create_tenant_refuses_reserved_and_taken_slugs(monkeypatch):
+    _patch_managers(monkeypatch)
+    _set_env(monkeypatch, APP_URL="https://try.orionintelligence.org", PRODUCTION_DOMAIN="", TENANT_BASE_DOMAIN="")
+    for email in ("user@mail.example", "user@try.example", "user@www.example"):
+        engine = ModelEngine()
+        engine.set_find_one(db_tenant_model, [None])
+        with pytest.raises(HTTPException) as exc:
+            _run(_make_manager(engine).create_tenant(db_tenant_model(name="Acme", email=email, iocs=[])))
+        assert exc.value.status_code == 400
+        assert not engine.saved
+    engine = ModelEngine()
+    engine.set_find_one(db_tenant_model, [_make_tenant(slug="acme")])
+    with pytest.raises(HTTPException) as exc:
+        _run(_make_manager(engine).create_tenant(db_tenant_model(name="Acme", email="user@acme.io", iocs=[])))
+    assert exc.value.status_code == 400
+    assert not engine.saved
+
+
+def test_update_tenant_refuses_a_foreign_tenant_id_instead_of_touching_the_callers_tenant(monkeypatch):
+    _patch_managers(monkeypatch)
+    tenant = _make_tenant()
+    foreign = _make_tenant(slug="other")
+    engine = ModelEngine().set_find_one(db_tenant_model, [foreign, tenant])
+    manager = _make_manager(engine)
+    current = SimpleNamespace(role="member", tenant_id=str(tenant.id), id="u1", username="bob", licenses=["maintainer"])
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.update_tenant(_tenant_request(str(foreign.id), name="Renamed"), current))
+    assert exc.value.status_code == 403
+    assert engine.saved == []
+
+
+def test_create_tenant_cleanup_removes_the_tenant_key_by_tenant_id(monkeypatch):
+    _patch_managers(monkeypatch)
+    engine = ModelEngine()
+    engine.set_find_one(db_tenant_model, [None])
+    engine.save_raises = True
+    manager = _make_manager(engine)
+    tenant = db_tenant_model(name="Acme", email="user@acme.com", iocs=[])
+    with pytest.raises(RuntimeError):
+        _run(manager.create_tenant(tenant))
+    key_removals = [query for (model, query), _ in engine.removed if model is db_keys]
+    assert len(key_removals) == 1
+    assert "tenant_id" in str(key_removals[0])
+
+
+def test_delete_tenant_removes_alerts_cases_audit_logs_and_takedowns():
+    assert {db_alert_model, db_case_model, db_audit_log, db_takedown_request_model} <= set(TenantManager.TENANT_SCOPED_MODELS)
+
+
+def test_access_block_reason_covers_disabled_tenants_and_children_of_broken_primaries():
+    primary = _make_tenant(is_primary=True, user_quota=15, verified=True, status=TenantStatus.ACTIVE)
+    healthy_child = _make_tenant(parent_tenant_id=str(primary.id), verified=True, status=TenantStatus.ACTIVE)
+    engine = ModelEngine().set_find_one(db_tenant_model, [primary]).set_find(db_tenant_model, [healthy_child])
+    engine.count_result = 3
+    assert _run(_make_manager(engine).access_block_reason(healthy_child)) is None
+
+    disabled = _make_tenant(verified=True, status=TenantStatus.DISABLE)
+    assert _run(_make_manager(ModelEngine()).access_block_reason(disabled)) == "Account disabled by administrator"
+
+    demoted = _make_tenant(is_primary=False, verified=True, status=TenantStatus.ACTIVE)
+    orphan = _make_tenant(parent_tenant_id=str(demoted.id), verified=True, status=TenantStatus.ACTIVE)
+    engine = ModelEngine().set_find_one(db_tenant_model, [demoted])
+    assert _run(_make_manager(engine).access_block_reason(orphan)) == "Access suspended: your primary tenant is no longer active"
+
+    starved = _make_tenant(is_primary=True, user_quota=0, verified=True, status=TenantStatus.ACTIVE)
+    child = _make_tenant(parent_tenant_id=str(starved.id), user_quota=1, verified=True, status=TenantStatus.ACTIVE)
+    engine = ModelEngine().set_find_one(db_tenant_model, [starved]).set_find(db_tenant_model, [child])
+    engine.count_result = 0
+    assert _run(_make_manager(engine).access_block_reason(child)) == "Access suspended: your primary tenant exceeded its quota"
+
+
+def test_update_child_tenant_quota_charges_sibling_reservations(monkeypatch):
+    _patch_managers(monkeypatch)
+    primary = _make_tenant(is_primary=True, user_quota=15)
+    child = _make_tenant(parent_tenant_id=str(primary.id))
+    sibling = _make_tenant(parent_tenant_id=str(primary.id), user_quota=5)
+    engine = ModelEngine().set_find_one(db_tenant_model, [child, primary, primary]).set_find(db_tenant_model, [child, sibling])
+    engine.count_results = [7]
+    manager = _make_manager(engine)
+
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.update_tenant(_tenant_request(str(child.id), user_quota=4), _primary_maintainer_user(primary)))
+
+    assert exc.value.status_code == 400

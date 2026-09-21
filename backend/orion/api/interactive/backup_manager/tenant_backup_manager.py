@@ -10,11 +10,13 @@ from pathlib import Path
 from bson import ObjectId, json_util
 from bson.errors import InvalidId
 from elasticsearch import helpers as es_helpers
+from pymongo.errors import BulkWriteError
 from fastapi import HTTPException
 
 from orion.api.interactive.backup_manager.backup_report import REPORT_NAME, BackupReport
+from orion.api.interactive.backup_manager.export_cipher import ExportCipher
 from orion.api.interactive.backup_manager.maintenance_state import maintenance_state
-from orion.api.interactive.backup_manager.models.tenant_partition_model import TenantScope
+from orion.api.interactive.backup_manager.models.tenant_partition_model import Ownership, TenantScope
 from orion.api.interactive.backup_manager.tenant_partition import TenantPartitionRegistry
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.log_manager.log_controller import log
@@ -59,6 +61,9 @@ class TenantBackupManager:
             raise HTTPException(status_code=409, detail="A previous restore was interrupted. Resolve it before running another restore.")
         if self.tenant_restore_marker.exists():
             raise HTTPException(status_code=409, detail="A previous tenant restore was interrupted. Resolve it before running another restore.")
+        if not await self._owner._job_store.begin("restore", "Staging tenant import"):
+            raise HTTPException(status_code=409, detail="Another backup or restore is already running")
+        heartbeat = asyncio.create_task(self._owner._job_store.keep_alive())
         stage_name = f"{CONSTANTS.IMPORT_TENANT_STAGE_PREFIX}{datetime.now(timezone.utc).strftime('%Y_%m_%d_%H_%M_%S')}_{uuid.uuid4().hex[:8]}"
         stage_dir = self._owner.backup_root / stage_name
         try:
@@ -67,13 +72,12 @@ class TenantBackupManager:
                 await self._ensure_import_allowed(owner_tenant_id, tenant_id, document)
             elif await self._is_secondary_tenant(tenant_id, document):
                 raise HTTPException(status_code=403, detail="Secondary tenants are imported through their primary tenant")
-        except Exception:
+        except Exception as exc:
             await self._owner._remove_tree(stage_dir)
+            await self._owner._job_store.finish(BackupJobStatus.FAILED, str(getattr(exc, "detail", exc)))
             raise
-        if not await self._owner._job_store.begin("restore", "Starting tenant import"):
-            log.g().i("TENANT IMPORT: request ignored, another backup or restore is already running")
-            await self._owner._remove_tree(stage_dir)
-            return await self._owner.job_status()
+        finally:
+            await self._owner._stop_heartbeat(heartbeat)
         self._owner._spawn(self._run_tenant_import(stage_name, tenant_id))
         return await self._owner.job_status()
 
@@ -92,8 +96,10 @@ class TenantBackupManager:
     async def _stage_tenant_import(self, upload, stage_dir: Path) -> tuple[str, dict]:
         unpacked = stage_dir / "unpacked"
         await asyncio.to_thread(unpacked.mkdir, parents=True, exist_ok=True)
+        upload_path = stage_dir / "upload.zip"
         archive_path = stage_dir / "import.zip"
-        await self._save_upload(upload, archive_path)
+        await self._save_upload(upload, upload_path)
+        await asyncio.to_thread(self._unwrap_export, upload_path, archive_path)
         await asyncio.to_thread(self._extract_archive, archive_path, unpacked)
         archive_path.unlink(missing_ok=True)
         source = await asyncio.to_thread(self._locate_imported_tenant_dir, unpacked)
@@ -142,14 +148,34 @@ class TenantBackupManager:
         await upload.close()
 
     @staticmethod
+    def _unwrap_export(upload_path: Path, archive_path: Path) -> None:
+        try:
+            with zipfile.ZipFile(upload_path) as outer:
+                member = next((entry for entry in outer.infolist() if entry.filename.rsplit("/", 1)[-1] == CONSTANTS.BACKUP_EXPORT_PAYLOAD_NAME), None)
+                if member is None:
+                    raise HTTPException(status_code=422, detail="Uploaded file is not a tenant export from this server")
+                with outer.open(member) as handle:
+                    ExportCipher.decrypt_to_file(handle, archive_path)
+        except zipfile.BadZipFile as exc:
+            raise HTTPException(status_code=422, detail="Uploaded file is not a valid zip archive") from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=f"Uploaded file was rejected: {exc}") from exc
+        upload_path.unlink(missing_ok=True)
+
+    @staticmethod
     def _extract_archive(archive_path: Path, destination: Path) -> None:
         root = destination.resolve()
         try:
             with zipfile.ZipFile(archive_path) as archive:
+                total = 0
                 for member in archive.infolist():
                     target = (destination / member.filename).resolve()
                     if target != root and root not in target.parents:
                         raise HTTPException(status_code=422, detail="Uploaded archive contains an invalid path")
+                    total += member.file_size
+                free = shutil.disk_usage(destination).free
+                if total > free / CONSTANTS.BACKUP_DISK_HEADROOM or total > archive_path.stat().st_size * CONSTANTS.BACKUP_IMPORT_MAX_INFLATION:
+                    raise HTTPException(status_code=413, detail="Uploaded archive is too large to import")
                 archive.extractall(destination)
         except zipfile.BadZipFile as exc:
             raise HTTPException(status_code=422, detail="Uploaded file is not a valid zip archive") from exc
@@ -188,16 +214,26 @@ class TenantBackupManager:
         if not (tenant_dir / CONSTANTS.BACKUP_TENANT_MONGO_DIR).is_dir():
             raise HTTPException(status_code=404, detail="Tenant not found in this backup")
         manifest = self._owner.read_manifest(self._owner.backup_root / backup.filename) or {}
-        block = manifest.get("tenants") or {}
-        summary = (block.get("tenants") or {}).get(tenant_id) or {}
-        await asyncio.to_thread(
-            BackupReport.write,
-            tenant_dir / REPORT_NAME,
-            {"tenant_id": tenant_id, "created_at": manifest.get("created_at"),
-             "mongo": summary.get("mongo") or {}, "elastic": summary.get("elastic") or {},
-             "tenants": {"layout": block.get("layout") or {}, "tenants": {tenant_id: summary}}},
-        )
-        return tenant_dir, f"{backup.filename}_{tenant_id}"
+        recorded = ((manifest.get("tenants") or {}).get("tenants") or {})
+        tenants = []
+        for directory in [tenant_dir, *self._child_tenant_dirs(tenant_dir)]:
+            document = await asyncio.to_thread(
+                self._read_first_document,
+                directory / CONSTANTS.BACKUP_TENANT_MONGO_DIR / f"{CONSTANTS.BACKUP_TENANT_COLLECTION}.ndjson",
+            ) or {}
+            tenants.append({
+                "tenant_id": directory.name,
+                "slug": document.get("slug") or "",
+                "parent_tenant_id": document.get(CONSTANTS.BACKUP_TENANT_PARENT_FIELD) or "",
+                **(recorded.get(directory.name) or {}),
+            })
+        report = BackupReport.render_export({
+            "backup": backup.filename,
+            "created_at": manifest.get("created_at"),
+            "exported_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "tenants": tenants,
+        })
+        return tenant_dir, f"{backup.filename}_{tenant_id}", report
 
     async def _latest_tenant_backup(self, tenant_id: str, owner_tenant_id: str | None = None) -> dict:
         backups = await self.list_backups_for_tenant(tenant_id)
@@ -274,16 +310,31 @@ class TenantBackupManager:
 
         owned = self._owner._partition_registry.tenant_owned(await database.list_collection_names())
         targets = [(tenant_dir, scope)]
+        live_tenants = await self._tenant_parents(database)
         for child_dir in self._child_tenant_dirs(tenant_dir):
+            if not ObjectId.is_valid(child_dir.name):
+                raise HTTPException(status_code=422, detail="Tenant identifier in the backup is not a valid object id")
+            if child_dir.name not in live_tenants:
+                log.g().w(f"TENANT RESTORE: skipped {child_dir.name}, it was deleted after the backup and is not resurrected")
+                continue
+            child_document = await asyncio.to_thread(
+                self._read_first_document,
+                child_dir / CONSTANTS.BACKUP_TENANT_MONGO_DIR / f"{CONSTANTS.BACKUP_TENANT_COLLECTION}.ndjson",
+            ) or {}
+            await self._ensure_import_allowed(tenant_id, child_dir.name, child_document)
             targets.append((child_dir, await self._tenant_restore_scope(database, child_dir.name, child_dir)))
         rollback_name = f"{CONSTANTS.RESTORE_TENANT_ROLLBACK_PREFIX}{tenant_id}_{datetime.now(timezone.utc).strftime('%Y_%m_%d_%H_%M_%S')}"
         rollback_dir = self._owner.backup_root / rollback_name
+        fenced_ids = [target_scope.tenant_id for _, target_scope in targets]
+        maintenance_state.get_instance().fence_tenants(fenced_ids)
+        await self._quiesce_tenant_writers(targets)
         try:
             await self._owner._set_progress(10, "Creating tenant rollback point")
             for _, target_scope in targets:
                 await self._export_tenant(rollback_dir / CONSTANTS.BACKUP_TENANTS_DIR / target_scope.tenant_id, target_scope, owned)
             log.g().i(f"TENANT RESTORE: rollback point created: {rollback_name}")
         except Exception as exc:
+            maintenance_state.get_instance().release_tenants(fenced_ids)
             await self._owner._remove_tree(rollback_dir)
             log.g().e(f"TENANT RESTORE FAILED: could not create rollback point: {exc}")
             raise HTTPException(status_code=500, detail=f"Tenant restore aborted, could not create rollback point: {exc}") from exc
@@ -299,9 +350,6 @@ class TenantBackupManager:
                 "started_at": datetime.now(timezone.utc),
             },
         )
-        fenced_ids = [target_scope.tenant_id for _, target_scope in targets]
-        maintenance_state.get_instance().fence_tenants(fenced_ids)
-
         try:
             await self._owner._set_progress(45, "Restoring tenant data")
             report = await self._run_tenant_restore_engine(tenant_dir, scope)
@@ -348,6 +396,19 @@ class TenantBackupManager:
         sub_tenants = [target_scope.tenant_id for _, target_scope in targets[1:]]
         log.g().i(f"TENANT RESTORE SUCCESS: backup={filename} tenant={tenant_id} sub_tenants={sub_tenants} {report}")
         return {"status": "restored", "filename": filename, "tenant_id": tenant_id, "sub_tenants": sub_tenants, **report}
+
+    async def _quiesce_tenant_writers(self, targets) -> None:
+        try:
+            from orion.api.interactive.extension_manager.extension_socket_manager import extension_socket_manager
+            socket_manager = extension_socket_manager.get_instance()
+            open_sockets = getattr(socket_manager, "_sockets", {})
+            for _, target_scope in targets:
+                for user_id in target_scope.user_ids:
+                    if user_id in open_sockets:
+                        await socket_manager.reset_sockets(user_id)
+        except Exception as exc:
+            log.g().w(f"TENANT RESTORE: could not close extension sockets: {exc}")
+        await asyncio.sleep(CONSTANTS.RESTORE_QUIESCE_DRAIN_SECONDS)
 
     async def resolve_interrupted_tenant_restore(self) -> bool:
         marker = self._owner._io.read_json_file(self.tenant_restore_marker)
@@ -593,7 +654,7 @@ class TenantBackupManager:
         return None
 
     @staticmethod
-    def _file_ids(path: Path) -> list[str]:
+    def _file_ids(path: Path, tenant_id: str) -> list[str]:
         if not path.is_file():
             return []
         ids = []
@@ -602,8 +663,11 @@ class TenantBackupManager:
                 line = line.strip()
                 if not line:
                     continue
-                identifier = json_util.loads(line).get("_id")
-                if identifier is not None:
+                document = json_util.loads(line)
+                identifier = document.get("_id")
+                if identifier is None or not ObjectId.is_valid(str(identifier)):
+                    continue
+                if str(document.get(CONSTANTS.BACKUP_TENANT_USER_FIELD) or "") == tenant_id:
                     ids.append(str(identifier))
         return ids
 
@@ -612,8 +676,14 @@ class TenantBackupManager:
         stored = await asyncio.to_thread(
             self._file_ids,
             tenant_dir / CONSTANTS.BACKUP_TENANT_MONGO_DIR / f"{CONSTANTS.BACKUP_TENANT_USER_COLLECTION}.ndjson",
+            tenant_id,
         )
-        merged = list(dict.fromkeys([*live.user_ids, *stored]))
+        foreign = await self._collect_ids(
+            database,
+            CONSTANTS.BACKUP_TENANT_USER_COLLECTION,
+            {"_id": {"$in": [ObjectId(user_id) for user_id in stored]}, CONSTANTS.BACKUP_TENANT_USER_FIELD: {"$ne": tenant_id}},
+        )
+        merged = [user_id for user_id in dict.fromkeys([*live.user_ids, *stored]) if user_id not in foreign]
         return TenantScope(tenant_id=tenant_id, user_ids=merged)
 
     async def _run_tenant_restore_engine(self, tenant_dir: Path, scope: TenantScope) -> dict:
@@ -645,20 +715,37 @@ class TenantBackupManager:
             if collection_name == CONSTANTS.BACKUP_TENANT_USER_COLLECTION:
                 async for document in database[collection_name].find(query, {"current_session_id": 1}):
                     live_sessions[document["_id"]] = document.get("current_session_id")
+            live_tenant = await database[collection_name].find_one(query) if collection_name == CONSTANTS.BACKUP_TENANT_COLLECTION else None
 
             removed = await database[collection_name].delete_many(query)
             written = 0
             skipped = 0
             async for batch in self._owner._io.read_documents(file):
-                inserted, conflicts = await self._insert_tenant_batch(database, collection_name, batch)
+                owned_batch = [document for document in batch if self._in_scope(rule, scope, document)]
+                inserted, conflicts = await self._insert_tenant_batch(database, collection_name, owned_batch)
                 written += inserted
-                skipped += conflicts
+                skipped += conflicts + len(batch) - len(owned_batch)
             for user_id, session_id in live_sessions.items():
                 await database[collection_name].update_one({"_id": user_id}, {"$set": {"current_session_id": session_id}})
+            if collection_name == CONSTANTS.BACKUP_TENANT_COLLECTION:
+                if live_tenant:
+                    pinned = {field: live_tenant[field] for field in CONSTANTS.BACKUP_TENANT_ADMIN_FIELDS if field in live_tenant}
+                else:
+                    restored_tenant = await database[collection_name].find_one(query) or {}
+                    pinned = {"is_default": False, **({"is_primary": False} if restored_tenant.get(CONSTANTS.BACKUP_TENANT_PARENT_FIELD) else {})}
+                await database[collection_name].update_one(query, {"$set": pinned})
             restored[collection_name] = {"removed": removed.deleted_count, "written": written, "skipped": skipped}
             if skipped:
                 log.g().w(f"TENANT RESTORE: {skipped} documents in {collection_name} are owned by another tenant now and were left untouched")
         return restored
+
+    @staticmethod
+    def _in_scope(rule, scope: TenantScope, document: dict) -> bool:
+        if rule.ownership == Ownership.DIRECT:
+            if rule.as_object_id:
+                return document.get("_id") == scope.object_id
+            return str(document.get(rule.tenant_field) or "") == scope.tenant_id
+        return str(document.get(rule.user_field) or "") in scope.user_ids
 
     async def _insert_tenant_batch(self, database, collection_name: str, batch: list) -> tuple:
         identifiers = [document.get("_id") for document in batch if document.get("_id") is not None]
@@ -668,9 +755,19 @@ class TenantBackupManager:
             async for document in cursor:
                 conflicts.add(document.get("_id"))
         payload = [document for document in batch if document.get("_id") not in conflicts]
+        rejected = 0
         if payload:
-            await database[collection_name].insert_many(payload, ordered=False)
-        return len(payload), len(batch) - len(payload)
+            try:
+                await database[collection_name].insert_many(payload, ordered=False)
+            except BulkWriteError as exc:
+                errors = [error for error in (exc.details or {}).get("writeErrors", []) if error.get("code") == 11000]
+                if len(errors) != len((exc.details or {}).get("writeErrors", [])):
+                    raise
+                rejected = len(errors)
+                for error in errors:
+                    document = payload[error["index"]] if error.get("index", -1) < len(payload) else {}
+                    log.g().w(f"TENANT RESTORE: {collection_name} document {document.get('_id')} ({document.get('username') or document.get('email') or ''}) clashes with a record of another tenant and was left out")
+        return len(payload) - rejected, len(batch) - len(payload) + rejected
 
     async def _restore_tenant_elastic(self, source_dir: Path, tenant_id: str) -> dict:
         if not source_dir.is_dir():
@@ -703,8 +800,16 @@ class TenantBackupManager:
                     actions = await asyncio.to_thread(self._owner._io.read_hits, handle, index_name, CONSTANTS.BACKUP_BATCH_SIZE)
                     if not actions:
                         break
-                    await es_helpers.async_bulk(conn, actions)
-                    written += len(actions)
+                    owned_actions = [
+                        {**action, "_op_type": "create"}
+                        for action in actions
+                        if str((action.get("_source") or {}).get(CONSTANTS.BACKUP_TENANT_ELASTIC_FIELD) or "") == tenant_id
+                    ]
+                    if owned_actions:
+                        inserted, _ = await es_helpers.async_bulk(conn, owned_actions, raise_on_error=False, stats_only=True)
+                        written += inserted
+                    if len(owned_actions) < len(actions):
+                        log.g().w(f"TENANT RESTORE: {len(actions) - len(owned_actions)} documents in {index_name} belong to another tenant and were left untouched")
             finally:
                 await asyncio.to_thread(handle.close)
             await conn.indices.refresh(index=index_name)

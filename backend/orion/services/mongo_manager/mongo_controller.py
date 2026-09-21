@@ -8,6 +8,7 @@ from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_enums import MONGO_CONNECTIONS
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, LicenseName
 from orion.services.mongo_manager.shared_model.db_backup_job_model import db_backup_job_model
+from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_document_feedback_model import db_document_feedback_model
 from orion.services.mongo_manager.shared_model.db_feeder_script_model import db_feeder_script_model
 from orion.services.mongo_manager.shared_model.db_scan_job_model import db_scan_job_model
@@ -74,6 +75,7 @@ class mongo_controller:
         await self.__engine.get_collection(db_takedown_request_model).create_index([("tenant_id", 1), ("target_domain", 1)], unique=True, name="unique_takedown_per_tenant")
         await self.__engine.get_collection(db_scheduler_model).create_index([("job_key", 1), ("scheduled_for", 1)],unique=True)
         await self.__engine.get_collection(db_backup_job_model).create_index([("job_key", 1)], unique=True, name="unique_backup_job_key")
+        await self.__engine.get_collection(db_keys).create_index([("tenant_id", 1)], unique=True, partialFilterExpression={"tenant_id": {"$type": "string"}}, name="unique_key_per_tenant")
         await self.__engine.database[SOCIAL_COLLECTION].create_index([("user_id", 1), ("profile_username", 1), ("updated_at", -1)])
         await self.__engine.get_collection(db_social_session_model).create_index([("user_id", 1), ("platform", 1), ("created_at", -1)])
         self.__engine.get_collection(db_social_profile_management_model).create_index([("user_id", 1)], unique=True)

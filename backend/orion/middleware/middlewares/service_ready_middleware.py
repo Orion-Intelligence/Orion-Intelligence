@@ -30,7 +30,15 @@ class service_ready_middleware:
             return
 
         path = scope.get("path", "")
-        if not service_manager.get_instance().check_status() and path == "/":
+        headers = dict(scope.get("headers", []))
+        browser_navigation = (
+            scope.get("method") in {"GET", "HEAD"}
+            and b"text/html" in headers.get(b"accept", b"")
+            and headers.get(b"x-requested-with", b"") != b"XMLHttpRequest"
+        )
+        if not service_manager.get_instance().check_status() and (
+            path == "/" or (browser_navigation and not self._can_serve_before_services(path))
+        ):
             response = RedirectResponse(url="/static/maintenance.html", status_code=307)
             await response(scope, receive, send)
             return

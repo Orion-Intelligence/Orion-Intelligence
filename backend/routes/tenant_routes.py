@@ -94,9 +94,9 @@ async def delete_tenant(tenant_id: str, current_user=Depends(get_current_user)):
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])), Depends(license_required("maintainer")), Depends(tenant_backup_allowed)], )
 async def export_tenant(tenant_id: str, current_user=Depends(get_current_user)):
     owner_tenant_id = None if current_user.role == "admin" else str(getattr(current_user, "tenant_id", "") or "")
-    tenant_dir, name = await BackupManager.get_instance().resolve_latest_tenant_download(tenant_id, owner_tenant_id)
+    tenant_dir, name, report = await BackupManager.get_instance().resolve_latest_tenant_download(tenant_id, owner_tenant_id)
     return StreamingResponse(
-        BackupStoreIO.iter_zip(tenant_dir, name),
+        BackupStoreIO.iter_export(tenant_dir, name, report),
         media_type="application/zip",
         headers={"Content-Disposition": f'attachment; filename="{name}.zip"'},
     )
@@ -521,11 +521,11 @@ async def import_tenant_backup(file: UploadFile, current_user=Depends(get_curren
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), Depends(tenant_backup_allowed), ], )
 async def download_tenant_backup(backup_id: str, current_user=Depends(get_current_user)):
-    tenant_dir, name = await BackupManager.get_instance().resolve_tenant_download(
+    tenant_dir, name, report = await BackupManager.get_instance().resolve_tenant_download(
         backup_id, str(getattr(current_user, "tenant_id", "") or "")
     )
     return StreamingResponse(
-        BackupStoreIO.iter_zip(tenant_dir, name),
+        BackupStoreIO.iter_export(tenant_dir, name, report),
         media_type="application/zip",
         headers={"Content-Disposition": f'attachment; filename="{name}.zip"'},
     )

@@ -1,18 +1,16 @@
 from urllib.parse import urlsplit
 
 from bson import ObjectId
-from cryptography.fernet import Fernet
 from fastapi import HTTPException, Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
+from configs import config
 from configs.auth_cookie import token_from_request
 from orion.api.interactive.backup_manager.maintenance_state import maintenance_state
 from orion.helper_manager.env_handler import env_handler
 from orion.management.managers.service_manager import service_manager
-from orion.services.encryption_manager.key_manager import KeyManager
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 from orion.services.session_manager.session_manager import session_manager
 
@@ -23,6 +21,13 @@ class tenant_resolution_middleware(BaseHTTPMiddleware):
         "/static/maintenance",
         "/api/s/static/system/",
     )
+    ACCESS_BLOCK_EXEMPT_PREFIXES = (
+        "/api/token",
+        "/api/logout",
+        "/api/get/tenant/node",
+        "/api/public",
+        "/api/s/static/",
+    )
 
     async def dispatch(self, request: Request, call_next):
         if getattr(request.state, "tenant", None) is not None:
@@ -30,7 +35,9 @@ class tenant_resolution_middleware(BaseHTTPMiddleware):
         if not service_manager.get_instance().check_status():
             return await call_next(request)
 
-        raw_host = request.headers.get("x-forwarded-host") or request.headers.get("host") or ""
+        raw_host = request.headers.get("host") or ""
+        if config.DEBUG:
+            raw_host = request.headers.get("x-forwarded-host") or raw_host
         raw_host = raw_host.split(",", 1)[0].strip().lower()
         hostname = urlsplit(f"//{raw_host}").hostname or ""
         hostname = hostname.rstrip(".")
@@ -59,7 +66,7 @@ class tenant_resolution_middleware(BaseHTTPMiddleware):
         elif hostname.endswith(".localhost"):
             tenant_slug = hostname[:-10]
             is_default_tenant = False
-        elif hostname == "trusted-web-main":
+        elif hostname == "trusted-web-main" and not request.headers.get("x-real-ip"):
             is_default_tenant = False
         else:
             return JSONResponse(status_code=404, content={"detail": "Tenant not found"})
@@ -83,16 +90,6 @@ class tenant_resolution_middleware(BaseHTTPMiddleware):
                 tenant = await engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
             else:
                 tenant = await engine.find_one(db_tenant_model, db_tenant_model.slug == tenant_slug)
-                if tenant is None:
-                    for item in await engine.find(db_tenant_model):
-                        name = str(getattr(item, "name", "") or "")
-                        if name.startswith("gAAAA"):
-                            key = await engine.find_one(db_keys, db_keys.tenant_id == str(item.id))
-                            if key:
-                                name = Fernet(KeyManager.get_instance()._unwrap(key.wrapped_key)).decrypt(name.encode()).decode()
-                        if not getattr(item, "slug", None) and name.strip().lower() == tenant_slug:
-                            tenant = item
-                            break
         except HTTPException as exc:
             return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
         except Exception:
@@ -103,6 +100,12 @@ class tenant_resolution_middleware(BaseHTTPMiddleware):
 
         if maintenance_state.get_instance().is_tenant_fenced(tenant.id, getattr(tenant, "parent_tenant_id", None)) and not request.url.path.startswith(self.TENANT_MAINTENANCE_EXEMPT_PREFIXES):
             return JSONResponse(status_code=503, content={"detail": "Tenant service unavailable"})
+
+        if request.url.path.startswith("/api/") and not request.url.path.startswith(self.ACCESS_BLOCK_EXEMPT_PREFIXES):
+            from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
+            reason = await TenantManager.get_instance().access_block_reason(tenant)
+            if reason:
+                return JSONResponse(status_code=403, content={"detail": reason, "access_blocked": True})
 
         request.state.tenant = tenant
         return await call_next(request)

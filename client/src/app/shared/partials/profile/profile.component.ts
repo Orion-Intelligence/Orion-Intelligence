@@ -197,7 +197,9 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
     if (!mailUrl) {
       return;
     }
-    window.open(mailUrl, '_blank', 'noopener,noreferrer');
+    const login = new URL('/auth/login', mailUrl);
+    login.search = new URLSearchParams({ origin: login.origin, orion_origin: window.location.origin }).toString();
+    window.open(login.toString(), '_blank', 'noopener,noreferrer');
     this.dropdownOpen.set(false);
     this.languageDropdownOpen.set(false);
   }

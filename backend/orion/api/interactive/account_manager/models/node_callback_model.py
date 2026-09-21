@@ -42,6 +42,7 @@ class TenantDataModel(BaseModel):
     licenses: list[str]
     assignedQuota: str
     quotaExceeded: bool
+    accessBlocked: str = ""
     image: Optional[str] = None
     profileVisibilityEnabled: bool = True
     eventManagementEnabled: bool = False

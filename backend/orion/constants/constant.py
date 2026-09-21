@@ -74,6 +74,10 @@ class CONSTANTS:
     RESTORE_TENANT_MARKER_NAME = ".restore_tenant_in_progress"
     RESTORE_TENANT_ROLLBACK_PREFIX = "rollback_tenant_"
     IMPORT_TENANT_STAGE_PREFIX = "import_tenant_"
+    BACKUP_EXPORT_PAYLOAD_NAME = "tenant.enc"
+    RESERVED_TENANT_SLUGS = ("www", "mail", "api", "admin", "static", "app", "localhost")
+    BACKUP_IMPORT_MAX_INFLATION = 100
+    BACKUP_TENANT_ADMIN_FIELDS = ("licenses", "user_quota", "tenant_quota", "is_primary", "parent_tenant_id", "is_default", "status", "verified", "slug", "subscription", "privileged_ioc")
     BACKUP_DISK_HEADROOM = 1.5
     BACKUP_EXCLUDED_ELASTIC_INDICES = {ELASTIC_INDEX.S_STEALERLOGS_INDEX}
     BACKUP_UNSETTABLE_INDEX_SETTINGS = {"creation_date", "uuid", "version", "provided_name", "resize", "routing"}

@@ -87,15 +87,6 @@ class AccountManager:
         if target_role not in (user_role.ADMIN, user_role.ANALYST):
             raise HTTPException(status_code=403, detail="Monitoring permission is limited to analyst users")
 
-    async def _assert_orion_mail_allowed(self, permissions, tenant_id, current_user):
-        if UserPermission.ORION_MAIL not in (permissions or []):
-            return
-        if current_user.role != user_role.ADMIN:
-            raise HTTPException(status_code=403, detail="Only a root tenant admin can assign the Orion Mail permission")
-        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(str(tenant_id)))
-        if tenant is None or not tenant.is_default:
-            raise HTTPException(status_code=403, detail="Orion Mail permission is limited to root tenant users")
-
     async def _delete_orion_mail_account(self, user):
         if UserPermission.ORION_MAIL not in (getattr(user, "permissions", None) or []):
             return
@@ -148,13 +139,10 @@ class AccountManager:
             hashed_password = self.create_tenant_user(existing_user, existing_mail, password)
 
             self._assert_monitoring_allowed(data.permissions, current_user, data.role)
-            await self._assert_orion_mail_allowed(data.permissions, current_user.tenant_id, current_user)
 
             from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
             tenant_id = str(current_user.tenant_id)
             tenant = await engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id)) if ObjectId.is_valid(tenant_id) else None
-            if tenant is not None:
-                await TenantManager.get_instance().assert_user_quota_available(tenant)
 
             creator_language = (getattr(current_user, "preferences", None) or {}).get("language")
 
@@ -173,7 +161,12 @@ class AccountManager:
                 preferences={"language": creator_language} if creator_language else {},
                 password_reset_required=True, )
 
-            await engine.save(user)
+            if tenant is not None:
+                async with TenantManager.quota_lock(tenant):
+                    await TenantManager.get_instance().assert_user_quota_available(tenant)
+                    await engine.save(user)
+            else:
+                await engine.save(user)
             return {"message": "User created successfully", "username": username, "email": email}
 
         except Exception:
@@ -188,6 +181,9 @@ class AccountManager:
 
         if user.role in ["admin"]:
             raise HTTPException(status_code=401, detail="This user type cannot be deleted")
+
+        if LicenseName.MAINTAINER in (user.licenses or []):
+            raise HTTPException(status_code=401, detail="Maintainer users are removed with their tenant")
 
         if current_user.licenses.__contains__(LicenseName.MAINTAINER):
             if user.tenant_id != current_user.tenant_id:
@@ -250,6 +246,8 @@ class AccountManager:
                 user.status = UserStatus.ACTIVE
 
         if request.licenses is not None:
+            if LicenseName.MAINTAINER in (user.licenses or []) and LicenseName.MAINTAINER not in (request.licenses or []):
+                raise HTTPException(status_code=403, detail="The maintainer license cannot be removed")
             if current_user.role != user_role.ADMIN:
                 if tenant is None:
                     raise HTTPException(status_code=400, detail="Tenant not found")
@@ -264,7 +262,6 @@ class AccountManager:
             user.licenses = request.licenses
         if request.permissions is not None:
             self._assert_monitoring_allowed(request.permissions, current_user, user.role)
-            await self._assert_orion_mail_allowed(request.permissions, user.tenant_id, current_user)
             user.permissions = request.permissions
             if UserPermission.CASE_MANAGEMENT not in (user.permissions or []):
                 user.alerts_allowed_all = False
@@ -380,6 +377,7 @@ class AccountManager:
         enc = Fernet(dek)
 
         quota_exceeded_reason = await TenantManager.get_instance().quota_exceeded_reason(tenant)
+        access_blocked = await TenantManager.get_instance().access_block_reason(tenant) or ""
 
         tenant_image_file = self.TENANT_DIR / f"{str(tenant.id)}.png"
         tenant_image_path = "/api/s/static/tenant/" + (str(tenant.id) if tenant_image_file.is_file() else "default")
@@ -412,7 +410,7 @@ class AccountManager:
                 enc, tenant.country), "city": self.safe_decrypt(enc, tenant.city), "postalCode": self.safe_decrypt(
                 enc, tenant.postal_code), "taxId": self.safe_decrypt(enc, tenant.id), "userId": "", "licenses": [
                 self.safe_decrypt(enc, l) for l in (tenant.licenses or [])], "assignedQuota": str(
-                assigned_quota), "quotaExceeded": quota_exceeded_reason == "user", "tenantQuotaExceeded": quota_exceeded_reason == "tenant", "image": tenant_image_path,
+                assigned_quota), "quotaExceeded": quota_exceeded_reason == "user", "tenantQuotaExceeded": quota_exceeded_reason == "tenant", "accessBlocked": access_blocked, "image": tenant_image_path,
                 "profileVisibilityEnabled": getattr(tenant, "profile_visibility_enabled", True),
                 "eventManagementEnabled": getattr(tenant, "event_management_enabled", False),
                 "alertsVisibleToAdmin": getattr(tenant, "alerts_visible_to_admin", True),

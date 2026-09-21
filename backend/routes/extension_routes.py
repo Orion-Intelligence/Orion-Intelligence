@@ -9,6 +9,7 @@ from starlette.responses import FileResponse, JSONResponse
 from configs.app_dependency import get_extension_user
 from configs.auth_cookie import clear_extension_cookie, extension_token_from_request, set_extension_cookie
 from configs.limiter_dependency import auth_rate_limit
+from orion.api.interactive.backup_manager.maintenance_state import maintenance_state
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.api.interactive.case_manager.case_communication_manager import CaseCommunicationManager
 from orion.api.interactive.extension_manager.extension_socket_manager import extension_socket_manager
@@ -73,6 +74,11 @@ async def socket_user_key(token: str | None) -> str | None:
     if not await system_session_active(current_user, redis_controller.getInstance()):
         return None
     return str(current_user.id)
+
+
+async def socket_tenant_fenced(token: str | None) -> bool:
+    current_user = await extension_user_from_token(token)
+    return bool(current_user) and maintenance_state.get_instance().is_tenant_fenced(getattr(current_user, "tenant_id", ""))
 
 
 @extension_routes.post("/api/extension/login")
@@ -165,6 +171,9 @@ async def extension_socket(websocket: WebSocket):
     user_key = await socket_user_key(token)
     if not user_key:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
+    if await socket_tenant_fenced(token):
+        await websocket.close(code=status.WS_1013_TRY_AGAIN_LATER)
         return
 
     socket_manager = extension_socket_manager.get_instance()

@@ -96,6 +96,12 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
       }
     }
     const authService = injector.get(AuthService, null);
+    const blockedBody = error instanceof HttpErrorResponse && error.status === 403 && error.error && typeof error.error === 'object' ? error.error as { access_blocked?: boolean; detail?: string } : null;
+    if (blockedBody?.access_blocked) {
+      const reason = String(blockedBody.detail ?? '');
+      injector.get(AppService, null)?.userSessionData.update((session) => ({ ...session, tenant: { ...session.tenant, accessBlocked: reason } }));
+      return throwError(() => error);
+    }
     const isSessionProbe = authReq.url.includes('api/get/tenant/node');
     if (error instanceof HttpErrorResponse && error.status === 401 && isSessionProbe) {
       authService?.clearAuthentication();

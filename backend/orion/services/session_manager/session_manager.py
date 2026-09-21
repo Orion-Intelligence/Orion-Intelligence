@@ -81,11 +81,13 @@ class session_manager:
     async def get_parent_tenant(self, tenant_id) -> db_tenant_model | None:
         tenant_id = str(tenant_id or "")
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id)) if ObjectId.is_valid(tenant_id) else None
+        if tenant is not None and not getattr(tenant, "verified", True):
+            raise HTTPException(status_code=401, detail="account approval pending")
         parent_tenant_id = str(getattr(tenant, "parent_tenant_id", None) or "")
         if not parent_tenant_id:
             return None
         parent_tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(parent_tenant_id)) if ObjectId.is_valid(parent_tenant_id) else None
-        if not parent_tenant or not parent_tenant.is_primary or not parent_tenant.verified or parent_tenant.status == TenantStatus.DISABLE:
+        if not parent_tenant or not parent_tenant.verified:
             raise HTTPException(status_code=401, detail="account blocked")
         return parent_tenant
 

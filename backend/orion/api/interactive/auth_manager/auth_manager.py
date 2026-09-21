@@ -61,6 +61,7 @@ class auth_manager:
             tenant_id = getattr(user, "tenant_id", None)
             
         session_manager.ensure_user_tenant_access(user, tenant_id)
+        await session_manager.get_instance().get_parent_tenant(user.tenant_id)
 
         requested_tenant_id = session_manager.tenant_identifier(tenant_id)
         if user.twofa_enabled:
@@ -98,8 +99,6 @@ class auth_manager:
             db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_id))
         if tenant and not tenant.verified:
             raise HTTPException(status_code=401, detail="account approval pending")
-        if tenant and tenant.status == TenantStatus.DISABLE:
-            raise HTTPException(status_code=401, detail="account blocked")
         parent_tenant = await session_manager.get_instance().get_parent_tenant(user.tenant_id)
         await session_manager.get_instance().ensure_quota_access(user)
 

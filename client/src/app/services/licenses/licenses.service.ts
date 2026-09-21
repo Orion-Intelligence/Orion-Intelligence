@@ -250,7 +250,7 @@ export class LicenseService {
 
   canUseOrionMail(): boolean {
     const session = this.appService.userSessionData();
-    return session.tenant.isDefault && (this.isAdmin() || (session.user.permissions ?? []).includes('orion_mail'));
+    return this.isAdmin() || this.isMaintainer() || (session.user.permissions ?? []).includes('orion_mail');
   }
 
   canDismissResults(): boolean {

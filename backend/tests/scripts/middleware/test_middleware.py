@@ -332,3 +332,85 @@ async def test_service_ready_middleware_returns_503_when_services_not_ready(monk
 
     assert response.status_code == 503
     assert response.json() == {"detail": "Service Not Ready"}
+
+
+def _tenant_middleware(monkeypatch, tenant):
+    class _FakeEngine:
+        @staticmethod
+        async def find_one(*_args, **_kwargs):
+            return tenant
+
+    monkeypatch.setattr(
+        "orion.middleware.middlewares.tenant_resolution_middleware.service_manager.get_instance",
+        staticmethod(lambda: SimpleNamespace(check_status=lambda: True)),
+    )
+    monkeypatch.setattr(
+        "orion.middleware.middlewares.tenant_resolution_middleware.env_handler.get_instance",
+        staticmethod(lambda: SimpleNamespace(env=lambda *_args: "orion.org")),
+    )
+    monkeypatch.setattr(
+        "orion.middleware.middlewares.tenant_resolution_middleware.mongo_controller.get_instance",
+        staticmethod(lambda: SimpleNamespace(get_engine=lambda: _FakeEngine())),
+    )
+    return tenant_resolution_middleware(app=_noop_app)
+
+
+async def _resolve(middleware, headers):
+    captured = {}
+    request = Request({"type": "http", "scheme": "http", "method": "GET", "path": "/", "headers": headers})
+
+    async def _call_next(inner_request: Request):
+        captured["tenant"] = inner_request.state.tenant
+        return PlainTextResponse("ok")
+
+    response = await middleware.dispatch(request, _call_next)
+    return response.status_code, captured.get("tenant")
+
+
+@pytest.mark.anyio
+async def test_tenant_resolution_middleware_ignores_forwarded_host_outside_debug(monkeypatch):
+    tenant = SimpleNamespace(id="tenant-1", slug="google", is_default=False)
+    middleware = _tenant_middleware(monkeypatch, tenant)
+    headers = [(b"host", b"attacker.example"), (b"x-forwarded-host", b"google.localhost:4200")]
+
+    monkeypatch.setattr("orion.middleware.middlewares.tenant_resolution_middleware.config.DEBUG", True)
+    assert await _resolve(middleware, headers) == (200, tenant)
+    monkeypatch.setattr("orion.middleware.middlewares.tenant_resolution_middleware.config.DEBUG", False)
+    assert (await _resolve(middleware, headers))[0] == 404
+
+
+@pytest.mark.anyio
+async def test_tenant_resolution_middleware_only_trusts_internal_hostname_from_direct_callers(monkeypatch):
+    tenant = SimpleNamespace(id="tenant-1", slug="default", is_default=True)
+    middleware = _tenant_middleware(monkeypatch, tenant)
+
+    assert await _resolve(middleware, [(b"host", b"trusted-web-main")]) == (200, tenant)
+    assert (await _resolve(middleware, [(b"host", b"trusted-web-main"), (b"x-real-ip", b"203.0.113.9")]))[0] == 404
+
+
+@pytest.mark.anyio
+async def test_tenant_resolution_middleware_blocks_api_requests_of_a_blocked_tenant(monkeypatch):
+    tenant = SimpleNamespace(id="tenant-1", slug="google", is_default=False)
+    middleware = _tenant_middleware(monkeypatch, tenant)
+
+    async def blocked(_tenant):
+        return "Account disabled by administrator"
+
+    monkeypatch.setattr(
+        "orion.api.interactive.tenant_manager.tenant_manager.TenantManager.get_instance",
+        staticmethod(lambda: SimpleNamespace(access_block_reason=blocked)),
+    )
+    monkeypatch.setattr("orion.middleware.middlewares.tenant_resolution_middleware.config.DEBUG", True)
+    headers = [(b"host", b"google.localhost:4200")]
+    request = Request({"type": "http", "scheme": "http", "method": "GET", "path": "/api/search", "headers": headers})
+
+    async def _call_next(_request: Request):
+        return PlainTextResponse("ok")
+
+    response = await middleware.dispatch(request, _call_next)
+    assert response.status_code == 403
+    assert b"access_blocked" in response.body
+
+    for path in ("/api/token", "/api/logout", "/api/get/tenant/node", "/api/public", "/"):
+        request = Request({"type": "http", "scheme": "http", "method": "GET", "path": path, "headers": headers})
+        assert (await middleware.dispatch(request, _call_next)).status_code == 200

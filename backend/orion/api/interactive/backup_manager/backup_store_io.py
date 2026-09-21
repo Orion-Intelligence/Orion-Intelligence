@@ -10,6 +10,8 @@ from pathlib import Path
 from bson import json_util
 from elasticsearch import helpers as es_helpers
 
+from orion.api.interactive.backup_manager.backup_report import REPORT_NAME
+from orion.api.interactive.backup_manager.export_cipher import ExportCipher
 from orion.services.arango_manager.arango_controller import arango_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.log_manager.log_controller import log
@@ -59,6 +61,23 @@ class BackupStoreIO:
                 payload = buffer.drain()
                 if payload:
                     yield payload
+        payload = buffer.drain()
+        if payload:
+            yield payload
+
+    @classmethod
+    def iter_export(cls, root: Path, arc_root: str, report: str):
+        buffer = _ZipBuffer()
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED, compresslevel=1) as archive:
+            archive.writestr(f"{arc_root}/{REPORT_NAME}", report)
+            info = zipfile.ZipInfo(f"{arc_root}/{CONSTANTS.BACKUP_EXPORT_PAYLOAD_NAME}")
+            info.compress_type = zipfile.ZIP_STORED
+            with archive.open(info, "w", force_zip64=True) as target:
+                for sealed in ExportCipher.encrypt_stream(cls.iter_zip(root, arc_root)):
+                    target.write(sealed)
+                    payload = buffer.drain()
+                    if payload:
+                        yield payload
         payload = buffer.drain()
         if payload:
             yield payload

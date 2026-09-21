@@ -77,6 +77,7 @@ export class AppService {
         assignedQuota: '0',
         quotaExceeded: false,
         tenantQuotaExceeded: false,
+        accessBlocked: '',
         profileVisibilityEnabled: true,
         eventManagementEnabled: false,
         alertsVisibleToAdmin: true,

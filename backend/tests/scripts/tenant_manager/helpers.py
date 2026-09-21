@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from contextlib import nullcontext
+
 import asyncio
 from types import SimpleNamespace
 
@@ -88,6 +90,7 @@ def _patch_managers(monkeypatch, *, config_cached="1", account=None, resource=No
     resource_manager = resource or FakeResource()
 
     monkeypatch.setattr(KeyManager, "get_instance", staticmethod(lambda: key_manager))
+    monkeypatch.setattr(TenantManager, "quota_lock", staticmethod(lambda tenant: nullcontext()))
     monkeypatch.setattr(
         "orion.services.mail_manager.mail_manager.mail_manager.get_instance",
         staticmethod(lambda: mail_manager),

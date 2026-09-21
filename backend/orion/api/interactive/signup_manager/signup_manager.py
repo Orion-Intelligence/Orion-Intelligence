@@ -26,7 +26,7 @@ class SignupManager:
         engine = mongo_controller.get_instance().get_engine()
         tenant_object_id = ObjectId(tenant_id)
         tenant = await engine.find_one(db_tenant_model, (db_tenant_model.id == tenant_object_id))
-        if not tenant.is_default and not tenant.is_primary:
+        if not tenant.is_default and (not tenant.is_primary or not tenant.verified or tenant.status == TenantStatus.DISABLE):
             raise HTTPException(status_code=400, detail="Signup is only allowed from default url")
         source_tenant_id = str(tenant.id)
         parent_tenant_id = None if tenant.is_default else str(tenant.id)

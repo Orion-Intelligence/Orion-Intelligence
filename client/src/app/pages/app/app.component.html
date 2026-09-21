@@ -1,32 +1,81 @@
 <app-trail-notification [trialNotificationCheck]="true"></app-trail-notification>
 
 @if (appService.userSessionData().tenant.tenantQuotaExceeded) {
-  <div class="quota-banner-enter w-full border-b border-[#f2d58f] bg-[linear-gradient(90deg,#fff9e7_0%,#fff2cb_50%,#ffe9b4_100%)] px-[16px] py-[10px] text-[#7a4b00] shadow-[0_4px_14px_rgba(146,64,14,0.10)] max-[640px]:px-[10px] max-[640px]:py-[9px]" role="alert" aria-live="polite">
+  <div class="quota-banner-enter w-full antialiased border-b border-[#e89a9a] bg-[linear-gradient(110deg,#fff0f0_0%,#ffdcdc_50%,#ffe8e8_100%)] px-[16px] py-[10px] text-[#922c2c] shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_1px_2px_rgba(153,38,38,0.05)] max-[640px]:px-[10px] max-[640px]:py-[9px]" role="alert" aria-live="polite">
     <div class="mx-auto flex max-w-[1100px] items-center justify-center gap-[10px] text-center max-[640px]:items-start max-[640px]:justify-start max-[640px]:gap-[8px] max-[640px]:text-left">
-      <span class="inline-flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-full bg-[#f59e0b] text-[12px] font-bold text-white max-[640px]:h-[20px] max-[640px]:w-[20px] max-[640px]:text-[11px]">!</span>
-      <p class="m-0 text-[13px] leading-[1.5] text-[#6b3f00] max-[640px]:flex-1 max-[640px]:text-[12px] max-[640px]:leading-[1.45]">
-        <strong>{{ 'Tenant quota exceeded.' | translate }}</strong>
-        <span class="mx-2 inline-block -translate-y-[1px] align-middle text-[#a86a00] max-[640px]:hidden">〡</span>
-        <span class="font-medium text-[#5a3200] max-[640px]:mt-[2px] max-[640px]:block">{{ 'Account access is limited at the moment. Remove one or more tenants, or increase your quota to restore full access.' | translate }}</span>
+      <span class="inline-flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-[6px] bg-[#f8bfc0] text-[#b12f35] shadow-[inset_0_0_0_1px_rgba(177,47,53,0.12)]" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" focusable="false">
+          <path d="M10.3 4.8 2.6 18.2A2 2 0 0 0 4.3 21h15.4a2 2 0 0 0 1.7-2.8L13.7 4.8a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+          <path d="M12 9v4m0 3.5v.1" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </span>
+      <p class="m-0 text-[13px] leading-[1.5] text-[#922c2c] max-[640px]:flex-1 max-[640px]:text-[12px] max-[640px]:leading-[1.45]">
+        <strong class="font-bold tracking-[-0.015em] text-[#a3222a]">{{ 'Tenant quota exceeded.' | translate }}</strong>
+        <span class="mx-[10px] inline-block h-[12px] w-px align-middle bg-[#dd9297] max-[640px]:hidden" aria-hidden="true"></span>
+        <span class="font-medium tracking-normal text-[#933b40] max-[640px]:mt-[2px] max-[640px]:block">{{ 'All associated sub-tenant accounts are blocked. Remove tenants or increase your quota to restore access.' | translate }}</span>
       </p>
     </div>
   </div>
 }
 
 @if (appService.userSessionData().tenant.quotaExceeded) {
-  <div class="quota-banner-enter w-full border-b border-[#f2d58f] bg-[linear-gradient(90deg,#fff9e7_0%,#fff2cb_50%,#ffe9b4_100%)] px-[16px] py-[10px] text-[#7a4b00] shadow-[0_4px_14px_rgba(146,64,14,0.10)] max-[640px]:px-[10px] max-[640px]:py-[9px]" role="alert" aria-live="polite">
+  <div class="quota-banner-enter w-full antialiased border-b border-[#e89a9a] bg-[linear-gradient(110deg,#fff0f0_0%,#ffdcdc_50%,#ffe8e8_100%)] px-[16px] py-[10px] text-[#922c2c] shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_1px_2px_rgba(153,38,38,0.05)] max-[640px]:px-[10px] max-[640px]:py-[9px]" role="alert" aria-live="polite">
     <div class="mx-auto flex max-w-[1100px] items-center justify-center gap-[10px] text-center max-[640px]:items-start max-[640px]:justify-start max-[640px]:gap-[8px] max-[640px]:text-left">
-      <span class="inline-flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-full bg-[#f59e0b] text-[12px] font-bold text-white max-[640px]:h-[20px] max-[640px]:w-[20px] max-[640px]:text-[11px]">!</span>
-      <p class="m-0 text-[13px] leading-[1.5] text-[#6b3f00] max-[640px]:flex-1 max-[640px]:text-[12px] max-[640px]:leading-[1.45]">
-        <strong>{{ 'User quota exceeded.' | translate }}</strong>
-        <span class="mx-2 inline-block -translate-y-[1px] align-middle text-[#a86a00] max-[640px]:hidden">〡</span>
-        <span class="font-medium text-[#5a3200] max-[640px]:mt-[2px] max-[640px]:block">{{ 'Account access is limited at the moment. Remove one or more users, or increase your quota to restore full access.' | translate }}</span>
+      <span class="inline-flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-[6px] bg-[#f8bfc0] text-[#b12f35] shadow-[inset_0_0_0_1px_rgba(177,47,53,0.12)]" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" focusable="false">
+          <path d="M10.3 4.8 2.6 18.2A2 2 0 0 0 4.3 21h15.4a2 2 0 0 0 1.7-2.8L13.7 4.8a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+          <path d="M12 9v4m0 3.5v.1" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </span>
+      <p class="m-0 text-[13px] leading-[1.5] text-[#922c2c] max-[640px]:flex-1 max-[640px]:text-[12px] max-[640px]:leading-[1.45]">
+        <strong class="font-bold tracking-[-0.015em] text-[#a3222a]">{{ 'User quota exceeded.' | translate }}</strong>
+        <span class="mx-[10px] inline-block h-[12px] w-px align-middle bg-[#dd9297] max-[640px]:hidden" aria-hidden="true"></span>
+        <span class="font-medium tracking-normal text-[#933b40] max-[640px]:mt-[2px] max-[640px]:block">{{ 'All associated sub-tenant accounts are blocked. Remove users or increase your quota to restore access.' | translate }}</span>
       </p>
     </div>
   </div>
 }
 
-@if (isVisible) {
+@if (appService.userSessionData().tenant.accessBlocked) {
+  <section data-testid="access-blocked-screen" aria-labelledby="access-blocked-title" aria-describedby="access-blocked-description" class="fixed inset-0 z-[1000] flex flex-col overflow-y-auto bg-[#111315] [background-image:linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] [background-size:56px_56px] font-['Inter',sans-serif] text-[#f4f6f8]">
+    <header class="flex min-h-[76px] shrink-0 items-center justify-between gap-4 border-b border-[#1f2022] px-6 py-5 sm:px-12 lg:px-20">
+      <img src="/assets/images/sidebar/search_nav_logo.png" [alt]="'Orion Intelligence' | translate" class="h-[30px] w-auto max-w-[169px] object-contain max-[360px]:max-w-[140px]" width="169" height="30">
+      <span class="flex shrink-0 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[#858b91]">
+        <span aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-[#d9858c]"></span>
+        {{ 'Account' | translate }}
+      </span>
+    </header>
+
+    <div class="flex flex-1 items-center px-6 py-14 sm:px-12 sm:py-20 lg:px-20">
+      <div class="mx-auto grid w-full max-w-[1180px] items-center gap-10 md:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] md:gap-16 lg:gap-24">
+        <div class="min-w-0">
+          <svg aria-hidden="true" focusable="false" viewBox="0 0 120 120" fill="none" class="h-[112px] w-[112px] text-[#d9858c] sm:h-[152px] sm:w-[152px]">
+            <rect x="23" y="49" width="74" height="59" rx="12" fill="currentColor" fill-opacity="0.06" stroke="currentColor" stroke-width="3" />
+            <path d="M39 49V33a21 21 0 0 1 42 0v16" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+            <circle cx="60" cy="75" r="5" fill="currentColor" />
+            <path d="M60 80v10" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+          </svg>
+          <h1 id="access-blocked-title" class="mb-0 mt-7 max-w-[560px] [text-wrap:balance] text-[32px] font-semibold leading-[1.08] tracking-[-0.035em] text-[#f4f6f8] sm:text-[46px]">
+            {{ 'Account temporarily disabled' | translate }}
+          </h1>
+        </div>
+
+        <div class="min-w-0 border-t border-[#282a2d] pt-8 md:border-s md:border-t-0 md:ps-12 md:pt-0">
+          <p id="access-blocked-description" class="m-0 max-w-[460px] text-[14px] leading-[1.7] text-[#a4adb5]">
+            {{ 'Please contact your network administrator to restore access to your account.' | translate }}
+          </p>
+          <button type="button" data-testid="access-blocked-logout" class="group mt-7 flex min-h-[64px] w-full items-center justify-between gap-4 border-x-0 border-y border-solid border-[#282a2d] bg-transparent px-3 py-4 text-start font-[inherit] text-[14px] font-semibold text-[#f4f6f8] outline-none transition-[background-color,border-color,color] duration-150 ease-out hover:border-[#9b6268] hover:bg-[#191b1d] hover:text-[#f0b1b6] focus-visible:ring-2 focus-visible:ring-[#ff8b96] motion-reduce:transition-none" (click)="logout()">
+            <span>{{ 'Log out' | translate }}</span>
+            <svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="none" class="shrink-0 text-[#858b91] group-hover:text-[#f0b1b6]">
+              <path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4m6-13 5 5-5 5m-7-5h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+}
+@else if (isVisible) {
   <main id="main-content" class="relative">
     <app-loader></app-loader>
     <div [class.app-route-fade-a]="shouldAnimate()" [class.app-route-fade-b]="!shouldAnimate() && !isErrorRoute()">

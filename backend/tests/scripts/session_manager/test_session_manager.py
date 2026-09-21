@@ -388,19 +388,18 @@ def test_refresh_token_returns_new_session_payload_for_crawler(monkeypatch):
     assert result["session"]["hasOnboarding"] is False
 
 
-def test_refresh_token_rejects_child_tenant_when_parent_is_not_primary():
+def test_refresh_token_still_issues_for_a_child_of_a_demoted_primary(monkeypatch):
     child_tenant = SimpleNamespace(parent_tenant_id="507f1f77bcf86cd799439099")
-    parent_tenant = SimpleNamespace(is_primary=False, verified=True, status=TenantStatus.ACTIVE)
+    parent_tenant = SimpleNamespace(id="507f1f77bcf86cd799439099", is_primary=False, verified=True, status=TenantStatus.ACTIVE)
     user = _make_user(role=user_role.MEMBER)
-    manager = _make_manager(find_one_results=[user, _make_user(), child_tenant, parent_tenant])
+    manager = _make_manager(find_one_results=[user, _make_user(), child_tenant, parent_tenant, _make_user(subscription=True)])
     manager._redis.values["session:507f1f77bcf86cd799439011"] = "sid-123"
+    monkeypatch.setattr(manager, "has_onboarding", lambda _company_id: asyncio.sleep(0, result=False))
     token = _token({"sub": "alice", "sid": "sid-123"})
 
-    with pytest.raises(HTTPException) as exc:
-        _run(manager.refresh_token(token))
+    result = _run(manager.refresh_token(token))
 
-    assert exc.value.status_code == 401
-    assert exc.value.detail == "account blocked"
+    assert result["token_type"] == "bearer"
 
 
 def test_refresh_token_allows_expired_trial_when_parent_is_subscribed(monkeypatch):
@@ -461,3 +460,16 @@ def test_ensure_quota_access_blocks_other_users_when_quota_is_exceeded(monkeypat
 
     assert exc.value.status_code == 403
     assert exc.value.detail == "Tenant quota exceeded. Contact your administrator."
+
+
+def test_get_parent_tenant_refuses_only_an_unverified_own_tenant():
+    manager = _make_manager(find_one_results=[SimpleNamespace(verified=False, status=TenantStatus.ACTIVE, parent_tenant_id=None)])
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.get_parent_tenant("507f1f77bcf86cd799439011"))
+    assert exc.value.detail == "account approval pending"
+    for tenant in (
+        SimpleNamespace(verified=True, status=TenantStatus.DISABLE, parent_tenant_id=None),
+        SimpleNamespace(verified=True, status=TenantStatus.ACTIVE, parent_tenant_id=None),
+    ):
+        manager = _make_manager(find_one_results=[tenant])
+        assert _run(manager.get_parent_tenant("507f1f77bcf86cd799439011")) is None

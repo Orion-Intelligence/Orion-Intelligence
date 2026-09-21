@@ -49,6 +49,7 @@ export interface TenantDataModel {
     assignedQuota: string;
     quotaExceeded: boolean;
     tenantQuotaExceeded?: boolean;
+    accessBlocked?: string;
     image?: string;
     profileVisibilityEnabled?: boolean;
     eventManagementEnabled?: boolean;

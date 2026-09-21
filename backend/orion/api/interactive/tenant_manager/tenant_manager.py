@@ -2,6 +2,7 @@ import json
 import re
 import shutil
 import threading
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional
@@ -18,9 +19,12 @@ from orion.api.interactive.account_manager.models.user_model import user_model
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.mongo_manager.shared_model.db_alert_connector_model import db_alert_connector_model
 from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model, visible_alerts
+from orion.services.mongo_manager.shared_model.db_audit_log import db_audit_log
+from orion.services.mongo_manager.shared_model.db_case_model import db_case_model
 from orion.services.mongo_manager.shared_model.db_chat_share_model import db_chat_share_model
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys, db_system_model
+from orion.services.mongo_manager.shared_model.db_takedown_request_model import db_takedown_request_model
 from orion.services.mongo_manager.shared_model.db_tenant_model import (IocCategory, TenantRequest, TenantStatus, DismissedIocType, db_tenant_model, normalize_tenant_slug)
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account, LicenseName, user_role
 from orion.services.permission_manager.permission_models import UserPermission
@@ -37,9 +41,11 @@ class TenantManager:
     SIGNUP_USERNAME_PATTERN = r"^[A-Za-z][A-Za-z0-9_-]{7,19}$"
     TENANT_USERNAME_PATTERN = r"^[A-Za-z0-9_-]{4,20}$"
     EMAIL_PATTERN = r"^[\w\.-]+@[\w\.-]+\.\w+$"
-    TENANT_SCOPED_MODELS = (db_user_account, db_keys, db_system_model, db_alert_connector_model, db_chat_share_model)
+    TENANT_SCOPED_MODELS = (db_user_account, db_keys, db_system_model, db_alert_connector_model, db_chat_share_model, db_alert_model, db_case_model, db_audit_log, db_takedown_request_model)
     PRIMARY_USER_QUOTA = 15
     PRIMARY_TENANT_QUOTA = 5
+    ACCESS_BLOCK_CACHE_SECONDS = 5
+    _access_block_cache: dict = {}
 
     @staticmethod
     def get_instance():
@@ -218,6 +224,12 @@ class TenantManager:
         reserved = sum((child.user_quota or 0) for child in children)
         return own_count + reserved
 
+    @staticmethod
+    def quota_lock(tenant):
+        from orion.services.redis_manager.redis_controller import redis_controller
+        pool_id = str(getattr(tenant, "parent_tenant_id", None) or tenant.id)
+        return redis_controller.getInstance().lock(f"tenant:quota:{pool_id}", timeout=30, blocking_timeout=10)
+
     async def assert_user_quota_available(self, tenant, active_only: bool = False, message: str = "User allocated quota exceeded") -> None:
         quota_tenant, quota_tenant_ids = await self.get_quota_scope(tenant)
         usage = await self.count_quota_tenant_usage(tenant, quota_tenant, quota_tenant_ids, active_only=active_only)
@@ -243,6 +255,25 @@ class TenantManager:
         if getattr(tenant, "is_primary", False) and tenant.tenant_quota and (len(quota_tenant_ids) - 1) > tenant.tenant_quota:
             return "tenant"
         return None
+
+    async def access_block_reason(self, tenant) -> Optional[str]:
+        if tenant is None or getattr(tenant, "is_default", False):
+            return None
+        cached = TenantManager._access_block_cache.get(str(tenant.id))
+        if cached and cached[0] > time.monotonic():
+            return cached[1]
+        reason = None
+        parent_tenant_id = str(getattr(tenant, "parent_tenant_id", None) or "")
+        if tenant.status == TenantStatus.DISABLE:
+            reason = "Account disabled by administrator"
+        elif parent_tenant_id:
+            parent = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(parent_tenant_id)) if ObjectId.is_valid(parent_tenant_id) else None
+            if parent is None or not parent.is_primary or not parent.verified or parent.status == TenantStatus.DISABLE:
+                reason = "Access suspended: your primary tenant is no longer active"
+            elif await self.quota_exceeded_reason(parent):
+                reason = "Access suspended: your primary tenant exceeded its quota"
+        TenantManager._access_block_cache[str(tenant.id)] = (time.monotonic() + TenantManager.ACCESS_BLOCK_CACHE_SECONDS, reason)
+        return reason
 
     async def is_signup_allowed(self, tenant) -> bool:
         if getattr(tenant, "is_default", False):
@@ -413,19 +444,31 @@ class TenantManager:
             if source_path.name == file_name and source_path.is_file():
                 shutil.copy2(source_path, target_dir / file_name)
 
+    async def assert_slug_available(self, slug: str) -> None:
+        reserved = set(constant.CONSTANTS.RESERVED_TENANT_SLUGS)
+        for key in ("APP_URL", "PRODUCTION_DOMAIN", "TENANT_BASE_DOMAIN"):
+            value = str(env_handler.get_instance().env(key, "") or "").strip().lower()
+            hostname = (urlsplit(value).hostname if "://" in value else value.removeprefix("*.")) or ""
+            reserved.add(hostname.split(".", 1)[0])
+        if slug in reserved:
+            raise HTTPException(status_code=400, detail="This domain name is reserved")
+        if await self._engine.find_one(db_tenant_model, db_tenant_model.slug == slug):
+            raise HTTPException(status_code=400, detail="This domain tenant already exists")
+
     async def create_tenant(self, data: db_tenant_model):
+        data.slug = self.build_tenant_slug(data.email)
+        await self.assert_slug_available(data.slug)
         try:
             data.privileged_ioc = False
             if not data.iocs and data.email:
                 data.iocs = self.build_privileged_iocs(data.email)
-            data.slug = self.build_tenant_slug(data.email)
             await self.encrypt_tenant(data)
             data.status = TenantStatus.ONBOARDING
             await self._engine.save(data)
             await self.copy_default_system_settings(data)
         except Exception as _:
             await self._engine.remove(db_user_account, db_user_account.tenant_id == str(data.id))
-            await self._engine.remove(db_keys, db_keys.id == str(data.id))
+            await self._engine.remove(db_keys, db_keys.tenant_id == str(data.id))
             await self._engine.remove(db_system_model, db_system_model.tenant_id == str(data.id))
             await self._engine.delete(data)
             raise
@@ -494,8 +537,9 @@ class TenantManager:
 
         if current_user.role not in ["admin"] and data.id not in ("", "-1", str(current_user.tenant_id)):
             child_tenant = await self.get_managed_tenant(current_user, data.id)
-            if child_tenant is not None:
-                return await self.update_child_tenant(child_tenant, data, current_user)
+            if child_tenant is None:
+                raise HTTPException(status_code=403, detail="You are not allowed to update this tenant")
+            return await self.update_child_tenant(child_tenant, data, current_user)
 
         if current_user.role in ["admin"]:
             tenant_id = data.id
@@ -524,8 +568,9 @@ class TenantManager:
 
         if data.password_reset_required is not None:
             maintainer = await self._engine.find_one(db_user_account,(db_user_account.tenant_id == tenant_id) & (db_user_account.licenses == LicenseName.MAINTAINER))
-            maintainer.password_reset_required = data.password_reset_required
-            await self._engine.save(maintainer)
+            if maintainer:
+                maintainer.password_reset_required = data.password_reset_required
+                await self._engine.save(maintainer)
 
         dek = await KeyManager.get_instance().get_profile_dek(str(tenant.id))
         enc = Fernet(dek)
@@ -716,8 +761,9 @@ class TenantManager:
 
         if data.user_quota is not None:
             requested_user_quota = max(data.user_quota, 0)
-            _, pool_tenant_ids = await self.get_quota_scope(primary_tenant)
-            available_quota = primary_tenant.user_quota - (await self.count_pool_users(pool_tenant_ids) - await self.count_pool_users([tenant_id]))
+            siblings = await self._engine.find(db_tenant_model, db_tenant_model.parent_tenant_id == str(primary_tenant.id))
+            reserved = sum((sibling.user_quota or 0) for sibling in siblings if str(sibling.id) != tenant_id)
+            available_quota = primary_tenant.user_quota - await self.count_pool_users([str(primary_tenant.id)]) - reserved
             if requested_user_quota > available_quota:
                 raise HTTPException(status_code=400, detail="User allocated quota exceeded")
             tenant.user_quota = requested_user_quota
@@ -1025,8 +1071,6 @@ class TenantManager:
                 raise HTTPException(status_code=400, detail="Tenant not found")
             tenant_id = str(tenant.id)
 
-            await self.assert_user_quota_available(tenant)
-
             if data.role in ["demo"] and current_user.role not in ["admin"]:
                 await AuditLogManager.get_instance().register(
                     str(tenant_id), str(current_user.id), "User creation denied")
@@ -1041,9 +1085,6 @@ class TenantManager:
 
             if requested and not requested.issubset(tenant_allowed) and not current_user.role in ["admin"]:
                 raise HTTPException(status_code=400, detail="User assigned license not allowed for this tenant")
-
-            if UserPermission.ORION_MAIL in (data.permissions or []):
-                raise HTTPException(status_code=403, detail="Orion Mail permission is limited to root tenant users")
 
             alerts_allowed_all, alerts_allowed_tenant_ids = await self.validate_alert_access_assignment(data, current_user, tenant)
 
@@ -1065,7 +1106,9 @@ class TenantManager:
                 password_reset_required=True, )
 
             await mail_manager.get_instance().validate_mail_configuration(tenant_id=tenant_id)
-            await engine.save(user)
+            async with self.quota_lock(tenant):
+                await self.assert_user_quota_available(tenant)
+                await engine.save(user)
             await AuditLogManager.get_instance().register(
                 str(current_user.tenant_id), str(current_user.id), "tenant created successfully")
 

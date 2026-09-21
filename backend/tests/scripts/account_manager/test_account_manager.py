@@ -197,6 +197,34 @@ def test_delete_user_rejects_maintainer_from_other_tenant(tmp_path):
     assert "same tenant" in (exc.value.detail or "")
 
 
+def test_delete_user_never_removes_a_maintainer(tmp_path):
+    user = _make_user(id="delete-me", tenant_id="tenant-1", licenses=[LicenseName.MAINTAINER, LicenseName.FREE])
+    engine = FakeMongoEngine(find_one_results=[user])
+    manager = _make_manager(tmp_path, engine)
+    for current_user in (
+        SimpleNamespace(id="owner-1", tenant_id="tenant-1", licenses=[LicenseName.MAINTAINER]),
+        SimpleNamespace(id="admin-1", tenant_id="tenant-0", role="admin", licenses=[LicenseName.MAINTAINER]),
+    ):
+        engine.find_one_results = [user]
+        with pytest.raises(HTTPException) as exc:
+            _run(manager.delete_user(SimpleNamespace(username="alice"), current_user))
+        assert exc.value.detail == "Maintainer users are removed with their tenant"
+    assert engine.deleted == []
+
+
+def test_update_user_never_strips_the_maintainer_license(tmp_path):
+    user = _make_user(id="owner", tenant_id="507f1f77bcf86cd799439012", licenses=[LicenseName.MAINTAINER, LicenseName.FREE])
+    engine = FakeMongoEngine(find_one_results=[user, None])
+    manager = _make_manager(tmp_path, engine)
+    current_user = SimpleNamespace(id="owner", tenant_id="507f1f77bcf86cd799439012", role=user_role.MEMBER, licenses=[LicenseName.MAINTAINER])
+
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.update_user(SimpleNamespace(username="alice", licenses=[LicenseName.FREE], permissions=None, status=None, model_fields_set=set()), current_user))
+
+    assert exc.value.status_code == 403
+    assert user.licenses == [LicenseName.MAINTAINER, LicenseName.FREE]
+
+
 def test_update_user_reactivates_disabled_user_and_updates_licenses(tmp_path, monkeypatch):
     user = _make_user(status=UserStatus.DISABLE, tenant_id="507f1f77bcf86cd799439012")
     tenant_key = Fernet.generate_key()

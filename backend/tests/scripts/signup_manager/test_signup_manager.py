@@ -9,7 +9,7 @@ import orion.api.interactive.signup_manager.signup_manager as signup_module
 from orion.api.interactive.signup_manager.model.signup_request_model import SignupRequest
 from orion.api.interactive.signup_manager.signup_manager import SignupManager
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
-from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
+from orion.services.mongo_manager.shared_model.db_tenant_model import TenantStatus, db_tenant_model
 from tests.scripts.tenant_manager.fakes import FakeMail, ModelEngine
 from tests.scripts.tenant_manager.helpers import _make_tenant, _run
 
@@ -55,7 +55,7 @@ def test_signup_from_default_url_creates_standalone_tenant(monkeypatch):
 
 
 def test_signup_from_primary_tenant_url_creates_sub_tenant(monkeypatch):
-    primary = _make_tenant(is_primary=True, user_quota=15, tenant_quota=5, slug="acme")
+    primary = _make_tenant(is_primary=True, verified=True, user_quota=15, tenant_quota=5, slug="acme")
     engine = ModelEngine()
     engine.set_find_one(db_tenant_model, [primary, SimpleNamespace(parent_tenant_id=str(primary.id)), primary])
     engine.set_find_one(db_user_account, [None, None])
@@ -83,7 +83,7 @@ def test_signup_rejected_from_standalone_tenant_url(monkeypatch):
 
 
 def test_signup_from_primary_tenant_url_respects_tenant_quota(monkeypatch):
-    primary = _make_tenant(is_primary=True, user_quota=15, tenant_quota=1)
+    primary = _make_tenant(is_primary=True, verified=True, user_quota=15, tenant_quota=1)
     engine = ModelEngine().set_find_one(db_tenant_model, [primary])
     _, created_tenants = _patch_signup(monkeypatch, engine, child_tenant_ids=["507f1f77bcf86cd799439099"])
 
@@ -95,7 +95,7 @@ def test_signup_from_primary_tenant_url_respects_tenant_quota(monkeypatch):
 
 
 def test_sub_tenant_signup_inherits_primary_maintainer_language(monkeypatch):
-    primary = _make_tenant(is_primary=True, user_quota=15, tenant_quota=5, slug="acme")
+    primary = _make_tenant(is_primary=True, verified=True, user_quota=15, tenant_quota=5, slug="acme")
     primary_maintainer = SimpleNamespace(tenant_id=str(primary.id), email="owner@acme.com", preferences={"language": "es"})
     engine = ModelEngine()
     engine.set_find_one(db_tenant_model, [primary, SimpleNamespace(parent_tenant_id=str(primary.id)), primary])
@@ -109,7 +109,7 @@ def test_sub_tenant_signup_inherits_primary_maintainer_language(monkeypatch):
 
 
 def test_sub_tenant_signup_gets_default_quota_when_primary_has_capacity(monkeypatch):
-    primary = _make_tenant(is_primary=True, user_quota=15, tenant_quota=5, slug="acme")
+    primary = _make_tenant(is_primary=True, verified=True, user_quota=15, tenant_quota=5, slug="acme")
     engine = ModelEngine()
     engine.set_find_one(db_tenant_model, [primary, SimpleNamespace(parent_tenant_id=str(primary.id)), primary])
     engine.set_find_one(db_user_account, [None, None])
@@ -121,7 +121,7 @@ def test_sub_tenant_signup_gets_default_quota_when_primary_has_capacity(monkeypa
 
 
 def test_sub_tenant_signup_gets_zero_quota_when_primary_capacity_exhausted(monkeypatch):
-    primary = _make_tenant(is_primary=True, user_quota=15, tenant_quota=5, slug="acme")
+    primary = _make_tenant(is_primary=True, verified=True, user_quota=15, tenant_quota=5, slug="acme")
     engine = ModelEngine()
     engine.set_find_one(db_tenant_model, [primary, SimpleNamespace(parent_tenant_id=str(primary.id)), primary])
     engine.set_find_one(db_user_account, [None, None])
@@ -130,3 +130,14 @@ def test_sub_tenant_signup_gets_zero_quota_when_primary_capacity_exhausted(monke
     _run(SignupManager.signup_user(_signup_request(), tenant_id=str(primary.id)))
 
     assert created_tenants[0].user_quota == 0
+
+
+def test_signup_is_refused_under_a_disabled_or_unverified_primary(monkeypatch):
+    for overrides in ({"verified": False}, {"verified": True, "status": TenantStatus.DISABLE}):
+        primary = _make_tenant(is_primary=True, user_quota=15, tenant_quota=5, slug="acme", **overrides)
+        engine = ModelEngine()
+        engine.set_find_one(db_tenant_model, [primary])
+        _patch_signup(monkeypatch, engine)
+        with pytest.raises(HTTPException) as exc:
+            _run(SignupManager.signup_user(_signup_request(), tenant_id=str(primary.id)))
+        assert exc.value.status_code == 400

@@ -4,6 +4,7 @@ import { ErrorStoreService } from './services/error-store.service';
 import { filter, map, Observable } from 'rxjs';
 
 import { AppService } from '../../services/core/app/app.service';
+import { AuthService } from '../../services/authetication/auth.service';
 import { MessageNotificationComponent } from '../../shared/partials/message-notification/message-notification.component';
 import { LoaderComponent } from '../../shared/partials/loader/loader.component';
 import { TrailNotificationComponent } from '../../shared/partials/trail-notification/trail-notification.component';
@@ -28,7 +29,7 @@ export class AppComponent {
   error$: Observable<boolean>;
   isVisible = true;
 
-  constructor(private router: Router, private errorStore: ErrorStoreService, protected appService: AppService, private loadingService: LoadingService) {
+  constructor(private router: Router, private errorStore: ErrorStoreService, protected appService: AppService, private loadingService: LoadingService, private authService: AuthService) {
     window.postMessage({ source: 'orion-app', type: 'register' }, window.location.origin);
     effect(() => {
       const theme = this.appService.userSessionData()?.user?.theme ?? 'dark-theme';
@@ -55,6 +56,10 @@ export class AppComponent {
         this.hideRouteLoader(true);
       }
     });
+  }
+
+  logout(): void {
+    this.authService.logout();
   }
 
   shouldAnimate(): boolean {

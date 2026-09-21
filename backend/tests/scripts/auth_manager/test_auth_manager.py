@@ -126,13 +126,12 @@ def test_login_tenant_not_verified(monkeypatch):
     assert exc.value.detail == "account approval pending"
 
 
-def test_login_tenant_disabled(monkeypatch):
+def test_login_tenant_disabled_still_signs_in_before_the_block_screen(monkeypatch):
     patch_common(monkeypatch)
     patch_authenticate(monkeypatch, make_user())
     patch_mongo(monkeypatch, make_engine([make_user(), make_tenant(status=TenantStatus.DISABLE)]))
-    with pytest.raises(HTTPException) as exc:
-        _run(auth_manager.login("x@y.com", "pw"))
-    assert exc.value.detail == "account blocked"
+    result = _run(auth_manager.login("x@y.com", "pw"))
+    assert result["access_token"] == "access-token"
 
 
 def test_login_trial_expired(monkeypatch):
@@ -363,3 +362,17 @@ def test_edit_user_status_no_mail_when_no_transition(monkeypatch):
     result = _run(auth_manager.edit_userStatus_and_sendMail_from_admin("507f1f77bcf86cd799439011", request))
     assert result is user
     assert not FakeMailManager.get_instance().sent
+
+
+def test_login_twofa_runs_the_tenant_gate_before_issuing_a_temp_token(monkeypatch):
+    patch_common(monkeypatch)
+    patch_authenticate(monkeypatch, make_user(twofa_enabled=True, twofa_secret="secret"))
+
+    async def blocked(_tenant_id):
+        raise HTTPException(status_code=401, detail="account blocked")
+
+    FakeSessionManager.get_instance().get_parent_tenant = blocked
+    with pytest.raises(HTTPException) as exc:
+        _run(auth_manager.login("x@y.com", "pw"))
+    assert exc.value.detail == "account blocked"
+    assert FakeSessionManager.get_instance().temp_tokens == []

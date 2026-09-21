@@ -30,6 +30,7 @@ export class ManageProfileComponent implements OnInit {
   private readonly allAlertsOption = 'all';
 
   protected readonly JSON = JSON;
+  protected readonly LicenseName = LicenseName;
 
   users: User[] = [];
   userSearch = '';
@@ -51,9 +52,7 @@ export class ManageProfileComponent implements OnInit {
     if (session.user.role === 'admin') {
       options.push({ key: 'monitoring', label: this.translationService.translate('Monitoring') });
     }
-    if (session.user.role === 'admin' && session.tenant.isDefault) {
-      options.push({ key: 'orion_mail', label: this.translationService.translate('Orion Mail') });
-    }
+    options.push({ key: 'orion_mail', label: this.translationService.translate('Orion Mail') });
     return options;
   }
 
@@ -117,8 +116,8 @@ export class ManageProfileComponent implements OnInit {
     }
   }
 
-  isLicenseDisabled(): boolean {
-    return false;
+  isLicenseDisabled(user: User): boolean {
+    return (user.licenses ?? []).includes(LicenseName.MAINTAINER);
   }
 
   canAssignLicense(license: LicenseName): boolean {

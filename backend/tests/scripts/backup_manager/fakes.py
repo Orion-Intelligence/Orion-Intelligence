@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
+from pymongo.errors import BulkWriteError
+
 from orion.services.mongo_manager.shared_model.db_backup_job_model import db_backup_job_model
 from orion.services.mongo_manager.shared_model.db_backup_model import db_backup_model
 
@@ -134,10 +136,23 @@ class _FakeTenantCollection:
         return SimpleNamespace(deleted_count=removed)
 
     async def insert_many(self, documents, ordered=True):
-        for document in documents:
+        write_errors = []
+        for index, document in enumerate(documents):
             if any(existing.get("_id") == document.get("_id") for existing in self.documents):
                 raise RuntimeError(f"duplicate key error on _id {document.get('_id')}")
+            if document.get("username") is not None and any(existing.get("username") == document.get("username") for existing in self.documents):
+                write_errors.append({"index": index, "code": 11000, "errmsg": f"E11000 duplicate key error username {document.get('username')}"})
+                continue
             self.documents.append(dict(document))
+        if write_errors:
+            raise BulkWriteError({"writeErrors": write_errors, "nInserted": len(documents) - len(write_errors)})
+
+    async def update_one(self, query, update):
+        for document in self.documents:
+            if _matches(document, query):
+                document.update(update.get("$set", {}))
+                return SimpleNamespace(modified_count=1)
+        return SimpleNamespace(modified_count=0)
 
     async def replace_one(self, query, replacement, upsert=False):
         for index, document in enumerate(self.documents):
