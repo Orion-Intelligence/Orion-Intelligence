@@ -1,3 +1,4 @@
+from routes.docs.docs import EXTENSION_DOCS
 import json
 import asyncio
 import secrets
@@ -75,7 +76,12 @@ async def socket_user_key(token: str | None) -> str | None:
     return str(current_user.id)
 
 
-@extension_routes.post("/api/extension/login")
+@extension_routes.post("/api/extension/login",
+    summary="Post login",
+    description=EXTENSION_DOCS["extension_auth"]["description"],
+    tags=["Extension"],
+    operation_id="postApiExtensionLogin",
+    response_description=EXTENSION_DOCS["extension_auth"]["response_description"], include_in_schema=True)
 async def extension_login(request: Request, response: Response = None, username: str = Body(...), password: str = Body(...), redis_store: redis_controller = Depends(redis_controller.getInstance)):
     async def authenticate_and_login():
         current_user = await auth_manager.get_instance().authenticate_user(username, password)
@@ -104,7 +110,12 @@ async def extension_login(request: Request, response: Response = None, username:
     return {"detail": "Logged in", "access_token": access_token}
 
 
-@extension_routes.get("/api/extension/session")
+@extension_routes.get("/api/extension/session",
+    summary="Get session",
+    description=EXTENSION_DOCS["extension_session"]["description"],
+    tags=["Extension"],
+    operation_id="getApiExtensionSession",
+    response_description=EXTENSION_DOCS["extension_session"]["response_description"], include_in_schema=True)
 async def extension_session(current_user=Depends(get_extension_user), redis_store: redis_controller = Depends(redis_controller.getInstance)):
     return {
         "username": getattr(current_user, "username", ""),
@@ -114,7 +125,12 @@ async def extension_session(current_user=Depends(get_extension_user), redis_stor
     }
 
 
-@extension_routes.post("/api/extension/refresh")
+@extension_routes.post("/api/extension/refresh",
+    summary="Post refresh",
+    description=EXTENSION_DOCS["extension_auth"]["description"],
+    tags=["Extension"],
+    operation_id="postApiExtensionRefresh",
+    response_description=EXTENSION_DOCS["extension_auth"]["response_description"], include_in_schema=True)
 async def extension_refresh(request: Request, response: Response = None):
     token = extension_token_from_request(request)
     if not token:
@@ -129,7 +145,12 @@ async def extension_refresh(request: Request, response: Response = None):
     return {"detail": "Refreshed", "access_token": access_token}
 
 
-@extension_routes.post("/api/extension/logout")
+@extension_routes.post("/api/extension/logout",
+    summary="Post logout",
+    description=EXTENSION_DOCS["extension_auth"]["description"],
+    tags=["Extension"],
+    operation_id="postApiExtensionLogout",
+    response_description=EXTENSION_DOCS["extension_auth"]["response_description"], include_in_schema=True)
 async def extension_logout(request: Request):
     token = extension_token_from_request(request)
     current_user = await extension_user_from_token(token)
@@ -142,7 +163,12 @@ async def extension_logout(request: Request):
     return resp
 
 
-@extension_routes.post("/api/extension/ws-ticket")
+@extension_routes.post("/api/extension/ws-ticket",
+    summary="Post ws-ticket",
+    description=EXTENSION_DOCS["extension_websocket"]["description"],
+    tags=["Extension"],
+    operation_id="postApiExtensionWs-Ticket",
+    response_description=EXTENSION_DOCS["extension_websocket"]["response_description"], include_in_schema=True)
 async def extension_ws_ticket(request: Request, redis_store: redis_controller = Depends(redis_controller.getInstance)):
     token = extension_token_from_request(request)
     if not await extension_user_from_token(token):
@@ -206,7 +232,12 @@ async def extension_socket(websocket: WebSocket):
         await socket_manager.unregister(user_key, websocket, socket_id)
 
 
-@extension_routes.get("/ext/{artifact:path}")
+@extension_routes.get("/ext/{artifact:path}",
+    summary="Get {artifact:path}",
+    description=EXTENSION_DOCS["extension_artifacts"]["description"],
+    tags=["Extension"],
+    operation_id="getExtArtifactpath",
+    response_description=EXTENSION_DOCS["extension_artifacts"]["response_description"], include_in_schema=True)
 async def extension_artifact(artifact: str):
     entry = EXTENSION_ARTIFACTS.get(artifact)
     if not entry:
