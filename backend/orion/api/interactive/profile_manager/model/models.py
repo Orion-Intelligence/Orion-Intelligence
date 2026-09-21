@@ -59,6 +59,7 @@ class SocialProfileConnectRequest(BaseModel):
     profile_username: str | None = None
     profile_url: str | None = None
     purposes: List[SocialProfilePurpose] = Field(default_factory=list)
+    persona_id: str | None = None
 
 
 class SocialProfileUpdateRequest(BaseModel):
@@ -69,6 +70,7 @@ class SocialProfileUpdateRequest(BaseModel):
     connection_status: SocialProfileConnectionStatus | None = None
     session_id: str | None = None
     purposes: List[SocialProfilePurpose] | None = None
+    persona_id: str | None = None
 
 
 class SocialProfileResponse(BaseModel):

@@ -1,4 +1,5 @@
 import asyncio
+import json
 import time
 from datetime import datetime, UTC
 from typing import Any
@@ -6,6 +7,8 @@ from orion.api.interactive.profile_manager.profile_manager import ProfileManager
 from orion.api.interactive.profile_manager.model.models import SocialAutomationResultRequest
 from orion.api.interactive.social_manager.social_manager import social_manager
 from orion.services.log_manager.log_controller import log
+from orion.services.redis_manager.redis_controller import redis_controller
+from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 from orion.services.mongo_manager.shared_model.db_social_profile_management_model import (ManagedSocialProfile, SocialPersona, SocialPersonaGender, SocialProfilePurpose)
 
 
@@ -19,6 +22,10 @@ class social_profile_job:
         "automation/ad-monitor": "ad_detection",
         "automation/hate-speech-monitor": "hate_speech",
     }
+    ACTIVE_RUNS_KEY_PREFIX = "social:active_runs:"
+    ACTIVE_RUNS_TTL_SECONDS = 1800
+    ACTIVE_RUN_STALE_SECONDS = 600
+    DAILY_STOP_KEY = "social:daily:stop"
 
     @staticmethod
     def get_instance():
@@ -33,8 +40,6 @@ class social_profile_job:
             social_profile_job.__instance = self
             self._profile_manager = ProfileManager.get_instance()
             self._posts_cache = {}
-            self._active_runs = {}
-            self._stop_daily = False
             self.is_running = False
 
 
@@ -43,7 +48,7 @@ class social_profile_job:
             return {"status": "skipped", "message": "Already running"}
             
         self.is_running = True
-        self._stop_daily = False
+        await self._clear_daily_stop()
         try:
             records = await self._profile_manager.get_all_social_profile_records()
 
@@ -51,7 +56,7 @@ class social_profile_job:
             skipped_profile_count = 0
             error_count = 0
             for record in records:
-                if self._stop_daily:
+                if await self._is_daily_stopped():
                     break
                 current_user = await self._profile_manager.get_user_for_social_record(record)
                 if current_user is None:
@@ -81,7 +86,7 @@ class social_profile_job:
                             skipped_profile_count += 1
                             continue
     
-                        if self._stop_daily:
+                        if await self._is_daily_stopped():
                             log.g().i("Social profile daily processing stopped from the dashboard")
                             break
                         await self._run_profile_purposes(profile, persona, session_state, record.user_id)
@@ -102,42 +107,101 @@ class social_profile_job:
         finally:
             self.is_running = False
 
-    def active_runs(self, user_id: str):
-        return [dict(run) for run in self._active_runs.values() if run.get("user_id") == str(user_id or "")]
+    def _runs_key(self, user_id: str) -> str:
+        return f"{self.ACTIVE_RUNS_KEY_PREFIX}{user_id}"
 
-    def _begin_run(self, key: str, payload: dict):
+    def _runs_lock_key(self, user_id: str) -> str:
+        return f"{self.ACTIVE_RUNS_KEY_PREFIX}lock:{user_id}"
+
+    async def _load_runs(self, user_id: str) -> dict:
+        raw = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [self._runs_key(user_id), None, None])
+        if not raw:
+            return {}
+        try:
+            data = json.loads(raw)
+        except (ValueError, TypeError):
+            return {}
+        if not isinstance(data, dict):
+            return {}
+        now = time.time()
+        return {run_id: run for run_id, run in data.items() if now - float(run.get("updated_at") or 0) <= self.ACTIVE_RUN_STALE_SECONDS}
+
+    async def _save_runs(self, user_id: str, runs: dict):
+        if runs:
+            await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [self._runs_key(user_id), json.dumps(runs), self.ACTIVE_RUNS_TTL_SECONDS])
+        else:
+            await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_DELETE_KEY, [self._runs_key(user_id)])
+
+    async def active_runs(self, user_id: str):
+        runs = await self._load_runs(str(user_id or ""))
+        return [dict(run) for run in runs.values()]
+
+    async def _begin_run(self, key: str, payload: dict) -> str:
         run_id = str(payload.get("run_id") or "")
         if not run_id:
             return ""
-        self._active_runs[run_id] = {
+        user_id = str(payload.get("user_id") or "")
+        run = {
             "run_id": run_id,
-            "user_id": str(payload.get("user_id") or ""),
+            "user_id": user_id,
             "profile_id": str(payload.get("profile_id") or ""),
             "platform": str(payload.get("platform") or ""),
             "activity": self.ACTIVITY_KEYS.get(key, key),
             "is_manual": bool(payload.get("is_manual")),
             "started_at": datetime.now(UTC).isoformat(),
             "step": "",
+            "updated_at": time.time(),
         }
-        log.g().i(f"RUNDBG begin run_id={run_id} profile={self._active_runs[run_id]['profile_id']} activity={self._active_runs[run_id]['activity']} manual={self._active_runs[run_id]['is_manual']} active={[ (r['profile_id'], r['activity']) for r in self._active_runs.values() ]}")
+        async with redis_controller.getInstance().lock(self._runs_lock_key(user_id), timeout=15, blocking_timeout=15):
+            runs = await self._load_runs(user_id)
+            runs[run_id] = run
+            await self._save_runs(user_id, runs)
         return run_id
 
-    def _end_run(self, run_id: str):
-        self._active_runs.pop(run_id, None)
-        log.g().i(f"RUNDBG end run_id={run_id} active={[ (r['profile_id'], r['activity']) for r in self._active_runs.values() ]}")
+    async def _set_step(self, user_id: str, run_id: str, step: str):
+        async with redis_controller.getInstance().lock(self._runs_lock_key(user_id), timeout=15, blocking_timeout=15):
+            runs = await self._load_runs(user_id)
+            if run_id in runs:
+                runs[run_id]["step"] = step
+                runs[run_id]["updated_at"] = time.time()
+                await self._save_runs(user_id, runs)
 
-    def cancel_run(self, user_id: str, run_id: str) -> bool:
-        run = self._active_runs.get(str(run_id or ""))
-        if not run or run.get("user_id") != str(user_id or ""):
-            return False
-        run["cancelled"] = True
-        run["step"] = "stopping"
-        if not run.get("is_manual"):
-            self._stop_daily = True
+    async def _end_run(self, user_id: str, run_id: str):
+        async with redis_controller.getInstance().lock(self._runs_lock_key(user_id), timeout=15, blocking_timeout=15):
+            runs = await self._load_runs(user_id)
+            runs.pop(run_id, None)
+            await self._save_runs(user_id, runs)
+
+    async def cancel_run(self, user_id: str, run_id: str) -> bool:
+        user_id = str(user_id or "")
+        run_id = str(run_id or "")
+        is_manual = True
+        async with redis_controller.getInstance().lock(self._runs_lock_key(user_id), timeout=15, blocking_timeout=15):
+            runs = await self._load_runs(user_id)
+            run = runs.get(run_id)
+            if not run:
+                return False
+            run["cancelled"] = True
+            run["step"] = "stopping"
+            run["updated_at"] = time.time()
+            is_manual = bool(run.get("is_manual"))
+            await self._save_runs(user_id, runs)
+        if not is_manual:
+            await self._set_daily_stop()
         return True
 
-    def _is_cancelled(self, run_id: str) -> bool:
-        return bool(self._active_runs.get(run_id, {}).get("cancelled"))
+    async def _is_cancelled(self, user_id: str, run_id: str) -> bool:
+        runs = await self._load_runs(str(user_id or ""))
+        return bool(runs.get(run_id, {}).get("cancelled"))
+
+    async def _set_daily_stop(self):
+        await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [self.DAILY_STOP_KEY, "1", self.ACTIVE_RUNS_TTL_SECONDS])
+
+    async def _clear_daily_stop(self):
+        await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_DELETE_KEY, [self.DAILY_STOP_KEY])
+
+    async def _is_daily_stopped(self) -> bool:
+        return bool(await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [self.DAILY_STOP_KEY, None, None]))
 
     async def _record_failure(self, run_id: str, key: str, payload: dict, reason: str):
         try:
@@ -154,11 +218,12 @@ class social_profile_job:
     async def _run_and_wait(self, key: str, payload: dict, timeout_seconds: int):
         headers = social_manager._social_headers(None, None)
         deadline = time.monotonic() + timeout_seconds
-        run_id = self._begin_run(key, payload)
+        user_id = str(payload.get("user_id") or "")
+        run_id = await self._begin_run(key, payload)
 
         try:
             while time.monotonic() < deadline:
-                if self._is_cancelled(run_id):
+                if await self._is_cancelled(user_id, run_id):
                     log.g().i(f"Social automation job for {key} stopped on request")
                     await self._record_failure(run_id, key, payload, "Stopped from the dashboard")
                     return None
@@ -180,15 +245,14 @@ class social_profile_job:
                     return body.get("result")
 
                 log.g().i(f"Social automation job {body.get('job_id')} pending: {body.get('step', '')}")
-                if run_id in self._active_runs:
-                    self._active_runs[run_id]["step"] = str(body.get("step") or "")
+                await self._set_step(user_id, run_id, str(body.get("step") or ""))
                 await asyncio.sleep(self.POLL_INTERVAL_SECONDS)
 
             log.g().w(f"Social automation job for {key} timed out after {timeout_seconds}s")
             await self._record_failure(run_id, key, payload, f"Timed out after {timeout_seconds}s")
             return None
         finally:
-            self._end_run(run_id)
+            await self._end_run(user_id, run_id)
 
     async def _store_result(self, result: Any):
         if not isinstance(result, dict):
@@ -203,7 +267,7 @@ class social_profile_job:
     async def _run_profile_purposes(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], user_id: str):
         import uuid
         for purpose in profile.purposes:
-            if self._stop_daily:
+            if await self._is_daily_stopped():
                 return
             run_id = str(uuid.uuid4())
 

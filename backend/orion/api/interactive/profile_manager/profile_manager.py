@@ -471,6 +471,12 @@ class ProfileManager:
             created_at=now,
             updated_at=now,
         )
+        if data.persona_id:
+            self._find_persona(record, data.persona_id)
+            if any(other.platform == profile.platform and other.assigned_persona_id == data.persona_id for other in record.profiles):
+                raise HTTPException(status_code=400, detail="This persona is already assigned to a profile on the selected platform")
+            profile.assigned_persona_id = data.persona_id
+            profile.assignment_status = SocialProfileAssignmentStatus.ASSIGNED
         record.profiles.append(profile)
         record.updated_at = now
         await self._engine.save(record)
@@ -519,6 +525,16 @@ class ProfileManager:
             profile.connection_status = SocialProfileConnectionStatus.CONNECTED
         if data.purposes is not None:
             profile.purposes = data.purposes
+        if data.persona_id is not None:
+            if data.persona_id == "":
+                profile.assigned_persona_id = None
+                profile.assignment_status = SocialProfileAssignmentStatus.UNASSIGNED
+            else:
+                self._find_persona(record, data.persona_id)
+                if any(other.profile_id != profile.profile_id and other.platform == profile.platform and other.assigned_persona_id == data.persona_id for other in record.profiles):
+                    raise HTTPException(status_code=400, detail="This persona is already assigned to a profile on the selected platform")
+                profile.assigned_persona_id = data.persona_id
+                profile.assignment_status = SocialProfileAssignmentStatus.ASSIGNED
         profile.updated_at = datetime.now(UTC)
         record.updated_at = profile.updated_at
         await self._engine.save(record)
@@ -684,7 +700,7 @@ class ProfileManager:
 
     async def stop_run(self, current_user, run_id: str):
         from orion.management.jobs.social_profile.social_profile_job import social_profile_job
-        if not social_profile_job.get_instance().cancel_run(str(current_user.id), run_id):
+        if not await social_profile_job.get_instance().cancel_run(str(current_user.id), run_id):
             raise HTTPException(status_code=404, detail="This run is no longer active")
         return {"status": "success", "message": "Run is stopping"}
 
@@ -705,7 +721,7 @@ class ProfileManager:
     async def get_results_overview(self, current_user) -> SocialProfileResultsOverviewResponse:
         from orion.management.jobs.social_profile.social_profile_job import social_profile_job
         user_id = str(current_user.id)
-        active_runs = social_profile_job.get_instance().active_runs(user_id)
+        active_runs = await social_profile_job.get_instance().active_runs(user_id)
 
         results = await self._engine.find_one(db_social_automation_result_model, db_social_automation_result_model.user_id == user_id)
         if results is None:

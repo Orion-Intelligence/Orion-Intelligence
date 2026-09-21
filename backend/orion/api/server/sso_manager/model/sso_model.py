@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field
 
+from orion.api.server.sso_manager.constants.sso_constants import SSO_CONSTANTS
+
 
 class SSOCodeExchangeRequest(BaseModel):
     code: str = Field(min_length=32, max_length=256)
@@ -11,4 +13,4 @@ class SSOSessionRequest(BaseModel):
 
 
 class SSOMailPassphraseRequest(SSOSessionRequest):
-    verifier: str | None = Field(default=None, pattern=r"^[A-Za-z0-9+/]{43}=$")
+    verifier: str | None = Field(default=None, pattern=SSO_CONSTANTS.S_MAIL_VERIFIER_PATTERN)

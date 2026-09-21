@@ -25,13 +25,14 @@ export class ManageProfilePopupComponent {
   readonly platforms = input<PlatformEntry[]>([]);
   readonly sessions = input<Record<string, SessionEntry[]>>({});
   readonly profiles = input<SocialProfile[]>([]);
+  readonly personas = input<SocialPersona[]>([]);
   readonly closed = output<void>();
   readonly saved = output<ManageProfilePopupSaveEvent>();
   readonly sessionsRequested = output<void>();
   readonly saving = signal(false);
   readonly formError = signal('');
   readonly personaForm = signal<SocialPersonaCreateRequest>({ name: '', age_group: '18-24', gender: 'unspecified', country: '', city: '', interests: [] });
-  readonly profileForm = signal<SocialProfileConnectRequest>({ platform: '', session_id: '', profile_name: '', profile_username: '', purposes: [] });
+  readonly profileForm = signal<SocialProfileConnectRequest>({ platform: '', session_id: '', profile_name: '', profile_username: '', purposes: [], persona_id: '' });
   readonly ageGroups: UiDropdownOption[] = ['13-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map(value => ({ key: value, label: value }));
   readonly genders: UiDropdownOption[] = [{ key: 'male', label: 'Male' }, { key: 'female', label: 'Female' }, { key: 'unspecified', label: 'Unspecified' }];
   readonly interests: UiDropdownOption[] = ['Animals', 'Comedy', 'Travel', 'Food', 'Sports', 'Beauty & Style', 'Art', 'Gaming', 'Science & Education', 'Dance', 'DIY', 'Auto', 'Music', 'Life Hacks', 'Oddly Satisfying', 'Outdoors', 'Fandom'].map(value => ({ key: value, label: value }));
@@ -59,6 +60,7 @@ export class ManageProfilePopupComponent {
         profile_name: profile.profile_name ?? '',
         profile_username: profile.profile_username ?? '',
         purposes: [...(profile.purposes || [])],
+        persona_id: profile.assigned_persona_id ?? '',
       });
     }
   }
@@ -98,6 +100,14 @@ export class ManageProfilePopupComponent {
 
   onProfilePurposes(values: string[]): void {
     this.profileForm.update(form => ({ ...form, purposes: values as SocialProfilePurpose[] }));
+  }
+
+  onProfilePersona(value: string | null): void {
+    this.profileForm.update(form => ({ ...form, persona_id: value ?? '' }));
+  }
+
+  personaOptions(): UiDropdownOption[] {
+    return this.personas().map(persona => ({ key: persona.persona_id, label: persona.name }));
   }
 
   platformOptions(): UiDropdownOption[] {

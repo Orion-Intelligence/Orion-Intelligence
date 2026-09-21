@@ -75,6 +75,7 @@ export interface SocialProfileConnectRequest {
   profile_username?: string | null;
   profile_url?: string | null;
   purposes: SocialProfilePurpose[];
+  persona_id?: string | null;
 }
 
 export interface SocialProfileUpdateRequest {
@@ -85,6 +86,7 @@ export interface SocialProfileUpdateRequest {
   connection_status?: SocialConnectionStatus | null;
   session_id?: string | null;
   purposes?: SocialProfilePurpose[] | null;
+  persona_id?: string | null;
 }
 
 export interface SocialProfileAssignmentRequest {

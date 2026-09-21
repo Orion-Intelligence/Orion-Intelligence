@@ -95,6 +95,13 @@
 
 
           <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Persona' | translate }}</label>
+            <div class="mt-1">
+              <app-ui-dropdown menuPlacement="static" [options]="personaOptions()" [selected]="profileForm().persona_id || ''" [searchable]="true" placeholder="Select persona" (valueChange)="onProfilePersona($event)"></app-ui-dropdown>
+            </div>
+          </div>
+
+          <div>
             <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Actions / Purposes' | translate }} <span class="text-red-500 [body.light-theme_&]:text-red-700">*</span></label>
             <div class="mt-1">
               <app-ui-dropdown menuPlacement="static" [options]="purposes" [selectedValues]="profileForm().purposes" [multiSelect]="true" [showSelectedChips]="true" placeholder="Select actions" (valuesChange)="onProfilePurposes($event)"></app-ui-dropdown>
