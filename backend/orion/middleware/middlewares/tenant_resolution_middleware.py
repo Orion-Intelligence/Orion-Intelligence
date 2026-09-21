@@ -7,6 +7,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
 from configs.auth_cookie import token_from_request
+from orion.api.interactive.backup_manager.maintenance_state import maintenance_state
 from orion.helper_manager.env_handler import env_handler
 from orion.management.managers.service_manager import service_manager
 from orion.services.encryption_manager.key_manager import KeyManager
@@ -17,6 +18,12 @@ from orion.services.session_manager.session_manager import session_manager
 
 
 class tenant_resolution_middleware(BaseHTTPMiddleware):
+    TENANT_MAINTENANCE_EXEMPT_PREFIXES = (
+        "/maintenance-assets/",
+        "/static/maintenance",
+        "/api/s/static/system/",
+    )
+
     async def dispatch(self, request: Request, call_next):
         if getattr(request.state, "tenant", None) is not None:
             return await call_next(request)
@@ -93,6 +100,9 @@ class tenant_resolution_middleware(BaseHTTPMiddleware):
 
         if tenant is None:
             return JSONResponse(status_code=404, content={"detail": "Tenant not found"})
+
+        if maintenance_state.get_instance().is_tenant_fenced(tenant.id, getattr(tenant, "parent_tenant_id", None)) and not request.url.path.startswith(self.TENANT_MAINTENANCE_EXEMPT_PREFIXES):
+            return JSONResponse(status_code=503, content={"detail": "Tenant service unavailable"})
 
         request.state.tenant = tenant
         return await call_next(request)

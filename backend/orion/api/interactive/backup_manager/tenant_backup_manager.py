@@ -13,6 +13,7 @@ from elasticsearch import helpers as es_helpers
 from fastapi import HTTPException
 
 from orion.api.interactive.backup_manager.backup_report import REPORT_NAME, BackupReport
+from orion.api.interactive.backup_manager.maintenance_state import maintenance_state
 from orion.api.interactive.backup_manager.models.tenant_partition_model import TenantScope
 from orion.api.interactive.backup_manager.tenant_partition import TenantPartitionRegistry
 from orion.services.elastic_manager.elastic_controller import elastic_controller
@@ -298,6 +299,8 @@ class TenantBackupManager:
                 "started_at": datetime.now(timezone.utc),
             },
         )
+        fenced_ids = [target_scope.tenant_id for _, target_scope in targets]
+        maintenance_state.get_instance().fence_tenants(fenced_ids)
 
         try:
             await self._owner._set_progress(45, "Restoring tenant data")
@@ -331,12 +334,14 @@ class TenantBackupManager:
                 ) from rollback_exc
 
             self.tenant_restore_marker.unlink(missing_ok=True)
+            maintenance_state.get_instance().release_tenants(fenced_ids)
             await self._owner._remove_tree(rollback_dir)
             for _, target_scope in targets:
                 await self._owner._refresh_caches(target_scope.tenant_id)
             raise HTTPException(status_code=500, detail=f"Tenant restore failed and was rolled back: {exc}") from exc
 
         self.tenant_restore_marker.unlink(missing_ok=True)
+        maintenance_state.get_instance().release_tenants(fenced_ids)
         await self._owner._remove_tree(rollback_dir)
         for _, target_scope in targets:
             await self._owner._refresh_caches(target_scope.tenant_id)
@@ -357,6 +362,8 @@ class TenantBackupManager:
             f"Only that tenant is affected and the rest of the platform is untouched. Rolling it back automatically."
         )
         rollback_dir = self._owner.backup_root / rollback_name
+        snapshot_ids = [snapshot.name for snapshot in self._rollback_snapshots(rollback_dir)]
+        maintenance_state.get_instance().fence_tenants(snapshot_ids)
         try:
             restored = await self._restore_from_rollback(rollback_dir)
         except Exception as exc:
@@ -371,6 +378,7 @@ class TenantBackupManager:
             )
             return True
         self.tenant_restore_marker.unlink(missing_ok=True)
+        maintenance_state.get_instance().release_tenants(snapshot_ids)
         await self._owner._remove_tree(rollback_dir)
         for restored_id in restored:
             await self._owner._refresh_caches(restored_id)
@@ -382,15 +390,19 @@ class TenantBackupManager:
         )
         return True
 
-    async def _restore_from_rollback(self, rollback_dir: Path) -> list[str]:
+    @classmethod
+    def _rollback_snapshots(cls, rollback_dir: Path) -> list[Path]:
         tenants_dir = rollback_dir / CONSTANTS.BACKUP_TENANTS_DIR
         if not tenants_dir.is_dir():
+            return []
+        return [snapshot for snapshot in sorted(tenants_dir.iterdir()) if cls._is_tenant_dir(snapshot)]
+
+    async def _restore_from_rollback(self, rollback_dir: Path) -> list[str]:
+        if not (rollback_dir / CONSTANTS.BACKUP_TENANTS_DIR).is_dir():
             raise RuntimeError(f"rollback snapshot {rollback_dir.name} is missing")
         database = self._owner._engine.database
         restored = []
-        for snapshot in sorted(tenants_dir.iterdir()):
-            if not self._is_tenant_dir(snapshot):
-                continue
+        for snapshot in self._rollback_snapshots(rollback_dir):
             scope = await self._tenant_restore_scope(database, snapshot.name, snapshot)
             await self._run_tenant_restore_engine(snapshot, scope)
             valid, details = await self._validate_tenant_restore(scope)
@@ -629,6 +641,11 @@ class TenantBackupManager:
                 log.g().w(f"TENANT RESTORE: skipped {collection_name}, no safe tenant filter could be built")
                 continue
 
+            live_sessions = {}
+            if collection_name == CONSTANTS.BACKUP_TENANT_USER_COLLECTION:
+                async for document in database[collection_name].find(query, {"current_session_id": 1}):
+                    live_sessions[document["_id"]] = document.get("current_session_id")
+
             removed = await database[collection_name].delete_many(query)
             written = 0
             skipped = 0
@@ -636,6 +653,8 @@ class TenantBackupManager:
                 inserted, conflicts = await self._insert_tenant_batch(database, collection_name, batch)
                 written += inserted
                 skipped += conflicts
+            for user_id, session_id in live_sessions.items():
+                await database[collection_name].update_one({"_id": user_id}, {"$set": {"current_session_id": session_id}})
             restored[collection_name] = {"removed": removed.deleted_count, "written": written, "skipped": skipped}
             if skipped:
                 log.g().w(f"TENANT RESTORE: {skipped} documents in {collection_name} are owned by another tenant now and were left untouched")
