@@ -65,3 +65,32 @@ SEARCH_DOCS = {"strategic": _doc("search/strategic.md"), "stealerlogs": _doc(
 
 SUPPORT_METHOD_DOCS={"subdomain_scan": _doc("support/subdomain_scan.md"), "dns_scan": _doc(
     "support/dns_scan.md"), "wayback_scan": _doc("support/wayback_scan.md")}
+
+SOCIAL_DOCS = {
+    "profile_search": _doc("social/profile_search.md"),
+    "profile_images": _doc("social/profile_images.md"),
+    "profile_metadata": _doc("social/profile_metadata.md"),
+    "profile_posts": _doc("social/profile_posts.md"),
+    "profile_videos": _doc("social/profile_videos.md"),
+    "profile_shorts": _doc("social/profile_shorts.md"),
+    "social_forum": _doc("social/social_forum.md"),
+    "profile_followers": _doc("social/profile_followers.md"),
+    "profile_following": _doc("social/profile_following.md"),
+    "profile_global_presence": _doc("social/profile_global_presence.md"),
+    "recon_image_search": _doc("social/recon_image_search.md"),
+    "recon_status": _doc("social/recon_status.md"),
+    "recon_cancel": _doc("social/recon_cancel.md"),
+    "phone_recon": _doc("social/phone_recon.md"),
+    "social_entity": _doc("social/social_entity.md"),
+    "extensions_version": _doc("social/extensions_version.md"),
+    "social_connections": _doc("social/social_connections.md"),
+    "social_data_management": _doc("social/social_data_management.md"),
+    "social_graph_management": _doc("social/social_graph_management.md"),
+}
+
+EXTENSION_DOCS = {
+    "extension_auth": _doc("extension/extension_auth.md"),
+    "extension_session": _doc("extension/extension_session.md"),
+    "extension_websocket": _doc("extension/extension_websocket.md"),
+    "extension_artifacts": _doc("extension/extension_artifacts.md"),
+}

@@ -24,6 +24,8 @@ def main():
     REPORT_DOCS: dict = ns.get("REPORT_DOCS", {})
     SEARCH_DOCS: dict = ns.get("SEARCH_DOCS", {})
     DYNAMIC_DOCS: dict = ns.get("DYNAMIC_DOCS", {})
+    SOCIAL_DOCS: dict = ns.get("SOCIAL_DOCS", {})
+    EXTENSION_DOCS: dict = ns.get("EXTENSION_DOCS", {})
 
     if out_dir.exists():
         shutil.rmtree(out_dir)
@@ -48,6 +50,10 @@ def main():
         write_endpoint("search", "Search", k, v)
     for k,v in DYNAMIC_DOCS.items():
         write_endpoint("dynamic", "Dynamic", k, v)
+    for k,v in SOCIAL_DOCS.items():
+        write_endpoint("social", "Social", k, v)
+    for k,v in EXTENSION_DOCS.items():
+        write_endpoint("extension", "Extension", k, v)
 
     # ALL.md
     parts = []
@@ -56,6 +62,8 @@ def main():
         ("Reports", REPORT_DOCS),
         ("Search", SEARCH_DOCS),
         ("Dynamic", DYNAMIC_DOCS),
+        ("Social", SOCIAL_DOCS),
+        ("Extension", EXTENSION_DOCS),
     ]:
         parts.append(f"# {section_name}\n")
         for k, doc in dct.items():
