@@ -119,10 +119,12 @@ class social_profile_job:
             "started_at": datetime.now(UTC).isoformat(),
             "step": "",
         }
+        log.g().i(f"RUNDBG begin run_id={run_id} profile={self._active_runs[run_id]['profile_id']} activity={self._active_runs[run_id]['activity']} manual={self._active_runs[run_id]['is_manual']} active={[ (r['profile_id'], r['activity']) for r in self._active_runs.values() ]}")
         return run_id
 
     def _end_run(self, run_id: str):
         self._active_runs.pop(run_id, None)
+        log.g().i(f"RUNDBG end run_id={run_id} active={[ (r['profile_id'], r['activity']) for r in self._active_runs.values() ]}")
 
     def cancel_run(self, user_id: str, run_id: str) -> bool:
         run = self._active_runs.get(str(run_id or ""))
