@@ -34,6 +34,7 @@ class social_profile_job:
             self._profile_manager = ProfileManager.get_instance()
             self._posts_cache = {}
             self._active_runs = {}
+            self._stop_daily = False
             self.is_running = False
 
 
@@ -42,6 +43,7 @@ class social_profile_job:
             return {"status": "skipped", "message": "Already running"}
             
         self.is_running = True
+        self._stop_daily = False
         try:
             records = await self._profile_manager.get_all_social_profile_records()
 
@@ -49,6 +51,8 @@ class social_profile_job:
             skipped_profile_count = 0
             error_count = 0
             for record in records:
+                if self._stop_daily:
+                    break
                 current_user = await self._profile_manager.get_user_for_social_record(record)
                 if current_user is None:
                     skipped_profile_count += len(record.profiles or [])
@@ -77,6 +81,9 @@ class social_profile_job:
                             skipped_profile_count += 1
                             continue
     
+                        if self._stop_daily:
+                            log.g().i("Social profile daily processing stopped from the dashboard")
+                            break
                         await self._run_profile_purposes(profile, persona, session_state, record.user_id)
                         processed_profile_count += 1
                     except Exception as exc:
@@ -123,6 +130,8 @@ class social_profile_job:
             return False
         run["cancelled"] = True
         run["step"] = "stopping"
+        if not run.get("is_manual"):
+            self._stop_daily = True
         return True
 
     def _is_cancelled(self, run_id: str) -> bool:
@@ -192,6 +201,8 @@ class social_profile_job:
     async def _run_profile_purposes(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], user_id: str):
         import uuid
         for purpose in profile.purposes:
+            if self._stop_daily:
+                return
             run_id = str(uuid.uuid4())
 
             if purpose == SocialProfilePurpose.POSTING:

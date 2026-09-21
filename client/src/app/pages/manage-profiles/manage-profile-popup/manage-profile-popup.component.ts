@@ -130,7 +130,7 @@ export class ManageProfilePopupComponent {
   }
 
   title(): string {
-    return this.mode() === 'persona' ? (this.persona() ? 'Edit Persona' : 'Add Persona') : (this.profile() ? 'Edit Profile' : 'Add Profile');
+    return this.mode() === 'persona' ? (this.persona() ? 'Edit Persona' : 'Add Persona') : (this.profile() ? 'Edit Account' : 'Add Account');
   }
 
   private savePersona(): void {

@@ -148,7 +148,7 @@ export function assertProfilesTab() {
   cy.contains('Select actions').click();
   cy.get('.ui-dropdown-menu').first().find('button').first().click();
   
-  cy.get('h3').contains('Profile Details').click();
+  cy.get('h3').contains('Account Details').click();
   
   cy.intercept('GET', '**/api/manage-profiles/profiles', {
     statusCode: 200,

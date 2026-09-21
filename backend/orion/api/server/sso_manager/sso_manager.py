@@ -11,7 +11,8 @@ from fastapi.responses import RedirectResponse
 
 from configs.auth_cookie import token_from_request
 from orion.api.server.sso_manager.constants.sso_constants import SSO_CONSTANTS
-from orion.api.server.sso_manager.model.sso_model import SSOCodeExchangeRequest, SSOSessionRequest
+from orion.api.server.sso_manager.model.sso_model import SSOCodeExchangeRequest, SSOMailPassphraseRequest, SSOSessionRequest
+from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account
 from orion.services.redis_manager.redis_controller import redis_controller
@@ -158,3 +159,12 @@ class sso_manager:
             return {"message": "Session already revoked"}
         await self._redis.invoke_trigger(REDIS_COMMANDS.S_DELETE_KEY, [key])
         return {"message": "Session revoked"}
+
+    async def set_mail_passphrase(self, request: Request, payload: SSOMailPassphraseRequest):
+        self._require_client(request)
+        user = await self._active_user(await self._session_record(payload.session_token) or {})
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired Orion Mail session")
+        user.mail_passphrase = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(payload.verifier) if payload.verifier else None
+        await self._engine.save(user)
+        return {"mail_passphrase_set": user.mail_passphrase is not None}

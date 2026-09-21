@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request
 
-from orion.api.server.sso_manager.model.sso_model import SSOCodeExchangeRequest, SSOSessionRequest
+from orion.api.server.sso_manager.model.sso_model import SSOCodeExchangeRequest, SSOMailPassphraseRequest, SSOSessionRequest
 from orion.api.server.sso_manager.sso_manager import sso_manager
 
 
@@ -25,3 +25,8 @@ async def verify_mail_session(request: Request, payload: SSOSessionRequest):
 @mail_sso_routes.post("/revoke")
 async def revoke_mail_session(request: Request, payload: SSOSessionRequest):
     return await sso_manager.get_instance().revoke(request, payload)
+
+
+@mail_sso_routes.post("/passphrase")
+async def set_mail_passphrase(request: Request, payload: SSOMailPassphraseRequest):
+    return await sso_manager.get_instance().set_mail_passphrase(request, payload)

@@ -4,7 +4,7 @@ import type { ManageProfileResultsActivity, ManageProfileResultsView, ManageProf
 export const MANAGE_PROFILES_TABS: ManageProfilesTabEntry[] = [
   { key: 'sessions', label: 'Sessions' },
   { key: 'personas', label: 'Personas' },
-  { key: 'profiles', label: 'Profiles' },
+  { key: 'profiles', label: 'Accounts' },
   { key: 'assignments', label: 'Persona Monitoring', description: 'Monitor posts and ads using a persona assigned to a profile.' },
   { key: 'hate_monitoring', label: 'Profile Monitoring', description: 'Monitor a real social media profile for hate speech.' },
   { key: 'results', label: 'Results' },
@@ -26,4 +26,4 @@ export const RESULTS_ACTIVITY_LABELS: Record<ManageProfileResultsActivity, strin
 
 export const RESULTS_RUNNING_TITLES: Record<ManageProfileResultsActivity, string> = { ad_detection: 'Scanning for ads', posting: 'Publishing post', hate_speech: 'Scanning for hate speech' };
 
-export const RESULTS_FALLBACK_PROFILE_LABEL = 'Profile';
+export const RESULTS_FALLBACK_PROFILE_LABEL = 'Account';

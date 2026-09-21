@@ -3068,5 +3068,17 @@
   "Gettr": "Gettr",
   "Imgur": "Imgur",
   "Pinterest": "Pinterest",
-  "Plurk": "Plurk"
+  "Plurk": "Plurk",
+  "Accounts": "Accounts",
+  "Add Account": "Add Account",
+  "Edit Account": "Edit Account",
+  "Account Details": "Account Details",
+  "Account Name": "Account Name",
+  "Account Username": "Account Username",
+  "No accounts created yet.": "No accounts created yet.",
+  "No accounts available for assignment.": "No accounts available for assignment.",
+  "Account saved successfully": "Account saved successfully",
+  "Edit account": "Edit account",
+  "Delete account": "Delete account",
+  "Stop daily run": "Stop daily run"
 }

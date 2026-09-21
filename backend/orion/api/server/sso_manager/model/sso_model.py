@@ -8,3 +8,7 @@ class SSOCodeExchangeRequest(BaseModel):
 
 class SSOSessionRequest(BaseModel):
     session_token: str = Field(min_length=32, max_length=512)
+
+
+class SSOMailPassphraseRequest(SSOSessionRequest):
+    verifier: str | None = Field(default=None, pattern=r"^[A-Za-z0-9+/]{43}=$")

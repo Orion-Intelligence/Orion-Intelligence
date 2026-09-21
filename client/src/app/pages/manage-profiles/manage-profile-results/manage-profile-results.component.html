@@ -16,7 +16,7 @@
   <div class="mb-3 flex flex-wrap items-end justify-between gap-3">
     <div class="flex w-full flex-wrap items-end gap-3 sm:w-auto">
       <div class="w-full sm:w-72">
-        <label for="manage-profiles-results-profile-filter" class="mb-1.5 block text-[11px] font-semibold text-[var(--color-text4)]">{{ 'Profile' | translate }}</label>
+        <label for="manage-profiles-results-profile-filter" class="mb-1.5 block text-[11px] font-semibold text-[var(--color-text4)]">{{ 'Account' | translate }}</label>
         <app-ui-dropdown class="block" id="manage-profiles-results-profile-filter" menuId="manage-profiles-results-profile-filter-menu" testId="manage-profiles-results-profile-filter" [options]="profileOptions()" [selected]="selectedProfileId() || null" [placeholder]="'All profiles' | translate" [allowEmpty]="true" (valueChange)="selectProfile($event)"></app-ui-dropdown>
       </div>
       <div class="w-full sm:w-40">
@@ -71,7 +71,7 @@
           @if (row.running) {
             <button type="button" data-testid="manage-profiles-result-stop" [disabled]="isRunStopping(row.runId)" (click)="stopRun(row, $event)" class="group inline-flex h-7 shrink-0 items-center gap-1.5 rounded-[7px] border border-red-400/25 bg-red-500/[0.06] px-1.5 pr-2 text-[10px] font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] hover:border-red-400/45 hover:bg-red-500/[0.12] focus-visible:ring-1 focus-visible:ring-red-400/55 disabled:cursor-not-allowed disabled:opacity-65" [title]="isRunStopping(row.runId) ? 'Stopping' : 'Stop this run'">
               <span aria-hidden="true" class="inline-flex h-[18px] w-[18px] items-center justify-center text-red-400 transition-colors group-hover:text-red-300"><i class="bi bi-stop-fill text-[11px]"></i></span>
-              <span>{{ (isRunStopping(row.runId) ? 'Stopping' : 'Stop') | translate }}</span>
+              <span>{{ (isRunStopping(row.runId) ? 'Stopping' : row.isManual ? 'Stop' : 'Stop daily run') | translate }}</span>
             </button>
           }
           @if (row.ads.length || row.posts.length) {

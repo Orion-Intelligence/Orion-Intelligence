@@ -326,7 +326,7 @@ export class ManageProfilesComponent {
   }
 
   onModalSaved(event: ManageProfilePopupSaveEvent | string): void {
-    this.notification.show(typeof event === 'string' ? 'Profile saved successfully' : (event === 'persona' ? 'Persona saved successfully' : 'Profile saved successfully'), 'success');
+    this.notification.show(typeof event === 'string' ? 'Account saved successfully' : (event === 'persona' ? 'Persona saved successfully' : 'Account saved successfully'), 'success');
     this.closeModal();
     this.loadSocialData();
   }
@@ -350,11 +350,16 @@ export class ManageProfilesComponent {
     this.confirmationMessage.set(`Are you sure you want to delete persona "${persona.name}"?`);
   }
 
+  profileNoun(profile: SocialProfile, capitalized = false): string {
+    const noun = (profile.purposes || []).includes('hate_speech_monitoring') ? 'profile' : 'account';
+    return capitalized ? noun.charAt(0).toUpperCase() + noun.slice(1) : noun;
+  }
+
   deleteProfile(profile: SocialProfile): void {
     this.selectedProfile.set(profile);
     this.selectedPersona.set(null);
     this.confirmationAction.set('profile');
-    this.confirmationMessage.set('Are you sure you want to delete this profile?');
+    this.confirmationMessage.set(`Are you sure you want to delete this ${this.profileNoun(profile)}?`);
   }
 
   confirmAction(confirmed: boolean): void {
@@ -377,11 +382,11 @@ export class ManageProfilesComponent {
     if (action === 'profile' && this.selectedProfile()) {
       this.service.deleteProfile(this.selectedProfile()!.profile_id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
-          this.notification.show('Profile deleted successfully', 'success');
+          this.notification.show(`${this.profileNoun(this.selectedProfile()!, true)} deleted successfully`, 'success');
           this.loadSocialData();
         },
         error: (error) => {
-          this.notification.show(error?.error?.detail ?? 'Failed to delete profile');
+          this.notification.show(error?.error?.detail ?? `Failed to delete ${this.profileNoun(this.selectedProfile()!)}`);
         },
       });
     }
