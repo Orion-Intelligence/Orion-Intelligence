@@ -89,6 +89,29 @@ async def delete_tenant(tenant_id: str, current_user=Depends(get_current_user)):
 
 
 @tenant_routes.get(
+    "/api/tenants/{tenant_id}/export",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])), Depends(license_required("maintainer")), Depends(tenant_backup_allowed)], )
+async def export_tenant(tenant_id: str, current_user=Depends(get_current_user)):
+    owner_tenant_id = None if current_user.role == "admin" else str(getattr(current_user, "tenant_id", "") or "")
+    tenant_dir, name = await BackupManager.get_instance().resolve_latest_tenant_download(tenant_id, owner_tenant_id)
+    return StreamingResponse(
+        BackupStoreIO.iter_zip(tenant_dir, name),
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{name}.zip"'},
+    )
+
+
+@tenant_routes.get(
+    "/api/tenants/{tenant_id}/export-info",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])), Depends(license_required("maintainer")), Depends(tenant_backup_allowed)], )
+async def export_tenant_info(tenant_id: str, current_user=Depends(get_current_user)):
+    owner_tenant_id = None if current_user.role == "admin" else str(getattr(current_user, "tenant_id", "") or "")
+    return await BackupManager.get_instance().latest_tenant_export_info(tenant_id, owner_tenant_id)
+
+
+@tenant_routes.get(
     "/api/tenants/alerts/summary",
     status_code=200,
     include_in_schema=False,

@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { AppService } from '../../../../services/core/app/app.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
+import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { search_filter_labels } from '../../../../shared/constants/shared-enums';
+import { formatRelativeAge, isStaleBackup } from '../../../../shared/utils/backup-age.util';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { IocCategory, TenantStatus, TenantStatusValues } from '../../../../shared/model/tenant/tenant.model';
 import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
@@ -48,8 +50,12 @@ export class ViewTenantComponent implements OnInit {
   activeIocTenant: ManagedTenant | null = null;
   iocDraft: IocCategory[] = [];
   tenantToDelete: ManagedTenant | null = null;
+  exportingTenantId: string | null = null;
+  tenantToExport: ManagedTenant | null = null;
+  exportConfirmationMessage = '';
+  exportIsStale = false;
 
-  constructor(public apiService: ApiService, protected licenseService: LicenseService, private appService: AppService, private translationService: TranslationService) {
+  constructor(public apiService: ApiService, protected licenseService: LicenseService, private appService: AppService, private translationService: TranslationService, private http: HttpClient, private notification: MessageNotificationService) {
   }
 
   get tenantLicenseOptions(): UiDropdownOption[] {
@@ -141,6 +147,79 @@ export class ViewTenantComponent implements OnInit {
     return this.isAdmin() || (this.licenseService.isPrimaryMaintainer() && this.appService.userSessionData().tenant.privilegedIoc === true);
   }
 
+  requestExportTenant(tenant: ManagedTenant): void {
+    const tenantId = tenant.id;
+    if (!tenantId || this.exportingTenantId) {
+      return;
+    }
+    this.exportingTenantId = tenantId;
+    this.apiService.get<{ created_at: string; filename: string }>(`tenants/${encodeURIComponent(tenantId)}/export-info`).subscribe({
+      next: (info) => {
+        this.exportingTenantId = null;
+        const name = [tenant.companyName, tenant.slug].find(value => value?.trim()) ?? tenantId;
+        const createdAt = info?.created_at ? new Date(info.created_at) : null;
+        const taken = createdAt ? `${createdAt.toLocaleString()} (${formatRelativeAge(createdAt)})` : this.translationService.translate('date unknown');
+        this.exportIsStale = !createdAt || isStaleBackup(createdAt);
+        const staleNote = this.exportIsStale ? ` ${this.translationService.translate('This backup is more than 24 hours old.')}` : '';
+        this.exportConfirmationMessage = `${this.translationService.translate('Export')} "${name}" ${this.translationService.translate('as of the last backup taken on')} ${taken}?${staleNote} ${this.translationService.translate('Changes made after that backup are not included.')}`;
+        this.tenantToExport = tenant;
+      },
+      error: (err) => {
+        this.exportingTenantId = null;
+        this.notification.show(err?.error?.detail ?? this.translationService.translate('Failed to export tenant'), 'fail');
+      },
+    });
+  }
+
+  confirmExportTenant(confirmed: boolean): void {
+    const tenant = this.tenantToExport;
+    this.tenantToExport = null;
+    if (!confirmed || !tenant) {
+      return;
+    }
+    this.exportTenant(tenant);
+  }
+
+  exportTenant(tenant: ManagedTenant): void {
+    const tenantId = tenant.id;
+    if (!tenantId || this.exportingTenantId) {
+      return;
+    }
+    this.exportingTenantId = tenantId;
+    this.http.get(`/api/tenants/${encodeURIComponent(tenantId)}/export`, { responseType: 'blob', withCredentials: true, observe: 'response' }).subscribe({
+      next: (response) => {
+        const disposition = response.headers.get('content-disposition') ?? '';
+        const served = /filename="?([^";]+)"?/.exec(disposition)?.[1];
+        const url = window.URL.createObjectURL(response.body as Blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = served ?? `${tenantId}.zip`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.exportingTenantId = null;
+      },
+      error: (err) => {
+        this.exportingTenantId = null;
+        const fallback = this.translationService.translate('Failed to export tenant');
+        const body = err?.error;
+        if (body instanceof Blob) {
+          body.text().then((text) => {
+            let detail = fallback;
+            try {
+              detail = JSON.parse(text)?.detail ?? fallback;
+            }
+            catch {
+              detail = fallback;
+            }
+            this.notification.show(detail, 'fail');
+          });
+          return;
+        }
+        this.notification.show(body?.detail ?? fallback, 'fail');
+      },
+    });
+  }
+
   openTenant(tenant: ManagedTenant): void {
     if (tenant.access_url) {
       window.open(tenant.access_url, '_blank', 'noopener,noreferrer');
@@ -200,7 +279,7 @@ export class ViewTenantComponent implements OnInit {
     this.isLoading = true;
     this.apiService.delete<unknown>(`tenants/${tenant.id}`).subscribe({
       next: () => {
-        this.tenants = this.tenants.filter(item => item.id !== tenant.id);
+        this.tenants = this.tenants.filter(item => item.id !== tenant.id && item.parent_tenant_id !== tenant.id);
         this.isLoading = false;
       },
       error: () => {

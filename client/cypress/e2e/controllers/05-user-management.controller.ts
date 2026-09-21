@@ -192,6 +192,11 @@ function setAddUserAlertAllowedTenants(wanted?: string[] | 'all') {
 
     void cy.wrap($trigger).click({force: true});
     void cy.wrap($trigger).should('have.attr', 'aria-expanded', 'true');
+    if (wanted !== 'all') {
+      wanted.forEach((name) => {
+        void cy.contains(`#${menuId} [role="option"]`, name, {timeout: 20000}).should('exist');
+      });
+    }
     cy.get(`#${menuId} [role="option"]`, {timeout: 10000})
       .should('have.length.greaterThan', 0)
       .each(($option) => {

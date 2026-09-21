@@ -44,13 +44,18 @@ export class ManageProfileResultsComponent implements OnInit {
   });
   readonly visibleRows = computed(() => {
     const view = this.view();
-    if (view === 'ads') {
-      return this.profileRows().filter(row => row.activity === 'ad_detection');
-    }
-    if (view === 'hate_speech') {
-      return this.profileRows().filter(row => row.activity === 'hate_speech');
-    }
-    return this.profileRows().filter(row => row.activity === 'posting' && (row.running || row.error));
+    return this.profileRows().filter(row => {
+      if (row.running) {
+        return true;
+      }
+      if (view === 'ads') {
+        return row.activity === 'ad_detection';
+      }
+      if (view === 'hate_speech') {
+        return row.activity === 'hate_speech';
+      }
+      return row.activity === 'posting' && row.error;
+    });
   });
   readonly visiblePosts = computed<ManageProfilePostRow[]>(() => this.view() === 'posts' ? flattenPostRows(this.profileRows(), this.profiles()).filter(post => post.source === 'published') : []);
   readonly hasClearableResults = computed(() => {

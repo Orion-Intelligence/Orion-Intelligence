@@ -31,7 +31,7 @@ async def tenant_branding_editor(current_user=Depends(get_current_user)):
     raise HTTPException(status_code=403, detail="Tenant branding permission required")
 
 
-async def root_admin_required(current_user=Depends(role_required([user_role.ADMIN]))):
+async def root_admin_required(current_user=Depends(get_current_user), _role=Depends(role_required([user_role.ADMIN]))):
     engine = mongo_controller.get_instance().get_engine()
     try:
         tenant_object_id = ObjectId(str(getattr(current_user, "tenant_id", "")))
