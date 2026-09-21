@@ -229,7 +229,7 @@
                       </button>
                     </div>
                     @if (isStealerRowExpanded(i)) {
-                      <app-expanded-row @expandFadeRow [mode]="'stealer'" [item]="toStealerItem(record)" [searchQuery]="getStealerSearchQuery(platformData)"></app-expanded-row>
+                      <app-expanded-row @expandFadeRow [mode]="'stealer'" [item]="toStealerItem(record)" [searchQuery]="getStealerSearchQuery(platformData)" [compact]="true"></app-expanded-row>
                     }
                   }
                 </div>

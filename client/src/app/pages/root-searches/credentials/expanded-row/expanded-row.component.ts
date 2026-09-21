@@ -42,6 +42,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   readonly item = input<CredentialResultItem | null>(null);
   readonly result = input<CredentialResultItem | null>(null);
   readonly searchQuery = input<string>('');
+  readonly compact = input<boolean>(false);
 
   constructor(private rowHelper: ResultRowHelperService) {
     this.passwordRevealConfirmed = this.getPasswordRevealConfirmed();

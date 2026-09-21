@@ -132,7 +132,13 @@ export class SocialProfileTabsSectionComponent {
     }
     return entries;
   });
-  readonly hasProfileData = computed(() => this.platformData()?.profile_details?.is_parsed === true);
+  readonly hasProfileData = computed(() => {
+    const platform = this.platformData();
+    if (platform?.profile_details?.is_parsed === true) {
+      return true;
+    }
+    return getProfileDetailEntries(platform).length > 0 || (platform?.online_presence?.length ?? 0) > 0 || (platform?.stealer_logs?.length ?? 0) > 0;
+  });
   readonly darkwebSections = computed<{ title: string; date: string; entries: { key: string; value: unknown }[] }[]>(() =>
     this.darkwebReport().map((doc, index) => {
       const entries = Object.entries(doc ?? {})

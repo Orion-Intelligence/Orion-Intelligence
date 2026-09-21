@@ -449,6 +449,10 @@ export class DocumentExportService extends GraphExportService {
         5: { cellWidth: contentW - 442 }
       };
     }
+    if (normalized[0] === 'recordindex' && normalized.includes('email') && normalized.includes('domain') && normalized.includes('source')) {
+      const weights = [0.06, 0.13, 0.22, 0.14, 0.14, 0.13, 0.10, 0.08];
+      return Object.fromEntries(weights.map((weight, index) => [index, { cellWidth: contentW * weight }]));
+    }
     const fallbackWidth = contentW / Math.max(columns.length, 1);
     return Object.fromEntries(columns.map((_, index) => [index, { cellWidth: fallbackWidth }]));
   }
