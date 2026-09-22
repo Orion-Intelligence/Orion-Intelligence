@@ -84,6 +84,17 @@ function waitForMaintenanceEnd(attempts = 0): Cypress.Chainable<void> {
   });
 }
 
+export function openMaintenancePage() {
+  cy.intercept('GET', '**/api/admin/backups/status', {
+    statusCode: 200,
+    body: {operation: 'backup', status: 'running', progress: 40, message: 'Exporting Elasticsearch', filename: ''},
+  }).as('maintenanceStatus');
+  cy.visit('/static/maintenance.html');
+  cy.wait('@maintenanceStatus', {timeout: 60000});
+  cy.contains('#notice-title', 'Backup in progress').should('be.visible');
+  cy.get('#progress').should('be.visible');
+}
+
 export function restoreBackupViaTestApi() {
   getBackupRows().eq(0).within(() => {
     cy.contains('button', 'Restore').click();

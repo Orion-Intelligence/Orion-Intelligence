@@ -4,6 +4,7 @@ import {
   getBackupFilenames,
   getBackupRows,
   openBackupRestore,
+  openMaintenancePage,
   openScheduledBackupSettings,
   restoreBackupViaTestApi,
   setScheduledBackupToggle,
@@ -57,5 +58,11 @@ describe('Backup & Restore - Admin Management Flow', () => {
     getBackupRows().should('have.length', MAX_BACKUPS);
 
     cy.logout();
+  });
+
+  it('lets the admin open the maintenance page while a backup is in progress', () => {
+    cy.loginAsAdmin();
+    openMaintenancePage();
+    cy.docsScreenshot('backup-restore-maintenance-page');
   });
 });
