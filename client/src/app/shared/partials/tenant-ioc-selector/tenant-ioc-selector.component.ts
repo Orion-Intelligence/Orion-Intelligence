@@ -59,11 +59,48 @@ export class TenantIocSelectorComponent implements OnChanges {
       return;
     }
     const category = this.iocs.find(c => c.ioc_id === this.selectedCategoryId);
-    if (category && !category.values.includes(normalized)) {
+    if (!category) {
+      return;
+    }
+    if (category.ioc_id === 'm_domain') {
+      this.addDomainIoc(category, normalized);
+      return;
+    }
+    if (!category.values.includes(normalized)) {
       category.values.push(normalized);
       this.iocsChanged.emit(this.iocs);
     }
   }
+
+  private addDomainIoc(category: IocCategory, value: string): void {
+    const normalizedValue = this.normalizeDomainValue(value);
+    if (!normalizedValue) {
+      return;
+    }
+    if (category.values.some(existing => this.normalizeDomainValue(existing) === normalizedValue)) {
+      return;
+    }
+    const parentDomain = category.values.find(existing => this.isSubdomainOf(normalizedValue, this.normalizeDomainValue(existing)));
+    if (parentDomain) {
+      this.messageNotificationService.show(`${parentDomain} is already added, so its sub-domain ${value} isn't needed.`);
+      return;
+    }
+    const coveredSubdomains = category.values.filter(existing => this.isSubdomainOf(this.normalizeDomainValue(existing), normalizedValue));
+    if (coveredSubdomains.length > 0) {
+      category.values = category.values.filter(existing => !coveredSubdomains.includes(existing));
+      this.messageNotificationService.show(`${value} covers ${coveredSubdomains.length} sub-domain${coveredSubdomains.length === 1 ? '' : 's'} already added, so ${coveredSubdomains.length === 1 ? 'it was' : 'they were'} removed.`, 'success');
+    }
+    category.values.push(value);
+    this.iocsChanged.emit(this.iocs);
+  }
+
+  normalizeDomainValue(value: string): string {
+  return value.trim().toLowerCase().replace(/\.+$/, '');
+}
+
+ isSubdomainOf(candidate: string, parent: string): boolean {
+  return !!candidate && !!parent && candidate !== parent && candidate.endsWith(`.${parent}`);
+}
 
   onIocCsvSelected(event: Event): void {
     if (this.disabled) {

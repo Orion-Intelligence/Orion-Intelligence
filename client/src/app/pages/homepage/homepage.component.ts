@@ -16,7 +16,7 @@ export class HomepageComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     const role = this.appService.userSessionData().user.role;
-    if (role == "profile" || role == "admin") {
+    if (role == "admin" || role == "member" || role == "analyst" || role == "demo") {
       this.router.navigate(['dashboard/profile/homepage']).then();
     }
     this.router.events
