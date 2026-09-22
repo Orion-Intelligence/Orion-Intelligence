@@ -314,13 +314,9 @@ class TenantBackupManager:
 
         owned = self._owner._partition_registry.tenant_owned(await database.list_collection_names())
         targets = [(tenant_dir, scope)]
-        live_tenants = await self._tenant_parents(database)
         for child_dir in self._child_tenant_dirs(tenant_dir):
             if not ObjectId.is_valid(child_dir.name):
                 raise HTTPException(status_code=422, detail="Tenant identifier in the backup is not a valid object id")
-            if child_dir.name not in live_tenants:
-                log.g().w(f"TENANT RESTORE: skipped {child_dir.name}, it was deleted after the backup and is not resurrected")
-                continue
             child_document = await asyncio.to_thread(
                 self._read_first_document,
                 child_dir / CONSTANTS.BACKUP_TENANT_MONGO_DIR / f"{CONSTANTS.BACKUP_TENANT_COLLECTION}.ndjson",

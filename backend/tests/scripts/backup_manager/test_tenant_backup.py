@@ -535,7 +535,7 @@ def test_restore_fences_the_tenant_before_the_rollback_snapshot_and_releases_on_
     monkeypatch.setattr(manager._tenant, "_export_tenant", original)
 
 
-def test_restore_of_a_primary_does_not_resurrect_a_secondary_deleted_since(tmp_path, monkeypatch):
+def test_restore_of_a_primary_resurrects_a_secondary_deleted_since(tmp_path, monkeypatch):
     collections = _collections()
     manager = _make_tenant_manager(tmp_path, collections, monkeypatch)
     for document in collections["db_tenant_model"].documents:
@@ -549,9 +549,9 @@ def test_restore_of_a_primary_does_not_resurrect_a_secondary_deleted_since(tmp_p
 
     result = _run(manager._tenant.restore_tenant("snapshot", TENANT_A))
 
-    assert result["sub_tenants"] == []
-    assert [document["_id"] for document in collections["db_tenant_model"].documents] == [ObjectId(TENANT_A)]
-    assert all(document["tenant_id"] != TENANT_B for document in collections["db_user_account"].documents)
+    assert result["sub_tenants"] == [TENANT_B]
+    assert ObjectId(TENANT_B) in [document["_id"] for document in collections["db_tenant_model"].documents]
+    assert any(document["tenant_id"] == TENANT_B for document in collections["db_user_account"].documents)
 
 
 def test_restore_leaves_out_a_user_whose_username_now_belongs_to_another_tenant(tmp_path, monkeypatch):

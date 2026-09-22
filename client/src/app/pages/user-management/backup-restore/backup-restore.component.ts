@@ -141,9 +141,8 @@ export class BackupRestoreComponent implements OnInit, OnDestroy {
     }
     this.isCreating = true;
     this.apiService.post<BackupJob>(`${this.basePath}/instant`, {}).subscribe({
-      next: (job) => {
-        this.applyJob(job);
-        this.schedulePoll(1000);
+      next: () => {
+        window.location.assign('/static/maintenance.html');
       },
       error: () => {
         this.isCreating = false;
@@ -196,6 +195,10 @@ export class BackupRestoreComponent implements OnInit, OnDestroy {
     this.isRestoring = true;
     this.apiService.post<BackupJob>(`${this.basePath}/${backup.id}/restore`, {}).subscribe({
       next: (job) => {
+        if (!this.isTenantScope) {
+          window.location.assign('/static/maintenance.html');
+          return;
+        }
         this.applyJob(job);
         this.schedulePoll(1000);
       },

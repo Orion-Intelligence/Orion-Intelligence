@@ -194,7 +194,11 @@ class BackupManager:
         if not await self._job_store.begin("backup", "Starting backup"):
             log.g().i("BACKUP: request ignored, another backup or restore is already running")
             return await self.job_status()
-        self._spawn(self._run_backup(backup_type))
+        self.maintenance_flag.parent.mkdir(parents=True, exist_ok=True)
+        self.maintenance_flag.touch()
+        maintenance_state.get_instance().invalidate()
+        log.g().i("BACKUP: maintenance mode enabled")
+        self._spawn(self._run_backup(backup_type, maintenance=True))
         return await self.job_status()
 
     async def run_backup_now(self, backup_type: BackupType) -> bool:
@@ -207,7 +211,7 @@ class BackupManager:
         await self._run_backup(backup_type)
         return True
 
-    async def _run_backup(self, backup_type: BackupType) -> None:
+    async def _run_backup(self, backup_type: BackupType, maintenance: bool = False) -> None:
         heartbeat = asyncio.create_task(self._job_store.keep_alive())
         try:
             result = await self.create_backup(backup_type)
@@ -216,6 +220,10 @@ class BackupManager:
             log.g().e(f"BACKUP FAILED: {exc}")
             await self._job_store.finish(BackupJobStatus.FAILED, str(getattr(exc, "detail", exc)))
         finally:
+            if maintenance:
+                self.maintenance_flag.unlink(missing_ok=True)
+                maintenance_state.get_instance().invalidate()
+                log.g().i("BACKUP: maintenance mode disabled")
             await self._stop_heartbeat(heartbeat)
 
     async def start_restore(self, backup_id: str) -> dict:
@@ -471,6 +479,13 @@ class BackupManager:
             str(marker.get("backup") or ""),
         )
         return True
+
+    async def clear_stale_backup_maintenance(self) -> None:
+        if self.restore_marker.exists() or not self.maintenance_flag.exists():
+            return
+        self.maintenance_flag.unlink(missing_ok=True)
+        maintenance_state.get_instance().invalidate()
+        log.g().w("BACKUP: cleared stale maintenance flag left by an interrupted backup")
 
     async def _run_restore_engine(self, source_dir: Path):
         await self._io.restore_mongo(source_dir / "mongo")

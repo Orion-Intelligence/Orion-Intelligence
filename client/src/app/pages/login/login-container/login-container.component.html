@@ -7,7 +7,7 @@
           <div class="w-full flex justify-center gap-6">
             <a [href]="appService.getConfig().appSettings.home_header_data_sources" target="_blank" rel="noopener noreferrer" class="text-[#5a6f85] font-['Roboto',sans-serif] font-normal text-[14px] no-underline transition-colors [body.light-theme_&]:hover:text-[#1176d4]">{{ 'Data Sources' | translate }}</a>
             <a [href]="appService.getConfig().appSettings.home_header_adversaries" target="_blank" rel="noopener noreferrer" class="text-[#5a6f85] font-['Roboto',sans-serif] font-normal text-[14px] no-underline transition-colors [body.light-theme_&]:hover:text-[#1176d4]">{{ 'Adversaries' | translate }}</a>
-            <a href="/privacy" target="_blank" rel="noopener noreferrer" class="text-[#5a6f85] font-['Roboto',sans-serif] font-normal text-[14px] no-underline transition-colors [body.light-theme_&]:hover:text-[#1176d4]">Privacy Policy</a>
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" class="text-[#5a6f85] font-['Roboto',sans-serif] font-normal text-[14px] no-underline transition-colors [body.light-theme_&]:hover:text-[#1176d4]">{{ 'Privacy Policy' | translate }}</a>
           </div>
           <div class="flex flex-col mt-[100px] items-center flex-grow">
             <div class="w-full max-w-[500px] flex flex-col items-center">
@@ -80,14 +80,14 @@
             <p class="text-[#5a6f85] font-['Roboto',sans-serif] font-normal text-[14px] leading-[1.2]">{{ this.appService.getConfig().appSettings.app_name }}</p>
           </div>
         </div>
-        <div class="flex-1 relative overflow-hidden rounded-[25px] bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.15)_0,rgba(255,255,255,0.25)_1px,transparent_1px,transparent_70px),repeating-linear-gradient(90deg,rgba(255,255,255,0.15)_0,rgba(255,255,255,0.25)_1px,transparent_1px,transparent_70px),radial-gradient(circle_at_center,#172a4f_0%,#0E1626_100%)] bg-blend-overlay">
+        <div class="flex-1 relative flex flex-col overflow-x-hidden overflow-y-auto rounded-[25px] bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.15)_0,rgba(255,255,255,0.25)_1px,transparent_1px,transparent_70px),repeating-linear-gradient(90deg,rgba(255,255,255,0.15)_0,rgba(255,255,255,0.25)_1px,transparent_1px,transparent_70px),radial-gradient(circle_at_center,#172a4f_0%,#0E1626_100%)] bg-blend-overlay">
           @if (isDefaultDashboardPreview()) {
             <div aria-hidden="true" class="pointer-events-none absolute inset-0 z-0 overflow-hidden">
               <img src="/assets/images/shared/auth_dashboard_map.png" alt="" loading="eager" fetchpriority="high" decoding="async" class="absolute inset-[-12px] h-[calc(100%+24px)] w-[calc(100%+24px)] -translate-y-12 scale-[1.12] object-cover object-[38%_center] opacity-[0.52] blur-[4px] saturate-[0.78] contrast-[1.04]" />
               <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,12,27,0.93)_0%,rgba(9,15,33,0.76)_42%,rgba(16,12,34,0.56)_100%),linear-gradient(180deg,rgba(4,9,20,0.10)_0%,rgba(4,9,20,0.48)_100%),radial-gradient(circle_at_82%_38%,rgba(151,34,62,0.32)_0%,transparent_52%)]"></div>
               <div class="absolute inset-0 bg-[radial-gradient(circle_at_14%_38%,rgba(37,112,174,0.24)_0%,transparent_44%),radial-gradient(circle_at_88%_78%,rgba(98,25,56,0.18)_0%,transparent_38%)]"></div>
             </div>
-            <section class="absolute left-[clamp(46px,4.2vw,84px)] top-[clamp(70px,12vh,132px)] z-[2] max-w-[560px] text-white max-[1699px]:max-w-[440px] max-[1279px]:hidden" aria-label="Platform overview">
+            <section class="relative z-[2] mx-[clamp(46px,4.2vw,84px)] mt-[clamp(70px,12vh,132px)] shrink-0 max-w-[560px] text-white max-[1699px]:max-w-[440px] max-[1279px]:hidden" [attr.aria-label]="'Platform overview' | translate">
               <div class="mb-4 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8fc8f7]">
                 <span class="h-px w-8 bg-[#22d1b6] shadow-[0_0_10px_rgba(34,209,182,0.65)]"></span>
                 {{ 'Unified Intelligence Platform' | translate }}
@@ -114,7 +114,7 @@
                 </div>
               </div>
             </section>
-            <div class="absolute left-[clamp(46px,4.2vw,84px)] right-[clamp(46px,4.2vw,84px)] top-[clamp(450px,53vh,570px)] z-[2] max-w-[760px] max-[1279px]:hidden" role="group" [attr.aria-label]="(appService.getConfig().appSettings.tenant_login ? 'Platform features' : 'Our partners') | translate">
+            <div class="relative z-[2] mx-[clamp(46px,4.2vw,84px)] mb-10 mt-7 shrink-0 max-w-[760px] max-[1279px]:hidden" role="group" [attr.aria-label]="(appService.getConfig().appSettings.tenant_login ? 'Platform features' : 'Our partners') | translate">
               @if (brandingResolved) {
                 <div class="mb-3 flex items-center gap-3">
                   <span class="h-[3px] w-6 rounded-full bg-[#24d2b7] shadow-[0_0_12px_rgba(36,210,183,0.45)]"></span>
@@ -127,7 +127,7 @@
                         <span aria-hidden="true" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-[8px] bg-[#167c83]/[0.08] text-[#167c83]">
                           <i class="bi inline-flex text-[17px] leading-none" [ngClass]="feature.icon"></i>
                         </span>
-                        <span class="min-w-0 text-left text-[12px] font-semibold leading-[1.3] tracking-[-0.01em] text-[#21354d]">{{ feature.label | translate }}</span>
+                        <span class="min-w-0 break-words text-start text-[12px] font-semibold leading-[1.3] tracking-[-0.01em] text-[#21354d]">{{ feature.label | translate }}</span>
                       </li>
                     }
                   </ul>
@@ -167,7 +167,7 @@
                 }
               }
             </div>
-            <div class="absolute bottom-[clamp(28px,4.5vh,52px)] left-[clamp(46px,4.2vw,84px)] z-[2] grid w-[min(600px,48vw)] grid-cols-3 gap-8 border-t border-[rgba(157,200,239,0.18)] pt-4 text-[#acc2d7] max-[1279px]:hidden" role="group" aria-label="Platform capabilities">
+            <div class="relative z-[2] mx-[clamp(46px,4.2vw,84px)] mb-[clamp(28px,4.5vh,52px)] mt-auto grid w-[min(600px,48vw)] shrink-0 grid-cols-3 gap-8 border-t border-[rgba(157,200,239,0.18)] pt-4 text-[#acc2d7] max-[1279px]:hidden" role="group" [attr.aria-label]="'Platform capabilities' | translate">
               <div>
                 <span class="mb-2 block h-[3px] w-6 rounded-full bg-[#24d2b7]"></span>
                 <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-white">{{ 'Multi-source' | translate }}</p>
