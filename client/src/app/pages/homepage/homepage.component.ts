@@ -11,13 +11,17 @@ import { AppService } from '../../services/core/app/app.service';
   templateUrl: './homepage.component.html',
 })
 export class HomepageComponent implements OnInit, AfterViewInit {
+  protected redirecting = false;
+
   constructor(private router: Router, private appService: AppService) {
   }
 
   ngOnInit() {
     const role = this.appService.userSessionData().user.role;
     if (role == "admin" || role == "member" || role == "analyst" || role == "demo") {
+      this.redirecting = true;
       this.router.navigate(['dashboard/profile/homepage']).then();
+      return;
     }
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
