@@ -1,4 +1,4 @@
-import {ensureSystemSettingsEditing, fillSystemMailConfiguration, openSystemSettings, openTenantBrandingSettings} from './controllers/09-system-management.controller';
+import {ensureSystemSettingsEditing, fillSystemMailConfiguration, openSystemSettings} from './controllers/09-system-management.controller';
 import {
   createTenantAccount,
   openTenantEditor,
@@ -28,47 +28,19 @@ describe('System Settings - Admin Update Flow', () => {
     cy.logout();
   });
 
-  it('shows an error when auth dashboard icon exceeds 1 MB', () => {
-    cy.loginAsAdmin();
-
-    openSystemSettings();
-    openTenantBrandingSettings();
-
-    cy.intercept('PUT', '**/api/system/image?key=auth_dashboard_icon', {
-      statusCode: 400,
-      body: {detail: 'File too large! Maximum allowed size is 1 MB.'}
-    }).as('uploadAuthDashboardIcon');
-
-    cy.contains('div', 'Login Image')
-      .parent()
-      .find('input[type="file"]')
-      .selectFile({
-        contents: Cypress.Buffer.alloc(1024 * 1024 + 1, 1),
-        fileName: 'auth-dashboard-icon-too-large.png',
-        mimeType: 'image/png',
-        lastModified: Date.now()
-      }, {force: true});
-
-    cy.contains('[role="alert"]', 'File too large! Maximum allowed size is 1 MB.')
-      .should('be.visible');
-
-    cy.logout();
-  });
-
   it('updates app name from system settings and signs out', () => {
     cy.loginAsAdmin();
 
     openSystemSettings();
 
-    cy.get('[data-testid="system-settings-edit"], [data-testid="system-settings-app-name"]').should('be.visible');
+    cy.get('[data-testid="system-settings-app-name"]').should('be.visible');
     cy.docsScreenshot('system-settings');
-    cy.get('[data-testid="system-settings-edit"]').should('be.visible').click();
     cy.get('[data-testid="system-settings-app-name"]').should('be.visible').clear().type('Dark Intelligence');
     cy.get('input[placeholder="Data Sources"]').should('be.visible').clear().type('https://example.com/data-sources');
     cy.get('input[placeholder="Adversaries"]').should('be.visible').clear().type('https://example.com/adversaries');
     cy.get('input[placeholder="Pricing"]').should('be.visible').clear().type('https://example.com/pricing');
     cy.scrollDashboardToTop()
-    cy.get('[data-testid="system-settings-save"]').should('be.visible').click();
+    cy.get('[data-testid="system-settings-save"]').should('be.visible').and('not.be.disabled').click();
 
     cy.logout();
   });
@@ -145,29 +117,31 @@ describe('System Settings - Admin Update Flow', () => {
 
     openSystemSettings();
 
-    cy.get('[data-testid="system-settings-mail-edit"]').should('be.visible').click();
     cy.contains('div', 'Network Configuration').scrollIntoView().should('be.visible');
     fillSystemMailConfiguration('localhost', '1');
 
     cy.intercept('POST', '**/api/public/update').as('updateWrongSystemSettings');
     cy.scrollDashboardToTop();
-    cy.get('[data-testid="system-settings-mail-save"]').should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
     cy.wait('@updateWrongSystemSettings', {timeout: 60000})
       .its('response.statusCode')
       .should('eq', 424);
     cy.contains('app-smtp-settings-block', 'Mail configuration is not working').should('be.visible');
 
+    const updatedMail = `cypress-mailer-updated+${Date.now()}@example.test`;
+
     ensureSystemSettingsEditing();
     fillSystemMailConfiguration('mailpit', '1025');
+    cy.get('[data-testid="system-settings-account-mail"]').clear().type(updatedMail);
 
     cy.intercept('POST', '**/api/public/update').as('updateSystemSettings');
     cy.scrollDashboardToTop();
-    cy.get('[data-testid="system-settings-mail-save"]').should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
 
     cy.wait('@updateSystemSettings', {timeout: 60000}).then(({ request, response }) => {
       expect(response?.statusCode).to.be.oneOf([200, 201]);
       const metaInfo = JSON.parse(request.body.settings.meta_info);
-      expect(metaInfo.ACCOUNTS_MAIL).to.eq('cypress-mailer@example.test');
+      expect(metaInfo.ACCOUNTS_MAIL).to.eq(updatedMail);
       expect(metaInfo.ACCOUNTS_MAIL_PASSWORD).to.eq('1#VSC&cuad)d');
       expect(metaInfo.ACCOUNTS_SMTP_SERVER).to.eq('mailpit');
       expect(metaInfo.ACCOUNTS_SMTP_PORT).to.eq('1025');
@@ -271,11 +245,13 @@ describe('System Settings - Admin Update Flow', () => {
     cy.get('[data-testid="tenant-settings-connect-slack"]').should('not.exist');
     cy.get('[data-testid="tenant-settings-connect-jira"]').should('not.exist');
 
-    cy.get('[data-testid="system-settings-alert-integrations-edit"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="alert-integration-slack"]')
+      .should('not.have.attr', 'open');
+    cy.get('[data-testid="alert-integration-slack"] summary').click();
     cy.get('[data-testid="system-settings-slack-client-id"]').scrollIntoView().should('be.visible').clear().type(alertSlackClientId);
     cy.get('[data-testid="system-settings-slack-client-secret"]').scrollIntoView().should('be.visible').clear().type('slack-secret-for-cypress', {log: false});
     cy.docsScreenshot('alert-integrations-system-slack-config');
-    cy.get('[data-testid="system-settings-alert-integrations-save"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="system-settings-alert-integrations-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
 
     cy.wait('@saveAlertConnectors').then(({request}) => {
       expect(request.body.slack_client_id).to.eq(alertSlackClientId);

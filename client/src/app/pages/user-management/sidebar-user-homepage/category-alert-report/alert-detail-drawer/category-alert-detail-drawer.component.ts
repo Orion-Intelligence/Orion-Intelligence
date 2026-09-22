@@ -1,14 +1,16 @@
-import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CategoryAlerts } from '../../../../../shared/model/alert-notification/alert.notification.model';
-import { RawFindingRow } from '../../../../../shared/model/alert-notification/raw-finding-row.model';
+import { CategoryAlerts } from '../../../../../shared/partials/alert-notification/model/alert.notification.model';
+import { RawFindingRow } from '../../../../../shared/partials/alert-notification/model/raw-finding-row.model';
 import { SidebarService } from '../../../../../shared/services/sidebar.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { riskIcon, riskIconColorClass, riskLabelClass } from '../../../../../shared/partials/alert-notification/risk-style.util';
 
 @Component({
   selector: 'app-category-alert-detail-drawer',
   imports: [CommonModule, TranslatePipe],
   host: { class: 'contents' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './category-alert-detail-drawer.component.html',
 })
 export class CategoryAlertDetailDrawerComponent {
@@ -21,7 +23,7 @@ export class CategoryAlertDetailDrawerComponent {
 
   expandedDescriptionIds = new Set<string>();
   selectedDetailAlert: CategoryAlerts | null = null;
-  isAlertDetailDrawerOpen: boolean = false;
+  isAlertDetailDrawerOpen = false;
 
   @Output() detailAlertChange = new EventEmitter<CategoryAlerts | null>();
 
@@ -78,40 +80,15 @@ export class CategoryAlertDetailDrawerComponent {
   }
 
   getRiskIcon(risk: string): string {
-    switch ((risk || '').toLowerCase()) {
-      case 'critical':
-        return 'bi-exclamation-octagon-fill';
-      case 'high':
-        return 'bi-exclamation-triangle-fill';
-      case 'medium':
-        return 'bi-exclamation-circle-fill';
-      case 'low':
-        return 'bi-info-circle-fill';
-      default:
-        return 'bi-info-circle-fill';
-    }
+    return riskIcon(risk);
   }
 
   getRiskIconColorClass(risk: string): string {
-    switch ((risk || '').toLowerCase()) {
-      case 'critical':
-        return 'category_report_status-critical';
-      case 'high':
-        return 'category_report_status-high';
-      case 'medium':
-        return 'category_report_status-medium';
-      case 'low':
-        return 'category_report_status-low';
-      default:
-        return '';
-    }
+    return riskIconColorClass(risk);
   }
 
   getRiskLabelClass(risk: string): string {
-    const normalized = (risk || '').toLowerCase();
-    return ['critical', 'high', 'medium', 'low'].includes(normalized)
-      ? `category_report_alert-label-${normalized}`
-      : '';
+    return riskLabelClass(risk);
   }
 
   hasAlertUrl(url: string): boolean {
@@ -120,7 +97,7 @@ export class CategoryAlertDetailDrawerComponent {
   }
 
   getAlertCardDate(alert: CategoryAlerts): Date {
-    return alert.resultDate || alert.detectedOn;
+    return alert.resultDate ?? alert.detectedOn;
   }
 
   hasRawFindings(alert: CategoryAlerts | null): boolean {
@@ -147,7 +124,7 @@ export class CategoryAlertDetailDrawerComponent {
   }
 
   shouldShowDescriptionToggle(description: string | null | undefined): boolean {
-    const text = (description || '').trim();
+    const text = (description ?? '').trim();
     return text.split(/\r?\n/).length > 4 || text.length > 280;
   }
 
@@ -206,12 +183,12 @@ export class CategoryAlertDetailDrawerComponent {
     return this.hiddenRawFindingKeys.has(key.toLowerCase());
   }
 
-  private formatRawFindingBlocks(value: unknown, depth: number = 1): string[] {
+  private formatRawFindingBlocks(value: unknown, depth = 1): string[] {
     const formattedValue = this.formatRawFindingBlock(value, depth);
     return formattedValue ? [formattedValue] : [];
   }
 
-  private formatRawFindingBlock(value: unknown, depth: number = 1): string {
+  private formatRawFindingBlock(value: unknown, depth = 1): string {
     if (value === null || value === undefined || value === '') {
       return '';
     }

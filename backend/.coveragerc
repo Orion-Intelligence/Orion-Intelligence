@@ -1,18 +1,9 @@
 [run]
-branch = True
-parallel = True
-source =
-    orion
+source = orion
+parallel = true
+sigterm = true
+concurrency = thread
+data_file = /tmp/.coverage.e2e
 
 [report]
-omit =
-    */backend/routes/*
-    */routes/*
-    */configs/*
-    */static/*
-    */migrations/*
-    */test_*.py
-    */tests/*
-    */__pycache__/*
-    */orion/services/__init__.py
-    */orion/services/log_manager/log_controller.py
+show_missing = False

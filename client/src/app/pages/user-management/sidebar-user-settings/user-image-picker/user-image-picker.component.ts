@@ -1,10 +1,11 @@
-import { Component, effect, input, output } from '@angular/core';
+import { Component, effect, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-user-image-picker',
   imports: [NgClass, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './user-image-picker.component.html'
 })
 export class UserImagePickerComponent {
@@ -15,7 +16,7 @@ export class UserImagePickerComponent {
   selectedImage?: string;
   readonly id = input('');
   imageUrl!: string;
-  readonly defaultImage = input<string>('assets/images/tenant/logo_url_default.png');
+  readonly defaultImage = input<string>('/api/s/static/tenant/logo_url_default.png');
   readonly wide = input(false);
   readonly onImageSelected = output<File>();
   readonly onClear = output<string>();
@@ -30,8 +31,12 @@ export class UserImagePickerComponent {
     });
   }
 
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
+  onFileSelected(event: Event) {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) {
+      return;
+    }
+    const file = input.files?.[0];
     if (!file) {
       return;
     }
@@ -57,7 +62,7 @@ export class UserImagePickerComponent {
   }
 
   hasCustomImage(): boolean {
-    const image = this.selectedImage || this.imageUrl || '';
+    const image = this.selectedImage ?? this.imageUrl ?? '';
     if (!image) {
       return false;
     }
@@ -66,8 +71,7 @@ export class UserImagePickerComponent {
       '/default',
       'logo_url_default.png',
       'logo_wide_light_default.png',
-      'logo_wide_dark_default.png',
-      'auth_dashboard_icon_default.png'
+      'logo_wide_dark_default.png'
     ];
     return !defaults.some(token => image.endsWith(token));
   }

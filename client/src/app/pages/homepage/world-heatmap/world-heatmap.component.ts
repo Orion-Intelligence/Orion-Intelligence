@@ -1,34 +1,54 @@
-import { Component, ElementRef, ViewChild, AfterViewInit, OnChanges, SimpleChanges, HostListener, OnInit, OnDestroy, input } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewInit, HostListener, NgZone, OnInit, OnDestroy, input, signal, ChangeDetectionStrategy } from '@angular/core';
+import { trigger, transition, style, animate } from '@angular/animations';
 import { HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
+import type { Feature, FeatureCollection, Geometry } from 'geojson';
+import type { GeometryCollection, Topology } from 'topojson-specification';
 import { ActivatedRoute } from '@angular/router';
 import { HeatmapReportComponent } from './heatmap-report/heatmap-report.component';
 import { AppService } from '../../../services/core/app/app.service';
 import { ApiService } from '../../../shared/services/api.service';
-import { InsightCacheService } from '../../../shared/services/insight-cache.service';
-import { CountryData, CountryInsightPageResponse } from '../../../shared/model/homepage/country-insight.model';
+import { InsightCacheService } from '../services/insight-cache.service';
+import { CountryData, CountryInsightPageResponse, CountryInsightReport } from '../model/country-insight.model';
 import { MapLoadingBadgesComponent } from '../../../shared/partials/map-loading-badges/map-loading-badges.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { asUnknownRecord, getOwnProperty, Nullable, setOwnProperty } from '../../../shared/utils/type-guards.util';
+
+type CountryFeature = Feature<Geometry, { name?: string }>;
+type WorldTopology = Topology<{ countries: GeometryCollection }>;
 
 @Component({
   selector: 'app-world-heatmap',
   imports: [HeatmapReportComponent, MapLoadingBadgesComponent, TranslatePipe],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './world-heatmap.component.html',
+  styleUrls: ['./world-heatmap.component.css'],
+  animations: [
+    trigger('mapLoaderFade', [
+      transition(':leave', [animate('300ms ease-in', style({ opacity: 0 }))]),
+    ]),
+  ],
 })
-export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, OnDestroy {
-  @ViewChild('mapContainer') private chartContainer!: ElementRef;
-  private allCategoryReports: any;
-  private rotationTimer: any;
+export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
+  @ViewChild('mapContainer') private chartContainer!: ElementRef<HTMLElement>;
+  private allCategoryReports: Record<string, CountryInsightReport[]> = {};
+  private rotationTimer: number | null = null;
+  private worldJsonPollTimer: number | null = null;
+  private mapLoaderTimer: number | null = null;
+  private resizeObserver: ResizeObserver | null = null;
+  private firstRenderScheduled = false;
+  private firstRenderFrame: number | null = null;
+  private themeObserver: MutationObserver | null = null;
   private svg!: d3.Selection<SVGSVGElement, unknown, null, undefined>;
   private mapG!: d3.Selection<SVGGElement, unknown, null, undefined>;
   private projection!: d3.GeoProjection;
-  private path!: d3.GeoPath<any, d3.GeoPermissibleObjects>;
+  private path!: d3.GeoPath<unknown, CountryFeature>;
   private tooltip!: d3.Selection<HTMLDivElement, unknown, null, undefined>;
-  private worldData: any;
+  private worldData: Nullable<WorldTopology> = null;
   private categoryOrder = [ 'leak', 'generic', 'exploit', 'chat', 'social', 'defacement' ];
   private valueByName = new Map<string, number>();
   private selectedName: string | null = null;
@@ -42,15 +62,16 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   private readonly countryReportLimit = 20;
 
   readonly canOpenReports = input<boolean>(true);
-  public activeCountryReports: any;
+  public activeCountryReports: CountryInsightReport[] = [];
   public activeCategoryKey: string | null = null;
-  public selectedCountryReports: any[] = [];
   public mapData: CountryData[] = [];
-  public isOpenCountryReport = false;
-  public isCountryReportLoading = false;
-  public isCountryReportLoadingMore = false;
-  public hasMoreCountryReports = false;
-  public isMapLoading = true;
+  public readonly selectedCountryReports = signal<CountryInsightReport[]>([]);
+  public readonly isOpenCountryReport = signal(false);
+  public readonly isCountryReportLoading = signal(false);
+  public readonly isCountryReportLoadingMore = signal(false);
+  public readonly hasMoreCountryReports = signal(false);
+  public readonly isMapLoading = signal(true);
+  public readonly showMapLoader = signal(false);
 
   private isLightTheme(): boolean {
     if (typeof document === 'undefined') {
@@ -77,69 +98,124 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     };
   }
 
-  constructor(private route: ActivatedRoute, private appService: AppService, private apiService: ApiService, private insightCacheService: InsightCacheService) {
+  constructor(private route: ActivatedRoute, public appService: AppService, private apiService: ApiService, private insightCacheService: InsightCacheService, private zone: NgZone) {
   }
 
   ngOnInit(): void {
-    const data = this.route.snapshot.data['insights'];
-    if (data) {
+    this.insightCacheService.loadInsight(this.route, data => {
       this.applyInsightData(data);
-      return;
-    }
-    this.insightCacheService.getInsight().subscribe(data => {
-      this.applyInsightData(data); 
     });
   }
 
   ngAfterViewInit(): void {
-    window.requestAnimationFrame(() => {
-      this.appService.loadWorldJson();
-      this.waitForWorldJsonAndRender();
-    });
+    this.mapLoaderTimer = window.setTimeout(() => {
+      this.mapLoaderTimer = null;
+      this.showMapLoader.set(this.isMapLoading());
+    }, 180);
+    this.observeThemeChanges();
+    this.appService.loadWorldJson();
+    this.setupResizeObserver();
+    this.waitForWorldJson();
   }
 
   ngOnDestroy(): void {
+    if (this.mapLoaderTimer !== null) {
+      window.clearTimeout(this.mapLoaderTimer);
+    }
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
+    if (this.firstRenderFrame !== null) {
+      window.cancelAnimationFrame(this.firstRenderFrame);
+      this.firstRenderFrame = null;
+    }
+    this.stopWorldJsonPoll();
+    this.themeObserver?.disconnect();
+    this.themeObserver = null;
     this.tooltip?.remove();
     this.stopCategoryRotation();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['data'] && !changes['data'].firstChange) {
-      this.buildIndex();
-      if (!this.mapG || !this.svg) {
-        return;
-      }
-      this.refreshMapPresentation(false);
-    }
-  }
-
   @HostListener('window:resize')
   onResize(): void {
+    if (this.resizeObserver) {
+      return;
+    }
+    this.renderIfReady();
+  }
+
+  private setupResizeObserver(): void {
+    if (typeof ResizeObserver === 'undefined' || !this.chartContainer) {
+      return;
+    }
+    this.resizeObserver = new ResizeObserver(() => {
+      this.renderIfReady();
+    });
+    this.resizeObserver.observe(this.chartContainer.nativeElement);
+  }
+
+  private renderIfReady(): void {
     if (!this.appService.worldJson()) {
       return;
     }
-    this.createChart();
-  }
-
-  private waitForWorldJsonAndRender(): void {
-    if (this.appService.worldJson()) {
-      this.createChart();
-      this.startCategoryRotation();
-      this.isMapLoading = false;
+    const element = this.chartContainer?.nativeElement;
+    if (!element || !element.offsetWidth || !element.offsetHeight) {
       return;
     }
-    window.setTimeout(() => {
-      this.waitForWorldJsonAndRender(); 
+    if (this.svg) {
+      this.createChart();
+      return;
+    }
+    if (this.firstRenderScheduled) {
+      return;
+    }
+    this.firstRenderScheduled = true;
+    this.firstRenderFrame = window.requestAnimationFrame(() => {
+      this.firstRenderFrame = window.requestAnimationFrame(() => {
+        this.firstRenderFrame = null;
+        const target = this.chartContainer?.nativeElement;
+        if (!target || !target.offsetWidth || !target.offsetHeight || !this.appService.worldJson()) {
+          this.firstRenderScheduled = false;
+          return;
+        }
+        this.createChart();
+        this.startCategoryRotation();
+        this.isMapLoading.set(false);
+      });
+    });
+  }
+
+  private waitForWorldJson(): void {
+    if (this.appService.worldJson()) {
+      this.stopWorldJsonPoll();
+      this.renderIfReady();
+      return;
+    }
+    this.worldJsonPollTimer = window.setTimeout(() => {
+      this.worldJsonPollTimer = null;
+      this.waitForWorldJson();
     }, 50);
   }
 
-  private getAvailableCategories(): string[] {
-    return this.categoryOrder.filter(cat => this.allCategoryReports?.[cat] &&
-          this.allCategoryReports[cat].length > 0);
+  private stopWorldJsonPoll(): void {
+    if (this.worldJsonPollTimer) {
+      window.clearTimeout(this.worldJsonPollTimer);
+      this.worldJsonPollTimer = null;
+    }
   }
 
-  private applyInsightData(data: any): void {
-    this.allCategoryReports = data.country_insight;
+  private getAvailableCategories(): string[] {
+    return this.categoryOrder.filter(cat => getOwnProperty(this.allCategoryReports, cat) &&
+          getOwnProperty(this.allCategoryReports, cat).length > 0);
+  }
+
+  private applyInsightData(data: unknown): void {
+    const countryInsight = asUnknownRecord(asUnknownRecord(data).country_insight);
+    this.allCategoryReports = Object.fromEntries(Object.entries(countryInsight).map(([category, reports]) => [
+      category,
+      Array.isArray(reports)
+        ? reports as CountryInsightReport[]
+        : [],
+    ]));
     this.activeCategoryKey = null;
     this.buildIndex();
     if (this.mapG && this.svg) {
@@ -165,17 +241,20 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     this.stopCategoryRotation();
     let index = 0;
     const switchCategory = () => {
-      this.activeCategoryKey = available[index];
-      this.activeCountryReports = this.allCategoryReports[this.activeCategoryKey];
+      const category = getOwnProperty(available, index);
+      this.activeCategoryKey = category;
+      this.activeCountryReports = getOwnProperty(this.allCategoryReports, category) ?? [];
       this.mapData = this.gettingUniqueCountrys();
       this.buildIndex();
       this.refreshMapPresentation(true);
       index = (index + 1) % available.length;
     };
     switchCategory();
-    this.rotationTimer = setInterval(() => {
-      switchCategory();
-    }, 8000);
+    this.zone.runOutsideAngular(() => {
+      this.rotationTimer = window.setInterval(() => {
+        switchCategory();
+      }, 8000);
+    });
   }
 
   private ensureLegendDefs(): void {
@@ -210,14 +289,14 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     if (!this.svg || !this.chartContainer) {
       return;
     }
-    const chartContainerElement = this.chartContainer.nativeElement as HTMLElement;
+    const chartContainerElement = this.chartContainer.nativeElement;
     const width = chartContainerElement.offsetWidth || 800;
     const isMobile = width <= 768;
     this.ensureLegendDefs();
     const legendColors = this.getLegendColors();
     const values = this.mapData.map(d => d.value).filter(v => v != null);
     const max = Math.max(...values, 1);
-    const legend = this.svg.selectAll<SVGGElement, any>('g.legend').data([0]).join('g').attr('class', 'legend');
+    const legend = this.svg.selectAll<SVGGElement, unknown>('g.legend').data([0]).join('g').attr('class', 'legend');
     const pad = isMobile ? 16 : 14;
     const barW = isMobile ? 128 : 180;
     const barH = isMobile ? 8 : 10;
@@ -226,10 +305,10 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     const titleSize = isMobile ? 10 : 11;
     const tickSize = isMobile ? 10 : 11;
     legend.attr('transform', `translate(${legendX},${legendY})`);
-    const title = legend.selectAll<SVGTextElement, any>('text.legend-title')
+    const title = legend.selectAll<SVGTextElement, unknown>('text.legend-title')
       .data([this.activeCategoryKey])
       .join('text')
-      .attr('class', 'legend-title')
+      .attr('class', 'legend-title [body.light-theme_&]:![fill:#1f2e47]')
       .attr('x', 0)
       .attr('y', 0)
       .attr('font-size', titleSize)
@@ -243,7 +322,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       .duration(400)
       .attr('opacity', 1)
       .text(d => d?.toUpperCase() ?? '');
-    legend.selectAll<SVGRectElement, any>('rect.legend-bar')
+    legend.selectAll<SVGRectElement, unknown>('rect.legend-bar')
       .data([0])
       .join('rect')
       .attr('class', 'legend-bar')
@@ -260,28 +339,23 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     const tickSelection = legend
       .selectAll<SVGLineElement, number>('line.legend-tick')
       .data(ticks);
-    tickSelection.join(enter => enter.append('line')
+    const animateTick = (selection: typeof tickSelection) => selection
+      .attr('stroke', legendColors.tick)
+      .attr('stroke-width', 1)
+      .transition()
+      .duration(600)
+      .attr('x1', d => (d / max) * barW)
+      .attr('x2', d => (d / max) * barW);
+    tickSelection.join(enter => animateTick(enter.append('line')
       .attr('class', 'legend-tick')
       .attr('y1', 8 + barH)
       .attr('y2', 8 + barH + 6)
       .attr('x1', 0)
-      .attr('x2', 0)
-      .attr('stroke', legendColors.tick)
-      .attr('stroke-width', 1)
-      .transition()
-      .duration(600)
-      .attr('x1', d => (d / max) * barW)
-      .attr('x2', d => (d / max) * barW), update => update
-      .attr('stroke', legendColors.tick)
-      .attr('stroke-width', 1)
-      .transition()
-      .duration(600)
-      .attr('x1', d => (d / max) * barW)
-      .attr('x2', d => (d / max) * barW), exit => exit.remove());
+      .attr('x2', 0)), update => animateTick(update), exit => exit.remove());
     legend.selectAll<SVGTextElement, number>('text.legend-tick-label')
       .data(ticks)
       .join(enter => enter.append('text')
-        .attr('class', 'legend-tick-label')
+        .attr('class', 'legend-tick-label [body.light-theme_&]:![fill:#1f2e47]')
         .attr('y', 8 + barH + 18)
         .attr('font-size', tickSize)
         .attr('font-weight', 500)
@@ -308,19 +382,19 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     if (!this.svg || !this.chartContainer) {
       return;
     }
-    const chartContainerElement = this.chartContainer.nativeElement as HTMLElement;
+    const chartContainerElement = this.chartContainer.nativeElement;
     const width = chartContainerElement.offsetWidth || 800;
     const isMobile = width <= 768;
     const labelX = isMobile ? 35 : 33;
     const labelY = isMobile ? 22 : 28;
     const labelSize = isMobile ? 12 : 14;
     const labelSpacing = isMobile ? 0.6 : 0.8;
-    const labelG = this.svg.selectAll<SVGGElement, any>('g.map-type').data([0]).join('g').attr('class', 'map-type');
+    const labelG = this.svg.selectAll<SVGGElement, unknown>('g.map-type').data([0]).join('g').attr('class', 'map-type');
     labelG.attr('transform', `translate(${labelX},${labelY})`).attr('pointer-events', 'none');
-    labelG.selectAll<SVGTextElement, any>('text.map-type-text')
+    labelG.selectAll<SVGTextElement, unknown>('text.map-type-text')
       .data([this.activeCategoryKey])
       .join('text')
-      .attr('class', 'map-type-text')
+      .attr('class', 'map-type-text [body.light-theme_&]:![fill:#1f2e47] [body.light-theme_&]:![filter:none]')
       .attr('x', 0)
       .attr('y', 0)
       .attr('dominant-baseline', 'middle')
@@ -332,11 +406,11 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   }
 
   private createChart(): void {
-    this.worldData = this.appService.worldJson();
+    this.worldData = this.appService.worldJson() as WorldTopology;
     if (!this.worldData) {
       return;
     }
-    const chartContainerElement = this.chartContainer.nativeElement as HTMLElement;
+    const chartContainerElement = this.chartContainer.nativeElement;
     const width = chartContainerElement.offsetWidth || 800;
     const height = chartContainerElement.offsetHeight || Math.min(Math.max(Math.round(width * 0.52), 400), Math.round(window.innerHeight * 0.8));
     d3.select(chartContainerElement).selectAll('*').remove();
@@ -354,23 +428,21 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       .scale(width / (2 * Math.PI))
       .translate([width / 2, height / 1.55]);
     this.path = d3.geoPath(this.projection);
-    const countries = topojson.feature(this.worldData, this.worldData.objects.countries) as any;
-    this.mapG
-      .selectAll<SVGPathElement, any>('path.country')
+    const countries = topojson.feature(this.worldData, this.worldData.objects.countries) as FeatureCollection<Geometry, { name?: string }>;
+    this.applyCountryStateClasses(this.mapG
+      .selectAll<SVGPathElement, CountryFeature>('path.country')
       .data(countries.features)
       .enter()
       .append('path')
-      .attr('d', this.path as any)
-      .attr('class', this.countryClass)
-      .classed('can-open-reports', this.canOpenReports())
-      .classed('has-data', (d: any) => this.getValueForFeature(d) != null)
-      .on('mousemove', (event: MouseEvent, d: any) => {
-        this.onHoverMove(event, d); 
+      .attr('d', feature => this.path(feature))
+      .attr('class', this.countryClass))
+      .on('mousemove', (event: MouseEvent, d) => {
+        this.onHoverMove(event, d);
       })
       .on('mouseleave', (event: MouseEvent) => {
-        this.onHoverOut(event); 
+        this.onHoverOut(event);
       })
-      .on('click', (_: MouseEvent, d: any) => {
+      .on('click', (_: MouseEvent, d) => {
         if (this.getValueForFeature(d) == null) {
           return;
         }
@@ -397,9 +469,20 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     this.refreshMapPresentation(false);
   }
 
-  private getValueForFeature(d: any): number | null {
-    const name = d?.properties?.name?.toLowerCase().trim();
-    return name ? this.valueByName.get(name) ?? null : null;
+  private applyCountryStateClasses(selection: d3.Selection<SVGPathElement, CountryFeature, SVGGElement, unknown>): d3.Selection<SVGPathElement, CountryFeature, SVGGElement, unknown> {
+    return selection
+      .classed('can-open-reports', this.canOpenReports())
+      .classed('cursor-pointer', this.canOpenReports())
+      .classed('cursor-default', !this.canOpenReports())
+      .classed('has-data', (d) => this.getValueForFeature(d) != null);
+  }
+
+  private getValueForFeature(d: CountryFeature): number | null {
+    const name = d.properties?.name?.toLowerCase().trim();
+    if (!name) {
+      return null;
+    }
+    return this.valueByName.get(name) ?? null;
   }
 
   private getColorScale() {
@@ -410,33 +493,35 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     const ramp = ['#4a2530', '#5a2533', '#6d2637', '#82273b', '#9a2840', '#b62a46', '#d92d4d'];
     return (v: number) => {
       const index = q(v);
-      return ramp[index];
+      return getOwnProperty(ramp, index);
     };
+  }
+
+  private getNeutralFill(): string {
+    return this.isLightTheme() ? 'rgba(148,163,184,0.34)' : this.neutralFill;
   }
 
   private updateColors(): void {
     const color = this.getColorScale();
-    this.mapG.selectAll<SVGPathElement, any>('path.country')
-      .classed('can-open-reports', this.canOpenReports())
-      .classed('has-data', (d: any) => this.getValueForFeature(d) != null)
-      .classed('is-clickable', (d: any) => this.canOpenReports() && this.getValueForFeature(d) != null)
-      .attr('fill', (d: any) => {
+    this.applyCountryStateClasses(this.mapG.selectAll<SVGPathElement, CountryFeature>('path.country'))
+      .classed('is-clickable', (d) => this.canOpenReports() && this.getValueForFeature(d) != null)
+      .attr('fill', (d) => {
         const v = this.getValueForFeature(d);
-        return v == null ? this.neutralFill : color(v);
+        return v == null ? this.getNeutralFill() : color(v);
       });
   }
 
-  private onHoverMove(event: MouseEvent, d: any): void {
-    const name = d?.properties?.name ?? '';
+  private onHoverMove(event: MouseEvent, d: CountryFeature): void {
+    const name = d.properties?.name ?? '';
     const v = this.getValueForFeature(d);
     this.mapG.selectAll('path.country').classed('hovered', false);
     d3.select(event.currentTarget as SVGPathElement).classed('hovered', true);
     this.tooltip.selectAll('*').remove();
     this.tooltip.append('div').text(name);
     this.tooltip.append('div').text(`Leaks: ${v ?? 'N/A'}`);
-    const chartContainerElement = this.chartContainer.nativeElement as HTMLElement;
+    const chartContainerElement = this.chartContainer.nativeElement;
     const rect = chartContainerElement.getBoundingClientRect();
-    const tooltipElement = this.tooltip.node() as HTMLDivElement | null;
+    const tooltipElement = this.tooltip.node();
     const tipW = tooltipElement?.offsetWidth ?? 160;
     const tipH = tooltipElement?.offsetHeight ?? 44;
     let x = event.clientX - rect.left + 12;
@@ -467,11 +552,11 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       .attr('class', this.tooltipHiddenClass);
   }
 
-  private onCountryClick(d: any): void {
+  private onCountryClick(d: CountryFeature): void {
     if (!this.canOpenReports()) {
       return;
     }
-    const name = d?.properties?.name;
+    const name = d.properties?.name;
     if (!name) {
       return;
     }
@@ -479,13 +564,13 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     this.openCountryReport();
   }
 
-  public getReportsByCountry(country: string): any[] {
+  public getReportsByCountry(country: string): CountryInsightReport[] {
     const normalizedTarget = (country || '').trim().toLowerCase();
     if (!normalizedTarget || !Array.isArray(this.activeCountryReports)) {
       return [];
     }
 
-    return this.activeCountryReports.filter((report: any) => {
+    return this.activeCountryReports.filter((report) => {
       const countries = Array.isArray(report?.m_country) ? report.m_country : [];
       return countries.some((entry: string) => String(entry || '')
         .split(',')
@@ -496,10 +581,10 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
 
   private gettingUniqueCountrys(): CountryData[] {
     const counts: Record<string, number> = {};
-    this.activeCountryReports?.forEach((doc: any) => {
-      doc?.m_country?.forEach((c: string) => {
+    this.activeCountryReports.forEach((doc) => {
+      doc.m_country?.forEach((c: string) => {
         c.split(',').map(x => x.trim()).forEach(cc => {
-          counts[cc] = (counts[cc] || 0) + 1;
+          setOwnProperty(counts, cc, (getOwnProperty(counts, cc) || 0) + 1);
         });
       });
     });
@@ -511,20 +596,20 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   }
 
   private openCountryReport(): void {
-    this.isOpenCountryReport = true;
+    this.isOpenCountryReport.set(true);
     this.resetCountryReportState();
     void this.fetchCountryReportsPage(1, false);
   }
 
   closeCountryReport(): void {
-    this.isOpenCountryReport = false;
+    this.isOpenCountryReport.set(false);
     this.selectedName = null;
     this.resetCountryReportState();
     this.setCountryReportLoadingState(false, false);
   }
 
   async loadMoreCountryReports(): Promise<void> {
-    if (!this.hasMoreCountryReports || this.isCountryReportLoadingMore || !this.selectedName) {
+    if (!this.hasMoreCountryReports() || this.isCountryReportLoadingMore() || !this.selectedName) {
       return;
     }
     await this.fetchCountryReportsPage(this.selectedCountryPage + 1, true);
@@ -544,15 +629,15 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
         .set('limit', String(this.countryReportLimit));
       const response = await firstValueFrom(this.apiService.get<CountryInsightPageResponse>('insight/country', { params }));
       const incomingItems = Array.isArray(response?.items) ? response.items : [];
-      this.selectedCountryReports = append ? [...this.selectedCountryReports, ...incomingItems] : incomingItems;
+      this.selectedCountryReports.set(append ? [...this.selectedCountryReports(), ...incomingItems] : incomingItems);
       this.selectedCountryPage = response?.page ?? page;
-      this.hasMoreCountryReports = Boolean(response?.has_more);
+      this.hasMoreCountryReports.set(Boolean(response?.has_more));
     }
     catch {
       if (!append) {
-        this.selectedCountryReports = [];
+        this.selectedCountryReports.set([]);
       }
-      this.hasMoreCountryReports = false;
+      this.hasMoreCountryReports.set(false);
     }
     finally {
       this.setCountryReportLoadingState(append, false);
@@ -565,16 +650,18 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     }
     const color = this.getColorScale();
     const getValueForFeature = this.getValueForFeature.bind(this);
-    const neutralFill = this.neutralFill;
-    const countries = this.mapG.selectAll<SVGPathElement, any>('path.country');
+    const neutralFill = this.getNeutralFill();
+    const countries = this.mapG.selectAll<SVGPathElement, CountryFeature>('path.country');
     countries
       .classed('can-open-reports', this.canOpenReports())
-      .classed('has-data', (d: any) => getValueForFeature(d) != null)
-      .classed('is-clickable', (d: any) => this.canOpenReports() && getValueForFeature(d) != null)
+      .classed('cursor-pointer', this.canOpenReports())
+      .classed('cursor-default', !this.canOpenReports())
+      .classed('has-data', (d) => getValueForFeature(d) != null)
+      .classed('is-clickable', (d) => this.canOpenReports() && getValueForFeature(d) != null)
       .transition()
       .duration(1100)
       .ease(d3.easeCubicInOut)
-      .attrTween('fill', function (this: SVGPathElement, d: any) {
+      .attrTween('fill', function (this: SVGPathElement, d) {
         const v = getValueForFeature(d);
         const nextFill = v == null ? neutralFill : color(v);
         const currentFill = d3.select(this).attr('fill') || neutralFill;
@@ -591,28 +678,46 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   }
 
   private refreshMapPresentation(animate: boolean): void {
-    if (animate) {
-      this.animateMapTransition();
+    this.zone.runOutsideAngular(() => {
+      if (animate) {
+        this.animateMapTransition();
+      }
+      else {
+        this.updateColors();
+      }
+      this.updateLegend();
+      this.updateActiveCategoryLabel();
+    });
+  }
+
+  private observeThemeChanges(): void {
+    if (typeof document === 'undefined' || typeof MutationObserver === 'undefined') {
+      return;
     }
-    else {
-      this.updateColors();
-    }
-    this.updateLegend();
-    this.updateActiveCategoryLabel();
+
+    this.themeObserver?.disconnect();
+    this.themeObserver = new MutationObserver(() => {
+      if (this.mapG && this.svg) {
+        this.refreshMapPresentation(false);
+      }
+    });
+    const options: MutationObserverInit = { attributes: true, attributeFilter: [ 'class' ] };
+    this.themeObserver.observe(document.documentElement, options);
+    this.themeObserver.observe(document.body, options);
   }
 
   private resetCountryReportState(): void {
-    this.selectedCountryReports = [];
+    this.selectedCountryReports.set([]);
     this.selectedCountryPage = 1;
-    this.hasMoreCountryReports = false;
+    this.hasMoreCountryReports.set(false);
   }
 
   private setCountryReportLoadingState(append: boolean, isLoading: boolean): void {
     if (append) {
-      this.isCountryReportLoadingMore = isLoading;
+      this.isCountryReportLoadingMore.set(isLoading);
       return;
     }
-    this.isCountryReportLoading = isLoading;
+    this.isCountryReportLoading.set(isLoading);
   }
 
   private normalizePositionValue(rawValue: number): number {

@@ -1,18 +1,20 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { AppService } from '../../../../services/core/app/app.service';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
-import { ALERT_CATEGORY_NAMES } from '../../../../shared/model/alert-notification/alert.notification.model';
+import { ALERT_CATEGORY_NAMES } from '../../../../shared/partials/alert-notification/model/alert.notification.model';
 import { TenantModel } from '../../../../shared/model/tenant/tenant.model';
 import { ApiService } from '../../../../shared/services/api.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-alert-scanner-settings',
   imports: [CommonModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './alert-scanner-settings.component.html',
 })
 export class AlertScannerSettingsComponent implements OnInit {
@@ -24,7 +26,7 @@ export class AlertScannerSettingsComponent implements OnInit {
   isReady = signal(false);
   isSaving = signal(false);
 
-  constructor(public appService: AppService, private apiService: ApiService, private router: Router, private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService) { }
+  constructor(public appService: AppService, private apiService: ApiService, private router: Router, private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService, private translationService: TranslationService) { }
 
   ngOnInit(): void {
     this.applyTenantData(this.appService.tenantData());
@@ -90,19 +92,19 @@ export class AlertScannerSettingsComponent implements OnInit {
         this.allowedScannerKeys = previous;
         this.setAllowedScannersLocal(this.scannerCategories.filter(category => previous.has(this.normalize(category))));
         this.isSaving.set(false);
-        this.messageNotificationService.show(err?.error?.detail || 'Failed to update alert scanners');
+        this.messageNotificationService.show(err?.error?.detail ?? this.translationService.translate('Failed to update alert scanners'));
       }
     });
   }
 
   private buildTenantPayload(allowed: readonly string[]): TenantModel {
-    const tenant = this.tenantData || this.appService.tenantData();
+    const tenant = this.tenantData ?? this.appService.tenantData();
     return {
       name: tenant.name || '',
-      phone: tenant.phone || '',
-      country: tenant.country || '',
-      city: tenant.city || '',
-      postal_code: tenant.postal_code || '',
+      phone: tenant.phone ?? '',
+      country: tenant.country ?? '',
+      city: tenant.city ?? '',
+      postal_code: tenant.postal_code ?? '',
       allowed_alert_categories: [...allowed],
     } as TenantModel;
   }

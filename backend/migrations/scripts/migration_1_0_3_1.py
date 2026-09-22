@@ -31,6 +31,6 @@ class migration_1_0_3_1:
 
         users = await engine.find(db_user_account)
         for user in users:
-            if not user.tenant_uuid and default_tenant_id:
-                user.tenant_uuid = default_tenant_id
+            if not user.tenant_id and default_tenant_id:
+                user.tenant_id = default_tenant_id
                 await engine.save(user)

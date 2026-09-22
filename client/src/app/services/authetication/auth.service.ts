@@ -2,11 +2,18 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import { ApiService } from '../../shared/services/api.service';
 import { Router } from '@angular/router';
-import { AuthModel } from '../../shared/model/auth/auth.model';
+import { AuthModel } from './model/auth.model';
 import { TokenRefreshService } from './token-refresh.service';
 import { HttpHeaders } from '@angular/common/http';
 import { AppStorageService } from '../core/app/app-storage.service';
 import { AppService } from '../core/app/app.service';
+import type { LoginResponse, LoginSession } from './model/auth.interfaces.model';
+export type { LoginResponse, LoginSession } from './model/auth.interfaces.model';
+
+
+
+
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private authState = new BehaviorSubject<AuthModel>({ isAuthenticated: false, isValidated: true, error: null });
@@ -24,7 +31,7 @@ export class AuthService {
     return this.authState.asObservable();
   }
 
-  login(mail: string, password: string, isDemo: boolean = false): Observable<any> {
+  login(mail: string, password: string, isDemo = false): Observable<LoginResponse> {
     if (this.appService.isMobileMode()) {
       localStorage.setItem('mobileDemo', 'true');
     }
@@ -38,11 +45,11 @@ export class AuthService {
       body.set('username', mail);
       body.set('password', password);
     }
-    return this.apiService.post<any>(route, body.toString(), { headers }).pipe(tap({
+    return this.apiService.post<LoginResponse>(route, body.toString(), { headers }).pipe(tap({
       next: (response) => {
         if (response.twofa_required) {
           this.denyAccess('2FA required');
-          return response.provisioning_uri || null;
+          return;
         }
         if (!this.applyLoginResponse(response)) {
           return;
@@ -63,7 +70,8 @@ export class AuthService {
     }));
   }
 
-  verifyTwofa(code: string, tempToken: string, _: string): Observable<any> {
+  verifyTwofa(code: string, tempToken: string, _: string): Observable<LoginResponse | null> {
+    void _;
     if (!tempToken) {
       return new Observable((observer) => {
         observer.next(null);
@@ -74,7 +82,7 @@ export class AuthService {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${tempToken}`,
     });
-    return this.apiService.post<any>('token/2fa/verify?cookie_only=true', { code }, { headers }).pipe(tap({
+    return this.apiService.post<LoginResponse>('token/2fa/verify?cookie_only=true', { code }, { headers }).pipe(tap({
       next: (response) => {
         if (!this.applyLoginResponse(response, 'Invalid 2FA code')) {
           return;
@@ -87,16 +95,17 @@ export class AuthService {
   }
 
   logout(): void {
+    this.apiService.post('logout', {}).subscribe({ error: () => void 0 });
+    this.appStorageService.clearActiveSession();
+    this.tokenRefreshService.stopTokenRefresh();
     this.authState.next({
       isAuthenticated: false,
       isValidated: true,
       error: null,
     });
     this.router.navigate(['/login']).then(() => {
-      this.apiService.post('logout', {}).subscribe();
       localStorage.clear();
       sessionStorage.clear();
-      this.tokenRefreshService.stopTokenRefresh();
       localStorage.setItem('onboarding', String(false));
       this.appStorageService.clearStorage();
       this.appService.clearAll();
@@ -108,23 +117,23 @@ export class AuthService {
     this.login('_', '_', true).subscribe(() => void 0);
   }
 
-  signup(username: string, email: string, password: string): Observable<any> {
+  signup(username: string, email: string, password: string): Observable<unknown> {
     return this.apiService.post('signup', { username, email, password });
   }
 
-  signup_verification(mail: string, password: string): Observable<any> {
+  signup_verification(mail: string, password: string): Observable<unknown> {
     return this.apiService.post('signup/verificaion', { username: mail, password });
   }
 
-  forgotPassword(email: string): Observable<any> {
+  forgotPassword(email: string): Observable<unknown> {
     return this.apiService.post('forgot', { email });
   }
 
-  recoverAccount(recoveryKey: string): Observable<any> {
+  recoverAccount(recoveryKey: string): Observable<unknown> {
     return this.apiService.post('recover', { recovery_key: recoveryKey });
   }
 
-  updatePassword(token: string, password: string): Observable<any> {
+  updatePassword(token: string, password: string): Observable<unknown> {
     return this.apiService.post('updatePassword', { token, password });
   }
 
@@ -154,6 +163,7 @@ export class AuthService {
   }
 
   public clearAuthentication(error: string | null = null): void {
+    this.appStorageService.clearActiveSession();
     this.tokenRefreshService.stopTokenRefresh();
     this.authState.next({
       isAuthenticated: false,
@@ -194,7 +204,7 @@ export class AuthService {
     }
     return this.apiService
       .post<{
-            session?: any;
+            session?: LoginSession;
         }>('token/refresh?cookie_only=true', {})
       .pipe(tap((response) => {
         if (response?.session) {
@@ -203,7 +213,7 @@ export class AuthService {
       }), map(() => void 0));
   }
 
-  private applyLoginResponse(response: any, deniedMessage: string = 'Access denied!'): boolean {
+  private applyLoginResponse(response: LoginResponse, deniedMessage = 'Access denied!'): boolean {
     if (!response?.session) {
       this.denyAccess(deniedMessage);
       return false;
@@ -213,19 +223,10 @@ export class AuthService {
       this.denyAccess(deniedMessage);
       return false;
     }
-    this.passwordResetToken = sessionData.password_reset_required ? sessionData.password_reset_token || null : null;
+    this.passwordResetToken = sessionData.password_reset_required ? sessionData.password_reset_token ?? null : null;
     this.setAuthenticated();
     this.startTokenRefresh();
     return true;
   }
 
-  private toBool(v: any): boolean {
-    if (typeof v === 'boolean') {
-      return v;
-    }
-    if (typeof v === 'string') {
-      return v === 'true';
-    }
-    return !!v;
-  }
 }

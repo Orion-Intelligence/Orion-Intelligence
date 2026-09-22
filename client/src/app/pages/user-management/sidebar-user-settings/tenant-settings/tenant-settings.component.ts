@@ -1,52 +1,59 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../shared/services/api.service';
 import { AppService } from '../../../../services/core/app/app.service';
-import { AuthService } from '../../../../services/authetication/auth.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { userSessionData } from '../../../../shared/model/company-profile/node.model';
 import { UserImagePickerComponent } from '../user-image-picker/user-image-picker.component';
 import { TenantModel } from '../../../../shared/model/tenant/tenant.model';
-import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
-import { getTenantLocationDisplay, toggleEditState } from '../sidebar-settings.util';
+import { getTenantLocationDisplay } from '../sidebar-settings.util';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
-import { AlertWebhookSettingsBlockComponent } from '../../../../shared/components/alert-webhook-settings-block/alert-webhook-settings-block.component';
-import { AlertConnectorSettingsResponse, AlertWebhookSettingsForm } from '../../../../shared/model/alert-webhook-settings/alert-webhook-settings.model';
-import { SmtpSettingsBlockComponent } from '../../../../shared/components/smtp-settings-block/smtp-settings-block.component';
-import { SmtpSettingsForm } from '../../../../shared/model/smtp-settings/smtp-settings.model';
+import { AlertWebhookSettingsBlockComponent } from '../../../../shared/partials/alert-webhook-settings-block/alert-webhook-settings-block.component';
+import { AlertConnectorSettingsResponse, AlertWebhookSettingsForm } from '../../../../shared/partials/alert-webhook-settings-block/model/alert-webhook-settings.model';
+import { createWebhookForm, mapAlertConnectorSettings } from '../../../../shared/partials/alert-webhook-settings-block/alert-webhook-settings.util';
+import { SmtpSettingsBlockComponent } from '../../../../shared/partials/smtp-settings-block/smtp-settings-block.component';
+import { SmtpSettingsForm } from '../../../../shared/partials/smtp-settings-block/model/smtp-settings.model';
+import { TimePickerComponent } from '../../../../shared/partials/filters/time-picker/time-picker.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
+import { notifyUploadImageError, uploadImageResource } from '../../settings-resource.util';
 
 @Component({
   selector: 'app-tenant-settings',
-  imports: [FormsModule, CommonModule, UserImagePickerComponent, SmtpSettingsBlockComponent, AlertWebhookSettingsBlockComponent, TranslatePipe],
-  animations: [fadeInDashboardItem],
-  templateUrl: './tenant-settings.component.html'
+  imports: [FormsModule, CommonModule, UserImagePickerComponent, SmtpSettingsBlockComponent, AlertWebhookSettingsBlockComponent, TimePickerComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  templateUrl: './tenant-settings.component.html',
+  styleUrls: ['./tenant-settings.component.css']
 })
 export class TenantSettingsComponent implements OnInit {
+  private contactSnapshot = '';
+  private privacySnapshot = '';
+  private mailSnapshot = '';
+  private webhookSnapshot = '';
+
   isAccountSectionOpen = true;
-  isEditing = false;
-  contactEditing = false;
-  privacyEditing = false;
   mailErrorState = false;
   webhookErrorState = false;
   userSessionData: userSessionData;
-  userId: string = '';
+  userId = '';
   mailForm: SmtpSettingsForm = { accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
-  webhookForm: AlertWebhookSettingsForm = this.createWebhookForm();
+  webhookForm: AlertWebhookSettingsForm = createWebhookForm();
 
-  constructor(protected apiService: ApiService, protected appService: AppService, protected authService: AuthService, protected licenseService: LicenseService, private messageNotificationService: MessageNotificationService) {
+  constructor(protected apiService: ApiService, protected appService: AppService, protected licenseService: LicenseService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {
     this.userSessionData = this.appService.userSessionData();
   }
 
   ngOnInit(): void {
-    this.userId = this.userSessionData?.user.preferences?.["userId"];
+    const userId = this.userSessionData?.user.preferences?.userId;
+    this.userId = typeof userId === 'string' ? userId : '';
     this.mailForm = {
-      accounts_mail_password: this.userSessionData.tenant.accountsMailPassword || '',
-      accounts_mail: this.userSessionData.tenant.accountsMail || '',
-      accounts_smtp_server: this.userSessionData.tenant.accountsSmtpServer || '',
-      accounts_smtp_port: this.userSessionData.tenant.accountsSmtpPort || '',
+      accounts_mail_password: this.userSessionData.tenant.accountsMailPassword ?? '',
+      accounts_mail: this.userSessionData.tenant.accountsMail ?? '',
+      accounts_smtp_server: this.userSessionData.tenant.accountsSmtpServer ?? '',
+      accounts_smtp_port: this.userSessionData.tenant.accountsSmtpPort ?? '',
     };
+    this.captureEditableSettings();
     this.loadAlertConnectorSettings();
   }
 
@@ -60,27 +67,58 @@ export class TenantSettingsComponent implements OnInit {
     }
   }
 
-  toggleEdit(event: Event) {
-    this.isEditing = toggleEditState(event, this.isEditing, () => {
+  isContactDirty(): boolean {
+    return this.contactState() !== this.contactSnapshot;
+  }
+
+  isPrivacyDirty(): boolean {
+    return this.privacyState() !== this.privacySnapshot;
+  }
+
+  isMailDirty(): boolean {
+    return this.mailState() !== this.mailSnapshot;
+  }
+
+  isWebhookDirty(): boolean {
+    return this.webhookState() !== this.webhookSnapshot;
+  }
+
+  saveWebhookSettings(): void {
+    if (!this.isWebhookDirty()) {
+      return;
+    }
+    const payload = {
+      slack_client_id: this.webhookForm.slack_client_id,
+      slack_client_secret: this.webhookForm.slack_client_secret,
+      jira_client_id: this.webhookForm.jira_client_id,
+      jira_client_secret: this.webhookForm.jira_client_secret
+    };
+    this.apiService.post<AlertConnectorSettingsResponse>('alert-connectors/settings', payload).subscribe({
+      next: (response) => {
+        this.applyAlertConnectorSettings(response);
+      },
+      error: () => {
+        this.webhookErrorState = true;
+      }
+    });
+  }
+
+  saveContactSettings(): void {
+    if (this.isContactDirty()) {
+      this.updateUser();
+    }
+  }
+
+  savePrivacySettings(): void {
+    if (this.isPrivacyDirty()) {
+      this.updateUser();
+    }
+  }
+
+  saveMailSettings(): void {
+    if (this.isMailDirty()) {
       this.updateUser(true);
-    });
-  }
-
-  toggleContactEdit(event: Event) {
-    this.contactEditing = toggleEditState(event, this.contactEditing, () => {
-      this.updateUser();
-    });
-  }
-
-  togglePrivacyEdit(event: Event) {
-    this.privacyEditing = toggleEditState(event, this.privacyEditing, () => {
-      this.updateUser();
-    });
-  }
-
-  saveMailSettings() {
-    this.updateUser(true);
-    this.isEditing = false;
+    }
   }
 
   getLocationDisplay(): string {
@@ -88,22 +126,8 @@ export class TenantSettingsComponent implements OnInit {
   }
 
   normalizedAlertRunTime(): string | null {
-    const value = (this.userSessionData.tenant.alertRunTime || '').trim();
+    const value = (this.userSessionData.tenant.alertRunTime ?? '').trim();
     return value || null;
-  }
-
-  getAlertRunTimeDisplay(): string {
-    return this.normalizedAlertRunTime() || 'Use default schedule';
-  }
-
-  openAlertRunTimePicker(input: HTMLInputElement): void {
-    if (!this.privacyEditing || input.disabled) {
-      return;
-    }
-    input.focus();
-    if (typeof input.showPicker === 'function') {
-      input.showPicker();
-    }
   }
 
   updateUser(includeMailSettings = false) {
@@ -121,6 +145,7 @@ export class TenantSettingsComponent implements OnInit {
       profile_visibility_enabled: this.userSessionData.tenant.profileVisibilityEnabled,
       event_management_enabled: this.userSessionData.tenant.eventManagementEnabled === true,
       alerts_visible_to_admin: this.userSessionData.tenant.alertsVisibleToAdmin !== false,
+      alerts_visible_to_parent: this.userSessionData.tenant.alertsVisibleToParent !== false,
       alert_run_time: this.normalizedAlertRunTime(),
     } as TenantModel;
     if (includeMailSettings) {
@@ -130,6 +155,13 @@ export class TenantSettingsComponent implements OnInit {
       tenantData.accounts_smtp_port = this.mailForm.accounts_smtp_port;
     }
     this.apiService.post(route, tenantData).subscribe({
+      next: () => {
+        this.contactSnapshot = this.contactState();
+        this.privacySnapshot = this.privacyState();
+        if (includeMailSettings) {
+          this.mailSnapshot = this.mailState();
+        }
+      },
       error: () => {
         if (includeMailSettings) {
           this.mailErrorState = true;
@@ -138,40 +170,22 @@ export class TenantSettingsComponent implements OnInit {
     });
   }
 
-  cancelEdit(event?: Event) {
-    event?.stopPropagation();
-    this.isEditing = false;
-  }
-
-  cancelContactEdit(event: Event) {
-    event.stopPropagation();
-    this.contactEditing = false;
-  }
-
-  cancelPrivacyEdit(event: Event) {
-    event.stopPropagation();
-    this.privacyEditing = false;
-  }
-
   updateUserResource(file: File) {
-    const formData = new FormData();
-    formData.append('file', file);
-    return this.apiService.put<any>('tenant/image', formData).subscribe({
+    return uploadImageResource(this.apiService, 'tenant/image', file).subscribe({
       next: (res) => {
         if (res?.image) {
           this.appService.userSessionData().tenant.image =
-                      `/api/s/static/tenant/${res.image}`;
+                        `/api/s/static/tenant/${res.image}`;
         }
       },
       error: (err) => {
-        const message = err?.error?.detail || 'Failed to upload image';
-        this.messageNotificationService.show(message);
+        notifyUploadImageError(err, this.messageNotificationService, this.translationService); 
       }
     });
   }
 
   deleteUserResource() {
-    return this.apiService.delete<any>('tenant/image').subscribe(() => {
+    return this.apiService.delete<unknown>('tenant/image').subscribe(() => {
       this.appService.userSessionData().tenant.image =
                 'assets/images/tenant/default.png';
     });
@@ -179,7 +193,9 @@ export class TenantSettingsComponent implements OnInit {
 
   private loadAlertConnectorSettings() {
     this.apiService.get<AlertConnectorSettingsResponse>('alert-connectors/settings').subscribe({
-      next: (response) => this.applyAlertConnectorSettings(response),
+      next: (response) => {
+        this.applyAlertConnectorSettings(response);
+      },
       error: () => {
         this.webhookErrorState = true;
       }
@@ -187,37 +203,50 @@ export class TenantSettingsComponent implements OnInit {
   }
 
   private applyAlertConnectorSettings(response: AlertConnectorSettingsResponse) {
-    this.webhookForm = {
-      slack_client_id: response?.app?.slack_client_id || '',
-      slack_client_secret: '',
-      slack_configured: response?.app?.slack_configured === true,
-      jira_client_id: response?.app?.jira_client_id || '',
-      jira_client_secret: '',
-      jira_configured: response?.app?.jira_configured === true,
-      alert_slack_connected: response?.tenant?.slack_connected === true,
-      alert_slack_channel: response?.tenant?.slack_channel || '',
-      alert_slack_team: response?.tenant?.slack_team || '',
-      alert_jira_connected: response?.tenant?.jira_connected === true,
-      alert_jira_site_url: response?.tenant?.jira_site_url || '',
-      alert_jira_site_name: response?.tenant?.jira_site_name || ''
-    };
+    this.webhookForm = mapAlertConnectorSettings(response);
     this.webhookErrorState = false;
+    this.webhookSnapshot = this.webhookState();
   }
 
-  private createWebhookForm(): AlertWebhookSettingsForm {
-    return {
-      slack_client_id: '',
-      slack_client_secret: '',
-      slack_configured: false,
-      jira_client_id: '',
-      jira_client_secret: '',
-      jira_configured: false,
-      alert_slack_connected: false,
-      alert_slack_channel: '',
-      alert_slack_team: '',
-      alert_jira_connected: false,
-      alert_jira_site_url: '',
-      alert_jira_site_name: ''
-    };
+  private webhookState(): string {
+    return JSON.stringify([
+      this.webhookForm.slack_client_id,
+      this.webhookForm.slack_client_secret,
+      this.webhookForm.jira_client_id,
+      this.webhookForm.jira_client_secret
+    ]);
+  }
+
+  private captureEditableSettings(): void {
+    this.contactSnapshot = this.contactState();
+    this.privacySnapshot = this.privacyState();
+    this.mailSnapshot = this.mailState();
+  }
+
+  private contactState(): string {
+    return JSON.stringify([
+      this.userSessionData.tenant.phone || '',
+      this.userSessionData.tenant.country || '',
+      this.userSessionData.tenant.city || ''
+    ]);
+  }
+
+  private privacyState(): string {
+    return JSON.stringify([
+      this.normalizedAlertRunTime(),
+      this.userSessionData.tenant.profileVisibilityEnabled !== false,
+      this.userSessionData.tenant.eventManagementEnabled === true,
+      this.userSessionData.tenant.alertsVisibleToAdmin !== false,
+      this.userSessionData.tenant.alertsVisibleToParent !== false
+    ]);
+  }
+
+  private mailState(): string {
+    return JSON.stringify([
+      this.mailForm.accounts_mail,
+      this.mailForm.accounts_mail_password,
+      this.mailForm.accounts_smtp_server,
+      this.mailForm.accounts_smtp_port
+    ]);
   }
 }

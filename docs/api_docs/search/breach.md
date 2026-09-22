@@ -4,7 +4,7 @@
 
 Search breach / leak intelligence reports aggregated from ransomware blogs, extortion sites, leak forums, and darkweb data-dump portals; returns a paginated list of breach announcements and related metadata.
 
-Request body (`search_leak_param_model`):
+Request body (`search_consolidated_param_model`):
 - **q** — free-text search term applied across title, content, location, industry, team name, domains, etc. (default: empty string)
 - **category** — logical content bucket. `"all"` searches across consolidated leak indices; other values may restrict the search to specific collections such as `"leaks"`, `"tracking"`, or `"news"` depending on deployment (default: `"all"`). When `"all"`, the backend runs a consolidated ranked search over the core leak index.
 - **page** — page number of the paginated result set (1-based; default: `1`).

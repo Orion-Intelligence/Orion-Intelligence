@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { HeaderComponent } from '../header/login-header/header.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -7,18 +7,19 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   selector: 'app-notification',
   standalone: true,
   imports: [HeaderComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './notification.component.html'
 })
 export class NotificationComponent {
-  title: string = 'Your Trial Has Ended';
-  description: string = 'Your trial period has ended. To continue enjoying full access, please upgrade your subscription.';
+  title = 'Your Trial Has Ended';
+  description = 'Your trial period has ended. To continue enjoying full access, please upgrade your subscription.';
 
   constructor(private router: Router) {
-    const nav = this.router.getCurrentNavigation();
+    const nav = this.router.currentNavigation();
     const state = nav?.extras?.state;
     if (state) {
-      this.title = state['title'] || this.title;
-      this.description = state['description'] || this.description;
+      this.title = state.title ?? this.title;
+      this.description = state.description ?? this.description;
     }
     else {
       this.router.navigate(['/']).then();

@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { TranslatePipe } from '../../../../../../../shared/pipes/translate.pipe';
+import { ShipDetailField } from '../../../../model/satellite-intel.model';
+import { formatCoordinateLabel, pickDefinedValue } from '../../../../map-utils/renderer-utils';
 
-type ShipDetailField = { label: string; value: string; mono?: boolean };
+
 
 const PRIMARY_SHIP_DETAIL_KEYS = new Set([
   'mmsi',
@@ -48,10 +50,11 @@ const PRIMARY_SHIP_DETAIL_KEYS = new Set([
   selector: 'app-ship-details-panel',
   standalone: true,
   imports: [CommonModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './ship-details-panel.component.html',
 })
 export class ShipDetailsPanelComponent {
-  @Input() ship: Record<string, any> | null = null;
+  @Input() ship: Record<string, unknown> | null = null;
 
   get fields(): ShipDetailField[] {
     return [
@@ -81,22 +84,11 @@ export class ShipDetailsPanelComponent {
   }
 
   get coordinates(): string {
-    const latitude = this.ship?.['latitude'];
-    const longitude = this.ship?.['longitude'];
-    if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
-      return `${Number(latitude).toFixed(3)}, ${Number(longitude).toFixed(3)}`;
-    }
-    return '-';
+    return formatCoordinateLabel(this.ship?.latitude, this.ship?.longitude);
   }
 
   private pick(...keys: string[]): unknown {
-    for (const key of keys) {
-      const value = this.ship?.[key];
-      if (value !== null && value !== undefined && value !== '') {
-        return value;
-      }
-    }
-    return null;
+    return pickDefinedValue(this.ship, keys);
   }
 
   private toExtraFields(key: string, value: unknown): ShipDetailField[] {

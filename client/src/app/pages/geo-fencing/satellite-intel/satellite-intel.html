@@ -1,18 +1,18 @@
 <div data-testid="geo-fencing-page" class="relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden">
   @if (isMainLoading) {
-    <div data-testid="geo-fencing-loading" class="absolute inset-0 z-[10000] flex items-center justify-center bg-[rgba(8,16,27,0.58)] px-4 backdrop-blur-[2px] [body.light-theme_&]:bg-white/50">
+    <div data-testid="geo-fencing-loading" class="absolute inset-0 z-[1050] flex items-center justify-center bg-[rgba(8,16,27,0.58)] px-4 backdrop-blur-[2px] [body.light-theme_&]:bg-white/50">
       <div class="map-overlay-menu w-[min(360px,calc(100%-2rem))] rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] p-4 backdrop-blur-md [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95">
         <div class="flex items-center gap-3">
           <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)]">
             <div class="h-5 w-5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></div>
           </div>
           <div class="min-w-0">
-            <p class="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text1)]">{{ mainLoadingTitle }}</p>
-            <p class="mt-1 truncate text-[12px] text-[var(--color-text3)]">{{ mainLoadingMessage }}</p>
+            <p class="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text1)]">{{ mainLoadingTitle | translate }}</p>
+            <p class="mt-1 truncate text-[12px] text-[var(--color-text3)]">{{ mainLoadingMessage | translate }}</p>
           </div>
         </div>
-        <div class="ui-progress-track mt-4 h-[5px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)]">
-          <div class="ui-progress-indeterminate-bar"></div>
+        <div class="relative overflow-hidden mt-4 h-[5px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)]">
+          <div class="absolute inset-0 overflow-hidden after:absolute after:bottom-0 after:top-0 after:w-[40%] after:rounded-full after:bg-[linear-gradient(90deg,#4ea2f1_0%,#2c7ac5_50%,#7cc2ff_100%)] after:shadow-[0_0_3px_rgb(78_162_241/18%)] after:content-[''] after:[animation:ui-progress-sweep-primary_1.3s_linear_infinite]"></div>
         </div>
       </div>
     </div>
@@ -58,7 +58,7 @@
           </app-map-entities-overlay>
         </div>
           @if (!(isFilterOpen$ | async) && !isThreatLensDetailOverlayOpen) {
-          <div class="absolute right-3 top-3 z-20 flex max-w-[calc(100%-24px)] items-center gap-2 map-overlay-menu max-[943px]:right-2 max-[943px]:top-2 max-[943px]:max-w-[calc(100%-16px)] max-[520px]:flex-col max-[520px]:items-end">
+          <div class="absolute right-3 top-3 z-[1090] flex max-w-[calc(100%-24px)] items-center gap-2 map-overlay-menu max-[943px]:right-2 max-[943px]:top-2 max-[943px]:max-w-[calc(100%-16px)] max-[520px]:flex-col max-[520px]:items-end">
             @if (showTopBar) {
               <div class="inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] transition-opacity" [ngClass]="isThreatToolbarDisabled ? 'opacity-50' : 'opacity-100'">
                 <button data-testid="geo-fencing-tab-map" class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors max-[420px]:px-2" [ngClass]="activeTab === 'map' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('map')">

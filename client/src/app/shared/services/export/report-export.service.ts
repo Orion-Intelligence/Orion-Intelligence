@@ -3,6 +3,9 @@ import { ExportSharedService } from './export-shared.service';
 import { GraphExportService } from './graph-export.service';
 import { DocumentExportService } from './document-export.service';
 import { GraphReportExportType, GraphReportPayload, UnifiedReportPayloadInput } from '../../model/report/report-export.model';
+import { getOwnProperty } from '../../utils/type-guards.util';
+import { escapeCsvValue } from './export-csv.util';
+
 
 @Injectable({ providedIn: 'root' })
 export class ReportExportService extends ExportSharedService {
@@ -26,7 +29,7 @@ export class ReportExportService extends ExportSharedService {
     const routeUrl = input.currentRouteUrl || '/';
     const urlObj = new URL(routeUrl, window.location.origin);
     const pathSegs = urlObj.pathname.split('/').filter(Boolean);
-    const queryType = (urlObj.searchParams.get('ci') || '').toLowerCase();
+    const queryType = (urlObj.searchParams.get('ci') ?? '').toLowerCase();
     const reportId = pathSegs[pathSegs.length - 1] || 'report';
     const nowIso = new Date().toISOString();
 
@@ -34,11 +37,11 @@ export class ReportExportService extends ExportSharedService {
     const title = `${this.toTitle(normalizedType)} Report`;
     const sessionName = `ID-${reportId}`;
 
-    const normalizedUrl = this.normalizeUrl(input.url || '');
+    const normalizedUrl = this.normalizeUrl(input.url ?? '');
     const source = this.toRecord(input.csvObject);
     const sourceEntries = Object.entries(source);
-    const contentText = this.cleanText(input.content || '');
-    const screenshotRef = this.cleanText(source['m_screenshot'] || '');
+    const contentText = this.cleanText(input.content ?? '');
+    const screenshotRef = this.cleanText(source.m_screenshot || '');
     const reportIdShort = this.compactMiddle(reportId, 14, 12);
     const sourceUrlShort = this.compactMiddle(normalizedUrl, 48, 18);
 
@@ -59,7 +62,7 @@ export class ReportExportService extends ExportSharedService {
       detailValues[this.toTitle(k)] = this.cleanText(v).slice(0, 500) || '-';
     });
     if (!sourceEntries.length) {
-      detailValues['Details'] = '-';
+      detailValues.Details = '-';
     }
 
     const tables = [{ title: 'Metadata', values: this.buildMetadataValues(source) }];
@@ -92,22 +95,17 @@ export class ReportExportService extends ExportSharedService {
     const rows = [
       ['section', 'field', 'value'],
       ...Object.entries(payload.summary || {}).map(([key, value]) => ['Summary', key, value]),
-      ...(payload.tables || []).flatMap(table => {
+      ...(payload.tables ?? []).flatMap(table => {
         const valueRows = Object.entries(table.values || {}).map(([key, value]) => [table.title, key, value]);
-        const tableRows = (table.rows || []).flatMap((row, index) =>
+        const tableRows = (table.rows ?? []).flatMap((row, index) =>
           Object.entries(row).map(([key, value]) => [`${table.title} #${index + 1}`, key, value]));
-        const blockRows = (table.recordBlocks || []).flatMap(block =>
+        const blockRows = (table.recordBlocks ?? []).flatMap(block =>
           Object.entries(block.values || {}).map(([key, value]) => [`${table.title} - ${block.title}`, key, value]));
         return [...valueRows, ...tableRows, ...blockRows];
       })
     ];
-    const csv = rows.map(row => row.map(value => this.escapeCsvValue(value)).join(',')).join('\n');
+    const csv = rows.map(row => row.map(value => escapeCsvValue(value)).join(',')).join('\n');
     this.downloadText(csv, 'text/csv;charset=utf-8;', `${this.buildSafeFilename(payload)}.csv`);
-  }
-
-  private escapeCsvValue(value: unknown): string {
-    const text = String(value ?? '');
-    return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
   }
 
   private downloadText(content: string, type: string, filename: string): void {
@@ -131,7 +129,7 @@ export class ReportExportService extends ExportSharedService {
   private buildMetadataValues(source: Record<string, string>): Record<string, string> {
     const pick = (...keys: string[]): string => {
       for (const key of keys) {
-        const value = this.cleanText(source[key] || '');
+        const value = this.cleanText(getOwnProperty(source, key) || '');
         if (value) {
           return value;
         }
@@ -151,7 +149,7 @@ export class ReportExportService extends ExportSharedService {
   }
 
   private buildScreenshotValues(source: Record<string, string>): Record<string, string> {
-    const screenshot = this.cleanText(source['m_screenshot'] || '');
+    const screenshot = this.cleanText(source.m_screenshot || '');
     return {
       Description: 'Screenshot Preview',
       Available: screenshot ? 'Yes' : 'No',
@@ -163,7 +161,7 @@ export class ReportExportService extends ExportSharedService {
     const relatedKeys = Object.keys(source).filter(k => /related|mapping|edge|graph/i.test(k));
     const joined = relatedKeys
       .slice(0, 12)
-      .map(k => `${this.toTitle(k)}: ${this.cleanText(source[k]).slice(0, 180)}`)
+      .map(k => `${this.toTitle(k)}: ${this.cleanText(getOwnProperty(source, k)).slice(0, 180)}`)
       .join(' | ');
     return {
       Description: 'Reports linked directly or indirectly through mapped entities.',

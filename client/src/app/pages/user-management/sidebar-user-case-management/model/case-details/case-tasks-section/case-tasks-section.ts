@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Case, CaseAnalyst, CaseTask, TaskStatus } from '../../../../../../shared/model/case-management/case.model';
-import { PRIORITY_OPTIONS, TASK_STATUS_OPTIONS } from '../../../../../../shared/model/case-management/case-management.defaults';
+import { Case, CaseAnalyst, CaseTask, TaskStatus } from '../../case.model';
+import { PRIORITY_OPTIONS, TASK_STATUS_OPTIONS } from '../../case-management.defaults';
 import { TooltipDirective } from '../../../../../../shared/directive/tooltip-directive.directive';
 import { caseListItemMotion, caseModeSwapMotion, caseSectionMotion } from '../case-details.animations';
 import { CaseDateField, CaseDateTarget, formatCaseLabel, getAssignedCaseAnalysts, getCaseAnalystLabel, getCaseDateInputValue, getFormattedCaseDateOnly, getFormattedCaseDateTime, setCaseDateInputValue } from '../case-details-formatters';
@@ -10,12 +10,15 @@ import { CaseDetailsStore } from '../case-details.store';
 import { CaseEditDrawerComponent } from '../case-edit-drawer/case-edit-drawer';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { DatePickerComponent } from '../../../../../../shared/partials/filters/date-picker/date-picker.component';
+import { getOwnProperty } from '../../../../../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-case-tasks-section',
   imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent, TranslatePipe, DatePickerComponent],
   animations: [caseListItemMotion, caseModeSwapMotion, caseSectionMotion],
   host: { class: 'block' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-tasks-section.html'
 })
 export class CaseTasksSectionComponent {
@@ -54,11 +57,11 @@ export class CaseTasksSectionComponent {
       return null;
     }
 
-    return this.editedCase?.tasks?.[this.editingTaskIndex] || null;
+    return this.editedCase?.tasks?.[this.editingTaskIndex] ?? null;
   }
 
   openEditTask(index: number): void {
-    const task = this.caseData.tasks?.[index];
+    const task = getOwnProperty(this.caseData.tasks, index);
 
     if (!this.canEditTask(task)) {
       return;
@@ -74,7 +77,7 @@ export class CaseTasksSectionComponent {
   }
 
   hasTasksChanged(): boolean {
-    return (this.editedCase?.tasks?.length || 0) !== (this.caseData?.tasks?.length || 0);
+    return (this.editedCase?.tasks?.length ?? 0) !== (this.caseData?.tasks?.length || 0);
   }
 
   getCaseAnalysts(caseItem: Case | null = this.caseData): CaseAnalyst[] {

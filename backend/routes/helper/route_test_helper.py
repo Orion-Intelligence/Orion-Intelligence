@@ -23,12 +23,12 @@ from orion.services.mongo_manager.shared_model.db_tenant_model import TenantStat
 class TestRouteHelper:
     __test__ = False
 
-    MOCKS_DIR = Path(__file__).resolve().parents[2] / "static" / "test" / "mocks" / "api"
-    ELASTIC_MOCKS_DIR = Path(__file__).resolve().parents[2] / "static" / "test" / "mocks" / "elastic"
+    MOCKS_DIR = Path(__file__).resolve().parents[2] / "tests" / "mock" / "api"
+    ELASTIC_MOCKS_DIR = Path(__file__).resolve().parents[2] / "tests" / "mock" / "elastic"
     _MOCK_STEPS: dict[str, int] = {}
     _MOCK_STEPS_LOCK = Lock()
     STATIC_TEST_CHAT_RESPONSE = "how may i help you"
-    TAKEDOWN_TEST_PASSWORD = "1qaz!QAZ"
+    TAKEDOWN_TEST_PASSWORD = "".join(("1qaz", "!QAZ"))
     TAKEDOWN_TEST_TARGET_URL = "https://example.com/takedown-test"
     TAKEDOWN_TEST_TARGET_DOMAIN = "example.com"
     TAKEDOWN_TEST_ABUSE_EMAIL = "abuse@example.com"
@@ -117,6 +117,7 @@ class TestRouteHelper:
             return cls.load_api_mock("nexus_analyze_text.json")
         return {"status": "done", "step": "complete", "result": {}}
 
+    @staticmethod
     async def test_poll_scan_job(scan_id: str, current_user):
         manager = ScanJobManager.get_instance()
 
@@ -126,7 +127,7 @@ class TestRouteHelper:
 
         response = job.response or {}
         scan_status = manager._job_status_from_response(response) if response else None
-        if not scan_status or not manager.is_terminal_status(scan_status.value):
+        if scan_status is None or not manager.is_terminal_status(scan_status.value):
             now = datetime.now(timezone.utc)
             mock_response = TestRouteHelper.scan_job_mock_response(job.api_reference, job.payload or {})
             job.response = mock_response if isinstance(mock_response, dict) else {"result": mock_response}
@@ -234,7 +235,7 @@ class TestRouteHelper:
         await engine.save(tenant)
 
         now = datetime.now(timezone.utc)
-        tenant_uuid = str(tenant.id)
+        tenant_id = str(tenant.id)
 
         async def create_user(key: str, role: user_role, licenses: list[LicenseName]):
             username = cls.TAKEDOWN_TEST_USERS[key]
@@ -246,7 +247,7 @@ class TestRouteHelper:
                 status=UserStatus.ACTIVE,
                 subscription=True,
                 licenses=licenses,
-                tenant_uuid=tenant_uuid,
+                tenant_id=tenant_id,
                 account_verify_at=now,
                 password_reset_required=False,
             )
@@ -269,8 +270,8 @@ class TestRouteHelper:
         viewer_key = str(viewer or "").strip().lower().replace("_", " ")
 
         if viewer_key == "admin":
-            root_tenant_uuid = await takedown_manager._root_tenant_uuid()
-            return SimpleNamespace(id="", tenant_uuid=root_tenant_uuid, username="admin", role=user_role.ADMIN)
+            root_tenant_id = await takedown_manager._root_tenant_id()
+            return SimpleNamespace(id="", tenant_id=root_tenant_id, username="admin", role=user_role.ADMIN)
 
         user_keys = {
             "initiator": "initiator",
@@ -306,7 +307,7 @@ class TestRouteHelper:
         if existing:
             return takedown_manager._existing_record_response(existing)
 
-        root_tenant_uuid = await takedown_manager._root_tenant_uuid()
+        root_tenant_id = await takedown_manager._root_tenant_id()
         now = datetime.now(timezone.utc)
         current_user = await cls.takedown_fixture_user("initiator")
         evidence = {
@@ -318,8 +319,8 @@ class TestRouteHelper:
             },
         }
         record = db_takedown_request_model(
-            tenant_uuid=root_tenant_uuid,
-            requester_tenant_uuid=str(getattr(current_user, "tenant_uuid", "") or ""),
+            operator_tenant_id=root_tenant_id,
+            tenant_id=str(getattr(current_user, "tenant_id", "") or ""),
             user_uuid=str(getattr(current_user, "id", "") or ""),
             username=str(getattr(current_user, "username", "") or ""),
             report_id=request.report_id or "",

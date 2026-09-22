@@ -1,30 +1,29 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, Inject, Input, OnDestroy, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Inject, Input, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { ResultRowHelperService } from '../../services/result-row-helper.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import type { ShareDestination, ShareTarget } from './model/share-response-dialog.model';
+export type { ShareDestination, ShareTarget } from './model/share-response-dialog.model';
 
-type ShareTarget = 'telegram' | 'x' | 'linkedin' | 'reddit' | 'email';
 
-interface ShareDestination {
-  target: ShareTarget;
-  label: string;
-  icon: string;
-  iconClass: string;
-}
+
+
+
 
 const SHARE_DESTINATIONS: ShareDestination[] = [
-  { target: 'telegram', label: 'Telegram', icon: 'bi-telegram', iconClass: 'text-sky-300 group-hover:text-sky-200' },
-  { target: 'x', label: 'X', icon: 'bi-twitter-x', iconClass: 'text-white/75 group-hover:text-white' },
-  { target: 'linkedin', label: 'LinkedIn', icon: 'bi-linkedin', iconClass: 'text-blue-300 group-hover:text-blue-200' },
-  { target: 'reddit', label: 'Reddit', icon: 'bi-reddit', iconClass: 'text-orange-300 group-hover:text-orange-200' },
-  { target: 'email', label: 'Email', icon: 'bi-envelope-fill', iconClass: 'text-amber-300 group-hover:text-amber-200' },
+  { target: 'telegram', label: 'Telegram', icon: 'bi-telegram', iconClass: 'text-sky-300 group-hover:text-sky-200 [body.light-theme_&]:text-sky-700 [body.light-theme_&]:group-hover:text-sky-800' },
+  { target: 'x', label: 'X', icon: 'bi-twitter-x', iconClass: 'text-white/75 group-hover:text-white [body.light-theme_&]:text-slate-600 [body.light-theme_&]:group-hover:text-slate-900' },
+  { target: 'linkedin', label: 'LinkedIn', icon: 'bi-linkedin', iconClass: 'text-blue-300 group-hover:text-blue-200 [body.light-theme_&]:text-blue-700 [body.light-theme_&]:group-hover:text-blue-800' },
+  { target: 'reddit', label: 'Reddit', icon: 'bi-reddit', iconClass: 'text-orange-300 group-hover:text-orange-200 [body.light-theme_&]:text-orange-700 [body.light-theme_&]:group-hover:text-orange-800' },
+  { target: 'email', label: 'Email', icon: 'bi-envelope-fill', iconClass: 'text-amber-300 group-hover:text-amber-200 [body.light-theme_&]:text-amber-700 [body.light-theme_&]:group-hover:text-amber-800' },
 ];
 
 @Component({
   selector: 'app-share-response-dialog',
   standalone: true,
   imports: [CommonModule, TooltipDirective, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './share-response-dialog.component.html',
 })
 export class ShareResponseDialogComponent implements AfterViewInit, OnDestroy {
@@ -77,7 +76,9 @@ export class ShareResponseDialogComponent implements AfterViewInit, OnDestroy {
     this.resultRowHelper.copyToClipboard(text).subscribe((ok) => {
       if (ok) {
         this.copied.set(true);
-        window.setTimeout(() => this.copied.set(false), 1400);
+        window.setTimeout(() => {
+          this.copied.set(false);
+        }, 1400);
       }
     });
   }
@@ -92,7 +93,9 @@ export class ShareResponseDialogComponent implements AfterViewInit, OnDestroy {
     if (!text || !nav.share) {
       return;
     }
-    void nav.share({ text }).then(() => this.close()).catch(() => undefined);
+    void nav.share({ text }).then(() => {
+      this.close();
+    }).catch(() => undefined);
   }
 
   shareUrl(target: ShareTarget): string {

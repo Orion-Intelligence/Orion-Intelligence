@@ -1,10 +1,10 @@
 function ensureSidebarExpanded() {
   cy.get('body').then(($body) => {
     if ($body.find('[data-testid="sidebar-expand-button"]:visible').length) {
-      cy.get('[data-testid="sidebar-expand-button"]').click();
+      void cy.get('[data-testid="sidebar-expand-button"]').click();
     }
   });
-  cy.get('[data-testid="sidebar-collapse-button"]').should('be.visible');
+  void cy.get('[data-testid="sidebar-collapse-button"]').should('be.visible');
 }
 
 describe('Dashboard – General Intelligence – Tabs & Pagination', () => {
@@ -20,7 +20,7 @@ describe('Dashboard – General Intelligence – Tabs & Pagination', () => {
 
   it('General Intelligence – tabs load & pagination', () => {
     cy.get('[data-testid="sidebar-group-strategic"]').should('be.visible').click();
-    cy.get('tr[id^="item-"], [data-testid="result-card"]').should('exist');
+    cy.get('[data-testid="result-card"]').should('exist');
     cy.get('body').scrollTo('bottom', {
       ensureScrollable: false
     });
@@ -30,7 +30,7 @@ describe('Dashboard – General Intelligence – Tabs & Pagination', () => {
     cy.get('[data-testid="pagination-next"]').filter(':visible').scrollIntoView().not(':disabled').then(($btn) => {
         if ($btn.length) {
           cy.wrap($btn).click();
-          cy.get('tr[id^="item-"], [data-testid="result-card"]').should('exist');
+          cy.get('[data-testid="result-card"]').should('exist');
         }
       });
   });
@@ -49,14 +49,14 @@ describe('Data Breach – Tabs & Pagination', () => {
 
   it('Data Breach – tabs load & pagination', () => {
     cy.get('[data-testid="sidebar-group-breach"]').scrollIntoView().should('be.visible').click();
-    cy.get('tr[id^="item-"], [data-testid="result-card"]').should('exist');
+    cy.get('[data-testid="result-card"]').should('exist');
     cy.get('[data-testid="pagination-root"]').should('exist');
 
     cy.get('[data-testid="pagination-root"]').scrollIntoView();
     cy.get('[data-testid="pagination-next"]').filter(':visible').scrollIntoView().not(':disabled').then(($btn) => {
         if ($btn.length) {
           cy.wrap($btn).click();
-          cy.get('tr[id^="item-"], [data-testid="result-card"]').should('exist');
+          cy.get('[data-testid="result-card"]').should('exist');
         }
       });
   });

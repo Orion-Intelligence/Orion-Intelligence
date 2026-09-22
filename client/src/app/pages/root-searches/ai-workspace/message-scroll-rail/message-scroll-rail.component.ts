@@ -1,11 +1,12 @@
-import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy } from '@angular/core';
-import { ScrollRailMarker, ScrollRailMessage, ScrollRailPrompt } from '../../../../shared/model/chat/message-scroll-rail.model';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { ScrollRailMarker, ScrollRailMessage, ScrollRailPrompt } from '../model/message-scroll-rail.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-message-scroll-rail',
   imports: [TranslatePipe],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './message-scroll-rail.component.html',
 })
 export class MessageScrollRailComponent implements OnChanges, OnDestroy {
@@ -18,8 +19,12 @@ export class MessageScrollRailComponent implements OnChanges, OnDestroy {
   private scrollFrame: number | null = null;
   private scrollTarget: HTMLElement | Window | null = null;
   private setupFrame: number | null = null;
-  private readonly onScroll = () => this.scheduleScrollSync();
-  private readonly onResize = () => this.scheduleScrollSync();
+  private readonly onScroll = () => {
+    this.scheduleScrollSync();
+  };
+  private readonly onResize = () => {
+    this.scheduleScrollSync();
+  };
 
   prompts: ScrollRailPrompt[] = [];
   visibleMarkers: ScrollRailMarker[] = [];
@@ -219,13 +224,9 @@ export class MessageScrollRailComponent implements OnChanges, OnDestroy {
 
     const anchorY = this.getScrollViewportTop(this.scrollTarget) + this.scrollAnchorOffset;
     let activeMessageIndex: number | null = null;
-    for (let messageIndex = 0; messageIndex < this.messages.length; messageIndex += 1) {
-      const element = this.getMessageElement(messageIndex);
-      if (!element) {
-        continue;
-      }
+    for (const { index, element } of this.iterateMessageElements()) {
       if (element.getBoundingClientRect().top <= anchorY) {
-        activeMessageIndex = messageIndex;
+        activeMessageIndex = index;
         continue;
       }
       break;
@@ -242,14 +243,10 @@ export class MessageScrollRailComponent implements OnChanges, OnDestroy {
   private getFirstVisibleMessageIndex(scrollTarget: HTMLElement | Window): number | null {
     const viewportTop = this.getScrollViewportTop(scrollTarget);
     const viewportBottom = this.getScrollViewportBottom(scrollTarget);
-    for (let messageIndex = 0; messageIndex < this.messages.length; messageIndex += 1) {
-      const element = this.getMessageElement(messageIndex);
-      if (!element) {
-        continue;
-      }
+    for (const { index, element } of this.iterateMessageElements()) {
       const rect = element.getBoundingClientRect();
       if (rect.bottom >= viewportTop && rect.top <= viewportBottom) {
-        return messageIndex;
+        return index;
       }
     }
     return null;
@@ -257,6 +254,15 @@ export class MessageScrollRailComponent implements OnChanges, OnDestroy {
 
   private getMessageElement(messageIndex: number): HTMLElement | null {
     return document.querySelector<HTMLElement>(`[data-ai-message-index="${messageIndex}"]`);
+  }
+
+  private *iterateMessageElements(): Generator<{ index: number; element: HTMLElement }> {
+    for (let messageIndex = 0; messageIndex < this.messages.length; messageIndex += 1) {
+      const element = this.getMessageElement(messageIndex);
+      if (element) {
+        yield { index: messageIndex, element };
+      }
+    }
   }
 
   private getFallbackScrollTarget(): HTMLElement | Window {

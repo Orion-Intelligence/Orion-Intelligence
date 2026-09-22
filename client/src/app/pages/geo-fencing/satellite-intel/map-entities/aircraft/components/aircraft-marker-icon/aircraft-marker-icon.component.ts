@@ -1,10 +1,9 @@
-import { Component } from '@angular/core';
-import { TranslatePipe } from '../../../../../../../shared/pipes/translate.pipe';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector:    'app-aircraft-marker-icon',
-  imports: [TranslatePipe],
   standalone:  true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './aircraft-marker-icon.component.html',
 })
 export class AircraftMarkerIconComponent {

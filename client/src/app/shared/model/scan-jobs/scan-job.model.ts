@@ -13,26 +13,24 @@ export interface ScanJobNotificationResponse {
 
 export interface ScanJobDetailResponse extends ScanJobNotificationResponse {
   api_reference?: string;
-  payload: Record<string, any>;
-  response: any;
+  payload: Record<string, unknown>;
+  response: unknown;
 }
 
 export interface ScanJob extends ScanJobNotificationResponse {
   api_reference?: string;
-  payload?: Record<string, any>;
-  response?: any;
+  payload?: Record<string, unknown>;
+  response?: unknown;
 }
-
-export type ScanJobNotification = ScanJobNotificationResponse;
 
 export interface ScanJobCreateResponse {
   scan_id: string;
   title: string;
   target: string;
   api_reference?: string;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
   status: ScanJobStatus;
-  response?: any;
+  response?: unknown;
   seen?: boolean;
   source?: 'new' | 'existing_running' | 'previous_completed';
   created_at?: string | Date;
@@ -58,7 +56,7 @@ export interface DuplicateScanPrompt {
 
 export interface ScanJobIncompleteResponse {
   scan_id: string;
-  payload?: Record<string, any>;
+  payload?: Record<string, unknown>;
 }
 
 export interface ScanJobListResponse<T = ScanJobNotificationResponse> {
@@ -70,29 +68,15 @@ export interface ScanJobListResponse<T = ScanJobNotificationResponse> {
 }
 
 export interface ScanJobPollResponse {
-  response?: any;
+  response?: unknown;
   seen?: boolean;
   updated_at?: string | Date;
   completed_at?: string | Date | null;
 }
 
-export interface ScanJobCountResponse {
-  total: number;
-}
-
-export interface ScanJobSeenResponse {
-  message: string;
-}
-
-export interface ScanJobDeleteResponse {
-  message: string;
-  deleted?: number;
-  skipped?: number;
-}
-
 export interface ScanJobStartRequest {
   apiReference: string;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
   metadata?: {
     section?: string;
     title?: string;
@@ -100,4 +84,5 @@ export interface ScanJobStartRequest {
   };
   pollDelayMs?: number;
   forceNew?: boolean;
+  reusePrevious?: boolean;
 }

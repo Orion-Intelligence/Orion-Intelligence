@@ -9,9 +9,9 @@ from orion.services.log_manager.log_controller import log
 
 
 class CategoryAlertProcessor:
-    def __init__(self, alert_buffer: AlertScanBuffer, search_model: Any):
+    def __init__(self, alert_buffer: AlertScanBuffer, search_manager: Any):
         self._alert_buffer = alert_buffer
-        self._search_model = search_model
+        self._search_model = search_manager
 
     @staticmethod
     def _value(data: Any, field: str, default: Any = None) -> Any:
@@ -32,13 +32,13 @@ class CategoryAlertProcessor:
                     continue
 
                 for ioc_value in self._value(ioc, "values", []) or []:
-                    await self._process_ioc_value(tenant_id, category, config, summary, ioc_type_name, ioc_value)
+                    await self._process_ioc_value(tenant_id, category, config, ioc_type_name, ioc_value)
         except Exception as e:
             log.g().e(f"Tenant alert processing failed for tenant={tenant_id}, category={category}: {e}")
 
         return summary
 
-    async def _process_ioc_value(self, tenant_id: str, category: str, config: CategorySearchConfig, summary: dict, ioc_type_name: str, ioc_value: str) -> None:
+    async def _process_ioc_value(self, tenant_id: str, category: str, config: CategorySearchConfig, ioc_type_name: str, ioc_value: str) -> None:
         search_data = {
             "entity_filter": {ioc_type_name: [ioc_value]},
             "category": config.search_data_category,
@@ -52,7 +52,7 @@ class CategoryAlertProcessor:
 
         try:
             search_param = config.param_model(**search_data)
-            es_response = await self._search(category, config, search_param)
+            es_response = await self._search(config, search_param)
             es_response_dict = ResponseParser.to_dict(es_response, allow_body=False)
             if es_response_dict is None:
                 return
@@ -76,7 +76,7 @@ class CategoryAlertProcessor:
                 f"category={category}, ioc={ioc_type_name}:{ioc_value}"
             )
 
-    async def _search(self, category: str, config: CategorySearchConfig, search_param: Any) -> Any:
+    async def _search(self, config: CategorySearchConfig, search_param: Any) -> Any:
         search_func = getattr(self._search_model, config.search_method)
 
         if config.search_method == "search_stealer_iocs":

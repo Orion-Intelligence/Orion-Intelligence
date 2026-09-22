@@ -1,6 +1,5 @@
-import { Component, effect, input } from '@angular/core';
+import { Component, effect, input, ChangeDetectionStrategy } from '@angular/core';
 
-import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 @Component({
@@ -8,7 +7,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
   standalone: true,
   imports: [TranslatePipe],
   templateUrl: './result-list.component.html',
-  animations: [fadeInDashboardItem]
+  changeDetection: ChangeDetectionStrategy.Eager
 })
 export class ResultListComponent {
   readonly listItemsInput = input<string[]>([], { alias: 'listItems' });

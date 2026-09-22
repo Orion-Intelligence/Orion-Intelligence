@@ -2,7 +2,7 @@ import asyncio
 import fcntl
 import importlib
 import os
-import sys
+import pkgutil
 
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_controller import mongo_controller
@@ -32,10 +32,11 @@ async def _run_migration_locked(version, app_version=None):
         log.g().w(f"Scripts directory not found: {script_dir}")
         return engine
 
-    migration_files = [f for f in os.listdir(script_dir) if f.startswith("migration_") and f.endswith(".py")]
+    migration_files = [module.name for module in pkgutil.iter_modules([script_dir])
+                       if module.name.startswith("migration_") and not module.ispkg]
     migration_versions = []
     for file in migration_files:
-        version_str = file.replace("migration_", "").replace(".py", "").replace("_", ".")
+        version_str = file.removeprefix("migration_").replace("_", ".")
         migration_versions.append((version_str, file))
     migration_versions.sort(key=lambda x: [int(part) if part.isdigit() else part for part in x[0].split(".")])
 
@@ -49,13 +50,11 @@ async def _run_migration_locked(version, app_version=None):
     else:
         stored_version_parts = [int(part) if part.isdigit() else part for part in stored_version.split(".")]
 
-    sys.path.insert(0, script_dir)
-
     for version_str, file in migration_versions:
         script_version_parts = [int(part) if part.isdigit() else part for part in version_str.split(".")]
         if target_version_parts >= script_version_parts > stored_version_parts:
-            migration_script_name = file.replace(".py", "")
-            migration_module = importlib.import_module(migration_script_name)
+            migration_script_name = file
+            migration_module = importlib.import_module(f"migrations.scripts.{migration_script_name}")
             if hasattr(migration_module, migration_script_name):
                 migration_class = getattr(migration_module, migration_script_name)
                 if hasattr(migration_class, "migrate"):

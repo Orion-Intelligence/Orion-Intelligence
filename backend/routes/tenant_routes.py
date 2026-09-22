@@ -3,8 +3,9 @@ from datetime import datetime
 
 from fastapi import APIRouter, Body, HTTPException, Query
 from fastapi import Depends, UploadFile
+from fastapi.responses import StreamingResponse
 
-from configs.app_dependency import license_required, role_required, status_required, get_current_user
+from configs.app_dependency import license_required, permission_required, role_required, status_required, get_current_user
 from orion.api.interactive.account_manager.account_manager import AccountManager
 from orion.api.interactive.account_manager.chat_share_manager import ChatShareManager
 from orion.api.interactive.account_manager.models.chat_history_model import CreateChatShareRequest
@@ -12,11 +13,14 @@ from orion.api.interactive.account_manager.models.chat_history_model import chat
 from orion.api.interactive.account_manager.models.user_meta_model import user_meta_model
 from orion.api.interactive.account_manager.models.user_param_model import user_param_model
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+from orion.api.interactive.backup_manager.backup_manager import BackupManager
+from orion.api.interactive.backup_manager.backup_store_io import BackupStoreIO
 from orion.api.interactive.auditlog_manager.models.audit_log_param_model import audit_log_param_model
 from orion.api.interactive.resource_manager.resource_manager import ResourceManager
 from orion.api.interactive.system_log_manager.system_log_manager import SystemLogManager
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
+from orion.services.permission_manager.permission_models import UserPermission
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantRequest
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel
@@ -29,6 +33,13 @@ from orion.api.server.nexus_manager.nexus_chat_gateway import nexus_chat_gateway
 
 tenant_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 SYSTEM_LOG_FLUSHED_AT_KEY = "SYSTEM_LOG_FLUSHED_AT"
+
+
+async def tenant_backup_allowed(current_user=Depends(get_current_user)):
+    tenant = await TenantManager.get_instance().get_managed_tenant(current_user)
+    if tenant is not None and getattr(tenant, "parent_tenant_id", None):
+        raise HTTPException(status_code=403, detail="Sub tenant backups are part of the primary tenant backup")
+    return current_user
 
 
 @tenant_routes.post(
@@ -63,25 +74,48 @@ async def get_tenant_users(current_user=Depends(get_current_user)):
     "/api/tenants/get",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN]))], )
-async def get_all_tenants():
-    return await TenantManager.get_instance().get_all_tenant()
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])), Depends(license_required("maintainer"))], )
+async def get_all_tenants(current_user=Depends(get_current_user)):
+    return await TenantManager.get_instance().get_tenants(current_user)
 
 
 @tenant_routes.delete(
     "/api/tenants/{tenant_id}",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])), Depends(license_required("maintainer"))], )
 async def delete_tenant(tenant_id: str, current_user=Depends(get_current_user)):
     return await TenantManager.get_instance().delete_tenant(tenant_id, current_user)
+
+
+@tenant_routes.get(
+    "/api/tenants/{tenant_id}/export",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])), Depends(license_required("maintainer")), Depends(tenant_backup_allowed)], )
+async def export_tenant(tenant_id: str, current_user=Depends(get_current_user)):
+    owner_tenant_id = None if current_user.role == "admin" else str(getattr(current_user, "tenant_id", "") or "")
+    tenant_dir, name, report = await BackupManager.get_instance().resolve_latest_tenant_download(tenant_id, owner_tenant_id)
+    return StreamingResponse(
+        BackupStoreIO.iter_export(tenant_dir, name, report),
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{name}.zip"'},
+    )
+
+
+@tenant_routes.get(
+    "/api/tenants/{tenant_id}/export-info",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])), Depends(license_required("maintainer")), Depends(tenant_backup_allowed)], )
+async def export_tenant_info(tenant_id: str, current_user=Depends(get_current_user)):
+    owner_tenant_id = None if current_user.role == "admin" else str(getattr(current_user, "tenant_id", "") or "")
+    return await BackupManager.get_instance().latest_tenant_export_info(tenant_id, owner_tenant_id)
 
 
 @tenant_routes.get(
     "/api/tenants/alerts/summary",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.ANALYST]))], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))], )
 async def get_visible_tenant_alerts_summary(current_user=Depends(get_current_user)):
     return await TenantManager.get_instance().get_visible_tenant_alerts_summary(current_user)
 
@@ -90,16 +124,16 @@ async def get_visible_tenant_alerts_summary(current_user=Depends(get_current_use
     "/api/tenants/alerts/allowed-options",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN]))], )
-async def get_alert_allowed_tenant_options():
-    return await TenantManager.get_instance().get_alert_allowed_tenant_options()
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])), Depends(license_required("maintainer"))], )
+async def get_alert_allowed_tenant_options(current_user=Depends(get_current_user)):
+    return await TenantManager.get_instance().get_alert_allowed_tenant_options(current_user)
 
 
 @tenant_routes.get(
     "/api/tenants/{tenant_id}/alerts",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.ANALYST]))], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))], )
 async def get_visible_tenant_category_alerts(tenant_id: str, page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=20), alert_type: str | None = Query(None), paginate: bool = Query(False), current_user=Depends(get_current_user)):
     return await TenantManager.get_instance().get_visible_tenant_alerts(
         tenant_id,
@@ -115,7 +149,7 @@ async def get_visible_tenant_category_alerts(tenant_id: str, page: int = Query(1
     "/api/tenants/{tenant_id}/alerts/filter-options",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.ANALYST]))], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))], )
 async def get_visible_tenant_alert_filter_options(tenant_id: str, field: str = Query(...), q: str = Query(""), limit: int = Query(25, ge=1, le=50), alert_type: str | None = Query(None), current_user=Depends(get_current_user)):
     return await TenantManager.get_instance().get_visible_tenant_alert_filter_options(
         tenant_id,
@@ -267,7 +301,7 @@ async def get_audit_logs(param: audit_log_param_model = Body(...), current_user=
     status_code=200,
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN]))], )
-async def delete_audit_log(log_id: str, current_user=Depends(get_current_user)):
+async def delete_audit_log(log_id: str, _current_user=Depends(get_current_user)):
     return {"success": await AuditLogManager.get_instance().delete(log_id)}
 
 
@@ -275,7 +309,8 @@ async def delete_audit_log(log_id: str, current_user=Depends(get_current_user)):
     "/api/profile/system-logs",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.ANALYST])),
+        Depends(permission_required([UserPermission.MONITORING]))], )
 async def get_system_logs(log_type: str | None = Query(None), date: str | None = Query(None), date_range: str | None = Query(None), page: int = Query(1), limit: int = Query(200)):
     try:
         flushed_at = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [SYSTEM_LOG_FLUSHED_AT_KEY, None, None])
@@ -312,7 +347,7 @@ async def delete_system_log(log_date: str, file_name: str):
     include_in_schema=False,
     dependencies=[Depends(status_required([UserStatus.ACTIVE])), ], )
 async def get_node(current_user=Depends(get_current_user)):
-    return await AlertManager.getInstance().get_alert_summary(str(current_user.tenant_uuid))
+    return await AlertManager.getInstance().get_alert_summary(str(current_user.tenant_id))
 
 @tenant_routes.post(
     "/api/get/tenant/node",
@@ -346,8 +381,8 @@ async def set_alerts_seen(data: list[AlertModel], current_user=Depends(get_curre
     status_code=200,
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.MEMBER])), Depends(status_required([UserStatus.ACTIVE])), ], )
-async def delete_alert(id: str = Body(..., description="Unique id identifier of the alert to delete."), current_user=Depends(get_current_user)):
-    return await AlertManager.getInstance().delete_alert(id, current_user)
+async def delete_alert(alert_id: str = Body(..., description="Unique id identifier of the alert to delete."), current_user=Depends(get_current_user)):
+    return await AlertManager.getInstance().delete_alert(alert_id, current_user)
 
 
 @tenant_routes.post(
@@ -416,7 +451,7 @@ async def run_user_ioc_alerts(current_user=Depends(get_current_user)):
     dependencies=[Depends(role_required([user_role.MEMBER])), Depends(status_required([UserStatus.ACTIVE])),
         Depends(license_required("maintainer")), ], )
 async def cancel_user_ioc_alerts(current_user=Depends(get_current_user)):
-    return await AlertManager.getInstance().set_scan_running(current_user.tenant_uuid, False,True)
+    return await AlertManager.getInstance().set_scan_running(current_user.tenant_id, False,True)
 
 
 @tenant_routes.post(
@@ -443,3 +478,54 @@ async def delete_typed_alerts(_type: str, current_user=Depends(get_current_user)
     dependencies=[Depends(role_required([user_role.MEMBER])), Depends(status_required([UserStatus.ACTIVE])), ], )
 async def get_alert_scan_status(current_user=Depends(get_current_user)):
     return await AlertManager.getInstance().get_scan_status(current_user)
+
+
+@tenant_routes.get(
+    "/api/tenant/backups",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), Depends(tenant_backup_allowed), ], )
+async def list_tenant_backups(current_user=Depends(get_current_user)):
+    return await BackupManager.get_instance().list_backups_for_tenant(str(getattr(current_user, "tenant_id", "") or ""))
+
+
+@tenant_routes.get(
+    "/api/tenant/backups/status",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), Depends(tenant_backup_allowed), ], )
+async def tenant_backup_status():
+    return await BackupManager.get_instance().job_status()
+
+
+@tenant_routes.post(
+    "/api/tenant/backups/{backup_id}/restore",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), Depends(tenant_backup_allowed), ], )
+async def restore_tenant_backup(backup_id: str, current_user=Depends(get_current_user)):
+    return await BackupManager.get_instance().start_tenant_restore(
+        backup_id, str(getattr(current_user, "tenant_id", "") or "")
+    )
+
+
+@tenant_routes.post(
+    "/api/tenant/backups/import",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), Depends(tenant_backup_allowed), ], )
+async def import_tenant_backup(file: UploadFile, current_user=Depends(get_current_user)):
+    return await BackupManager.get_instance().start_tenant_import(
+        file, str(getattr(current_user, "tenant_id", "") or "")
+    )
+
+
+@tenant_routes.get(
+    "/api/tenant/backups/{backup_id}/download",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), Depends(tenant_backup_allowed), ], )
+async def download_tenant_backup(backup_id: str, current_user=Depends(get_current_user)):
+    tenant_dir, name, report = await BackupManager.get_instance().resolve_tenant_download(
+        backup_id, str(getattr(current_user, "tenant_id", "") or "")
+    )
+    return StreamingResponse(
+        BackupStoreIO.iter_export(tenant_dir, name, report),
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{name}.zip"'},
+    )

@@ -1,7 +1,8 @@
 import { Subscription } from 'rxjs';
-import { SatelliteLiveShip } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteLiveShip, SatelliteLiveShipsBBoxResponse } from '../../model/satellite-intel-api.models';
 import { MapEntityLoadingBridge, SatelliteTrackingViewport } from '../../../models/geo-fencing.models';
 import { SatelliteShipTrackingService } from './ship-tracking.service';
+import { isFiniteNumber } from '../../../../../shared/utils/type-guards.util';
 
 export class SatelliteShipTrackingController {
   private trackSub?: Subscription;
@@ -85,21 +86,10 @@ export class SatelliteShipTrackingController {
     clearTimeout(this.timer);
     this.trackSub = this.service.pollGlobal().subscribe({
       next: (res) => {
-        if (!this.enabled) {
-          return;
-        }
-        const payload = (res?.result ?? res) as any;
-        const ships = this.service.extractItems(payload);
-        if (ships !== null) {
-          this.applyResult(ships, payload, 'Global ship tracking');
-        }
-        const feedIssue = this.service.getFeedIssue(payload);
-        if (ships === null && feedIssue) {
-          this.error = `Global ship tracking: ${feedIssue}`;
-        }
+        this.handleTrackingResponse(res, 'Global ship tracking', true, (ships) => ships);
       },
       error: (err) => {
-        this.error = err?.error?.detail || err?.message || 'Global ship tracking failed';
+        this.error = err?.error?.detail ?? err?.message ?? 'Global ship tracking failed';
       },
     });
     this.trackSub.add(() => {
@@ -132,21 +122,10 @@ export class SatelliteShipTrackingController {
     clearTimeout(this.timer);
     this.trackSub = this.service.pollInBounds(viewport.lat, viewport.lon, viewport.delta).subscribe({
       next: (res) => {
-        if (!this.enabled) {
-          return;
-        }
-        const payload = (res?.result ?? res) as any;
-        const ships = this.service.extractItems(payload);
-        if (ships !== null) {
-          this.applyResult(this.filterShipsToViewport(ships, viewport), payload, 'Ship tracking', !viewportChanged);
-        }
-        const feedIssue = this.service.getFeedIssue(payload);
-        if (ships === null && feedIssue) {
-          this.error = `Ship tracking: ${feedIssue}`;
-        }
+        this.handleTrackingResponse(res, 'Ship tracking', !viewportChanged, (ships) => this.filterShipsToViewport(ships, viewport));
       },
       error: (err) => {
-        this.error = err?.error?.detail || err?.message || 'Ship tracking failed';
+        this.error = err?.error?.detail ?? err?.message ?? 'Ship tracking failed';
       },
     });
     this.trackSub.add(() => {
@@ -162,7 +141,22 @@ export class SatelliteShipTrackingController {
     });
   }
 
-  private applyResult(ships: SatelliteLiveShip[], payload: any, label: string, keepLastAllowed = true): void {
+  private handleTrackingResponse(res: SatelliteLiveShipsBBoxResponse, label: string, keepLastAllowed: boolean, mapShips: (ships: SatelliteLiveShip[]) => SatelliteLiveShip[]): void {
+    if (!this.enabled) {
+      return;
+    }
+    const payload = (res?.result ?? res) as unknown;
+    const ships = this.service.extractItems(payload);
+    if (ships !== null) {
+      this.applyResult(mapShips(ships), payload, label, keepLastAllowed);
+    }
+    const feedIssue = this.service.getFeedIssue(payload);
+    if (ships === null && feedIssue) {
+      this.error = `${label}: ${feedIssue}`;
+    }
+  }
+
+  private applyResult(ships: SatelliteLiveShip[], payload: unknown, label: string, keepLastAllowed = true): void {
     const feedIssue = this.service.getFeedIssue(payload);
     if (ships.length > 0) {
       if (feedIssue && keepLastAllowed && this.shouldKeepLastShips() && ships.length < this.data.length) {
@@ -200,11 +194,11 @@ export class SatelliteShipTrackingController {
     return ships.filter((ship) => {
       const latitude = ship.latitude;
       const longitude = ship.longitude;
-      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      if (!isFiniteNumber(latitude) || !isFiniteNumber(longitude)) {
         return false;
       }
-      const lonDistance = Math.min(Math.abs((longitude as number) - viewport.lon), 360 - Math.abs((longitude as number) - viewport.lon));
-      return Math.abs((latitude as number) - viewport.lat) <= viewport.delta && lonDistance <= viewport.delta;
+      const lonDistance = Math.min(Math.abs(longitude - viewport.lon), 360 - Math.abs(longitude - viewport.lon));
+      return Math.abs(latitude - viewport.lat) <= viewport.delta && lonDistance <= viewport.delta;
     });
   }
 

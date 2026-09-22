@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tenant export</title>
+<style>
+  :root { color-scheme: light dark; --bg: #0f1a2b; --card: #16243a; --line: #24384f; --text: #e6edf6; --muted: #8fa3bb; --accent: #57a5eb; }
+  @media (prefers-color-scheme: light) { :root { --bg: #f4f7fb; --card: #ffffff; --line: #d9e2ee; --text: #172235; --muted: #5b6b80; --accent: #2b90ee; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px 16px 48px; background: var(--bg); color: var(--text); font: 14px/1.5 Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 15px; margin: 0; }
+  p { margin: 0; color: var(--muted); }
+  .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 20px 0 28px; }
+  .meta div, section { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .meta b { display: block; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  section { margin-bottom: 16px; }
+  .totals { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 8px 0 12px; color: var(--muted); }
+  .totals strong { color: var(--text); }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th, td { text-align: left; padding: 6px 8px; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+  th { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); border-top: 0; }
+  td:last-child, th:last-child { text-align: right; }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--accent); font-size: 11px; margin-left: 8px; vertical-align: middle; }
+  .note { margin-top: 24px; font-size: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Tenant export</h1>
+  <p>Summary of what this export contains. The data itself is in <code>tenant.enc</code>, readable only by the Orion Intelligence server that produced it.</p>
+  <div class="meta">__META__</div>
+  __SECTIONS__
+  <p class="note">Counts were recorded when the backup was taken. Import this file from the Backup &amp; Restore page of the same server.</p>
+</main>
+</body>
+</html>

@@ -1,14 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, HostBinding, Input, NgZone, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostBinding, Input, NgZone, OnChanges, OnDestroy, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ThreatLensDisplayFeedItem, ThreatLensFeedItem, ThreatLensFeedRange, ThreatLensFeedRangeOption } from '../../../models/geo-fencing.models';
 import { ThreatLensFeedPanelType } from '../../models/threat-lens-map.types';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { formatFeedDate } from '../feed-date.util';
+import { toHexColor } from '../../threat-lens-format.util';
 
 @Component({
   selector: 'app-threat-lens-feed-panel',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './threat-lens-feed-panel.component.html',
 })
 export class ThreatLensFeedPanelComponent implements AfterViewInit, OnChanges, OnDestroy {
@@ -49,7 +52,7 @@ export class ThreatLensFeedPanelComponent implements AfterViewInit, OnChanges, O
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['items'] || changes['feedType']) {
+    if (changes.items || changes.feedType) {
       this.setFeedCollections();
       this.restartAutoScroll();
     }
@@ -127,8 +130,8 @@ export class ThreatLensFeedPanelComponent implements AfterViewInit, OnChanges, O
     this.feedItems = this.items
       .map((item) => ({
         ...item,
-        displayDate: this.formatFeedDate(item.date),
-        colorHex: this.toHexColor(item.color),
+        displayDate: formatFeedDate(item.date),
+        colorHex: toHexColor(item.color),
       }))
       .filter((item) => this.feedType === 'news'
         ? item.categoryKey === 'news_model'
@@ -167,29 +170,6 @@ export class ThreatLensFeedPanelComponent implements AfterViewInit, OnChanges, O
     }
 
     return Date.now() - (dayCount * 24 * 60 * 60 * 1000);
-  }
-
-  private formatFeedDate(value: string): string {
-    if (!value) {
-      return 'Date unavailable';
-    }
-
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-      return 'Date unavailable';
-    }
-
-    return new Intl.DateTimeFormat('en', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    }).format(date);
-  }
-
-  private toHexColor(color: [number, number, number]): string {
-    return `#${color.map((value) => value.toString(16).padStart(2, '0')).join('')}`;
   }
 
   private restartAutoScroll(): void {
@@ -267,6 +247,7 @@ export class ThreatLensFeedPanelComponent implements AfterViewInit, OnChanges, O
       }
     }
     catch {
+      return '';
     }
 
     return '';

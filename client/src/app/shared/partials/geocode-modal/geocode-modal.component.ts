@@ -1,21 +1,19 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, Output, Renderer2, SimpleChanges } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, Output, Renderer2, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { validateCoordinatesInput } from '../../utils/geo-coordinates.utils';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import type { GeoLocationSearchResult } from './model/geocode-modal.model';
+export type { GeoLocationSearchResult } from './model/geocode-modal.model';
 
-export interface GeoLocationSearchResult {
-  name:          string;
-  display_name?: string;
-  lat:           number;
-  lon:           number;
-  delta?:        number;
-}
+
+
 
 @Component({
   selector:    'app-geocode-modal',
   standalone:  true,
   imports:     [CommonModule, FormsModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './geocode-modal.component.html',
 })
 export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestroy {
@@ -75,7 +73,7 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    const isOpenChange = changes['isOpen'];
+    const isOpenChange = changes.isOpen;
     if (isOpenChange) {
       this.searchRequestId++;
       clearTimeout(this.searchTimer);
@@ -118,7 +116,9 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
       return;
     }
     this.isSearching = true;
-    this.searchTimer = setTimeout(() => this.runSearch(), this.DEBOUNCE_MS);
+    this.searchTimer = setTimeout(() => {
+      void this.runSearch();
+    }, this.DEBOUNCE_MS);
   }
 
   async runSearch(): Promise<void> {
@@ -146,9 +146,9 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
         this.searchError = `No results for "${query}"`;
       }
     }
-    catch (err: any) {
+    catch (err: unknown) {
       if (requestId === this.searchRequestId) {
-        this.searchError = err?.message || 'Search failed';
+        this.searchError = err instanceof Error ? err.message : 'Search failed';
       }
     }
     finally {
@@ -191,7 +191,7 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
   onSubmit(): void {
     this.onManualCoordsChange();
     this.onManualCoverageChange();
-    if (this.coordsError || this.coverageError || !this.manualCoords.trim()) {
+    if (Boolean(this.coordsError) || Boolean(this.coverageError) || !this.manualCoords.trim()) {
       return;
     }
 

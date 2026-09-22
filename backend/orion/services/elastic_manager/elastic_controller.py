@@ -8,10 +8,8 @@ from orion.constants import constant
 from orion.helper_manager.env_handler import env_handler
 from orion.services.elastic_manager.elastic_enums import (ELASTIC_CONNECTIONS, MANAGE_ELASTIC_MESSAGES, ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_ENUMS)
 from orion.services.log_manager.log_controller import log
-
-
-ELASTIC_SEARCH_REQUEST_TIMEOUT = 120
-ELASTIC_WRITE_REQUEST_TIMEOUT = 220
+ELASTIC_SEARCH_REQUEST_TIMEOUT = constant.CONSTANTS.ELASTIC_SEARCH_REQUEST_TIMEOUT
+ELASTIC_WRITE_REQUEST_TIMEOUT = constant.CONSTANTS.ELASTIC_WRITE_REQUEST_TIMEOUT
 
 
 def _with_timeout(conn, timeout: int):
@@ -54,13 +52,6 @@ class elastic_controller:
             return self.__m_dump_connection
         return self.__m_core_connection
 
-    def __conn_for_indices(self, indices):
-        if env_handler.get_instance().env('PRODUCTION') == '0':
-            return self.__m_core_connection
-        if indices and set(indices).issubset({ELASTIC_INDEX.S_STEALERLOGS_INDEX}):
-            return self.__m_dump_connection
-        return self.__m_core_connection
-
     @classmethod
     def _clip_oversized_keyword_values(cls, value, field_path: tuple[str, ...] = ()):
         if any(part.lower() in {"m_screenshot", "screenshot"} for part in field_path):
@@ -92,6 +83,23 @@ class elastic_controller:
             )
         except ApiError as ex:
             log.g().w(f"Skipping mapping update for Elasticsearch index {index}: {str(ex)}")
+
+    @staticmethod
+    async def __ensure_field_safe(conn, index: str, field: str, add_type=None, fielddata_if_text=False):
+        try:
+            timed_conn = _with_timeout(conn, ELASTIC_WRITE_REQUEST_TIMEOUT)
+            current = await timed_conn.indices.get_mapping(index=index)
+            for entry in current.body.values():
+                existing = entry.get("mappings", {}).get("properties", {}).get(field)
+                if existing is None:
+                    if add_type is not None:
+                        await timed_conn.indices.put_mapping(
+                            index=index, body={"properties": {field: {"type": add_type}}})
+                elif fielddata_if_text and existing.get("type") == "text" and not existing.get("fielddata"):
+                    await timed_conn.indices.put_mapping(
+                        index=index, body={"properties": {field: {"type": "text", "fielddata": True}}})
+        except Exception as ex:
+            log.g().w(f"ELASTIC : ensure field {index}.{field} skipped : {str(ex)}")
 
     @staticmethod
     async def __refresh_touched_indices(touched_indices: dict[int, tuple[AsyncElasticsearch, set[str]]]):
@@ -129,10 +137,11 @@ class elastic_controller:
                     body={"index.blocks.read_only_allow_delete": False},
                     request_timeout=220)
 
-            await self.__put_mapping_safe(
+            await self.__ensure_field_safe(
                 self.__m_core_connection,
                 ELASTIC_INDEX.S_LEAK_INDEX,
-                {"m_domain": {"type": "keyword"}},
+                "m_domain",
+                add_type="keyword",
             )
 
             if not await self.__m_core_connection.indices.exists(index=ELASTIC_INDEX.S_OPENSANCTIONS_INDEX, request_timeout=220):
@@ -152,6 +161,13 @@ class elastic_controller:
                     index=ELASTIC_INDEX.S_GENERIC_INDEX,
                     body={"index.blocks.read_only_allow_delete": False},
                     request_timeout=220)
+
+            await self.__ensure_field_safe(
+                self.__m_core_connection,
+                ELASTIC_INDEX.S_GENERIC_INDEX,
+                "m_content_type",
+                fielddata_if_text=True,
+            )
 
             if not await self.__m_core_connection.indices.exists(
                     index=ELASTIC_INDEX.S_DEFACEMENT_INDEX,
@@ -252,18 +268,6 @@ class elastic_controller:
         return prepared
 
     @staticmethod
-    def is_map_entity_document(document: dict) -> bool:
-        if not isinstance(document, dict):
-            return False
-
-        location = document.get("location")
-        has_location = isinstance(location, dict) and location.get("lat") is not None and location.get("lon") is not None
-        has_type = bool(str(document.get("type") or "").strip())
-        has_capacity = document.get("capacity_mw") is not None
-
-        return has_location and has_type and has_capacity
-
-    @staticmethod
     def map_entities_document_id(document: dict) -> str:
         location = document.get("location") if isinstance(document, dict) else None
         key_payload = {
@@ -319,7 +323,7 @@ class elastic_controller:
         try:
             m_request_defacement = {"query": {"range": {"m_date": {"lt": "now-6M"}}}}
             await self.__m_core_connection.delete_by_query(
-                index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, body=m_request_defacement)
+                index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, body=m_request_defacement, conflicts="proceed")
 
         except Exception as ex:
             log.g().e(f"Failed to delete old records: {str(ex)}")
@@ -516,6 +520,7 @@ class elastic_controller:
                         index=index,
                         id=doc_id,
                         body={"doc": entry[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True},
+                        retry_on_conflict=5,
                     )
                     touched_indices.setdefault(id(conn), (conn, set()))[1].add(index)
 
@@ -543,6 +548,7 @@ class elastic_controller:
                     index=index,
                     id=doc_id,
                     body={"doc": p_data[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True},
+                    retry_on_conflict=5,
                 )
                 touched_indices.setdefault(id(conn), (conn, set()))[1].add(index)
 

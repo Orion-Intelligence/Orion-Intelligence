@@ -1,14 +1,14 @@
-import { AfterViewInit, Component, ElementRef, OnInit, inject, input } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { AfterViewInit, Component, ElementRef, OnInit, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
 import { ChatResultItem } from '../../../../shared/model/results/chat/chat.callback.model';
 import { DatePipe, SlicePipe, CommonModule } from '@angular/common';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { NormalizeUnicodePipe } from '../../../../shared/pipes/normalize-unicode.pipe';
-import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { ProxyController } from '../../../../shared/services/proxy-controller';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { openProxiedUrl, scrollToResultCard } from '../dashboard-result.util';
 
 @Component({
   selector: 'app-dashboard-result-chat',
@@ -19,6 +19,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
     CommonModule,
     NormalizeUnicodePipe,
     RouterLink, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './dashboard-result-chat.component.html'
 })
 export class DashboardResultChatComponent implements OnInit, AfterViewInit {
@@ -26,13 +27,13 @@ export class DashboardResultChatComponent implements OnInit, AfterViewInit {
   private readonly proxied_resource = inject(ProxyController);
 
   currentUrl = '';
-  queryParams: any = {};
+  queryParams: Params = {};
   isCollapsed = true;
   isConsolidatedView = false;
   readonly searchResults = input<ChatResultItem[]>([]);
   readonly isExpandAble = input<boolean>(false);
 
-  constructor(protected authService: AuthService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
+  constructor(protected authService: AuthService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
   }
 
   ngAfterViewInit() {
@@ -70,25 +71,10 @@ export class DashboardResultChatComponent implements OnInit, AfterViewInit {
     const previousLimit = this.getResultDisplayLimit();
     const isExpanding = this.isCollapsed;
     this.isCollapsed = !this.isCollapsed;
-    this.scrollToResultIndex(isExpanding ? previousLimit : 0);
+    scrollToResultCard(this.elementRef.nativeElement, isExpanding ? previousLimit : 0);
   }
 
   openExternalUrl(url?: string | null) {
-    if (!this.authService.getIsMobileDemo() || !url) {
-      return;
-    }
-
-    this.proxied_resource.open(url);
-  }
-
-  private scrollToResultIndex(index: number): void {
-    if (index < 0) {
-      return;
-    }
-    setTimeout(() => {
-      this.elementRef.nativeElement
-        .querySelector<HTMLElement>(`[data-result-index="${index}"]`)
-        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 0);
+    openProxiedUrl(this.proxied_resource, this.authService.getIsMobileDemo(), url);
   }
 }

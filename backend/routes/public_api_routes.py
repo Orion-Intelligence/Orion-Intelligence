@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Body, Depends, Query
 from fastapi import Request, HTTPException
 from orion.api.interactive.account_manager.chat_share_manager import ChatShareManager
 from orion.api.interactive.case_manager.case_share_manager import CaseShareManager
 from orion.api.interactive.resource_manager.resource_manager import ResourceManager
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
-from orion.api.interactive.search_manager.search_model import search_model
+from orion.api.interactive.search_manager.search_manager import search_manager
+from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from orion.api.server.config_manager.config_controller import config_controller
 from configs.app_dependency import _enum_value
 from configs.auth_cookie import token_from_request
@@ -43,31 +44,34 @@ async def _request_has_admin_account(request: Request) -> bool:
     dependencies=[],
 )
 async def get_public_config(request: Request):
+    tenant = getattr(request.state, "tenant", None)
     config = await config_controller.getInstance().get_system_info(
         include_email_config=await _request_has_admin_account(request),
-        tenant_id=str(request.state.tenant.id),
+        tenant_id=str(tenant.id) if tenant else None,
     )
     config.settings["app_url"] = env_handler.get_instance().env("APP_URL", "")
+    config.settings["signup_enabled"] = "1" if await TenantManager.get_instance().is_signup_allowed(request.state.tenant) else "0"
+    config.settings["orion_mail_url"] = env_handler.get_instance().env("ORION_MAIL_PUBLIC_URL", "http://mail.localhost:4200")
     return config
 
 
-@public_routes.get("/api/s/static/tenant/{id}", include_in_schema=False, dependencies=[Depends(cookie_required)])
-async def get_tenant_resource(id: str):
-    return await ResourceManager.get_instance().get_tenant_image(id)
+@public_routes.get("/api/s/static/tenant/{resource_id}", include_in_schema=False, dependencies=[Depends(cookie_required)])
+async def get_tenant_resource(resource_id: str):
+    return await ResourceManager.get_instance().get_tenant_image(resource_id)
 
 
-@public_routes.get("/api/s/static/user/{id}", include_in_schema=False, dependencies=[Depends(cookie_required)])
-async def get_user_resource(id: str):
-    return await ResourceManager.get_instance().get_user_image(id)
+@public_routes.get("/api/s/static/user/{resource_id}", include_in_schema=False, dependencies=[Depends(cookie_required)])
+async def get_user_resource(resource_id: str):
+    return await ResourceManager.get_instance().get_user_image(resource_id)
 
 
 @public_routes.get("/api/s/static/favicon", include_in_schema=False)
 async def get_favicon_resource(request: Request):
     return await ResourceManager.get_instance().get_favicon(request.state.tenant)
 
-@public_routes.get("/api/s/static/system/{id}", include_in_schema=False)
-async def get_system_resource(request: Request, id: str):
-    return await ResourceManager.get_instance().get_system_image(id, request.state.tenant)
+@public_routes.get("/api/s/static/system/{resource_id}", include_in_schema=False)
+async def get_system_resource(request: Request, resource_id: str):
+    return await ResourceManager.get_instance().get_system_image(resource_id, request.state.tenant)
 
 
 @public_routes.get("/api/public/case-shares/{share_id}", include_in_schema=False)
@@ -87,7 +91,10 @@ def _request_ip(request: Request) -> str:
     forwarded_for = request.headers.get("x-forwarded-for", "")
     if forwarded_for:
         return forwarded_for.split(",", 1)[0].strip()
-    return request.client.host if request.client else "unknown"
+    client = request.client
+    if client is None:
+        return "unknown"
+    return client.host
 
 
 @public_routes.get(
@@ -111,7 +118,7 @@ async def search_stealerlog(request: Request, q: str = Query(...)):
 
     param = search_credential_param_model(q=q)
     try:
-        return await search_model.getInstance().search_stealerlogs_persona_breach(param)
+        return await search_manager.getInstance().search_stealerlogs_persona_breach(param)
     except HTTPException:
         raise
     except Exception as exc:

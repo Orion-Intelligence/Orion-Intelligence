@@ -1,6 +1,15 @@
 import {
+  CTI_CLUSTER_CHIP_KEYS,
+  CTI_CONTEXT_ACTION_TESTIDS,
+  applyCtiGraphSize,
+  clickCtiContextActionIfPresent,
+  clickCtiSearchChip,
   openAndAssertReportModal,
+  probeCtiCanvas,
+  selectCtiDropdownOption,
   selectCtiFilterType,
+  selectFirstCtiDropdownOption,
+  typeCtiSearch,
   visitCtiGraph,
   waitForToolbarSearchReady,
   waitForCtiGraphReady
@@ -59,8 +68,21 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
     cy.get('[data-testid="cti-graph-adv-clear-all"]').filter(':visible').first().should('not.be.disabled').click();
     cy.get('[data-testid="cti-graph-adv-empty-state"]').filter(':visible').should('contain', 'No builder values selected');
     waitForCtiGraphReady();
-    cy.get('[data-testid="graph-sidebar-collapse"]').filter(':visible').first().click();
-    cy.get('[data-testid="graph-sidebar-expand"]').filter(':visible').first().click();
+    cy.get('graph-sidebar [data-sidebar-expanded]').should('be.visible');
+    cy.get('[data-testid="graph-sidebar-collapse"]')
+      .filter(':visible')
+      .first()
+      .should('have.attr', 'aria-label', 'Collapse sidebar')
+      .click();
+    cy.get('graph-sidebar [data-sidebar-expanded]').should('not.exist');
+    cy.get('graph-sidebar [data-sidebar-collapsed]').should('be.visible');
+    cy.get('[data-testid="graph-sidebar-expand"]')
+      .filter(':visible')
+      .first()
+      .should('have.attr', 'aria-label', 'Expand sidebar')
+      .click();
+    cy.get('graph-sidebar [data-sidebar-expanded]').should('be.visible');
+    cy.get('graph-sidebar [data-sidebar-collapsed]').should('not.exist');
   });
 
   it('covers CTI report export option selection', () => {
@@ -77,6 +99,9 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
     cy.get('[data-testid="graph-report-export-report"]').filter(':visible').first().click();
     cy.get('[data-testid="graph-report-export-modal"]').should('not.exist');
     cy.readFile(`${exportBase}-graph-report.pdf`, 'binary', { timeout: 30000 }).should('contain', '%PDF');
+    openAndAssertReportModal('Export CTI Report');
+    cy.get('[data-testid="graph-report-export-csv"]').filter(':visible').first().click();
+    cy.get('[data-testid="graph-report-export-modal"]').should('not.exist');
   });
 
   it('attempts CTI graph context menu actions (data-dependent)', () => {
@@ -123,6 +148,71 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
         cy.get('@ctiReportOpen').should('have.been.called');
       }
     });
+  });
+
+  it('covers CTI basic cluster chip search modes and graph size apply', () => {
+    visitCtiGraph();
+    waitForToolbarSearchReady();
+
+    CTI_CLUSTER_CHIP_KEYS.forEach((chipKey) => {
+      clickCtiSearchChip(chipKey);
+      waitForCtiGraphReady();
+    });
+
+    typeCtiSearch('breach');
+    waitForCtiGraphReady();
+
+    clickCtiSearchChip('all');
+    waitForCtiGraphReady();
+
+    applyCtiGraphSize(60, 2);
+    waitForCtiGraphReady();
+    cy.get('graph-sidebar [data-sidebar-expanded]').should('be.visible');
+  });
+
+  it('covers CTI advanced builder cluster field with a dynamically selected cluster value', () => {
+    visitCtiGraph();
+
+    cy.get('[data-testid="cti-graph-advanced-toggle"]').filter(':visible').first().click();
+    cy.get('[data-testid="cti-graph-adv-expand"]').filter(':visible').first().click();
+    cy.get('[data-testid="cti-graph-adv-expanded-modal"]').filter(':visible').first().should('be.visible');
+
+    selectCtiDropdownOption('cti-graph-adv-field-select', 'Cluster');
+    cy.get('[data-testid="cti-graph-adv-cluster-value-select"]').filter(':visible').first().should('be.visible');
+    selectFirstCtiDropdownOption('cti-graph-adv-cluster-value-select');
+
+    cy.get('[data-testid="cti-graph-adv-expanded-execute"]').filter(':visible').first().click();
+    cy.get('[data-testid="cti-graph-adv-filter-chip"]').filter(':visible').should('have.length.at.least', 1);
+    waitForCtiGraphReady();
+  });
+
+  it('covers CTI node info panel, node interactions, and context menu node actions (data-dependent)', () => {
+    visitCtiGraph();
+    selectCtiFilterType('Cluster');
+    waitForCtiGraphReady();
+
+    probeCtiCanvas('click');
+    cy.get('body').then(($body) => {
+      const infoPanel = $body.find('[data-testid="cti-node-info-panel"]:visible');
+      if (infoPanel.length > 0) {
+        cy.wrap(infoPanel.first()).should('be.visible');
+        cy.get('[data-testid="cti-node-info-panel"] button').filter(':visible').first().click();
+        cy.get('[data-testid="cti-node-info-panel"]').should('not.exist');
+      }
+    });
+
+    probeCtiCanvas('dblclick');
+    waitForCtiGraphReady();
+
+    cy.window().then((win) => {
+      cy.stub(win, 'open').as('ctiNodeOpen');
+    });
+
+    CTI_CONTEXT_ACTION_TESTIDS.forEach((testId) => {
+      clickCtiContextActionIfPresent(testId);
+    });
+
+    waitForCtiGraphReady();
   });
 
 });

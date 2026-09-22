@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, ElementRef, OnInit, inject, input } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
 import { HelperService } from '../../../../shared/services/helper.service';
 import { GeneralResultItem } from '../../../../shared/model/results/general/general.callback.model';
 import { LeakResultItem } from '../../../../shared/model/results/leak/leak.callback.model';
@@ -11,11 +11,13 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { isWithinDays as isWithinDaysUtil } from '../../../../shared/utils/intel-report.util';
 import { ProxyController } from '../../../../shared/services/proxy-controller';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { openProxiedUrl, scrollToResultCard } from '../dashboard-result.util';
 
 @Component({
   selector: 'app-dashboard-results-general-grid',
   templateUrl: './dashboard-results-general.component.html',
   imports: [RouterLink, DatePipe, TooltipDirective, CommonModule, NgClass, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true
 })
 export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
@@ -26,7 +28,7 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
   protected readonly window = window;
 
   currentUrl = '';
-  queryParams: any = {};
+  queryParams: Params = {};
   isCollapsed = true;
   isFreeStrategic = false;
   isConsolidatedView = false;
@@ -35,19 +37,20 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
   readonly searchResults = input<(GeneralResultItem | LeakResultItem)[]>([]);
   readonly isExpandAble = input<boolean>(false);
 
-  constructor(private authService: AuthService, private activatedRoute: ActivatedRoute, private helperService: HelperService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
+  constructor(private authService: AuthService, private helperService: HelperService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
   }
 
   ngAfterViewInit() {
     this.scrollService.scrollToSavedPosition();
   }
 
-  highlightWords(text: any): string {
+  highlightWords(text: unknown): string {
     const key = JSON.stringify(text);
-    if (this.highlightCache.has(key)) {
-      return this.highlightCache.get(key)!;
+    const cached = this.highlightCache.get(key);
+    if (cached !== undefined) {
+      return cached;
     }
-    const result = this.helperService.highlightWords(text);
+    const result = this.helperService.highlightWords(typeof text === 'string' ? text : String(text ?? ''));
     this.highlightCache.set(key, result);
     return result;
   }
@@ -89,7 +92,7 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
     const previousLimit = this.getResultDisplayLimit();
     const isExpanding = this.isCollapsed;
     this.isCollapsed = !this.isCollapsed;
-    this.scrollToResultIndex(isExpanding ? previousLimit : 0);
+    scrollToResultCard(this.elementRef.nativeElement, isExpanding ? previousLimit : 0);
   }
 
   getDisplayTags(item: GeneralResultItem | LeakResultItem): string[] {
@@ -110,7 +113,7 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
   }
 
   getDisplayUrl(item: GeneralResultItem | LeakResultItem): string {
-    return item.m_url || item.m_source_url || item.m_base_url || '';
+    return item.m_url ?? item.m_source_url ?? item.m_base_url ?? '';
   }
 
   getReportLink(item: GeneralResultItem | LeakResultItem): string[] {
@@ -125,21 +128,6 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
   }
 
   openExternalUrl(url?: string | null): void {
-    if (!this.isMobileMode() || !url) {
-      return;
-    }
-
-    this.proxied_resource.open(url);
-  }
-
-  private scrollToResultIndex(index: number): void {
-    if (index < 0) {
-      return;
-    }
-    setTimeout(() => {
-      this.elementRef.nativeElement
-        .querySelector<HTMLElement>(`[data-result-index="${index}"]`)
-        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 0);
+    openProxiedUrl(this.proxied_resource, this.isMobileMode(), url);
   }
 }

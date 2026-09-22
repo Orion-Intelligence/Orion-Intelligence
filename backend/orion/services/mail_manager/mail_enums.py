@@ -11,12 +11,6 @@ class MailSubject(str, Enum):
     TAKEDOWN_REQUEST = "URGENT: Abuse/Takedown Request for {domain}"
 
 
-class MailMessage(str, Enum):
-    VERIFICATION = "Click the link below to verify your email address."
-    ACCOUNT_RECOVERY = "Click the link below to reset your account access."
-    ACCOUNT_CREATED = "Your account has been successfully created. Please verify your email to activate your account."
-
-
 class MailUrlHeading(str, Enum):
     VERIFICATION = "Verification link : "
     TENANT_ACCESS = "Tenant access link : "

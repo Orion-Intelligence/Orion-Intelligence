@@ -223,6 +223,7 @@ class search_query_generator:
     def _build_query_block(p_query_model, pfilter, raw_query, quoted_value, exact_phrases, loose_terms, phrase_fields, must_clauses, must_not_clause, m_page_number, date_boost_fields):
         multi_fields = [f"{field}^{boost}" for field, boost in phrase_fields]
 
+        content_query: dict
         if raw_query == "*":
             content_query = {"match_all": {}}
         else:
@@ -291,7 +292,7 @@ class search_query_generator:
                 if not u:
                     continue
 
-                has_scheme = bool(re.match(r"^(?:https?://)", u, flags=re.I))
+                has_scheme = bool(re.match(r"^https?://", u, flags=re.I))
                 candidates = set()
 
                 if has_scheme:
@@ -372,7 +373,6 @@ class search_query_generator:
                     knn_clause = {
                         "knn": {
                             "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
-                            "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
                             "num_candidates": 1000,
                             "query_vector": qvec,
                             "filter": {"bool": {"filter": must_filter_clauses}}
@@ -437,6 +437,15 @@ class search_query_generator:
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
     @staticmethod
+    def _parse_date_range(value):
+        parts = value.split(",")
+        if len(parts) != 2:
+            return None
+        from_date = datetime.strptime(parts[0].strip(), DATE_ONLY_FORMAT).strftime(DATE_START_UTC_FORMAT)
+        to_date = datetime.strptime(parts[1].strip(), DATE_ONLY_FORMAT).strftime(DATE_END_UTC_FORMAT)
+        return from_date, to_date
+
+    @staticmethod
     def build_date_priority_filter(from_date, to_date, priority_field_names):
         formatted_ranges = {
             "m_date": (from_date, to_date),
@@ -484,7 +493,6 @@ class search_query_generator:
 
         m_date_range = p_query_model.daterange
         m_network = p_query_model.network
-        m_platform = p_query_model.platform
         m_page_number = getattr(p_query_model, "page", 1)
         m_content_type = str(getattr(p_query_model, "m_content_type", None) or p_query_model.content or "all").strip().lower()
         m_platform = (p_query_model.platform or "").strip().lower()
@@ -513,10 +521,9 @@ class search_query_generator:
 
         if m_date_range:
             try:
-                parts = m_date_range.split(",")
-                if len(parts) == 2:
-                    from_date = datetime.strptime(parts[0].strip(), DATE_ONLY_FORMAT).strftime(DATE_START_UTC_FORMAT)
-                    to_date = datetime.strptime(parts[1].strip(), DATE_ONLY_FORMAT).strftime(DATE_END_UTC_FORMAT)
+                parsed_range = search_query_generator._parse_date_range(m_date_range)
+                if parsed_range:
+                    from_date, to_date = parsed_range
                     must_clauses.append(search_query_generator.build_date_priority_filter(from_date, to_date, date_priority_fields))
             except ValueError:
                 pass
@@ -625,7 +632,7 @@ class search_query_generator:
         else:
             loose_terms = [] if raw_query in ("*", "") else [t for t in re.findall(r'\w+', raw_query) if t and t.strip('"')]
 
-        phrase_fields = [("m_title", 5), ("m_content", 3), ("m_url", 2), ("m_source_url", 2), ("m_sender_name", 2), ("m_author", 2), ("m_username", 2), ("m_base_url", 1),
+        phrase_fields = [("m_title", 5), ("m_content", 3), ("m_url", 2), ("m_source_url", 2), ("m_sender_name", 2), ("m_sender_username", 3), ("m_author", 2), ("m_username", 2), ("m_base_url", 1),
             ("m_team", 1), ("m_attacker", 1), ("m_users", 1), ("m_network", 1), ("m_channel_name", 4),
             ("m_name", 4), ("m_family", 3), ("m_aliases", 3), ("m_actor_names", 3), ("m_references", 1),
             ("m_sha256_hash", 5), ("m_sha1_hash", 4), ("m_md5_hash", 4), ("m_signature", 4), ("m_tags", 3), ("m_file_name", 3)]
@@ -644,7 +651,7 @@ class search_query_generator:
             date_boost_fields=date_boost_fields)
 
         unified_query["size"] = result_size
-        unified_query["from"] = max(0, (m_page_number - 1) * result_size)
+        unified_query["from"] = max(0, min((m_page_number - 1) * result_size, 10000 - result_size))
 
         if channel_q:
             qb = unified_query["query"]["function_score"]["query"].setdefault("bool", {"must": []})
@@ -670,10 +677,9 @@ class search_query_generator:
             must_clauses.append(logic_query)
 
         if p_query_model.daterange:
-            parts = p_query_model.daterange.split(",")
-            if len(parts) == 2:
-                from_date = datetime.strptime(parts[0].strip(), DATE_ONLY_FORMAT).strftime(DATE_START_UTC_FORMAT)
-                to_date = datetime.strptime(parts[1].strip(), DATE_ONLY_FORMAT).strftime(DATE_END_UTC_FORMAT)
+            parsed_range = search_query_generator._parse_date_range(p_query_model.daterange)
+            if parsed_range:
+                from_date, to_date = parsed_range
 
                 must_clauses.append({
                     "bool": {
@@ -700,7 +706,7 @@ class search_query_generator:
         )
 
         unified_query["size"] = 15
-        unified_query["from"] = max(0, (getattr(p_query_model, "page", 1) - 1) * 15)
+        unified_query["from"] = max(0, min((getattr(p_query_model, "page", 1) - 1) * 15, 10000 - 15))
 
         return (
             base_index,
@@ -735,7 +741,7 @@ class search_query_generator:
         }
 
         date_field = "date"
-        date_range = getattr(p_query_model, "daterange", None)
+        date_range = str(getattr(p_query_model, "daterange", None) or "")
 
         if date_range:
             parts = date_range.split(',')
@@ -764,7 +770,7 @@ class search_query_generator:
 
         page = getattr(p_query_model, "page", 1) or 1
         size = (getattr(p_query_model, "size", None) or (100 if is_match_all else 500))
-        frm = max((page - 1) * size, 0)
+        frm = max(0, min((page - 1) * size, 10000 - size))
 
         query_body = {
             "query": es_query,

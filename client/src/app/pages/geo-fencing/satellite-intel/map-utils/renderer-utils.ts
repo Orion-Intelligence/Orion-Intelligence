@@ -1,4 +1,6 @@
 import { TrackingEntityType } from '../../models/geo-fencing.models';
+import type { LatLngBounds, Map as LeafletMap } from 'leaflet';
+import { asUnknownRecord, getOwnProperty, isFiniteNumber } from '../../../../shared/utils/type-guards.util';
 
 export function normalizeEntityId(value: unknown): string | null {
   if (value === null || value === undefined) {
@@ -9,11 +11,12 @@ export function normalizeEntityId(value: unknown): string | null {
 }
 
 export function escapeTooltipText(value: string): string {
-  return value.replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;' }[character] ?? character));
+  const encodedEntities: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;' };
+  return value.replace(/[&<>"']/g, character => getOwnProperty(encodedEntities, character) ?? character);
 }
 
-export function getMarkerBaseSize(map: any, type: TrackingEntityType): number {
-  const zoom = map?.getZoom?.() ?? 3;
+export function getMarkerBaseSize(map: Pick<LeafletMap, 'getZoom'> | null | undefined, type: TrackingEntityType): number {
+  const zoom = map?.getZoom() ?? 3;
   const base = type === 'aircraft' ? 26 : 28;
   const growth = type === 'aircraft' ? 1.8 : 1.6;
   const cap = type === 'aircraft' ? 20 : 8;
@@ -35,8 +38,66 @@ export function getBearingDegrees(fromLat: number, fromLon: number, toLat: numbe
   return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
 }
 
-export function getGridBucketKey(latitude: number, longitude: number): string {
-  return `grid:${Math.floor((latitude + 90) / 10)}:${Math.floor((longitude + 180) / 10)}`;
+export function getMovementBearing(current: { lat: number; lng: number } | null | undefined, targetLat: number | null | undefined, targetLon: number | null | undefined): number | null {
+  if (
+    current &&
+    Number.isFinite(current.lat) &&
+    Number.isFinite(current.lng) &&
+    isFiniteNumber(targetLat) &&
+    isFiniteNumber(targetLon)
+  ) {
+    return getBearingDegrees(current.lat, current.lng, targetLat, targetLon);
+  }
+  return null;
+}
+
+export function projectDestination(lat: number, lon: number, bearing: number, distanceMeters: number): { lat: number; lon: number } {
+  const bearingRadians = (bearing * Math.PI) / 180;
+  const latRadians = (lat * Math.PI) / 180;
+  const metersPerDegreeLat = 111320;
+  const metersPerDegreeLon = Math.max(1, metersPerDegreeLat * Math.cos(latRadians));
+
+  return {
+    lat: lat + (Math.cos(bearingRadians) * distanceMeters) / metersPerDegreeLat,
+    lon: lon + (Math.sin(bearingRadians) * distanceMeters) / metersPerDegreeLon,
+  };
+}
+
+export function coerceFiniteNumber(value: unknown): number | null {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null;
+  }
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+export function formatCoordinateLabel(latitude: unknown, longitude: unknown): string {
+  if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+    return `${Number(latitude).toFixed(3)}, ${Number(longitude).toFixed(3)}`;
+  }
+  return '-';
+}
+
+export function pickDefinedValue(source: Record<string, unknown> | null | undefined, keys: string[]): unknown {
+  for (const key of keys) {
+    const value = getOwnProperty(source, key);
+    if (value !== null && value !== undefined && value !== '') {
+      return value;
+    }
+  }
+  return null;
+}
+
+export function spatialRenderKeyParts(zoom: number, bounds: LatLngBounds): string[] {
+  const center = bounds.getCenter();
+  return [
+    `z:${Math.round(zoom * 2)}`,
+    `c:${center.lat.toFixed(1)},${center.lng.toFixed(1)}`,
+    `d:${bounds.getNorth().toFixed(1)},${bounds.getEast().toFixed(1)},${bounds.getSouth().toFixed(1)},${bounds.getWest().toFixed(1)}`,
+  ];
 }
 
 export function stableHash(key: string): number {
@@ -47,34 +108,194 @@ export function stableHash(key: string): number {
   return hash;
 }
 
-export function sampleByBucket<T>(items: T[], ratio: number, getBucketKey: (item: T) => string, getStableKey: (item: T) => string): T[] {
-  const buckets = new Map<string, T[]>();
-
-  items.forEach(item => {
-    const bucketKey = getBucketKey(item);
-    const bucketItems = buckets.get(bucketKey) ?? [];
-    bucketItems.push(item);
-    buckets.set(bucketKey, bucketItems);
-  });
-
-  const sampled: T[] = [];
-  buckets.forEach(bucketItems => {
-    const keepCount = Math.max(1, Math.ceil(bucketItems.length * ratio));
-    if (keepCount >= bucketItems.length) {
-      sampled.push(...bucketItems);
-      return;
-    }
-
-    sampled.push(...bucketItems.slice().sort((left, right) => stableHash(getStableKey(left)) - stableHash(getStableKey(right))).slice(0, keepCount));
-  });
-
-  return sampled;
-}
-
-export function getResponseStatus(res: any): string | undefined {
-  return res?.result?.status || res?.status;
+export function getResponseStatus(res: unknown): string | undefined {
+  const response = asUnknownRecord(res);
+  const result = asUnknownRecord(response.result);
+  const status = result.status ?? response.status;
+  return typeof status === 'string' ? status : undefined;
 }
 
 export function isPendingStatus(status: string | undefined): boolean {
   return status === 'pending' || status === 'busy';
+}
+
+export function screenCellFor(map: Pick<LeafletMap, 'latLngToContainerPoint'> | null | undefined, latitude: number | null | undefined, longitude: number | null | undefined, gridSize: number): { row: number; col: number } | null {
+  if (!map?.latLngToContainerPoint || typeof latitude !== 'number' || typeof longitude !== 'number' || !Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null;
+  }
+
+  const point = map.latLngToContainerPoint([latitude, longitude]);
+  if (!Number.isFinite(point?.x) || !Number.isFinite(point?.y)) {
+    return null;
+  }
+
+  return {
+    row: Math.floor(point.y / gridSize),
+    col: Math.floor(point.x / gridSize),
+  };
+}
+
+export function takeEvenlySpacedCells<T>(cells: T[], count: number): T[] {
+  if (count <= 0) {
+    return [];
+  }
+  if (count >= cells.length) {
+    return cells;
+  }
+
+  const selected: T[] = [];
+  const step = cells.length / count;
+  for (let index = 0; index < count; index += 1) {
+    selected.push(cells[Math.min(cells.length - 1, Math.floor((index + 0.5) * step))]);
+  }
+  return selected;
+}
+
+export function orderDistributionCells<T extends { row: number; col: number }>(cells: T[], limit: number): T[] {
+  if (cells.length <= limit) {
+    return cells.slice().sort((left, right) => left.row - right.row || left.col - right.col);
+  }
+
+  const rowGroups = new Map<number, T[]>();
+  cells.forEach(cell => {
+    const rowCells = rowGroups.get(cell.row) ?? [];
+    rowCells.push(cell);
+    rowGroups.set(cell.row, rowCells);
+  });
+
+  const quotas = Array.from(rowGroups.entries())
+    .map(([row, rowCells]) => {
+      const sortedCells = rowCells.slice().sort((left, right) => left.col - right.col);
+      const rawQuota = (limit * sortedCells.length) / cells.length;
+      return {
+        row,
+        cells: sortedCells,
+        quota: Math.min(sortedCells.length, Math.floor(rawQuota)),
+        remainder: rawQuota % 1,
+      };
+    })
+    .sort((left, right) => left.row - right.row);
+  let used = quotas.reduce((total, quota) => total + quota.quota, 0);
+
+  quotas
+    .slice()
+    .sort((left, right) => right.remainder - left.remainder || right.cells.length - left.cells.length)
+    .forEach(quota => {
+      if (used >= limit || quota.quota >= quota.cells.length) {
+        return;
+      }
+      quota.quota += 1;
+      used += 1;
+    });
+
+  while (used < limit) {
+    const nextQuota = quotas.find(quota => quota.quota < quota.cells.length);
+    if (!nextQuota) {
+      break;
+    }
+    nextQuota.quota += 1;
+    used += 1;
+  }
+
+  return quotas.flatMap(quota => takeEvenlySpacedCells(quota.cells, quota.quota));
+}
+
+export function sampleScreenGridSize(zoom: number): number {
+  if (zoom >= 7) {
+    return 96;
+  }
+  if (zoom >= 6) {
+    return 104;
+  }
+  if (zoom >= 5) {
+    return 112;
+  }
+  if (zoom >= 4) {
+    return 120;
+  }
+  return 128;
+}
+
+export function distributionScreenGridSize(zoom: number): number {
+  return Math.max(32, Math.round(sampleScreenGridSize(zoom) / 3));
+}
+
+export function sampleGridSize(zoom: number): number {
+  if (zoom >= 7) {
+    return 1;
+  }
+  if (zoom >= 6) {
+    return 1.5;
+  }
+  if (zoom >= 5) {
+    return 2;
+  }
+  if (zoom >= 4) {
+    return 2.5;
+  }
+  return 3;
+}
+
+export function distributionGridSize(zoom: number): number {
+  return Math.max(0.25, sampleGridSize(zoom) / 4);
+}
+
+export function viewportSampleRatio(zoom: number): number {
+  if (zoom >= 8) {
+    return 0.456;
+  }
+  if (zoom >= 7) {
+    return 0.396;
+  }
+  if (zoom >= 6) {
+    return 0.324;
+  }
+  if (zoom >= 5) {
+    return 0.408;
+  }
+  if (zoom >= 4) {
+    return 0.24;
+  }
+  if (zoom >= 3) {
+    return 0.168;
+  }
+  return 0.168;
+}
+
+export function moderateSampleRatio(sampleRatio: number): number {
+  return Math.max(sampleRatio, 0.264);
+}
+
+export function sampleBucketKey(map: Pick<LeafletMap, 'latLngToContainerPoint'> | null | undefined, latitude: number | null | undefined, longitude: number | null | undefined, zoom: number): string {
+  const screenGridSize = sampleScreenGridSize(zoom);
+  const screenCell = screenCellFor(map, latitude, longitude, screenGridSize);
+  if (screenCell) {
+    return `screen:${screenGridSize}:${screenCell.row}:${screenCell.col}`;
+  }
+
+  if (isFiniteNumber(latitude) && isFiniteNumber(longitude)) {
+    const gridSize = sampleGridSize(zoom);
+    const latBucket = Math.floor((latitude + 90) / gridSize);
+    const lonBucket = Math.floor((longitude + 180) / gridSize);
+    return `grid:${gridSize}:${latBucket}:${lonBucket}`;
+  }
+
+  return 'grid:unknown';
+}
+
+export function distributionCell(map: Pick<LeafletMap, 'latLngToContainerPoint'> | null | undefined, latitude: number | null | undefined, longitude: number | null | undefined, zoom: number): { key: string; row: number; col: number } {
+  const screenGridSize = distributionScreenGridSize(zoom);
+  const screenCell = screenCellFor(map, latitude, longitude, screenGridSize);
+  if (screenCell) {
+    return { key: `screen-cell:${screenGridSize}:${screenCell.row}:${screenCell.col}`, row: screenCell.row, col: screenCell.col };
+  }
+
+  if (isFiniteNumber(latitude) && isFiniteNumber(longitude)) {
+    const gridSize = distributionGridSize(zoom);
+    const row = Math.floor((latitude + 90) / gridSize);
+    const col = Math.floor((longitude + 180) / gridSize);
+    return { key: `cell:${gridSize}:${row}:${col}`, row, col };
+  }
+
+  return { key: 'cell:unknown', row: 0, col: 0 };
 }

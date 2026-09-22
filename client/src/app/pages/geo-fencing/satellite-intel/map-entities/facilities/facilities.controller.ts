@@ -1,5 +1,5 @@
 import { Subscription } from 'rxjs';
-import { SatelliteFacilitiesResponse } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteFacilitiesResponse } from '../../model/satellite-intel-api.models';
 import { MapEntityLoadingBridge, OrionSatelliteFeature, SatelliteTrackingViewport } from '../../../models/geo-fencing.models';
 import { SatelliteFacilitiesService } from './facilities.service';
 

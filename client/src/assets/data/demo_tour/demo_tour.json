@@ -21,6 +21,7 @@
       "additionalElementIds": ["sidebar-profile"],
       "title": "Ioc Results",
       "description": "Here you can see the results related to the searched value.",
+      "activateSelector": "button[data-testid=\"consolidated-tab-iocs\"]",
       "paddingTop": -6,
       "paddingLeft": -20,
       "paddingBottom": 0,
@@ -43,7 +44,7 @@
     {
       "elementId": "dashboard-consolidated",
       "additionalElementIds": ["sidebar-profile"],
-      "title": "Network Intel",
+      "title": "Network Intel Search",
       "description": "Now we move to Network Intel and search bbc.com there as well.",
       "activateSelector": "button[data-testid=\"consolidated-tab-network-intelligence\"]",
       "inputSelector": "input[data-testid=\"network-intel-search-input\"]",
@@ -57,18 +58,16 @@
     {
       "elementId": "sidebar-social",
       "title": "Social Section",
-      "description": "This opens the Social section in the sidebar so you can access its sub-categories quickly.",
+      "description": "Open the Social section from the sidebar to investigate social intelligence.",
       "activateSelector": "[data-testid=\"sidebar-group-social\"]",
-      "waitForSelector": "#sidebar-social [data-testid^=\"sidebar-subitem-social-\"]",
       "scrollIntoView": true,
       "position": "right"
     },
     {
-      "elementId": "sidebar-web-scan",
-      "title": "Web Scans",
-      "description": "This opens the Web Scans section in the sidebar so you can access its sub-categories quickly.",
+      "elementId": "sidebar-network-intel",
+      "title": "Network Intel Workspace",
+      "description": "This highlights the Network Intel section available in your workspace.",
       "activateSelector": "[data-testid=\"sidebar-group-scanner\"]",
-      "waitForSelector": "#sidebar-web-scan [data-testid^=\"sidebar-subitem-scanner-\"]",
       "scrollIntoView": true,
       "position": "right"
     }
@@ -87,9 +86,30 @@
       "title": "General Intelligence",
       "description": "This opens the General Intelligence section in the sidebar and takes you to it.",
       "activateSelector": "[data-testid=\"sidebar-group-strategic\"]",
-      "waitForSelector": "#sidebar-general [data-testid^=\"sidebar-subitem-strategic-\"]",
       "scrollIntoView": true,
       "position": "right"
+    }
+  ],
+  "feeder": [
+    {
+      "elementId": "sidebar-profile",
+      "title": "Feeder tools",
+      "description": "Open your profile section to access the Feeder tools available to your account.",
+      "activateSelector": "[data-testid=\"sidebar-group-profile\"]",
+      "waitForSelector": "[data-testid=\"sidebar-subitem-profile-feeder\"]",
+      "sidebarState": "expanded",
+      "scrollIntoView": true,
+      "position": "right"
+    }
+  ],
+  "maintainer": [
+    {
+      "elementId": "profile-notification-bell",
+      "title": "Workspace notifications",
+      "description": "Review tenant alerts and operational updates from the notification center.",
+      "showWhenSelector": "[data-testid=\"profile-notification-bell\"]",
+      "position": "bottom",
+      "padding": 6
     }
   ],
   "osint_basic": [
@@ -106,7 +126,6 @@
       "title": "General Intelligence",
       "description": "This opens the General Intelligence section in the sidebar and redirects you to it.",
       "activateSelector": "[data-testid=\"sidebar-group-strategic\"]",
-      "waitForSelector": "#sidebar-general [data-testid^=\"sidebar-subitem-strategic-\"]",
       "scrollIntoView": true,
       "position": "right"
     },
@@ -115,7 +134,7 @@
       "additionalElementIds": ["sidebar-general"],
       "title": "Open Report",
       "description": "This opens the full report view for the selected result.",
-      "activateSelector": "#open-report",
+      "activateSelector": "[data-testid=\"open-report\"]",
       "waitForSelector": "#report-detail",
       "paddingLeft": -16,
       "position": "left"
@@ -135,16 +154,14 @@
       "title": "General Intelligence",
       "description": "This opens the General Intelligence section in the sidebar and shows its result area.",
       "activateSelector": "[data-testid=\"sidebar-group-strategic\"]",
-      "waitForSelector": "#sidebar-general [data-testid^=\"sidebar-subitem-strategic-\"]",
       "scrollIntoView": true,
       "position": "right"
     },
     {
       "elementId": "sidebar-stealer-logs",
       "title": "Stealer Logs",
-      "description": "This opens the Stealer Logs section in the sidebar so you can access its sub-categories quickly.",
+      "description": "Open Stealer Logs from the sidebar to investigate exposed credentials and compromised devices.",
       "activateSelector": "[data-testid=\"sidebar-group-stealerlogs\"]",
-      "waitForSelector": "#sidebar-stealer-logs [data-testid^=\"sidebar-subitem-stealerlogs-\"]",
       "scrollIntoView": true,
       "position": "right"
     },
@@ -173,9 +190,8 @@
     {
       "elementId": "sidebar-stealer-logs",
       "title": "Stealer Logs",
-      "description": "This opens the Stealer Logs section in the sidebar so you can access its sub-categories quickly.",
+      "description": "Open Stealer Logs from the sidebar to investigate exposed credentials and compromised devices.",
       "activateSelector": "[data-testid=\"sidebar-group-stealerlogs\"]",
-      "waitForSelector": "#sidebar-stealer-logs [data-testid^=\"sidebar-subitem-stealerlogs-\"]",
       "scrollIntoView": true,
       "position": "right"
     },
@@ -196,11 +212,10 @@
       "position": "bottom"
     },
     {
-      "elementId": "sidebar-web-scan",
-      "title": "Web Scans",
-      "description": "This opens the Web Scans section in the sidebar so you can access its scanning tools.",
+      "elementId": "sidebar-network-intel",
+      "title": "Network Intel",
+      "description": "This highlights the Network Intel section available for scanning and infrastructure research.",
       "activateSelector": "[data-testid=\"sidebar-group-scanner\"]",
-      "waitForSelector": "#sidebar-web-scan [data-testid^=\"sidebar-subitem-scanner-\"]",
       "scrollIntoView": true,
       "position": "right"
     },
@@ -212,6 +227,54 @@
       "waitForSelector": "#sidebar-entity-api [data-testid^=\"sidebar-subitem-api-\"]",
       "scrollIntoView": true,
       "position": "right"
+    }
+  ],
+  "shared": [
+    {
+      "elementId": "sidebar-collapse-button",
+      "title": "Collapse sidebar",
+      "description": "Collapse the sidebar when you need more room for your workspace.",
+      "sidebarState": "expanded",
+      "profileMenuState": "closed",
+      "showWhenSelector": "[data-testid=\"dashboard-sidebar-component\"]",
+      "targetInteractive": false,
+      "position": "right",
+      "padding": 6
+    },
+    {
+      "elementId": "sidebar-expand-button",
+      "title": "Expand sidebar",
+      "description": "Expand the sidebar to see section names and navigate quickly.",
+      "sidebarState": "collapsed",
+      "profileMenuState": "closed",
+      "showWhenSelector": "[data-testid=\"dashboard-sidebar-component\"]",
+      "targetInteractive": false,
+      "position": "right",
+      "padding": 6
+    },
+    {
+      "elementId": "profile-dropdown-menu",
+      "title": "Profile menu",
+      "description": "Manage your theme, language, support options, and sign out from this menu.",
+      "sidebarState": "expanded",
+      "profileMenuState": "open",
+      "showWhenSelector": "[data-testid=\"profile-menu\"]",
+      "targetInteractive": false,
+      "position": "left",
+      "padding": 6
+    }
+  ],
+  "shared_documentation": [
+    {
+      "elementId": "sidebar-documentation",
+      "title": "Documentation",
+      "description": "Open product guides and reference material whenever documentation is available.",
+      "sidebarState": "expanded",
+      "profileMenuState": "closed",
+      "showWhenSelector": "#sidebar-documentation",
+      "scrollIntoView": true,
+      "position": "right",
+      "padding": 6
     }
   ]
 }

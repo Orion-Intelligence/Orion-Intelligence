@@ -1,4 +1,4 @@
-import { ApplicationConfig, inject, provideAppInitializer } from '@angular/core';
+import { ApplicationConfig, inject, provideAppInitializer, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter, withRouterConfig } from '@angular/router';
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
@@ -14,6 +14,7 @@ import { firstValueFrom } from 'rxjs';
 export const appConfig: ApplicationConfig = {
   providers: [
     AuthGuard,
+    provideZoneChangeDetection(),
     provideHttpClient(withInterceptors([httpInterceptor])),
     provideAppInitializer(() => {
       const appService = inject(AppService);
@@ -21,7 +22,9 @@ export const appConfig: ApplicationConfig = {
       return firstValueFrom(appService.loadConfig()).then(() => translationService.initialize());
     }),
     provideAppInitializer(() => inject(AppService).loadSession()),
-    provideAppInitializer(() => inject(ProxyController).initialize()),
+    provideAppInitializer(() => {
+      inject(ProxyController).initialize();
+    }),
     provideRouter(routes, withRouterConfig({ onSameUrlNavigation: 'reload' })),
     provideAnimationsAsync()
   ],

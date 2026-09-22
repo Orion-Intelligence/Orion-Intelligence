@@ -325,8 +325,6 @@ const SOCIAL_PLATFORM_FILTER = {
     { key: "habr", label: "Habr" },
     { key: "hackernoon", label: "HackerNoon" },
     { key: "hashnode", label: "Hashnode" },
-    { key: "instagram", label: "Instagram" },
-    { key: "linkedin", label: "LinkedIn" },
     { key: "mastodon", label: "Mastodon" },
     { key: "medium", label: "Medium" },
     { key: "microblog", label: "Micro.blog" },
@@ -335,12 +333,13 @@ const SOCIAL_PLATFORM_FILTER = {
     { key: "pastebin", label: "Pastebin" },
     { key: "pleroma", label: "Pleroma" },
     { key: "primal", label: "Primal" },
-    { key: "quora", label: "Quora" },
     { key: "reddit", label: "Reddit" },
     { key: "stackoverflow", label: "Stack Overflow" },
     { key: "substack", label: "Substack" },
+    { key: "gettr", label: "Gettr" },
+    { key: "pinterest", label: "Pinterest" },
+    { key: "plurk", label: "Plurk" },
     { key: "threads", label: "Threads" },
-    { key: "tiktok", label: "TikTok" },
     { key: "twitter", label: "Twitter" },
     { key: "youtube", label: "YouTube" },
   ],
@@ -499,11 +498,6 @@ export const apt_intel_filters: FilterModel = {
     network: COMMON_NETWORK,
     daterange: DATERANGE_CREATION,
     content: APT_INTEL_CONTENT_FILTER
-  }
-};
-export const threat_intel_filters: FilterModel = {
-  filters: {
-    daterange: DATERANGE_CREATION
   }
 };
 export const threat_intel_apt_filters: FilterModel = {

@@ -2,7 +2,7 @@
   <div class="mb-2 text-xs font-bold leading-snug">{{ title }}</div>
   @for (row of rows; track row.label) {
     <div class="border-t border-white/10 py-1 text-[11px] leading-snug [body.light-theme_&]:border-[#d8e3f0]" [ngClass]="row.stacked ? 'flex flex-col items-start gap-1' : 'flex items-start justify-between gap-1'">
-      <span class="text-[10px] font-semibold uppercase tracking-wide text-white/65 [body.light-theme_&]:text-[var(--color-text4)]">{{ row.label }}</span>
+      <span class="text-[10px] font-semibold uppercase tracking-wide text-white/65 [body.light-theme_&]:text-[var(--color-text4)]">{{ row.label | translate }}</span>
       <span class="font-semibold text-white [body.light-theme_&]:text-[var(--color-text1)]" [ngClass]="row.stacked ? 'text-left' : 'text-right break-words'">{{ row.value }}</span>
     </div>
   }

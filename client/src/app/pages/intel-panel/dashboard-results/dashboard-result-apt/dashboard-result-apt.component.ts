@@ -1,52 +1,48 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, effect, inject, input, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, effect, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { RecordSidebarComponent } from '../../../../shared/components/record-sidebar/record-sidebar.component';
+import { RecordSidebarComponent } from '../../../../shared/partials/record-sidebar/record-sidebar.component';
 import { AptIntelGroup, AptIntelRecord, AptIntelResultItem, AptIntelSummary } from '../../../../shared/model/results/apt-intel/apt-intel.callback.model';
-import { RecordSidebarItem } from '../../../../shared/model/record-sidebar/record-sidebar.model';
-import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
-
-const STAGGER_RENDER_BATCH_SIZE = 10;
-const STAGGER_RENDER_DELAY_MS = 16;
-const RECORD_SIDEBAR_CLOSE_MS = 300;
+import { RecordSidebarItem } from '../../../../shared/partials/record-sidebar/model/record-sidebar.model';
+import { buildGridPlaceholders, scrollToResultCard } from '../dashboard-result.util';
+import { DashboardResultGroupBase } from '../dashboard-result-group-base';
 
 @Component({
   selector: 'app-dashboard-result-apt',
   standalone: true,
   imports: [CommonModule, DatePipe, TranslatePipe, RouterLink, RecordSidebarComponent],
   templateUrl: './dashboard-result-apt.component.html',
-  animations: [fadeInDashboardItem],
+  styleUrls: ['./dashboard-result-apt.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
 })
-export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDestroy {
+export class DashboardResultAptComponent extends DashboardResultGroupBase implements OnInit, AfterViewInit, OnDestroy {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
-  private renderTimer: ReturnType<typeof setTimeout> | null = null;
-  private recordSidebarCloseTimer: ReturnType<typeof setTimeout> | null = null;
-  private renderKey = '';
-  private renderTargetCount = 0;
 
   currentUrl = '';
   queryParams: Record<string, string> = {};
   isCollapsed = true;
   isConsolidatedView = false;
-  expandedGroupKey: string | null = null;
-  isRecordSidebarVisible = false;
-  visibleGroupCount = signal(0);
   readonly searchResults = input<AptIntelResultItem[]>([]);
   readonly isExpandAble = input<boolean>(false);
   readonly directResults = input<boolean>(false);
 
   constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
+    super();
     effect(() => {
-      if (this.directResults()) {
-        const results = this.getVisibleResults();
-        this.startStaggeredRender(results.length, this.buildDirectRenderKey(results));
-        return;
-      }
-      const groups = this.getAptIntelGroups().slice(0, this.getGroupDisplayLimit());
-      this.startStaggeredRender(groups.length, this.buildRenderKey(groups));
+      this.renderCurrentView();
     });
+  }
+
+  private renderCurrentView(): void {
+    if (this.directResults()) {
+      const results = this.getVisibleResults();
+      this.startStaggeredRender(results.length, this.buildDirectRenderKey(results));
+      return;
+    }
+    const groups = this.getAptIntelGroups().slice(0, this.getGroupDisplayLimit());
+    this.startStaggeredRender(groups.length, this.buildRenderKey(groups));
   }
 
   ngOnInit(): void {
@@ -81,9 +77,7 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
   }
 
   getGridPlaceholders(results: unknown[]): number[] {
-    const remainder = results.length % 3;
-    const count = remainder === 0 ? 0 : 3 - remainder;
-    return this.isConsolidatedView ? [] : Array.from({ length: count }, (_, index) => index);
+    return buildGridPlaceholders(results.length, this.isConsolidatedView);
   }
 
   getAptIntelSummary(): AptIntelSummary {
@@ -131,51 +125,11 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
     });
   }
 
-  toggleGroup(key: string): void {
-    if (this.expandedGroupKey === key && this.isRecordSidebarOpen()) {
-      this.closeRecordSidebar();
-      return;
-    }
-    this.expandedGroupKey = key;
-    this.openRecordSidebar();
-  }
-
-  isGroupExpanded(key: string): boolean {
-    return this.expandedGroupKey === key && this.isRecordSidebarOpen();
-  }
-
-  isRecordSidebarOpen(): boolean {
-    return this.isRecordSidebarVisible;
-  }
-
-  openRecordSidebar(): void {
-    this.clearRecordSidebarCloseTimer();
-    this.isRecordSidebarVisible = true;
-  }
-
-  closeRecordSidebar(): void {
-    this.isRecordSidebarVisible = false;
-    this.clearRecordSidebarCloseTimer();
-    this.recordSidebarCloseTimer = setTimeout(() => {
-      if (!this.isRecordSidebarVisible) {
-        this.expandedGroupKey = null;
-      }
-      this.recordSidebarCloseTimer = null;
-    }, RECORD_SIDEBAR_CLOSE_MS);
-  }
-
   toggleCollapsed(): void {
     const previousLimit = this.directResults() ? this.getDirectResultDisplayLimit() : this.getGroupDisplayLimit();
     const isExpanding = this.isCollapsed;
     this.isCollapsed = !this.isCollapsed;
-    if (this.directResults()) {
-      const results = this.getVisibleResults();
-      this.startStaggeredRender(results.length, this.buildDirectRenderKey(results));
-      this.scrollToResultIndex(isExpanding ? previousLimit : 0);
-      return;
-    }
-    const groups = this.getAptIntelGroups().slice(0, this.getGroupDisplayLimit());
-    this.startStaggeredRender(groups.length, this.buildRenderKey(groups));
+    this.renderCurrentView();
     this.scrollToResultIndex(isExpanding ? previousLimit : 0);
   }
 
@@ -194,7 +148,7 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
 
   getSidebarItems(): RecordSidebarItem[] {
     return this.getSidebarRecords().map((record, index) => ({
-      id: record.item.m_hash || record.item._id || record.item.m_sha256_hash || `${this.normalizeGroupKey(record.title)}-${index}`,
+      id: record.item.m_hash ?? record.item._id ?? record.item.m_sha256_hash ?? `${this.normalizeGroupKey(record.title)}-${index}`,
       title: record.title,
       subtitle: this.getPrimaryIdentity(record.item),
       kindLabel: this.getKindLabel(record.item),
@@ -204,16 +158,12 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
       routerLink: this.getReportLink(record.item),
       queryParams: this.getQueryParams(record.item),
       searchText: this.getRecordSearchText(record.item),
-      savePositionId: record.item.m_hash || record.item._id || record.item.m_sha256_hash || '',
+      savePositionId: record.item.m_hash ?? record.item._id ?? record.item.m_sha256_hash ?? '',
     }));
   }
 
   getSidebarSubtitle(): string {
-    const selectedGroup = this.getSelectedGroup();
-    if (selectedGroup) {
-      return `${selectedGroup.records.length} records / ${selectedGroup.title}`;
-    }
-    return `${this.getSidebarRecords().length} records`;
+    return this.getSelectedGroupSubtitle(this.getSelectedGroup()) ?? `${this.getSidebarRecords().length} records`;
   }
 
   getReportLink(item: AptIntelResultItem): string[] {
@@ -240,11 +190,11 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
   }
 
   getItemKey(item: AptIntelResultItem, index = 0): string {
-    return this.getReportId(item) || item.m_url || item.m_base_url || `${index}`;
+    return this.getReportId(item) ?? item.m_url ?? item.m_base_url ?? `${index}`;
   }
 
   getReportId(item: AptIntelResultItem): string {
-    return item.m_hash || item._id || item.m_sha256_hash || item.m_sha1_hash || item.m_md5_hash || '';
+    return item.m_hash ?? item._id ?? item.m_sha256_hash ?? item.m_sha1_hash ?? item.m_md5_hash ?? '';
   }
 
   saveCurrentPosition(item: AptIntelResultItem): void {
@@ -259,29 +209,25 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
   }
 
   getTitle(item: AptIntelResultItem): string {
-    return item.m_title || item.m_team || this.toList(item.m_attacker)[0] || item.m_family || item.m_signature || item.m_file_name || item.m_url || 'Untitled intel';
-  }
-
-  getDescription(item: AptIntelResultItem): string {
-    return item.m_important_content || item.m_content || '';
+    return item.m_title ?? item.m_team ?? this.toList(item.m_attacker)[0] ?? item.m_family ?? item.m_signature ?? item.m_file_name ?? item.m_url ?? 'Untitled intel';
   }
 
   getPrimarySource(item: AptIntelResultItem): string {
-    return item.m_reporter || item.m_source_url || item.m_url || item.m_base_url || '';
+    return item.m_reporter ?? item.m_source_url ?? item.m_url ?? item.m_base_url ?? '';
   }
 
   getDateValue(item: AptIntelResultItem): string | null {
-    return item.m_date || item.m_first_seen || item.m_last_seen || item.m_update_date || item.m_creation_date || null;
+    return item.m_date ?? item.m_first_seen ?? item.m_last_seen ?? item.m_update_date ?? item.m_creation_date ?? null;
   }
 
   getPrimaryIdentity(item: AptIntelResultItem): string {
     if (this.isDefacement(item)) {
-      return item.m_team || this.toList(item.m_attacker)[0] || item.m_url || item.m_base_url || '-';
+      return item.m_team ?? this.toList(item.m_attacker)[0] ?? item.m_url ?? item.m_base_url ?? '-';
     }
     if (this.isMalware(item)) {
-      return item.m_sha256_hash || item.m_sha1_hash || item.m_md5_hash || item.m_signature || item.m_file_name || '-';
+      return item.m_sha256_hash ?? item.m_sha1_hash ?? item.m_md5_hash ?? item.m_signature ?? item.m_file_name ?? '-';
     }
-    return item.m_family || this.toList(item.m_aliases)[0] || item.m_country || '-';
+    return item.m_family ?? this.toList(item.m_aliases)[0] ?? item.m_country ?? '-';
   }
 
   getTags(item: AptIntelResultItem): string[] {
@@ -298,7 +244,7 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
   }
 
   getReferenceCount(item: AptIntelResultItem): number {
-    return (item.m_references || []).length + (item.m_sha256_hash ? 1 : 0);
+    return (item.m_references ?? []).length + (item.m_sha256_hash ? 1 : 0);
   }
 
   getArtifactCount(item: AptIntelResultItem): number {
@@ -332,18 +278,12 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
   }
 
   getGroupPrimarySource(group: AptIntelGroup): string {
-    return group.records.map(record => record.sourceLabel).find(Boolean) || '-';
+    return group.records.map(record => record.sourceLabel).find(Boolean) ?? '-';
   }
 
   getGroupProfileLabel(group: AptIntelGroup): string {
     const first = group.records[0]?.item;
-    return first ? (first.m_platform || first.m_origin_country || first.m_country || '-') : '-';
-  }
-
-  getBadgeClass(item: AptIntelResultItem): string {
-    return this.isMalware(item)
-      ? 'border-rose-400/30 bg-rose-400/10 text-rose-200'
-      : 'border-sky-400/30 bg-sky-400/10 text-sky-200';
+    return first ? (first.m_platform ?? first.m_origin_country ?? first.m_country ?? '-') : '-';
   }
 
   isMalware(item: AptIntelResultItem): boolean {
@@ -356,12 +296,12 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
 
   private getActorGroupTitle(item: AptIntelResultItem): string {
     if (this.isDefacement(item)) {
-      return item.m_team || this.toList(item.m_attacker)[0] || item.m_url || item.m_base_url || 'Unknown actor';
+      return item.m_team ?? this.toList(item.m_attacker)[0] ?? item.m_url ?? item.m_base_url ?? 'Unknown actor';
     }
     if (this.isMalware(item)) {
-      return item.m_signature || item.m_family || item.m_file_name || item.m_title || 'Unknown malware';
+      return item.m_signature ?? item.m_family ?? item.m_file_name ?? item.m_title ?? 'Unknown malware';
     }
-    return item.m_family || item.m_title || this.toList(item.m_aliases)[0] || 'Unknown actor';
+    return item.m_family ?? item.m_title ?? this.toList(item.m_aliases)[0] ?? 'Unknown actor';
   }
 
   private getGroupSubtitle(item: AptIntelResultItem): string {
@@ -419,80 +359,16 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
     return this.isExpandAble() && this.isCollapsed ? 2 : 100;
   }
 
-  private buildRenderKey(groups: AptIntelGroup[]): string {
-    return groups.map(group => `${group.key}:${group.records.length}:${group.latestSeen || ''}`).join('|');
-  }
-
   private buildDirectRenderKey(results: AptIntelResultItem[]): string {
     return results.map((item, index) => this.getItemKey(item, index)).join('|');
   }
 
-  private startStaggeredRender(targetCount: number, key: string): void {
-    if (this.renderKey === key && this.renderTargetCount === targetCount) {
-      return;
-    }
-    this.clearRenderTimer();
-    this.renderKey = key;
-    this.renderTargetCount = targetCount;
-    this.visibleGroupCount.set(Math.min(targetCount, STAGGER_RENDER_BATCH_SIZE));
-    this.revealNextGroupBatch();
-  }
-
-  private revealNextGroupBatch(): void {
-    if (this.visibleGroupCount() >= this.renderTargetCount) {
-      return;
-    }
-    this.renderTimer = setTimeout(() => {
-      this.visibleGroupCount.update(count => Math.min(count + STAGGER_RENDER_BATCH_SIZE, this.renderTargetCount));
-      this.revealNextGroupBatch();
-    }, STAGGER_RENDER_DELAY_MS);
-  }
-
-  private clearRenderTimer(): void {
-    if (this.renderTimer) {
-      clearTimeout(this.renderTimer);
-      this.renderTimer = null;
-    }
-  }
-
-  private clearRecordSidebarCloseTimer(): void {
-    if (this.recordSidebarCloseTimer) {
-      clearTimeout(this.recordSidebarCloseTimer);
-      this.recordSidebarCloseTimer = null;
-    }
-  }
-
   private scrollToResultIndex(index: number): void {
-    if (index < 0) {
-      return;
-    }
-    setTimeout(() => {
-      this.elementRef.nativeElement
-        .querySelector<HTMLElement>(`[data-result-index="${index}"]`)
-        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 0);
+    scrollToResultCard(this.elementRef.nativeElement, index);
   }
 
   private uniqueValues(values: string[]): string[] {
     return Array.from(new Set(values.map(value => String(value || '').trim()).filter(Boolean)));
-  }
-
-  private getLatestDate(current: string | null, next: string | null): string | null {
-    if (!current) {
-      return next;
-    }
-    if (!next) {
-      return current;
-    }
-    return this.dateTime(next) > this.dateTime(current) ? next : current;
-  }
-
-  private dateTime(value: string | null): number {
-    if (!value) {
-      return 0;
-    }
-    const parsed = new Date(value).getTime();
-    return Number.isNaN(parsed) ? 0 : parsed;
   }
 
   private toList(value?: string | string[] | null): string[] {

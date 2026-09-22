@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -9,13 +9,14 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   selector: 'app-pro-subscription',
   standalone: true,
   imports: [CommonModule, FormsModule, NgClass, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './pro-subscription.component.html'
 })
 export class ProSubscriptionComponent {
-  selectedSubscription: string = 'monthly-highlighted';
-  userName: string = '';
-  userPhone: string = '';
-  userEmail: string = '';
+  selectedSubscription = 'monthly-highlighted';
+  userName = '';
+  userPhone = '';
+  userEmail = '';
   submitted = false;
   readonly permanent = input(false);
   readonly close = output<undefined>();
@@ -24,7 +25,7 @@ export class ProSubscriptionComponent {
   }
 
   closePopup() {
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.close.emit(undefined);
   }
 

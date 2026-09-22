@@ -1,48 +1,56 @@
-import { Component, OnChanges, SimpleChanges, input, output } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { AppService } from '../../../services/core/app/app.service';
-import { AlertNotification } from '../../model/alert-notification/alert.notification.model';
+import { AlertNotification } from './model/alert.notification.model';
 import { AlertModel } from '../../model/company-profile/node.model';
 import { ApiService } from '../../services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { overlayAnimation, sidebarAnimation } from '../../animations/sidebar.animations';
 import { ExportChoiceModalComponent } from '../export-choice-modal/export-choice-modal.component';
 import { ALERT_REPORT_EXPORT_OPTIONS } from '../../model/report/export-choice.model';
-import { AlertExportService } from '../../services/export/alert-export.service';
+import { AlertExportService } from './services/alert-export.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ScanNotificationService } from '../../services/scan-notification.service';
 import { ScanJob } from '../../model/scan-jobs/scan-job.model';
 import { ConfirmationPopupComponent } from '../confirmation-popup/confirmation-popup.component';
 import { Router } from '@angular/router';
 import { LicenseService } from '../../../services/licenses/licenses.service';
+import { asUnknownRecord } from '../../utils/type-guards.util';
+import type { AlertListPage, AlertNotificationPage } from './model/alert-notification.model';
+export type { AlertListPage, AlertNotificationPage } from './model/alert-notification.model';
+
 
 type NotificationMode = 'alerts' | 'scans';
 type ScanActionMode = 'single-delete' | 'delete-all' | 'mark-seen-completed';
+
+
 
 @Component({
   selector: 'app-alert-notification',
   imports: [CommonModule, NgClass, ExportChoiceModalComponent, ConfirmationPopupComponent, TranslatePipe],
   templateUrl: './alert-notification.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [sidebarAnimation, overlayAnimation],
 })
 export class AlertNotificationComponent implements OnChanges {
   private appendTimer: ReturnType<typeof setTimeout> | null = null;
+  private relativeTimeReferenceMs = Date.now();
 
   alertNotifications: AlertNotification[] = [];
   readonly batchSize: number = 20;
   readonly incrementalDelayMs: number = 120;
   readonly incrementalChunkSize: number = 1;
-  currentPage: number = 0;
-  totalCount: number = 0;
-  hasMore: boolean = false;
+  currentPage = 0;
+  totalCount = 0;
+  hasMore = false;
   countsByType: Record<string, number> = {};
-  isLoadingMore: boolean = false;
-  isLoadMoreTriggered: boolean = false;
-  isFetchingDetail: boolean = false;
+  isLoadingMore = false;
+  isLoadMoreTriggered = false;
+  isFetchingDetail = false;
   alertToShowReport: AlertModel | null = null;
-  isExportChoiceOpen: boolean = false;
-  isScanDeleteConfirmationOpen: boolean = false;
-  isScanDeleting: boolean = false;
+  isExportChoiceOpen = false;
+  isScanDeleteConfirmationOpen = false;
+  isScanDeleting = false;
   scanDeleteTarget: ScanJob | null = null;
   scanDeleteMode: ScanActionMode | null = null;
   readonly alertExportOptions = ALERT_REPORT_EXPORT_OPTIONS;
@@ -54,7 +62,7 @@ export class AlertNotificationComponent implements OnChanges {
   constructor(public appService: AppService, public apiService: ApiService, private messageNotificationService: MessageNotificationService, private alertExportService: AlertExportService, public scanNotificationService: ScanNotificationService, private router: Router, private licenseService: LicenseService) {
   }
 
-  private decrementUnseenSummary(by: number = 1): void {
+  private decrementUnseenSummary(by = 1): void {
     const summary = this.appService.userSessionData().alert_summary;
     if (!summary) {
       return;
@@ -66,8 +74,11 @@ export class AlertNotificationComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['isNotificationOpen']) {
-      const value = changes['isNotificationOpen'].currentValue;
+    if (changes.isNotificationOpen) {
+      const value = changes.isNotificationOpen.currentValue;
+      if (value === true) {
+        this.relativeTimeReferenceMs = Date.now();
+      }
       if (value === true && this.isAlertMode() && this.alertNotifications.length === 0) {
         this.fetchNotifications(true);
       }
@@ -95,7 +106,7 @@ export class AlertNotificationComponent implements OnChanges {
     return this.hasMore || this.alertNotifications.length < this.totalCount;
   }
 
-  private fetchNotifications(reset: boolean, attempt: number = 1): void {
+  private fetchNotifications(reset: boolean, attempt = 1): void {
     if (this.isLoadingMore) {
       return;
     }
@@ -103,9 +114,9 @@ export class AlertNotificationComponent implements OnChanges {
     this.clearAppendTimer();
     const nextPage = reset ? 1 : this.currentPage + 1;
     this.isLoadingMore = true;
-    this.apiService.get<any>(`profile/alerts?paginate=true&compact=true&unseen_only=true&include_counts=true&page=${nextPage}&limit=${this.batchSize}`).subscribe({
+    this.apiService.get<AlertNotificationPage>(`profile/alerts?paginate=true&compact=true&unseen_only=true&include_counts=true&page=${nextPage}&limit=${this.batchSize}`).subscribe({
       next: response => {
-        const items = (response?.items || []).map((n: any) => ({
+        const items = (response.items ?? []).map((n: AlertNotification) => ({
           ...n,
           lastSeen: n?.lastSeen ? new Date(n.lastSeen) : n?.lastSeen
         }));
@@ -117,10 +128,10 @@ export class AlertNotificationComponent implements OnChanges {
           }, 800);
           return;
         }
-        this.totalCount = response?.total || 0;
-        this.currentPage = response?.page || nextPage;
+        this.totalCount = response?.total ?? 0;
+        this.currentPage = response?.page ?? nextPage;
         this.hasMore = !!response?.has_more;
-        this.countsByType = response?.counts_by_type || {};
+        this.countsByType = response?.counts_by_type ?? {};
         this.isLoadingMore = false;
         this.isLoadMoreTriggered = false;
         this.appendNotificationsIncrementally(items, reset);
@@ -180,46 +191,46 @@ export class AlertNotificationComponent implements OnChanges {
     if (!date) {
       return '';
     }
-    const d = new Date(date + 'Z');
-    const now = new Date();
-    const seconds = Math.floor((now.getTime() - d.getTime()) / 1000);
+    const d = new Date(date instanceof Date ? date : `${date}Z`);
+    const seconds = Math.floor((this.relativeTimeReferenceMs - d.getTime()) / 1000);
+    const formatter = new Intl.RelativeTimeFormat(document.documentElement.lang || 'en', { numeric: 'always' });
     if (seconds < 60) {
-      return `${seconds} sec ago`;
+      return formatter.format(-seconds, 'second');
     }
     const minutes = Math.floor(seconds / 60);
     if (minutes < 60) {
-      return `${minutes} min ago`;
+      return formatter.format(-minutes, 'minute');
     }
     const hours = Math.floor(minutes / 60);
     if (hours < 24) {
-      return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+      return formatter.format(-hours, 'hour');
     }
     const days = Math.floor(hours / 24);
     if (days < 30) {
-      return `${days} day${days > 1 ? 's' : ''} ago`;
+      return formatter.format(-days, 'day');
     }
     const months = Math.floor(days / 30);
     if (months < 12) {
-      return `${months} month${months > 1 ? 's' : ''} ago`;
+      return formatter.format(-months, 'month');
     }
     const years = Math.floor(months / 12);
-    return `${years} year${years > 1 ? 's' : ''} ago`;
+    return formatter.format(-years, 'year');
   }
 
   seeDetails(_category: string, hash: string) {
-    const notification = this.alertNotifications.find(n => n.hash === hash) || { categoryName: _category };
+    const notification = this.alertNotifications.find(n => n.hash === hash) ?? { categoryName: _category };
     if (!this.licenseService.canViewAlert(notification)) {
       this.messageNotificationService.show(this.alertLicenseWarning);
       return;
     }
     this.isFetchingDetail = true;
-    this.apiService.get<any>('profile/alerts').subscribe({
+    this.apiService.get<AlertModel[] | AlertListPage>('profile/alerts').subscribe({
       next: response => {
         const alerts: AlertModel[] = Array.isArray(response)
           ? response
           : (Array.isArray(response?.items) ? response.items : []);
         this.appService.userSessionData().alerts = alerts;
-        const selectedAlert = alerts.find(a => a.data_hash === hash) || null;
+        const selectedAlert = alerts.find(a => a.data_hash === hash) ?? null;
         if (!selectedAlert) {
           this.isFetchingDetail = false;
           this.messageNotificationService.show(this.alertLicenseWarning);
@@ -295,6 +306,15 @@ export class AlertNotificationComponent implements OnChanges {
     this.isScanDeleteConfirmationOpen = true;
   }
 
+  stopScan(job: ScanJob, event?: Event): void {
+    event?.stopPropagation();
+    this.scanNotificationService.deleteScan(job).subscribe({
+      error: err => {
+        this.messageNotificationService.show(err?.error?.detail ?? 'Failed to stop scan');
+      },
+    });
+  }
+
   requestClearAllScans(): void {
     if (!this.scanNotificationService.jobs().length) {
       return;
@@ -336,7 +356,7 @@ export class AlertNotificationComponent implements OnChanges {
           this.closeScanDeleteConfirmation();
         },
         error: err => {
-          this.messageNotificationService.show(err?.error?.detail || 'Failed to delete scan');
+          this.messageNotificationService.show(err?.error?.detail ?? 'Failed to delete scan');
           this.closeScanDeleteConfirmation();
         },
       });
@@ -351,7 +371,7 @@ export class AlertNotificationComponent implements OnChanges {
           this.closeScanDeleteConfirmation();
         },
         error: err => {
-          this.messageNotificationService.show(err?.error?.detail || 'Failed to clear scans');
+          this.messageNotificationService.show(err?.error?.detail ?? 'Failed to clear scans');
           this.closeScanDeleteConfirmation();
         },
       });
@@ -360,7 +380,7 @@ export class AlertNotificationComponent implements OnChanges {
 
     this.scanNotificationService.deleteAllScans().subscribe({
       next: response => {
-        const deleted = Number(response?.deleted || 0);
+        const deleted = Number(asUnknownRecord(response).deleted ?? 0);
         if (deleted > 0) {
           this.messageNotificationService.show('Scans deleted successfully!', 'success');
         }
@@ -370,7 +390,7 @@ export class AlertNotificationComponent implements OnChanges {
         this.closeScanDeleteConfirmation();
       },
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || 'Failed to delete scans');
+        this.messageNotificationService.show(err?.error?.detail ?? 'Failed to delete scans');
         this.closeScanDeleteConfirmation();
       },
     });
@@ -426,6 +446,11 @@ export class AlertNotificationComponent implements OnChanges {
     return this.scanNotificationService.getStatus(job) === 'error';
   }
 
+  isNetworkScan(job: ScanJob): boolean {
+    const reference = String(job.api_reference ?? '').replace(/^\/?api\//, '');
+    return reference.startsWith('netintel/') || reference.startsWith('urlscan/');
+  }
+
   getProgress(job: ScanJob): number {
     return this.scanNotificationService.getProgress(job);
   }
@@ -434,20 +459,16 @@ export class AlertNotificationComponent implements OnChanges {
     return this.scanNotificationService.getStep(job);
   }
 
-  getScanError(job: ScanJob): string {
-    return this.scanNotificationService.getError(job);
-  }
-
   close() {
     if (this.isScanMode()) {
       this.scanNotificationService.closePanel();
     }
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.closeNotification.emit(undefined);
   }
 
   clearAll() {
-    this.apiService.get<any>('profile/alerts').subscribe({
+    this.apiService.get<AlertModel[] | AlertListPage>('profile/alerts').subscribe({
       next: (alerts) => {
         const allAlerts: AlertModel[] = Array.isArray(alerts)
           ? alerts
@@ -473,7 +494,7 @@ export class AlertNotificationComponent implements OnChanges {
             this.close();
           },
           error: (err) => {
-            const mess = err?.error?.detail || 'Clear all alerts failed';
+            const mess = err?.error?.detail ?? 'Clear all alerts failed';
             this.messageNotificationService.show(mess);
           },
         });
@@ -482,7 +503,7 @@ export class AlertNotificationComponent implements OnChanges {
   }
 
   getLatestAlerts() {
-    this.apiService.get<any>('profile/alerts').subscribe({
+    this.apiService.get<AlertModel[] | AlertListPage>('profile/alerts').subscribe({
       next: response => {
         this.appService.userSessionData().alerts = Array.isArray(response)
           ? response

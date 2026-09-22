@@ -1,5 +1,5 @@
 import { AsyncPipe, DatePipe, NgClass, NgOptimizedImage } from '@angular/common';
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -10,6 +10,7 @@ import { takedown_filters } from '../../../shared/constants/filters';
 import { SidebarService } from '../../../shared/services/sidebar.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
+import { AppService } from '../../../services/core/app/app.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TakedownFilter, TakedownListResponse, TakedownRequestItem } from '../../../shared/model/takedown/takedown.model';
 import { Observable } from 'rxjs';
@@ -20,6 +21,7 @@ import { TakedownActionComponent } from '../../../shared/partials/takedown-actio
   selector: 'app-takedown-requests',
   standalone: true,
   imports: [FormsModule, DatePipe, NgClass, NgOptimizedImage, AsyncPipe, FiltersComponent, PaginationComponent, TranslatePipe, TakedownRejectionPopupComponent, TakedownActionComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './takedown-requests.component.html'
 })
 export class TakedownRequestsComponent implements OnInit, AfterViewInit {
@@ -38,7 +40,7 @@ export class TakedownRequestsComponent implements OnInit, AfterViewInit {
   error = '';
   rejectionTarget: TakedownRequestItem | null = null;
 
-  constructor(private apiService: ApiService, public sidebarService: SidebarService, private dashboardService: DashboardService, private licenseService: LicenseService, private router: Router) {
+  constructor(private apiService: ApiService, public sidebarService: SidebarService, private dashboardService: DashboardService, private licenseService: LicenseService, private appService: AppService, private router: Router) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -70,7 +72,7 @@ export class TakedownRequestsComponent implements OnInit, AfterViewInit {
       .set('q', this.query.trim())
       .set('page', this.page)
       .set('limit', this.limit);
-    const daterange = this.selectedFilters['daterange'];
+    const daterange = this.selectedFilters.daterange;
     if (daterange) {
       params = params.set('daterange', daterange);
     }
@@ -89,7 +91,7 @@ export class TakedownRequestsComponent implements OnInit, AfterViewInit {
 
   applyFilters(filters: Record<string, string | null>): void {
     this.selectedFilters = { ...filters };
-    this.status = (filters['status'] as TakedownFilter) || 'all';
+    this.status = (filters.status as TakedownFilter) || 'all';
     this.page = 1;
     this.load();
   }
@@ -123,7 +125,7 @@ export class TakedownRequestsComponent implements OnInit, AfterViewInit {
         this.actionId = '';
       },
       error: err => {
-        this.error = err?.error?.detail || 'Unable to accept takedown request.';
+        this.error = err?.error?.detail ?? 'Unable to accept takedown request.';
         this.actionId = '';
       }
     });
@@ -156,22 +158,26 @@ export class TakedownRequestsComponent implements OnInit, AfterViewInit {
         this.rejectionTarget = null;
       },
       error: err => {
-        this.error = err?.error?.detail || 'Unable to reject takedown request.';
+        this.error = err?.error?.detail ?? 'Unable to reject takedown request.';
         this.actionId = '';
       }
     });
   }
 
+  canDecide(item: TakedownRequestItem): boolean {
+    return !item.operator_tenant_id || item.operator_tenant_id === this.appService.userSessionData().tenant.id;
+  }
+
   statusClass(status: string): string {
     switch (status) {
       case 'accepted':
-        return 'border-[rgba(40,167,69,0.35)] bg-[rgba(40,167,69,0.1)] text-[#7ee787]';
+        return 'border-[rgba(40,167,69,0.35)] bg-[rgba(40,167,69,0.1)] text-[#7ee787] [body.light-theme_&]:border-emerald-600/30 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800';
       case 'denied':
-        return 'border-[rgba(220,53,69,0.35)] bg-[rgba(220,53,69,0.1)] text-[#ff8a8a]';
+        return 'border-[rgba(220,53,69,0.35)] bg-[rgba(220,53,69,0.1)] text-[#ff8a8a] [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800';
       case 'failed':
-        return 'border-[rgba(255,193,7,0.35)] bg-[rgba(255,193,7,0.1)] text-[#ffd866]';
+        return 'border-[rgba(255,193,7,0.35)] bg-[rgba(255,193,7,0.1)] text-[#ffd866] [body.light-theme_&]:border-amber-600/30 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800';
       default:
-        return 'border-[rgba(87,165,235,0.35)] bg-[rgba(87,165,235,0.1)] text-[var(--color-blue-640)]';
+        return 'border-[rgba(87,165,235,0.35)] bg-[rgba(87,165,235,0.1)] text-[var(--color-blue-640)] [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800';
     }
   }
 

@@ -1,35 +1,35 @@
 <ng-container>
     <span id="top"></span>
     <div class="w-full max-w-[2400px] rounded-[12px] p-5">
-        <div class="ui-page-container p-5" data-testid="case-management-page">
+        <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-[#f9fbff] [body.light-theme_&]:shadow-none p-5" data-testid="case-management-page">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" [ngClass]="caseManagementMode === 'alerts' ? '' : 'mb-4'">
                 <div>
-                    <h1 class="ui-page-title">{{ 'Cases' | translate }}</h1>
-                    <p class="ui-page-description">
+                    <h1 class="text-[20px] font-semibold leading-[1.2] text-[var(--color-text1)]">{{ 'Cases' | translate }}</h1>
+                    <p class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">
                         {{ (showArchivedCases ? 'Viewing archived cases' : 'Manage cybersecurity cases') | translate }}
                     </p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
-                    <div class="grid h-10 overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]" [ngClass]="canViewAdminAlerts() ? 'grid-cols-3' : 'grid-cols-2'" data-testid="case-management-mode-toggle">
-                        <button type="button" data-testid="case-mode-list-button" class="px-3 text-sm font-semibold transition" [ngClass]="caseManagementMode === 'list' ? 'bg-sky-500/15 text-sky-200 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800' : 'text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'" (click)="setCaseManagementMode('list')">
+                    <div class="grid h-8 overflow-hidden rounded-[8px] border border-[rgba(87,165,235,0.18)] bg-[linear-gradient(135deg,rgba(148,163,184,0.14),rgba(100,116,139,0.08))] [body.light-theme_&]:border-[rgba(43,144,238,0.12)] [body.light-theme_&]:bg-[#f1f4f8]" [ngClass]="canViewAdminAlerts() ? 'grid-cols-3' : 'grid-cols-2'" data-testid="case-management-mode-toggle">
+                        <button type="button" data-testid="case-mode-list-button" class="px-3 text-[13px] font-semibold transition" [ngClass]="caseManagementMode === 'list' ? 'bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] text-[var(--color-text1)] [body.light-theme_&]:bg-[#e4effa] [body.light-theme_&]:text-[#1d4ed8]' : 'text-[var(--color-text3)] hover:bg-[linear-gradient(135deg,rgba(148,163,184,0.22),rgba(100,116,139,0.14))] [body.light-theme_&]:hover:bg-[#e7ecf3]'" (click)="setCaseManagementMode('list')">
                             {{ 'Case List' | translate }}
                         </button>
-                        <button type="button" data-testid="case-mode-analytics-button" class="border-l border-[var(--tenant-line)] px-3 text-sm font-semibold transition" [ngClass]="caseManagementMode === 'analytics' ? 'bg-sky-500/15 text-sky-200 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800' : 'text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'" (click)="setCaseManagementMode('analytics')">
+                        <button type="button" data-testid="case-mode-analytics-button" class="border-l border-[rgba(87,165,235,0.18)] [body.light-theme_&]:border-[rgba(43,144,238,0.12)] px-3 text-[13px] font-semibold transition" [ngClass]="caseManagementMode === 'analytics' ? 'bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] text-[var(--color-text1)] [body.light-theme_&]:bg-[#e4effa] [body.light-theme_&]:text-[#1d4ed8]' : 'text-[var(--color-text3)] hover:bg-[linear-gradient(135deg,rgba(148,163,184,0.22),rgba(100,116,139,0.14))] [body.light-theme_&]:hover:bg-[#e7ecf3]'" (click)="setCaseManagementMode('analytics')">
                             {{ 'Analytics' | translate }}
                         </button>
                         @if (canViewAdminAlerts()) {
-                        <button type="button" data-testid="case-mode-alerts-button" class="border-l border-[var(--tenant-line)] px-3 text-sm font-semibold transition" [ngClass]="caseManagementMode === 'alerts' ? 'bg-sky-500/15 text-sky-200 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800' : 'text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'" (click)="setCaseManagementMode('alerts')">
+                        <button type="button" data-testid="case-mode-alerts-button" class="border-l border-[rgba(87,165,235,0.18)] [body.light-theme_&]:border-[rgba(43,144,238,0.12)] px-3 text-[13px] font-semibold transition" [ngClass]="caseManagementMode === 'alerts' ? 'bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] text-[var(--color-text1)] [body.light-theme_&]:bg-[#e4effa] [body.light-theme_&]:text-[#1d4ed8]' : 'text-[var(--color-text3)] hover:bg-[linear-gradient(135deg,rgba(148,163,184,0.22),rgba(100,116,139,0.14))] [body.light-theme_&]:hover:bg-[#e7ecf3]'" (click)="setCaseManagementMode('alerts')">
                             {{ 'Alerts' | translate }}
                         </button>
                         }
                     </div>
 
                     @if (canManageCases()) {
-                    <button type="button" data-testid="case-tracking-board-button" class="ui-btn ui-btn-secondary" (click)="openTrackingBoard()">
+                    <button type="button" data-testid="case-tracking-board-button" class="inline-flex h-8 items-center justify-center rounded-[8px] border border-[rgba(87,165,235,0.18)] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-4 text-[13px] font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] hover:border-[rgba(87,165,235,0.32)] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 [body.light-theme_&]:border-[rgba(43,144,238,0.12)] [body.light-theme_&]:bg-[#eef5fc] [body.light-theme_&]:hover:border-[rgba(43,144,238,0.24)] [body.light-theme_&]:hover:bg-[#e4effa]" (click)="openTrackingBoard()">
                         {{ 'Status Tracking Board' | translate }}
                     </button>
 
-                    <button type="button" data-testid="add-case-button" class="ui-btn ui-btn-primary" (click)="addCase()">
+                    <button type="button" data-testid="add-case-button" class="inline-flex h-8 items-center justify-center rounded-[8px] border border-[rgba(87,165,235,0.18)] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-4 text-[13px] font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] hover:border-[rgba(87,165,235,0.32)] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 [body.light-theme_&]:border-[rgba(43,144,238,0.12)] [body.light-theme_&]:bg-[#eef5fc] [body.light-theme_&]:hover:border-[rgba(43,144,238,0.24)] [body.light-theme_&]:hover:bg-[#e4effa]" (click)="addCase()">
                         {{ 'Add Case' | translate }}
                     </button>
                     }
@@ -55,8 +55,8 @@
                 <div class="flex items-center gap-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-4 py-3">
                     <span class="h-5 w-5 animate-spin rounded-full border-2 border-[var(--tenant-line)] border-t-sky-400"></span>
                     <div>
-                        <p class="mb-0 text-sm font-semibold text-[var(--color-text2)]">Loading cases</p>
-                        <p class="mt-0.5 mb-0 text-xs text-[var(--color-text4)]">Preparing analytics</p>
+                        <p class="mb-0 text-sm font-semibold text-[var(--color-text2)]">{{ 'Loading cases' | translate }}</p>
+                        <p class="mt-0.5 mb-0 text-xs text-[var(--color-text4)]">{{ 'Preparing analytics' | translate }}</p>
                     </div>
                 </div>
             </div>
@@ -91,52 +91,52 @@
 
                         @if ((filteredCases?.length || 0) > 0) {
                         <tbody class="text-[15px] font-normal text-[var(--color-text3)]">
-                            @for (case of filteredCases; track case.caseId || $index; let i = $index) {
-                            <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]" [attr.data-testid]="'case-row-' + case.caseId">
+                            @for (caseItem of filteredCases; track caseItem.caseId || $index) {
+                            <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--ui-table-row-hover)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]" [attr.data-testid]="'case-row-' + caseItem.caseId">
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">
-                                    {{ case.caseId }}</td>
-                                <td class="overflow-hidden text-ellipsis align-middle whitespace-nowrap px-4 py-3.5" [title]="case.title">{{ case.title }}
+                                    {{ caseItem.caseId }}</td>
+                                <td class="overflow-hidden text-ellipsis align-middle whitespace-nowrap px-4 py-3.5" [title]="caseItem.title">{{ caseItem.title }}
                                 </td>
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{
-                                    formatLabel(case.caseType) }}
+                                    formatLabel(caseItem.caseType) }}
                                 </td>
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                                    <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="{ 'bg-blue-500/10 text-blue-300 [body.light-theme_&]:bg-blue-100 [body.light-theme_&]:text-blue-800': case.status === 'new' || case.status === 'intake_review', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': case.status === 'under_investigation' || case.status === 'evidence_collection' || case.status === 'verification' || case.status === 'regulatory_action' || case.status === 'legal_review', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': case.status === 'resolved', 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700': case.status === 'closed' }">
-                                        {{ formatLabel(case.status) }}
+                                    <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="{ 'bg-blue-500/10 text-blue-300 [body.light-theme_&]:bg-blue-100 [body.light-theme_&]:text-blue-800': caseItem.status === 'new' || caseItem.status === 'intake_review', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': caseItem.status === 'under_investigation' || caseItem.status === 'evidence_collection' || caseItem.status === 'verification' || caseItem.status === 'regulatory_action' || caseItem.status === 'legal_review', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': caseItem.status === 'resolved', 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700': caseItem.status === 'closed' }">
+                                        {{ formatLabel(caseItem.status) }}
                                     </span>
                                 </td>
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                                    <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="{ 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800': case.severity === 'critical', 'bg-orange-500/10 text-orange-300 [body.light-theme_&]:bg-orange-100 [body.light-theme_&]:text-orange-800': case.severity === 'high', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': case.severity === 'medium', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': case.severity !== 'critical' && case.severity !== 'high' && case.severity !== 'medium' }">
-                                        {{ case.severity }}
+                                    <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="{ 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800': caseItem.severity === 'critical', 'bg-orange-500/10 text-orange-300 [body.light-theme_&]:bg-orange-100 [body.light-theme_&]:text-orange-800': caseItem.severity === 'high', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': caseItem.severity === 'medium', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': caseItem.severity !== 'critical' && caseItem.severity !== 'high' && caseItem.severity !== 'medium' }">
+                                        {{ caseItem.severity }}
                                     </span>
                                 </td>
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                                    <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="{ 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800': case.priority === 'critical', 'bg-orange-500/10 text-orange-300 [body.light-theme_&]:bg-orange-100 [body.light-theme_&]:text-orange-800': case.priority === 'high', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': case.priority === 'medium', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': case.priority !== 'critical' && case.priority !== 'high' && case.priority !== 'medium' }">
-                                        {{ case.priority }}
+                                    <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="{ 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800': caseItem.priority === 'critical', 'bg-orange-500/10 text-orange-300 [body.light-theme_&]:bg-orange-100 [body.light-theme_&]:text-orange-800': caseItem.priority === 'high', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': caseItem.priority === 'medium', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': caseItem.priority !== 'critical' && caseItem.priority !== 'high' && caseItem.priority !== 'medium' }">
+                                        {{ caseItem.priority }}
                                     </span>
                                 </td>
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
                                     <div class="text-sm font-medium text-[var(--color-text1)]">{{
-                                        getFormattedDate(case.updatedAt) }}</div>
+                                        getFormattedDate(caseItem.updatedAt) }}</div>
                                     <div class="mt-1 text-xs text-[var(--color-text4)]">{{
-                                        getFormattedTime(case.updatedAt) }}</div>
+                                        getFormattedTime(caseItem.updatedAt) }}</div>
                                 </td>
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
-                                    <div class="inline-flex items-center justify-center gap-2">
+                                    <div class="inline-flex items-center justify-center divide-x divide-[var(--tenant-line)] overflow-hidden rounded-lg border border-[var(--tenant-line)]">
                                         @if (canManageCases()) {
-                                        <button type="button" [attr.data-testid]="'case-assign-analyst-' + case.caseId" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [title]="'Assign Analyst' | translate" (click)="openAssignAnalystDialog(case)">
+                                        <button type="button" [attr.data-testid]="'case-assign-analyst-' + caseItem.caseId" class="inline-flex h-8 w-8 items-center justify-center bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [title]="'Assign Analyst' | translate" (click)="openAssignAnalystDialog(caseItem)">
                                             <svg viewBox="0 0 16 16" class="h-[16px] w-[16px] fill-current" aria-hidden="true">
                                                 <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
                                                 <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"></path>
                                             </svg>
                                         </button>
                                         }
-                                        <button type="button" (click)="viewCase(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-label]="'View case' | translate" [attr.data-testid]="'case-view-' + case.caseId">
-                                            <img src="assets/images/shared/view.svg" width="18" alt="view" class="case-action-icon cursor-pointer" />
+                                        <button type="button" (click)="viewCase(caseItem.caseId)" class="inline-flex h-8 w-8 items-center justify-center bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-label]="'View case' | translate" [attr.data-testid]="'case-view-' + caseItem.caseId">
+                                            <img src="assets/images/shared/view.svg" width="18" alt="" class="case-action-icon ui-action-icon cursor-pointer" />
                                         </button>
                                         @if (canDeleteCases()) {
-                                        <button type="button" (click)="openDeleteConfirmation(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text2)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)]" [attr.aria-label]="'Delete case' | translate" [attr.data-testid]="'case-delete-' + case.caseId">
-                                            <img src="assets/images/shared/theme/bin.svg" width="18" alt="delete" class="case-action-icon cursor-pointer" />
+                                        <button type="button" (click)="openDeleteConfirmation(caseItem.caseId)" class="inline-flex h-8 w-8 items-center justify-center bg-[rgba(127,29,29,0.22)] text-[var(--color-text2)] transition hover:bg-[rgba(127,29,29,0.34)] [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:bg-red-200/70" [attr.aria-label]="'Delete case' | translate" [attr.data-testid]="'case-delete-' + caseItem.caseId">
+                                            <img src="assets/images/shared/theme/bin.svg" width="18" alt="" class="case-action-icon cursor-pointer" />
                                         </button>
                                         }
                                     </div>
@@ -158,30 +158,30 @@
                 </div>
                 <div class="space-y-3 md:hidden">
                     @if ((filteredCases?.length || 0) > 0) {
-                    @for (case of filteredCases; track case.caseId || $index; let i = $index) {
-                    <div class="overflow-hidden rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)]" [attr.data-testid]="'case-mobile-card-' + case.caseId">
+                    @for (caseItem of filteredCases; track caseItem.caseId || $index) {
+                    <div class="overflow-hidden rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)]" [attr.data-testid]="'case-mobile-card-' + caseItem.caseId">
                         <div class="flex items-start justify-between gap-3 border-b border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] px-3 py-2.5">
                             <div class="min-w-0">
-                                <div class="truncate text-sm font-semibold text-[var(--color-text1)]">{{ case.title }}
+                                <div class="truncate text-sm font-semibold text-[var(--color-text1)]">{{ caseItem.title }}
                                 </div>
-                                <div class="mt-0.5 text-[11px] font-medium text-[var(--color-text4)]">{{ case.caseId }}
-                                    &middot; {{ formatLabel(case.caseType) }}</div>
+                                <div class="mt-0.5 text-[11px] font-medium text-[var(--color-text4)]">{{ caseItem.caseId }}
+                                    &middot; {{ formatLabel(caseItem.caseType) }}</div>
                             </div>
                             <div class="flex shrink-0 items-center gap-2">
                                 @if (canManageCases()) {
-                                <button type="button" [attr.data-testid]="'case-mobile-assign-analyst-' + case.caseId" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [title]="'Assign Analyst' | translate" (click)="openAssignAnalystDialog(case)">
+                                <button type="button" [attr.data-testid]="'case-mobile-assign-analyst-' + caseItem.caseId" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [title]="'Assign Analyst' | translate" (click)="openAssignAnalystDialog(caseItem)">
                                     <svg viewBox="0 0 16 16" class="h-[16px] w-[16px] fill-current" aria-hidden="true">
                                         <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
                                         <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"></path>
                                     </svg>
                                 </button>
                                 }
-                                <button type="button" (click)="viewCase(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-label]="'View case' | translate" [attr.data-testid]="'case-mobile-view-' + case.caseId">
-                                    <img src="assets/images/shared/view.svg" width="18" alt="view" class="case-action-icon cursor-pointer" />
+                                <button type="button" (click)="viewCase(caseItem.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-label]="'View case' | translate" [attr.data-testid]="'case-mobile-view-' + caseItem.caseId">
+                                    <img src="assets/images/shared/view.svg" width="18" alt="" class="case-action-icon ui-action-icon cursor-pointer" />
                                 </button>
                                 @if (canDeleteCases()) {
-                                <button type="button" (click)="openDeleteConfirmation(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text2)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)]" [attr.aria-label]="'Delete case' | translate" [attr.data-testid]="'case-mobile-delete-' + case.caseId">
-                                    <img src="assets/images/shared/theme/bin.svg" width="18" alt="delete" class="case-action-icon cursor-pointer" />
+                                <button type="button" (click)="openDeleteConfirmation(caseItem.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text2)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)] [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-200/70" [attr.aria-label]="'Delete case' | translate" [attr.data-testid]="'case-mobile-delete-' + caseItem.caseId">
+                                    <img src="assets/images/shared/theme/bin.svg" width="18" alt="" class="case-action-icon cursor-pointer" />
                                 </button>
                                 }
                             </div>
@@ -190,29 +190,29 @@
                             <div class="flex items-center justify-between gap-3 py-2">
                                 <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
                                     'Status' | translate }}</span>
-                                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="{ 'bg-blue-500/10 text-blue-300 [body.light-theme_&]:bg-blue-100 [body.light-theme_&]:text-blue-800': case.status === 'new' || case.status === 'intake_review', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': case.status === 'under_investigation' || case.status === 'evidence_collection' || case.status === 'verification' || case.status === 'regulatory_action' || case.status === 'legal_review', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': case.status === 'resolved', 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700': case.status === 'closed' }">
-                                    {{ formatLabel(case.status) }}
+                                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="{ 'bg-blue-500/10 text-blue-300 [body.light-theme_&]:bg-blue-100 [body.light-theme_&]:text-blue-800': caseItem.status === 'new' || caseItem.status === 'intake_review', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': caseItem.status === 'under_investigation' || caseItem.status === 'evidence_collection' || caseItem.status === 'verification' || caseItem.status === 'regulatory_action' || caseItem.status === 'legal_review', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': caseItem.status === 'resolved', 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700': caseItem.status === 'closed' }">
+                                    {{ formatLabel(caseItem.status) }}
                                 </span>
                             </div>
                             <div class="flex items-center justify-between gap-3 py-2">
                                 <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
                                     'Severity' | translate }}</span>
-                                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="{ 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800': case.severity === 'critical', 'bg-orange-500/10 text-orange-300 [body.light-theme_&]:bg-orange-100 [body.light-theme_&]:text-orange-800': case.severity === 'high', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': case.severity === 'medium', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': case.severity !== 'critical' && case.severity !== 'high' && case.severity !== 'medium' }">
-                                    {{ case.severity }}
+                                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="{ 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800': caseItem.severity === 'critical', 'bg-orange-500/10 text-orange-300 [body.light-theme_&]:bg-orange-100 [body.light-theme_&]:text-orange-800': caseItem.severity === 'high', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': caseItem.severity === 'medium', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': caseItem.severity !== 'critical' && caseItem.severity !== 'high' && caseItem.severity !== 'medium' }">
+                                    {{ caseItem.severity }}
                                 </span>
                             </div>
                             <div class="flex items-center justify-between gap-3 py-2">
                                 <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
                                     'Priority' | translate }}</span>
-                                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="{ 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800': case.priority === 'critical', 'bg-orange-500/10 text-orange-300 [body.light-theme_&]:bg-orange-100 [body.light-theme_&]:text-orange-800': case.priority === 'high', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': case.priority === 'medium', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': case.priority !== 'critical' && case.priority !== 'high' && case.priority !== 'medium' }">
-                                    {{ case.priority }}
+                                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="{ 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800': caseItem.priority === 'critical', 'bg-orange-500/10 text-orange-300 [body.light-theme_&]:bg-orange-100 [body.light-theme_&]:text-orange-800': caseItem.priority === 'high', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': caseItem.priority === 'medium', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': caseItem.priority !== 'critical' && caseItem.priority !== 'high' && caseItem.priority !== 'medium' }">
+                                    {{ caseItem.priority }}
                                 </span>
                             </div>
                             <div class="flex items-center justify-between gap-3 py-2">
                                 <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
                                     'Updated' | translate }}</span>
                                 <span class="text-right text-xs font-medium text-[var(--color-text1)]">{{
-                                    getFormattedDate(case.updatedAt) }} &middot; {{ getFormattedTime(case.updatedAt)
+                                    getFormattedDate(caseItem.updatedAt) }} &middot; {{ getFormattedTime(caseItem.updatedAt)
                                     }}</span>
                             </div>
                         </div>
@@ -251,28 +251,28 @@
                         <tbody class="text-[15px] font-normal text-[var(--color-text3)]">
                             <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)]">
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                                    <div class="ui-shimmer h-3 w-12 rounded bg-[var(--color-blue-720)]"></div>
+                                    <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-12 rounded bg-[var(--color-blue-720)]"></div>
                                 </td>
                                 <td class="overflow-hidden text-ellipsis align-middle whitespace-nowrap px-4 py-3.5">
-                                    <div class="ui-shimmer h-3 w-24 rounded bg-[var(--color-blue-720)]"></div>
+                                    <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-24 rounded bg-[var(--color-blue-720)]"></div>
                                 </td>
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                                    <div class="ui-shimmer h-3 w-32 rounded bg-[var(--color-blue-720)]"></div>
+                                    <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-32 rounded bg-[var(--color-blue-720)]"></div>
                                 </td>
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                                    <div class="ui-shimmer h-6 w-20 rounded-full bg-[var(--color-blue-720)]"></div>
+                                    <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-6 w-20 rounded-full bg-[var(--color-blue-720)]"></div>
                                 </td>
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                                    <div class="ui-shimmer h-6 w-16 rounded-full bg-[var(--color-blue-720)]"></div>
+                                    <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-6 w-16 rounded-full bg-[var(--color-blue-720)]"></div>
                                 </td>
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                                    <div class="ui-shimmer h-6 w-16 rounded-full bg-[var(--color-blue-720)]"></div>
+                                    <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-6 w-16 rounded-full bg-[var(--color-blue-720)]"></div>
                                 </td>
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                                    <div class="ui-shimmer h-3 w-16 rounded bg-[var(--color-blue-720)]"></div>
+                                    <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-16 rounded bg-[var(--color-blue-720)]"></div>
                                 </td>
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
-                                    <div class="ui-shimmer mx-auto h-8 w-8 rounded-lg bg-[var(--color-blue-720)]"></div>
+                                    <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] mx-auto h-8 w-8 rounded-lg bg-[var(--color-blue-720)]"></div>
                                 </td>
                             </tr>
                         </tbody>
@@ -282,13 +282,13 @@
                     @for (_ of [1,2,3]; track _) {
                     <div class="overflow-hidden rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)]">
                         <div class="border-b border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] px-3 py-3">
-                            <div class="ui-shimmer h-3 w-2/3 rounded bg-[var(--color-blue-720)]"></div>
-                            <div class="ui-shimmer mt-2 h-3 w-1/3 rounded bg-[var(--color-blue-720)]"></div>
+                            <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-2/3 rounded bg-[var(--color-blue-720)]"></div>
+                            <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] mt-2 h-3 w-1/3 rounded bg-[var(--color-blue-720)]"></div>
                         </div>
                         <div class="space-y-2 p-3">
-                            <div class="ui-shimmer h-3 w-full rounded bg-[var(--color-blue-720)]"></div>
-                            <div class="ui-shimmer h-3 w-4/5 rounded bg-[var(--color-blue-720)]"></div>
-                            <div class="ui-shimmer h-3 w-3/5 rounded bg-[var(--color-blue-720)]"></div>
+                            <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-full rounded bg-[var(--color-blue-720)]"></div>
+                            <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-4/5 rounded bg-[var(--color-blue-720)]"></div>
+                            <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-3/5 rounded bg-[var(--color-blue-720)]"></div>
                         </div>
                     </div>
                     }

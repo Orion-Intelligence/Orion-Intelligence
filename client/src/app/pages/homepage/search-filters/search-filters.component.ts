@@ -1,19 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild, ElementRef, OnInit, input, output } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { search_filter_labels } from '../../../shared/constants/shared-enums';
 import { AppService } from '../../../services/core/app/app.service';
 import { FilterCategory } from '../../../shared/model/filter/filter.model';
 import { searchFilterAnimation } from '../../../shared/animations/search.filter.animation';
-import { SuggestionService } from '../../../services/entity_filter_suggestions/suggestions.service';
+import { SuggestionService } from '../../../shared/partials/filters/services/suggestions.service';
 import { HelperService } from '../../../shared/services/helper.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { getOwnProperty, setOwnProperty } from '../../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-search-filters',
   standalone: true,
   imports: [FormsModule, CommonModule, TranslatePipe],
   templateUrl: './search-filters.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [searchFilterAnimation],
 })
 export class SearchFiltersComponent implements OnInit {
@@ -48,7 +51,7 @@ export class SearchFiltersComponent implements OnInit {
     });
     const defaultCategories: Record<string, string[]> = {};
     for (const key of Object.keys(search_filter_labels)) {
-      defaultCategories[key] = [];
+      setOwnProperty(defaultCategories, key, []);
     }
     this.initializeFilterCategories(defaultCategories);
     this.categories = this.app_service.configData().localSettings.entityfilterCategories;
@@ -85,42 +88,46 @@ export class SearchFiltersComponent implements OnInit {
     this.filteredSuggestions = [];
     this.showSuggestions = false;
     if (this.checkDomain) {
-      // TODO: The 'emit' function requires a mandatory void argument
+
       this.checkDomain.emit(undefined);
     }
   }
 
   getTags(key: string): string[] {
-    const value = this.app_service.getConfig().localSettings.entityfilterCategories[key];
+    const value = getOwnProperty(this.app_service.getConfig().localSettings.entityfilterCategories, key);
     return value ?? [];
+  }
+
+  private toTagOptions(key: string) {
+    return this.getTags(key).map(val => ({
+      id: `${key}-${val}`,
+      value: val,
+      type: key
+    }));
   }
 
   removeTag(event: MouseEvent, categoryId: string, tag: string): void {
     event.stopPropagation();
     event.preventDefault();
-    const value = this.app_service.getConfig().localSettings.entityfilterCategories[categoryId];
+    const value = getOwnProperty(this.app_service.getConfig().localSettings.entityfilterCategories, categoryId);
     if (Array.isArray(value)) {
-      this.app_service.getConfig().localSettings.entityfilterCategories[categoryId] = value.filter(t => t !== tag);
+      setOwnProperty(this.app_service.getConfig().localSettings.entityfilterCategories, categoryId, value.filter(t => t !== tag));
     }
     else if (value === tag) {
-      delete this.app_service.getConfig().localSettings.entityfilterCategories[categoryId];
+      Reflect.deleteProperty(this.app_service.getConfig().localSettings.entityfilterCategories, categoryId);
     }
     this.app_service.set('entityfilterCategories', this.app_service.getConfig().localSettings.entityfilterCategories);
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.searchFiltersChange.emit(undefined);
   }
 
   clearSelection() {
-    Object.keys(this.categories).forEach(key => this.categories[key] = []);
+    Object.keys(this.categories).forEach(key => setOwnProperty(this.categories, key, []));
     this.updateService();
   }
 
   private updateService() {
     this.app_service.set('entityfilterCategories', this.categories);
-  }
-
-  toggleExpand() {
-    this.app_service.set('iocExpanded', !this.app_service.configData().localSettings.iocExpanded);
   }
 
   onEntityFilterToggle(newValue: boolean): void {
@@ -152,16 +159,12 @@ export class SearchFiltersComponent implements OnInit {
       }
       this.filteredCategories = finalSortedKeys.map(key => ({
         id: key,
-        name: key === 'm_search_all' ? 'Search All' : (search_filter_labels[key] || key),
-        tags: this.getTags(key).map(val => ({
-          id: `${key}-${val}`,
-          value: val,
-          type: key
-        }))
+        name: key === 'm_search_all' ? 'Search All' : (getOwnProperty(search_filter_labels, key) || key),
+        tags: this.toTagOptions(key)
       }));
     }
     else {
-      const matchedKeys = Object.keys(this.categories).filter(categoryKey => (search_filter_labels[categoryKey] || categoryKey).toLowerCase().includes(queryLower));
+      const matchedKeys = Object.keys(this.categories).filter(categoryKey => (getOwnProperty(search_filter_labels, categoryKey) || categoryKey).toLowerCase().includes(queryLower));
       const rest = matchedKeys.filter(k => k !== 'm_search_all' && k !== this.selectedCategoryId);
       const sortedRest = rest.sort((a, b) => this.getTags(b).length - this.getTags(a).length);
       if (isDefaultSelection) {
@@ -173,12 +176,8 @@ export class SearchFiltersComponent implements OnInit {
       }
       this.filteredCategories = finalSortedKeys.map(key => ({
         id: key,
-        name: search_filter_labels[key] || key,
-        tags: this.getTags(key).map(val => ({
-          id: `${key}-${val}`,
-          value: val,
-          type: key
-        }))
+        name: getOwnProperty(search_filter_labels, key) || key,
+        tags: this.toTagOptions(key)
       }));
     }
   }

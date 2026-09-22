@@ -1,20 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { NgForm, FormsModule } from '@angular/forms';
 import { HeaderComponent } from "../header/login-header/header.component";
-import { PasswordChecks, PasswordStrength, areAllPasswordRequirementsMet, createEmptyPasswordChecks, evaluatePasswordInput } from "../../utils/auth-form.util";
+import { PasswordMeterHost } from '../../utils/password-meter-host';
 import { AppService } from '../../../services/core/app/app.service';
-import { PasswordToggleDirective } from '../../directives/password-toggle.directive';
+import { PasswordToggleDirective } from '../../directive/password-toggle.directive';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-forgot-password',
   templateUrl: './reset-password.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, HeaderComponent, CommonModule, PasswordToggleDirective, TranslatePipe]
 })
-export class ResetPasswordComponent implements OnInit {
+export class ResetPasswordComponent extends PasswordMeterHost implements OnInit {
   @ViewChild('forgotForm') form?: NgForm;
   email = '';
   recoveryKey = '';
@@ -22,28 +23,13 @@ export class ResetPasswordComponent implements OnInit {
   password = '';
   errorMessage: string | null = null;
   responseError = false;
-  hasToken: boolean = false;
-  token: string = '';
-  confirmPassword: string = 'asdsadasd';
+  hasToken = false;
+  token = '';
+  confirmPassword = 'asdsadasd';
   forcedPasswordReset = false;
-  passwordStrength: PasswordStrength = null;
-  showPasswordMeter = false;
-  passwordChecks: PasswordChecks = createEmptyPasswordChecks();
-  currentUnmetCheck: string | null = null;
 
   constructor(private router: Router, private route: ActivatedRoute, public auth_service: AuthService, private appService: AppService) {
-  }
-
-  onPasswordInput(password: string) {
-    const evaluation = evaluatePasswordInput(password);
-    this.showPasswordMeter = evaluation.showPasswordMeter;
-    this.passwordChecks = evaluation.passwordChecks;
-    this.currentUnmetCheck = evaluation.currentUnmetCheck;
-    this.passwordStrength = evaluation.passwordStrength;
-  }
-
-  get allPasswordRequirementsMet(): boolean {
-    return areAllPasswordRequirementsMet(this.passwordChecks);
+    super();
   }
 
   setRecoveryMode(recoveryMode: boolean) {
@@ -57,7 +43,7 @@ export class ResetPasswordComponent implements OnInit {
 
   ngOnInit() {
     const token = this.route.snapshot.paramMap.get('token');
-    if (token !== null) {
+    if (typeof token === 'string') {
       this.token = token;
       this.hasToken = true;
     }
@@ -73,7 +59,7 @@ export class ResetPasswordComponent implements OnInit {
           return;
         }
         this.auth_service.updatePassword(this.token, this.password).subscribe({
-          next: (_) => {
+          next: () => {
             this.responseError = false;
             if (this.forcedPasswordReset) {
               this.appService.loadSession(true).subscribe(() => {
@@ -102,7 +88,7 @@ export class ResetPasswordComponent implements OnInit {
           ? this.auth_service.recoverAccount(this.recoveryKey)
           : this.auth_service.forgotPassword(this.email);
         request.subscribe({
-          next: (_) => {
+          next: () => {
             this.responseError = false;
             this.router.navigate(['notification'], {
               state: {
@@ -114,7 +100,7 @@ export class ResetPasswordComponent implements OnInit {
           error: (err) => {
             this.responseError = true;
             if (this.recoveryMode) {
-              this.errorMessage = err?.error?.detail || "Invalid recovery key";
+              this.errorMessage = err?.error?.detail ?? "Invalid recovery key";
             }
             else {
               this.errorMessage = "Something went wrong. Please try again later.";

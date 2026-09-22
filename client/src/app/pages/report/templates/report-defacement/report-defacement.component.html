@@ -1,0 +1,111 @@
+<app-report-header [csv_object]="{ m_url: defacementData?.m_url }" [url]="defacementData?.m_url"></app-report-header>
+
+<app-report-interaction-host [docId]="reportDocId">
+  <div class="mt-4 mx-[12px] sm:mx-[15px] lg:mx-[30px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card [&&]:!bg-[var(--color-blue-700)] [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-white [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-none bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4">
+    <div class="mb-4 pb-3 flex justify-between items-center">
+      <div class="min-w-0 pr-4">
+        <div class="mb-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text4)]">{{ 'Target' | translate }}</div>
+        <a [href]="defacementData?.m_url" target="_blank" rel="noopener noreferrer" class="block min-w-0 truncate text-[20px] font-semibold leading-tight text-[var(--color-text1)] hover:text-[var(--color-blue-640)] hover:underline">
+          {{ formatTitleUrl(defacementData?.m_url) }}
+        </a>
+      </div>
+
+      <app-takedown-action class="shrink-0" [reportId]="reportDocId" [targetUrl]="defacementData?.m_url" [status]="$any(defacementData)?.m_takedown_status || null" [statusLabel]="$any(defacementData)?.m_takedown_label || ''"></app-takedown-action>
+    </div>
+
+    <div class="mt-5 grid gap-x-6 border-t border-[var(--color-divider)] pt-2 text-sm md:grid-cols-2 xl:grid-cols-3">
+      <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+        <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'Saved on' | translate }}</p>
+        <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_date ? (defacementData?.m_date | date: 'MMM d, y') : '-' }}</span>
+      </div>
+
+      @if (!defacementData?.m_ioc_type?.length) {
+        <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'Defacer' | translate }}</p>
+          <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_attacker ? defacementData?.m_attacker : '-' }}</span>
+        </div>
+      }
+
+      <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+        <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'Team' | translate }}</p>
+        <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_team }}</span>
+      </div>
+      @if (!defacementData?.m_ioc_type?.length) {
+        <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'Web Server' | translate }}</p>
+          <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_web_server ? defacementData?.m_web_server : '-' }}</span>
+        </div>
+      } @else {
+        <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'IOC Type' | translate }}</p>
+          <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_ioc_type?.join(', ') }}</span>
+        </div>
+      }
+
+      <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+        <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'alertTypes.breach' | translate }}</p>
+        <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ normalizeDisplayUrl(defacementData?.m_source_url) }}</span>
+      </div>
+
+      <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+        <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">IP</p>
+        <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_ip ? defacementData?.m_ip : '-' }}</span>
+      </div>
+
+      <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+        <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'Location' | translate }}</p>
+        <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_location ? defacementData?.m_location : '-' }}</span>
+      </div>
+    </div>
+  </div>
+
+  @if (filteredArrayKeys.length) {
+    <div data-testid="report-metadata-card" class="mt-4 mx-[12px] sm:mx-[15px] lg:mx-[30px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card [&&]:!bg-[var(--color-blue-700)] [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-white [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-none bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4">
+      <div (click)="metadataToggleContent()" class="flex cursor-pointer items-start justify-between gap-3">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 text-[16px] font-semibold leading-tight text-[var(--color-text1)]">
+            <img src="/assets/images/shared/theme/info.svg" alt="" class="h-5 w-5 shrink-0 ui-action-icon" [appTooltip]="'The metadata includes granular details from the report, such as detected people, organizations, domains, and other extracted elements' | translate">
+            <span class="truncate">{{ 'Metadata' | translate }}</span>
+          </div>
+          <p class="mt-1 text-[12px] text-[var(--color-text4)]">{{ 'Detected entities, extracted sections, and structured attributes.' | translate }}</p>
+        </div>
+        <div [attr.aria-label]="(isExpandedMetadata ? 'Collapse' : 'Expand') | translate" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-transparent transition-[border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:-translate-y-[1px]">
+          <img [ngClass]="{ 'rotate-180': !isExpandedMetadata }" alt="" aria-hidden="true" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="h-5 w-5 brightness-0 invert transition-transform duration-150 [body.light-theme_&]:!filter-none">
+        </div>
+      </div>
+      @if (isExpandedMetadata) {
+        <div class="mt-4">
+          <div class="-mx-1 overflow-x-auto px-1">
+            <div class="flex min-w-max items-end gap-5 border-b border-[var(--color-divider)]">
+              @for (key of filteredArrayKeys; track key) {
+                <button data-testid="report-metadata-tab" [attr.data-metadata-key]="key" (click)="setActiveTab(key)" [ngClass]="activeTab === key ? 'border-[var(--color-blue-640)] text-[var(--color-text1)]' : 'border-transparent text-[var(--color-text4)] hover:text-[var(--color-text2)]'" [appTooltip]="('Info about' | translate) + ' ' + (key === 'm_person' ? ('Entity' | translate) : formatKeyLabel(key))" class="-mb-px flex items-center gap-2 border-b-2 px-0.5 pb-2 pt-1 text-[12px] font-semibold transition-colors duration-150">
+                  <span>{{ key === 'm_person' ? ('Entity' | translate) : formatKeyLabel(key) }}</span>
+                  <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--color-text4)]">
+                    {{ getMetadataCount(key) }}
+                  </span>
+                </button>
+              }
+            </div>
+          </div>
+          @if (activeTab === 'm_content') {
+            <app-result-section [listItems]="[content]"></app-result-section>
+          }
+          @if (activeTab === 'm_section') {
+            <app-result-section [listItems]="listItems"></app-result-section>
+          }
+          @if (activeTab === 'm_org' || activeTab === 'm_person') {
+            <div class="report-surface-soft mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] [&&]:!bg-[var(--color-blue-790)] [body.light-theme_&&]:!bg-[#f6faff] p-3 text-xs text-[var(--color-text4)] [.light-theme_&]:!bg-[var(--color-blue-720)]">
+              {{ 'Names of people, organizations, and entities are handled separately, but may overlap in the results.' | translate }}
+            </div>
+          }
+          @if (activeTab !== 'm_section' && activeTab !== 'm_content') {
+            <app-result-list [activeTab]="activeTab" [listItems]="listItems"></app-result-list>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <app-json-api-viewer [jsonData]="defacementData"></app-json-api-viewer>
+  <app-report-mapping></app-report-mapping>
+</app-report-interaction-host>

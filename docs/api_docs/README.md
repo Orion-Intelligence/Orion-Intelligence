@@ -107,10 +107,35 @@ social/profile_search
 social/profile_images
 social/profile_metadata
 social/profile_posts
+social/profile_videos
+social/profile_shorts
+social/social_forum
 social/profile_followers
 social/profile_following
 social/profile_global_presence
 social/recon_image_search
+social/recon_status
+social/recon_cancel
+social/phone_recon
+social/social_entity
+social/extensions_version
+social/social_connections
+social/social_data_management
+social/social_graph_management
+```
+
+---
+
+## Extension
+
+```{toctree}
+:maxdepth: 1
+:caption: Extension
+
+extension/extension_auth
+extension/extension_session
+extension/extension_websocket
+extension/extension_artifacts
 ```
 
 ---

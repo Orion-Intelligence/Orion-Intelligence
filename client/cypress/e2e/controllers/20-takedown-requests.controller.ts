@@ -29,8 +29,6 @@ export const TAKEDOWN_FIXTURE = {
 
 export const takedownSelector = (testId: string) => `[data-testid="${testId}"]`;
 
-let currentRecord: TakedownRecord | null = null;
-
 function takedownRecord(status: TakedownStatus = 'pending'): TakedownRecord {
   const accepted = status === 'accepted';
   return {
@@ -49,7 +47,7 @@ function takedownRecord(status: TakedownStatus = 'pending'): TakedownRecord {
   };
 }
 
-function reportBody() {
+function reportBody(currentRecord: TakedownRecord | null) {
   const accepted = currentRecord?.status === 'accepted';
   return {
     m_hash: REPORT_HASH,
@@ -71,17 +69,17 @@ function reportBody() {
   };
 }
 
-export function stubTakedownReportFlow() {
-  currentRecord = null;
+export function registerTakedownIntercepts(seedStatus: TakedownStatus | null = null) {
+  let currentRecord: TakedownRecord | null = seedStatus ? takedownRecord(seedStatus) : null;
 
-  cy.intercept('GET', `**/api/search/defacement/${REPORT_HASH}*`, req => {
+  void cy.intercept('GET', `**/api/search/defacement/${REPORT_HASH}*`, req => {
     req.reply({
       statusCode: 200,
-      body: reportBody(),
+      body: reportBody(currentRecord),
     });
   }).as('loadTakedownReport');
 
-  cy.intercept('GET', '**/api/takedowns*', req => {
+  void cy.intercept('GET', '**/api/takedowns*', req => {
     const items = currentRecord ? [currentRecord] : [];
     req.reply({
       statusCode: 200,
@@ -94,7 +92,7 @@ export function stubTakedownReportFlow() {
     });
   }).as('loadTakedowns');
 
-  cy.intercept('POST', '**/api/takedowns', req => {
+  void cy.intercept('POST', '**/api/takedowns', req => {
     expect(req.body).to.deep.equal({
       report_id: REPORT_HASH,
       target_url: TAKEDOWN_FIXTURE.targetUrl,
@@ -115,7 +113,7 @@ export function stubTakedownReportFlow() {
     });
   }).as('createTakedown');
 
-  cy.intercept('POST', `**/api/takedowns/${REQUEST_ID}/accept`, req => {
+  void cy.intercept('POST', `**/api/takedowns/${REQUEST_ID}/accept`, req => {
     currentRecord = takedownRecord('accepted');
     req.reply({
       statusCode: 200,
@@ -124,54 +122,63 @@ export function stubTakedownReportFlow() {
   }).as('acceptTakedown');
 }
 
+export function stubTakedownReportFlow() {
+  registerTakedownIntercepts();
+}
+
 export function openCompromisedMonitoringReport() {
-  cy.visit(TAKEDOWN_FIXTURE.reportUrl);
-  cy.wait('@loadTakedownReport').its('response.statusCode').should('eq', 200);
-  cy.get(`a[href="${TAKEDOWN_FIXTURE.targetUrl}"]`).should('be.visible');
-  cy.contains(TAKEDOWN_FIXTURE.targetDomain).should('be.visible');
-  cy.contains('button', 'Initiate Takedown').should('be.visible');
+  cy.location('origin').then((origin) => {
+    void cy.visit(`${origin}${TAKEDOWN_FIXTURE.reportUrl}`);
+  });
+  void cy.wait('@loadTakedownReport').its('response.statusCode').should('eq', 200);
+  void cy.get(`a[href="${TAKEDOWN_FIXTURE.targetUrl}"]`).should('be.visible');
+  void cy.contains(TAKEDOWN_FIXTURE.targetDomain).should('be.visible');
+  void cy.contains('button', 'Initiate Takedown').should('be.visible');
 }
 
 export function initiateTakedownFromReport() {
-  cy.contains('button', 'Initiate Takedown').should('be.visible').and('not.be.disabled').click();
-  cy.get(takedownSelector('takedown-custom-message'))
+  void cy.contains('button', 'Initiate Takedown').should('be.visible').and('not.be.disabled').click();
+  void cy.get(takedownSelector('takedown-custom-message'))
     .should('be.visible')
     .and('have.value', '')
     .type(TAKEDOWN_FIXTURE.customMessage)
     .should('have.value', TAKEDOWN_FIXTURE.customMessage);
-  cy.get(takedownSelector('takedown-submit')).should('be.visible').and('not.be.disabled').click();
-  cy.wait('@createTakedown').its('response.statusCode').should('eq', 200);
-  cy.get(takedownSelector('takedown-action-modal')).should('contain.text', TAKEDOWN_FIXTURE.abuseEmail);
-  cy.get(takedownSelector('takedown-action-modal')).should('contain.text', 'Takedown in progress');
-  cy.contains(takedownSelector('takedown-action-modal') + ' button', 'Close').click();
-  cy.contains('button', 'Takedown in progress').should('be.visible');
+  void cy.get(takedownSelector('takedown-submit')).should('be.visible').and('not.be.disabled').click();
+  void cy.wait('@createTakedown').its('response.statusCode').should('eq', 200);
+  void cy.get(takedownSelector('takedown-action-modal')).should('contain.text', TAKEDOWN_FIXTURE.abuseEmail);
+  void cy.get(takedownSelector('takedown-action-modal')).should('contain.text', 'Takedown in progress');
+  void cy.contains(takedownSelector('takedown-action-modal') + ' button', 'Close').click();
+  void cy.contains('button', 'Takedown in progress').should('be.visible');
 }
 
 export function openTakedownReviewList() {
-  cy.visit('/dashboard/profile/take-down');
-  cy.wait('@loadTakedowns').its('response.statusCode').should('eq', 200);
-  cy.get(takedownSelector('takedown-row')).should('have.length', 1);
-  cy.get(takedownSelector('takedown-row')).first().within(() => {
-    cy.contains(TAKEDOWN_FIXTURE.targetDomain).should('be.visible');
-    cy.contains(TAKEDOWN_FIXTURE.targetUrl).should('be.visible');
-    cy.contains(TAKEDOWN_FIXTURE.abuseEmail).should('be.visible');
-    cy.contains('Takedown in progress').should('be.visible');
+  cy.location('origin').then((origin) => {
+    void cy.visit(`${origin}/dashboard/profile/take-down`);
+  });
+  void cy.wait('@loadTakedowns').its('response.statusCode').should('eq', 200);
+  void cy.get(takedownSelector('takedown-row')).should('have.length', 1);
+  void cy.get(takedownSelector('takedown-row')).first().within(() => {
+    void cy.contains(TAKEDOWN_FIXTURE.targetDomain).should('be.visible');
+    void cy.contains(TAKEDOWN_FIXTURE.targetUrl).should('be.visible');
+    void cy.contains(TAKEDOWN_FIXTURE.abuseEmail).should('be.visible');
   });
 }
 
 export function acceptTakedownFromList() {
-  cy.get(takedownSelector('takedown-row')).first().within(() => {
-    cy.get(takedownSelector('takedown-accept-button')).should('be.visible').and('not.be.disabled').click();
+  void cy.get(takedownSelector('takedown-row')).first().within(() => {
+    void cy.get(takedownSelector('takedown-accept-button')).should('be.visible').and('not.be.disabled').click();
   });
-  cy.wait('@acceptTakedown').its('response.statusCode').should('eq', 200);
-  cy.get(takedownSelector('takedown-row')).first().within(() => {
-    cy.contains('Takedown reported').should('be.visible');
-    cy.contains('Closed').should('be.visible');
+  void cy.wait('@acceptTakedown').its('response.statusCode').should('eq', 200);
+  void cy.get(takedownSelector('takedown-row')).first().within(() => {
+    void cy.contains('Takedown reported').should('be.visible');
+    void cy.contains('Closed').should('be.visible');
   });
 }
 
 export function assertReportShowsAcceptedTakedown() {
-  cy.visit(TAKEDOWN_FIXTURE.reportUrl);
-  cy.wait('@loadTakedownReport').its('response.statusCode').should('eq', 200);
-  cy.contains('button', 'Takedown reported').should('be.visible').and('be.disabled');
+  cy.location('origin').then((origin) => {
+    void cy.visit(`${origin}${TAKEDOWN_FIXTURE.reportUrl}`);
+  });
+  void cy.wait('@loadTakedownReport').its('response.statusCode').should('eq', 200);
+  void cy.contains('button', 'Takedown reported').should('be.visible').and('be.disabled');
 }

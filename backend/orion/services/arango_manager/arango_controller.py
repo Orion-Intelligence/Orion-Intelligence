@@ -1,6 +1,7 @@
 import asyncio
 
 from arango import ArangoClient
+from arango.http import DefaultHTTPClient
 
 from orion.constants.cti_graph_schema import CLUSTER_LABELS, GRAPH_SCHEMA_VERSION
 from orion.services.arango_manager.arango_enums import ARANGO_CONNECTIONS
@@ -30,7 +31,10 @@ class arango_controller:
     async def link_connection(self):
         for _ in range(60):
             try:
-                self.__client = ArangoClient(hosts=ARANGO_CONNECTIONS.ARANGO_URL)
+                self.__client = ArangoClient(
+                    hosts=ARANGO_CONNECTIONS.ARANGO_URL,
+                    http_client=DefaultHTTPClient(pool_connections=50, pool_maxsize=50),
+                )
 
                 sys_db = self.__client.db(
                     "_system",

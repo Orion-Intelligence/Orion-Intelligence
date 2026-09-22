@@ -1,15 +1,18 @@
-import { ChangeDetectorRef, Component, forwardRef, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, forwardRef, NgZone, OnInit, ViewRef, ChangeDetectionStrategy } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { finalize } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ReportFeedbackModel } from '../../../../../sections/report/templates/report_general/models/report-feedback.model';
-import { ArtifactReportOption, Case, CaseAnalyst, CaseArtifact, CaseArtifactFile, CaseClosure, CaseCommentRequest, CaseEntity, CaseLink, CaseTask, CaseUpdateRequest, TaskStatus } from '../../../../../shared/model/case-management/case.model';
-import { DEFAULT_CASE_ARTIFACT_TEMPLATE, DEFAULT_CASE_TASK_TEMPLATE, DEFAULT_RELATED_CASE_ENTITY_TEMPLATE } from '../../../../../shared/model/case-management/case-management.defaults';
+import { ReportFeedbackModel } from '../../../../../shared/partials/report-interactions/models/report-feedback.model';
+import { ArtifactReportOption, Case, CaseAnalyst, CaseArtifact, CaseArtifactFile, CaseClosure, CaseCommentRequest, CaseCommunication, CaseCommunicationRequest, CaseEntity, CaseLink, CaseTask, CaseUpdateRequest, TaskStatus } from '../case.model';
+import { DEFAULT_CASE_ARTIFACT_TEMPLATE, DEFAULT_CASE_TASK_TEMPLATE, DEFAULT_RELATED_CASE_ENTITY_TEMPLATE } from '../case-management.defaults';
 import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
 import { ConfirmationPopupComponent } from '../../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { HttpClient } from '@angular/common/http';
 import { CaseArtifactsSectionComponent } from './case-artifacts-section/case-artifacts-section';
 import { CaseClosureSectionComponent } from './case-closure-section/case-closure-section';
+import { CaseCommunicationsSectionComponent } from './case-communications-section/case-communications-section';
 import { CaseLinkedCasesSectionComponent } from './case-linked-cases-section/case-linked-cases-section';
 import { CaseRelatedEntitiesSectionComponent } from './case-related-entities-section/case-related-entities-section';
 import { CaseTasksSectionComponent } from './case-tasks-section/case-tasks-section';
@@ -25,9 +28,14 @@ import { buildCaseCommentsFeedback } from './case-details-feedback.mapper';
 import { buildCasePdfReport } from './case-details-pdf.mapper';
 import { cleanCaseForSave, cleanComment, createCaseId, ensureArtifactDefaults, ensureEntityDefaults, ensurePrimaryEntity, ensureTaskDefaults } from './case-details-payload.mapper';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../../shared/services/translation.service';
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
 import { AppService } from '../../../../../services/core/app/app.service';
+import { ProxyController } from '../../../../../shared/services/proxy-controller';
+import { SocialExtensionService } from '../../../../../shared/services/social-extension.service';
 import { ChatWidgetComponent } from '../../../../root-searches/ai-workspace/chat-widget/chat-widget.component';
+import { getOwnProperty } from '../../../../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-case-details',
@@ -37,6 +45,7 @@ import { ChatWidgetComponent } from '../../../../root-searches/ai-workspace/chat
     CaseArtifactsSectionComponent,
     CaseClosureSectionComponent,
     CaseCommentsSectionComponent,
+    CaseCommunicationsSectionComponent,
     CaseDetailsSkeletonComponent,
     CaseHeaderActionsComponent,
     CaseLinkedCasesSectionComponent,
@@ -48,6 +57,7 @@ import { ChatWidgetComponent } from '../../../../root-searches/ai-workspace/chat
     { provide: CaseDetailsStore, useExisting: forwardRef(() => CaseDetails) }
   ],
   animations: [caseSectionMotion],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-details.html',
 })
 export class CaseDetails extends CaseDetailsStore implements OnInit {
@@ -63,12 +73,15 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   isAddingArtifact = false;
   isAddingTask = false;
   isAddingLinkedCase = false;
+  isAddingCommunication = false;
   isClosingCase = false;
   newRelatedEntity: CaseEntity | null = null;
   newArtifact: CaseArtifact | null = null;
   newTask: CaseTask | null = null;
   newLinkedCase: CaseLink | null = null;
+  newCommunication: CaseCommunication | null = null;
   newClosure: CaseClosure | null = null;
+  readonly busyCommunicationIds = new Set<string>();
   analysts: CaseAnalyst[] = [];
   accessibleCases: Case[] = [];
   isCommentSaving = false;
@@ -89,8 +102,13 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   isUnarchiveConfirmationOpen = false;
   isArchivingCase = false;
 
-  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private casePdfExportService: CasePdfExportService, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef, public appService: AppService, private licenseService: LicenseService) {
+  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private casePdfExportService: CasePdfExportService, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef, public appService: AppService, private licenseService: LicenseService, private translationService: TranslationService, private proxyController: ProxyController, private zone: NgZone, private destroyRef: DestroyRef, private socialExtensionService: SocialExtensionService) {
     super();
+  }
+
+  private translate(key: string): string {
+    this.translationService.version();
+    return this.translationService.translate(key);
   }
 
   ngOnInit(): void {
@@ -100,6 +118,35 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       this.loadAnalysts();
       this.loadAccessibleCases();
     }
+
+    this.socialExtensionService.communicationCaptured()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(event => {
+        this.onCommunicationCaptured(event);
+      });
+  }
+
+  private onCommunicationCaptured(event: { caseId: string; communicationId: string; hasSession: boolean }): void {
+    const current = this.caseData;
+    if (!current || current.caseId !== event.caseId) {
+      return;
+    }
+
+    const communications = current.communications ?? [];
+    const index = communications.findIndex(item => item.communicationId === event.communicationId);
+    if (index < 0) {
+      return;
+    }
+
+    this.zone.run(() => {
+      current.communications = communications.map((item, position) => position === index ? { ...item, hasSession: event.hasSession } : item);
+      this.caseData = { ...current };
+      this.busyCommunicationIds.delete(event.communicationId);
+      this.messageNotificationService.show(this.translate('Session saved successfully'), 'success');
+      if (!(this.cdr as ViewRef).destroyed) {
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   canManageCases(): boolean {
@@ -155,8 +202,8 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
     if (!caseId) {
       this.isLoading = false;
-      this.messageNotificationService.show('No case ID provided');
-      this.router.navigate(['/dashboard/profile/case-management']);
+      this.messageNotificationService.show(this.translate('No case ID provided'));
+      void this.router.navigate(['/dashboard/profile/case-management']);
       return;
     }
 
@@ -166,9 +213,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         caseData.tasks = caseData.tasks || [];
         caseData.comments = caseData.comments || [];
         caseData.linkedCases = caseData.linkedCases || [];
-        caseData.closure = caseData.closure || null;
+        caseData.communications = caseData.communications || [];
+        caseData.closure = caseData.closure ?? null;
         caseData.assignedAnalystIds = caseData.assignedAnalystIds || [];
-        caseData.assignedAnalysts = caseData.assignedAnalysts || [];
+        caseData.assignedAnalysts = caseData.assignedAnalysts ?? [];
 
         if (!this.canManageCases()) {
           this.analysts = caseData.assignedAnalysts;
@@ -183,8 +231,8 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         });
       },
       error: () => {
-        this.messageNotificationService.show('Case not found');
-        this.router.navigate(['/dashboard/profile/case-management']);
+        this.messageNotificationService.show(this.translate('Case not found'));
+        void this.router.navigate(['/dashboard/profile/case-management']);
         this.isLoading = false;
       }
     });
@@ -206,11 +254,11 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return;
     }
     if (!this.canManageCases() && section !== 'tasks') {
-      this.messageNotificationService.show('Analysts can only edit tasks and comments');
+      this.messageNotificationService.show(this.translate('Analysts can only edit tasks and comments'));
       return;
     }
     if (this.caseData.closure) {
-      this.messageNotificationService.show('Closed cases cannot be edited');
+      this.messageNotificationService.show(this.translate('Closed cases cannot be edited'));
       return;
     }
     const editedCase: Case = JSON.parse(JSON.stringify(this.caseData));
@@ -218,7 +266,8 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     editedCase.assignedAnalystIds = editedCase.assignedAnalystIds || [];
     editedCase.comments = editedCase.comments || [];
     editedCase.linkedCases = editedCase.linkedCases || [];
-    editedCase.closure = editedCase.closure || null;
+    editedCase.communications = editedCase.communications || [];
+    editedCase.closure = editedCase.closure ?? null;
     editedCase.entities = (editedCase.entities || []).map(entity => ensureEntityDefaults(entity));
     editedCase.artifacts = (editedCase.artifacts || []).map(artifact => ensureArtifactDefaults(artifact));
     editedCase.tasks = (editedCase.tasks || []).map(task => ensureTaskDefaults(task));
@@ -261,14 +310,14 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
   uploadArtifactFiles(artifact: CaseArtifact, fileInput: HTMLInputElement): void {
     if (!this.canManageCases()) {
-      this.messageNotificationService.show('Analysts cannot upload artifact files');
+      this.messageNotificationService.show(this.translate('Analysts cannot upload artifact files'));
       return;
     }
     if (!this.caseData || !artifact.artifactId) {
       return;
     }
 
-    const files = Array.from(fileInput.files || []);
+    const files = Array.from(fileInput.files ?? []);
 
     if (!this.validateArtifactFiles(artifact, files, artifact.files?.length || 0)) {
       fileInput.value = '';
@@ -285,16 +334,16 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         this.patchArtifactFiles(artifact.artifactId, nextFiles);
 
         fileInput.value = '';
-        this.messageNotificationService.show('Files uploaded successfully', 'success');
+        this.messageNotificationService.show(this.translate('Files uploaded successfully'), 'success');
       },
       error: err => {
         fileInput.value = '';
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to upload files');
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Failed to upload files'));
       }
     });
   }
 
-  loadArtifactReports(source: string, q: string = ''): void {
+  loadArtifactReports(source: string, q = ''): void {
     this.artifactReports = [];
 
     if (!source) {
@@ -311,7 +360,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       error: err => {
         this.artifactReports = [];
         this.isArtifactReportsLoading = false;
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to load reports');
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Failed to load reports'));
       }
     });
   }
@@ -334,7 +383,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   scheduleArtifactReportSearch(artifact: CaseArtifact): void {
-    if (!artifact || artifact.type !== 'report' || !artifact.linkedReportSource) {
+    if (artifact?.type !== 'report' || !artifact.linkedReportSource) {
       return;
     }
 
@@ -365,7 +414,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     const url = this.getArtifactReportViewUrl(artifact);
 
     if (!url) {
-      this.messageNotificationService.show('Report link is not available');
+      this.messageNotificationService.show(this.translate('Report link is not available'));
       return;
     }
 
@@ -389,7 +438,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       exploit: { base: 'exploit', category: 'all' }
     };
 
-    const config = sourcePathMap[source];
+    const config = getOwnProperty(sourcePathMap, source);
 
     if (!config) {
       return '';
@@ -413,7 +462,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     const artifactFile = (artifact.files || []).find(file => file.fileId === fileId);
 
     if (artifactFile && this.isArtifactFileIntegrityFailed(artifactFile)) {
-      this.messageNotificationService.show('File integrity check failed');
+      this.messageNotificationService.show(this.translate('File integrity check failed'));
       return;
     }
 
@@ -423,7 +472,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = artifactFile?.fileName || 'artifact-file';
+        link.download = artifactFile?.fileName ?? 'artifact-file';
         link.click();
         window.URL.revokeObjectURL(url);
       },
@@ -432,14 +481,14 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
           artifactFile.integrityStatus = 'failed';
         }
 
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'File integrity check failed');
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('File integrity check failed'));
       }
     });
   }
 
   deleteArtifactFile(artifact: CaseArtifact, fileId: string): void {
     if (!this.canManageCases()) {
-      this.messageNotificationService.show('Analysts cannot delete artifact files');
+      this.messageNotificationService.show(this.translate('Analysts cannot delete artifact files'));
       return;
     }
     if (!this.caseData || !artifact.artifactId) {
@@ -452,10 +501,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
         this.patchArtifactFiles(artifact.artifactId, nextFiles);
 
-        this.messageNotificationService.show('File deleted successfully', 'success');
+        this.messageNotificationService.show(this.translate('File deleted successfully'), 'success');
       },
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to delete file');
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Failed to delete file'));
       }
     });
   }
@@ -465,7 +514,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return;
     }
 
-    const files = Array.from(fileInput.files || []);
+    const files = Array.from(fileInput.files ?? []);
 
     if (!files.length) {
       this.pendingNewArtifactFiles = [];
@@ -502,7 +551,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       },
       error: err => {
         this.isPdfExporting = false;
-        this.messageNotificationService.show(err?.message || 'Failed to export PDF');
+        this.messageNotificationService.show(err?.message ?? this.translate('Failed to export PDF'));
       }
     });
   }
@@ -511,7 +560,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     if (!this.canManageCases()) {
       return;
     }
-    if (!this.caseData?.closure || this.caseData.isArchived || this.isArchivingCase) {
+    if (!this.caseData?.closure || Boolean(this.caseData.isArchived) || this.isArchivingCase) {
       return;
     }
 
@@ -568,10 +617,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
   getShareConfirmationMessage(): string {
     if (this.pendingShareAction === 'create') {
-      return 'Creating a share link will allow anyone with the link to access this case report until the link expires. Do you want to continue?';
+      return this.translate('Creating a share link will allow anyone with the link to access this case report until the link expires. Do you want to continue?');
     }
     if (this.pendingShareAction === 'revoke') {
-      return 'Revoking share links will expire all previously shared links for this case. Do you want to continue?';
+      return this.translate('Revoking share links will expire all previously shared links for this case. Do you want to continue?');
     }
     return '';
   }
@@ -591,11 +640,11 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         if (this.caseData) {
           this.caseData.isArchived = true;
         }
-        this.messageNotificationService.show('Case archived successfully', 'success');
+        this.messageNotificationService.show(this.translate('Case archived successfully'), 'success');
       },
       error: err => {
         this.isArchivingCase = false;
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to archive case');
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Failed to archive case'));
       }
     });
   }
@@ -617,11 +666,11 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
           this.caseData.archivedAt = undefined;
           this.caseData.archivedBy = '';
         }
-        this.messageNotificationService.show('Case unarchived successfully', 'success');
+        this.messageNotificationService.show(this.translate('Case unarchived successfully'), 'success');
       },
       error: err => {
         this.isArchivingCase = false;
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to unarchive case');
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Failed to unarchive case'));
       }
     });
   }
@@ -635,7 +684,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       expiresInHours: 168
     }).subscribe({
       next: share => {
-        let shareUrl = share.path;
+        let shareUrl: string;
         try {
           shareUrl = new URL(share.path, window.location.origin).toString();
         }
@@ -647,7 +696,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       },
       error: err => {
         this.isShareCreating = false;
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to create share link');
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Failed to create share link'));
       }
     });
   }
@@ -660,11 +709,11 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     this.caseService.revokeCaseShares(this.caseData.caseId).subscribe({
       next: result => {
         this.isShareRevoking = false;
-        this.messageNotificationService.show(`${result.revokedCount || 0} share links revoked.`, 'success');
+        this.messageNotificationService.show(this.translate('{count} share links revoked.').replace('{count}', String(result.revokedCount || 0)), 'success');
       },
       error: err => {
         this.isShareRevoking = false;
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to revoke share links');
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Failed to revoke share links'));
       }
     });
   }
@@ -674,6 +723,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     this.isAddingArtifact = false;
     this.isAddingTask = false;
     this.isAddingLinkedCase = false;
+    this.isAddingCommunication = false;
     this.isClosingCase = false;
 
     this.newRelatedEntity = null;
@@ -682,6 +732,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     this.pendingNewArtifactFileInput = null;
     this.newTask = null;
     this.newLinkedCase = null;
+    this.newCommunication = null;
     this.newClosure = null;
   }
 
@@ -697,13 +748,13 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return null;
     }
     return caseItem.entities.find(entity => entity.entityId === caseItem.primaryEntityId)
-      || caseItem.entities.find(entity => entity.role === 'primary')
-      || caseItem.entities[0];
+      ?? caseItem.entities.find(entity => entity.role === 'primary')
+      ?? caseItem.entities[0];
   }
 
   getRelatedEntities(caseItem: Case | null = this.caseData): CaseEntity[] {
     const primaryEntity = this.getPrimaryEntity(caseItem);
-    return caseItem?.entities?.filter(entity => entity.entityId !== primaryEntity?.entityId) || [];
+    return caseItem?.entities?.filter(entity => entity.entityId !== primaryEntity?.entityId) ?? [];
   }
 
   removeRelatedEntity(index: number): void {
@@ -714,7 +765,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return;
     }
 
-    const relatedEntity = this.getRelatedEntities(this.editedCase)[index];
+    const relatedEntity = getOwnProperty(this.getRelatedEntities(this.editedCase), index);
 
     if (!relatedEntity) {
       return;
@@ -772,10 +823,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     return this.getCaseSaveSignature(this.editedCase) !== this.getCaseSaveSignature(this.caseData);
   }
 
-  getLinkableCases(caseItem: Case | null = this.editedCase || this.caseData, currentSelectedCaseId = ''): Case[] {
+  getLinkableCases(caseItem: Case | null = this.editedCase ?? this.caseData, currentSelectedCaseId = ''): Case[] {
     const currentCaseId = caseItem?.caseId;
 
-    const alreadyLinkedCaseIds = new Set((caseItem?.linkedCases || [])
+    const alreadyLinkedCaseIds = new Set((caseItem?.linkedCases ?? [])
       .map(linkedCase => linkedCase.targetCaseId)
       .filter(caseId => caseId && caseId !== currentSelectedCaseId));
 
@@ -784,7 +835,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       !alreadyLinkedCaseIds.has(item.caseId));
   }
 
-  hasLinkableCases(caseItem: Case | null = this.editedCase || this.caseData, currentSelectedCaseId = ''): boolean {
+  hasLinkableCases(caseItem: Case | null = this.editedCase ?? this.caseData, currentSelectedCaseId = ''): boolean {
     return this.getLinkableCases(caseItem, currentSelectedCaseId).length > 0;
   }
 
@@ -841,6 +892,23 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     };
   }
 
+  openAddCommunication(): void {
+    if (!this.canManageCases()) {
+      return;
+    }
+    if (!this.caseData || this.isEditing) {
+      return;
+    }
+
+    this.cancelAllSectionModes();
+    this.isAddingCommunication = true;
+    this.newCommunication = {
+      communicationId: '',
+      name: '',
+      url: ''
+    };
+  }
+
   openAddLinkedCase(): void {
     if (!this.canManageCases()) {
       return;
@@ -864,10 +932,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
   getCloseCaseTooltip(): string {
     if (this.canCloseCase()) {
-      return 'Close case';
+      return this.translate('Close case');
     }
 
-    return 'Case cannot be closed until it reaches Resolved status';
+    return this.translate('Case cannot be closed until it reaches Resolved status');
   }
 
   openCloseCase(): void {
@@ -879,7 +947,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (!this.canCloseCase()) {
-      this.messageNotificationService.show('Case cannot be closed until it reaches Resolved status');
+      this.messageNotificationService.show(this.translate('Case cannot be closed until it reaches Resolved status'));
       return;
     }
 
@@ -909,6 +977,16 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     this.cancelAllSectionModes();
   }
 
+  private normalizeCaseCollections(updated: Case): void {
+    updated.artifacts = updated.artifacts || [];
+    updated.tasks = updated.tasks || [];
+    updated.comments = updated.comments || [];
+    updated.linkedCases = updated.linkedCases || [];
+    updated.communications = updated.communications || [];
+    updated.assignedAnalystIds = updated.assignedAnalystIds || [];
+    updated.closure = updated.closure ?? null;
+  }
+
   private saveCasePayload(payload: CaseUpdateRequest, successMessage: string): void {
     if (!this.caseData) {
       return;
@@ -916,12 +994,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
     this.caseService.updateCase(this.caseData.caseId, payload).subscribe({
       next: updated => {
-        updated.artifacts = updated.artifacts || [];
-        updated.tasks = updated.tasks || [];
-        updated.comments = updated.comments || [];
-        updated.linkedCases = updated.linkedCases || [];
-        updated.assignedAnalystIds = updated.assignedAnalystIds || [];
-        updated.closure = updated.closure || null;
+        this.normalizeCaseCollections(updated);
 
         this.caseData = updated;
         this.isEditing = false;
@@ -929,10 +1002,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         this.editedCase = null;
         this.cancelAllSectionModes();
 
-        this.messageNotificationService.show(successMessage, 'success');
+        this.messageNotificationService.show(this.translate(successMessage), 'success');
       },
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to save changes');
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Failed to save changes'));
       }
     });
   }
@@ -946,7 +1019,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (!this.editedCase.title.trim()) {
-      this.messageNotificationService.show('Case title is required');
+      this.messageNotificationService.show(this.translate('Case title is required'));
       return;
     }
 
@@ -971,7 +1044,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     const primaryEntity = ensurePrimaryEntity(this.editedCase);
 
     if (!primaryEntity.value.trim()) {
-      this.messageNotificationService.show('Primary entity value is required');
+      this.messageNotificationService.show(this.translate('Primary entity value is required'));
       return;
     }
 
@@ -999,7 +1072,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       || (entity.source === 'other' && !entity.entitySourceOtherValue?.trim()));
 
     if (invalidIndex >= 0) {
-      this.messageNotificationService.show(`Related entity ${invalidIndex + 1} is invalid`);
+      this.messageNotificationService.show(this.translate('Related entity {index} is invalid').replace('{index}', String(invalidIndex + 1)));
       return;
     }
 
@@ -1015,7 +1088,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (!this.newRelatedEntity.value.trim()) {
-      this.messageNotificationService.show('Related entity value is required');
+      this.messageNotificationService.show(this.translate('Related entity value is required'));
       return;
     }
 
@@ -1048,7 +1121,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       || (artifact.type === 'report' && (!artifact.linkedReportSource || !artifact.linkedReportId)));
 
     if (invalidIndex >= 0) {
-      this.messageNotificationService.show(`Artifact ${invalidIndex + 1} is invalid`);
+      this.messageNotificationService.show(this.translate('Artifact {index} is invalid').replace('{index}', String(invalidIndex + 1)));
       return;
     }
 
@@ -1064,7 +1137,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (!this.newArtifact.title.trim()) {
-      this.messageNotificationService.show('Artifact title is required');
+      this.messageNotificationService.show(this.translate('Artifact title is required'));
       return;
     }
 
@@ -1077,17 +1150,17 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (this.newArtifact.type === 'url_capture' && !this.newArtifact.url?.trim()) {
-      this.messageNotificationService.show('URL is required');
+      this.messageNotificationService.show(this.translate('URL is required'));
       return;
     }
 
     if (this.newArtifact.type === 'report' && (!this.newArtifact.linkedReportSource || !this.newArtifact.linkedReportId)) {
-      this.messageNotificationService.show('Please select a report');
+      this.messageNotificationService.show(this.translate('Please select a report'));
       return;
     }
 
     if ((this.newArtifact.type === 'screenshot' || this.newArtifact.type === 'file') && !this.pendingNewArtifactFiles.length) {
-      this.messageNotificationService.show('Please select at least one file');
+      this.messageNotificationService.show(this.translate('Please select at least one file'));
       return;
     }
 
@@ -1099,12 +1172,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
     this.caseService.updateCase(this.caseData.caseId, payload).subscribe({
       next: updated => {
-        updated.artifacts = updated.artifacts || [];
-        updated.tasks = updated.tasks || [];
-        updated.comments = updated.comments || [];
-        updated.linkedCases = updated.linkedCases || [];
-        updated.assignedAnalystIds = updated.assignedAnalystIds || [];
-        updated.closure = updated.closure || null;
+        this.normalizeCaseCollections(updated);
 
         this.caseData = updated;
 
@@ -1123,12 +1191,12 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
               this.pendingNewArtifactFileInput = null;
               this.cancelAllSectionModes();
 
-              this.messageNotificationService.show('Artifact added successfully', 'success');
+              this.messageNotificationService.show(this.translate('Artifact added successfully'), 'success');
             },
             error: err => {
               this.pendingNewArtifactFiles = [];
               this.pendingNewArtifactFileInput = null;
-              this.messageNotificationService.show(err?.error?.detail || err?.message || 'Artifact saved, but file upload failed');
+              this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Artifact saved, but file upload failed'));
             }
           });
 
@@ -1139,10 +1207,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         this.pendingNewArtifactFileInput = null;
         this.cancelAllSectionModes();
 
-        this.messageNotificationService.show('Artifact added successfully', 'success');
+        this.messageNotificationService.show(this.translate('Artifact added successfully'), 'success');
       },
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to add artifact');
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Failed to add artifact'));
       }
     });
   }
@@ -1155,12 +1223,12 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     const invalidIndex = (this.editedCase.tasks || []).findIndex(task => !task.title.trim());
 
     if (invalidIndex >= 0) {
-      this.messageNotificationService.show(`Task ${invalidIndex + 1} title is required`);
+      this.messageNotificationService.show(this.translate('Task {index} title is required').replace('{index}', String(invalidIndex + 1)));
       return;
     }
 
     if (!this.canManageCases()) {
-      const originalTasks = new Map((this.caseData?.tasks || []).map(task => [task.taskId, task]));
+      const originalTasks = new Map((this.caseData?.tasks ?? []).map(task => [task.taskId, task]));
 
       const invalidTask = (this.editedCase.tasks || []).find(task => {
         const originalTask = originalTasks.get(task.taskId);
@@ -1179,7 +1247,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       });
 
       if (invalidTask) {
-        this.messageNotificationService.show('Analysts can only update their assigned task status to In Progress or Under Review');
+        this.messageNotificationService.show(this.translate('Analysts can only update their assigned task status to In Progress or Under Review'));
         return;
       }
     }
@@ -1193,7 +1261,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (!this.newTask.title.trim()) {
-      this.messageNotificationService.show('Task title is required');
+      this.messageNotificationService.show(this.translate('Task title is required'));
       return;
     }
 
@@ -1216,12 +1284,12 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     const invalidIndex = linkedCases.findIndex(link => !link.targetCaseId);
 
     if (invalidIndex >= 0) {
-      this.messageNotificationService.show(`Linked case ${invalidIndex + 1} target case is required`);
+      this.messageNotificationService.show(this.translate('Linked case {index} target case is required').replace('{index}', String(invalidIndex + 1)));
       return;
     }
 
     if (this.hasDuplicateLinkedCases(linkedCases)) {
-      this.messageNotificationService.show('Same case cannot be linked more than once');
+      this.messageNotificationService.show(this.translate('Same case cannot be linked more than once'));
       return;
     }
 
@@ -1237,7 +1305,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (!this.newLinkedCase.targetCaseId) {
-      this.messageNotificationService.show('Target case is required');
+      this.messageNotificationService.show(this.translate('Target case is required'));
       return;
     }
 
@@ -1245,7 +1313,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       .some(link => link.targetCaseId === this.newLinkedCase?.targetCaseId);
 
     if (alreadyLinked) {
-      this.messageNotificationService.show('This case is already linked');
+      this.messageNotificationService.show(this.translate('This case is already linked'));
       return;
     }
 
@@ -1253,6 +1321,132 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     draft.linkedCases = [...(draft.linkedCases || []), this.newLinkedCase];
 
     this.saveCasePayload(cleanCaseForSave(draft), 'Linked case added successfully');
+  }
+
+  saveNewCommunication(): void {
+    if (!this.requireManageCases() || !this.caseData || !this.newCommunication) {
+      return;
+    }
+
+    const payload = this.buildCommunicationRequest(this.newCommunication);
+
+    if (!payload) {
+      return;
+    }
+
+    this.caseService.addCommunication(this.caseData.caseId, payload).subscribe({
+      next: updated => {
+        this.applyCommunicationResult(updated, 'External communication added successfully'); 
+      },
+      error: err => {
+        this.showCommunicationError(err); 
+      }
+    });
+  }
+
+  saveCommunication(communication: CaseCommunication): void {
+    if (!this.requireManageCases() || !this.caseData) {
+      return;
+    }
+
+    const payload = this.buildCommunicationRequest(communication);
+
+    if (!payload) {
+      return;
+    }
+
+    this.caseService.updateCommunication(this.caseData.caseId, communication.communicationId, payload).subscribe({
+      next: updated => {
+        this.applyCommunicationResult(updated, 'External communication updated successfully'); 
+      },
+      error: err => {
+        this.showCommunicationError(err); 
+      }
+    });
+  }
+
+  removeCommunication(communicationId: string): void {
+    if (!this.requireManageCases() || !this.caseData) {
+      return;
+    }
+
+    this.caseService.deleteCommunication(this.caseData.caseId, communicationId).subscribe({
+      next: updated => {
+        this.applyCommunicationResult(updated, 'External communication deleted successfully'); 
+      },
+      error: err => {
+        this.showCommunicationError(err); 
+      }
+    });
+  }
+
+  isCommunicationBusy(communication: CaseCommunication): boolean {
+    return this.busyCommunicationIds.has(communication.communicationId);
+  }
+
+  openCommunication(communication: CaseCommunication): void {
+    if (!this.caseData || this.isCommunicationBusy(communication)) {
+      return;
+    }
+
+    this.busyCommunicationIds.add(communication.communicationId);
+
+    this.caseService.openCommunication(this.caseData.caseId, communication.communicationId, this.proxyController.resolve(communication.url))
+      .pipe(finalize(() => this.busyCommunicationIds.delete(communication.communicationId)))
+      .subscribe(result => {
+        if (result.error) {
+          this.messageNotificationService.show(this.getCommunicationSessionError(result.error));
+        }
+      });
+  }
+
+  private applyCommunicationResult(updated: Case, successMessage: string): void {
+    this.normalizeCaseCollections(updated);
+    this.caseData = updated;
+    this.isEditing = false;
+    this.activeEditSection = null;
+    this.editedCase = null;
+    this.cancelAllSectionModes();
+    this.messageNotificationService.show(this.translate(successMessage), 'success');
+  }
+
+  private showCommunicationError(err: unknown): void {
+    const error = err as { error?: { detail?: string }; message?: string };
+    this.messageNotificationService.show(error?.error?.detail ?? error?.message ?? this.translate('Failed to save changes'));
+  }
+
+  private buildCommunicationRequest(communication: CaseCommunication): CaseCommunicationRequest | null {
+    const name = communication.name?.trim() ?? '';
+    const url = communication.url?.trim() ?? '';
+
+    if (!name) {
+      this.messageNotificationService.show(this.translate('External communication name is required'));
+      return null;
+    }
+
+    if (!this.isValidCommunicationUrl(url)) {
+      this.messageNotificationService.show(this.translate('External communication URL must be a valid http or https address'));
+      return null;
+    }
+
+    return { name, url };
+  }
+
+  private isValidCommunicationUrl(url: string): boolean {
+    try {
+      return ['http:', 'https:'].includes(new URL(url).protocol);
+    }
+    catch {
+      return false;
+    }
+  }
+
+  private getCommunicationSessionError(error: string): string {
+    if (error === 'extension_required') {
+      return this.translate('Connect the browser extension to open external communications');
+    }
+
+    return this.translate('Session could not be saved');
   }
 
   saveClosure(): void {
@@ -1264,7 +1458,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (this.newClosure.reason === 'other' && !this.newClosure.closureReasonOtherValue?.trim()) {
-      this.messageNotificationService.show('Other closure reason is required');
+      this.messageNotificationService.show(this.translate('Other closure reason is required'));
       return;
     }
 
@@ -1303,26 +1497,26 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       },
       error: err => {
         this.isCommentSaving = false;
-        this.commentErrorMessage = err?.error?.detail || err?.message || 'Unable to save comment.';
+        this.commentErrorMessage = err?.error?.detail ?? err?.message ?? this.translate('Unable to save comment.');
       }
     });
   }
 
   getAnalystLabel(userId?: string): string {
     if (!userId) {
-      return 'Unassigned';
+      return this.translate('Unassigned');
     }
 
     const analyst = [
       ...(this.analysts || []),
-      ...(this.caseData?.assignedAnalysts || [])
+      ...(this.caseData?.assignedAnalysts ?? [])
     ].find(item => item.id === userId);
 
     if (!analyst) {
       return userId;
     }
 
-    return analyst.username || analyst.email || analyst.id;
+    return analyst.username ?? analyst.email ?? analyst.id;
   }
 
   getCaseAnalysts(caseItem: Case | null = this.caseData): CaseAnalyst[] {
@@ -1330,7 +1524,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return caseItem.assignedAnalysts;
     }
 
-    const assignedIds = new Set(caseItem?.assignedAnalystIds || []);
+    const assignedIds = new Set(caseItem?.assignedAnalystIds ?? []);
     return this.analysts.filter(analyst => assignedIds.has(analyst.id));
   }
 
@@ -1368,7 +1562,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   formatConfidence(value?: string | null): string {
-    return this.formatLabel(value || 'high');
+    return this.formatLabel(value ?? 'high');
   }
 
   private getCaseSaveSignature(caseItem: Case): string {
@@ -1384,7 +1578,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
   verifyArtifactFile(artifact: CaseArtifact, fileId: string): void {
     if (!this.canManageCases()) {
-      this.messageNotificationService.show('Analysts cannot verify artifact files');
+      this.messageNotificationService.show(this.translate('Analysts cannot verify artifact files'));
       return;
     }
     if (!this.caseData || !artifact.artifactId) {
@@ -1394,12 +1588,12 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     this.caseService.verifyArtifactFile(this.caseData.caseId, artifact.artifactId, fileId).subscribe({
       next: result => {
         this.setArtifactFileStatus(artifact, fileId, result.status);
-        this.messageNotificationService.show(result.success ? 'File integrity verified' : 'File integrity check failed',
+        this.messageNotificationService.show(this.translate(result.success ? 'File integrity verified' : 'File integrity check failed'),
           result.success ? 'success' : undefined);
       },
       error: err => {
         this.setArtifactFileStatus(artifact, fileId, 'failed');
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'File integrity check failed');
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('File integrity check failed'));
       }
     });
   }
@@ -1417,7 +1611,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
   private validateOtherValue(value: string | undefined | null, otherValue: string | undefined | null, message: string): boolean {
     if (value === 'other' && !otherValue?.trim()) {
-      this.messageNotificationService.show(message);
+      this.messageNotificationService.show(this.translate(message));
       return false;
     }
     return true;
@@ -1437,18 +1631,18 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (existingFileCount + files.length > this.maxArtifactFiles) {
-      this.messageNotificationService.show(`Maximum ${this.maxArtifactFiles} files can be attached to an artifact`);
+      this.messageNotificationService.show(this.translate('Maximum {count} files can be attached to an artifact').replace('{count}', String(this.maxArtifactFiles)));
       return false;
     }
 
     for (const file of files) {
       if (artifact.type === 'screenshot' && file.type !== 'image/png') {
-        this.messageNotificationService.show('Screenshots must be PNG images');
+        this.messageNotificationService.show(this.translate('Screenshots must be PNG images'));
         return false;
       }
 
       if (artifact.type === 'file' && !this.artifactAllowedFileTypes.includes(file.type)) {
-        this.messageNotificationService.show('Allowed file types: PDF, JPG, PNG, TXT, DOCX');
+        this.messageNotificationService.show(this.translate('Allowed file types: PDF, JPG, PNG, TXT, DOCX'));
         return false;
       }
     }
@@ -1461,7 +1655,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return true;
     }
 
-    this.messageNotificationService.show('Analysts can only edit tasks and comments');
+    this.messageNotificationService.show(this.translate('Analysts can only edit tasks and comments'));
     return false;
   }
 }

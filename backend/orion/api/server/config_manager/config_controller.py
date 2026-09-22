@@ -22,18 +22,19 @@ class config_controller:
     __instance = None
     CONFIG_CACHE_KEY = "system_config"
     EMAIL_META_KEYS = {"ACCOUNTS_MAIL_PASSWORD", "ACCOUNTS_MAIL", "ACCOUNTS_SMTP_SERVER", "ACCOUNTS_SMTP_PORT"}
-    TENANT_EDITABLE_SETTINGS = {AllowedKeys.APP_NAME.value}
+    TENANT_EDITABLE_META_KEYS = {"S_HOME_HEADER_DATA_SOURCES", "S_HOME_HEADER_ADVERSARIES", "S_HOME_HEADER_PRICING"}
+    TENANT_EDITABLE_SETTINGS = {AllowedKeys.APP_NAME.value, AllowedKeys.S_ONION.value, AllowedKeys.META_INFO.value}
     ADMIN_SETTING_KEYS = {
         AllowedKeys.VERSION.value,
+        AllowedKeys.EXTENSION_VERSION.value,
         AllowedKeys.LANGUAGE_ALLOWED.value,
         AllowedKeys.ADMIN_ROOT_ALLOWED.value,
-        AllowedKeys.S_ONION.value,
+        AllowedKeys.BACKUP_SCHEDULE.value,
     }
     SYSTEM_RESOURCE_FILENAMES = {
         AllowedKeys.LOGO_URL: "logo_url_custom.png",
         AllowedKeys.LOGO_WIDE_LIGHT: "logo_wide_light_custom.png",
         AllowedKeys.LOGO_WIDE_DARK: "logo_wide_dark_custom.png",
-        AllowedKeys.AUTH_DASHBOARD_ICON: "auth_dashboard_icon_custom.png",
     }
     LEGACY_ALERT_CONNECTOR_META_KEYS = {"ALERT_SLACK_WEBHOOK_URL", "ALERT_SLACK_CHANNEL", "ALERT_SLACK_CHANNEL_ID", "ALERT_SLACK_CONFIGURATION_URL", "ALERT_SLACK_TEAM_ID", "ALERT_SLACK_TEAM_NAME", "ALERT_JIRA_ACCESS_TOKEN", "ALERT_JIRA_REFRESH_TOKEN", "ALERT_JIRA_EXPIRES_AT", "ALERT_JIRA_CLOUD_ID", "ALERT_JIRA_SITE_URL", "ALERT_JIRA_SITE_NAME", "ALERT_JIRA_BASE_URL", "ALERT_JIRA_EMAIL", "ALERT_JIRA_API_TOKEN", "ALERT_JIRA_PROJECT_KEY", "ALERT_JIRA_ISSUE_TYPE"}
 
@@ -45,7 +46,7 @@ class config_controller:
 
     def __init__(self):
         self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-        self.SYSTEM_DIR = self.BASE_DIR / "static" / "resource" / "system"
+        self.SYSTEM_DIR = self.BASE_DIR / "workspace" / "resource" / "system"
         self.SYSTEM_DIR.mkdir(parents=True, exist_ok=True)
 
         if config_controller.__instance is not None:
@@ -54,50 +55,32 @@ class config_controller:
         config_controller.__instance = self
         self._config: dict[str, str] = {}
         self._configs: dict[str, dict[str, str]] = {}
-        self._tenants: dict[str, db_tenant_model] = {}
-        self._default_tenant_id: str | None = None
         self._engine = mongo_controller.get_instance().get_engine()
         asyncio.create_task(self.load_config())
 
     @classmethod
-    def _is_admin(self, current_user) -> bool:
+    def _is_admin(cls, current_user) -> bool:
         return getattr(current_user, "role", "") == "admin"
 
     @classmethod
-    def _is_tenant_branding_editor(self, current_user) -> bool:
-        if self._is_admin(current_user):
+    def _is_tenant_branding_editor(cls, current_user) -> bool:
+        if cls._is_admin(current_user):
             return True
         licenses = getattr(current_user, "licenses", None) or []
         return LicenseName.MAINTAINER in licenses
 
     async def _get_tenant(self, tenant_id: str | None = None) -> db_tenant_model | None:
         if tenant_id is None:
-            if self._default_tenant_id:
-                cached_default = self._tenants.get(self._default_tenant_id)
-                if cached_default is not None:
-                    return cached_default
-            tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
-        else:
-            cached_tenant = self._tenants.get(tenant_id)
-            if cached_tenant is not None:
-                return cached_tenant
+            return await self._engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
 
-            try:
-                tenant_object_id = ObjectId(tenant_id)
-            except (InvalidId, TypeError):
-                tenant_object_id = tenant_id
+        try:
+            tenant_object_id = ObjectId(tenant_id)
+        except (InvalidId, TypeError):
+            tenant_object_id = tenant_id
 
-            tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == tenant_object_id)
-            if tenant is None and tenant_object_id != tenant_id:
-                tenant = await self._engine.find_one(db_tenant_model,db_tenant_model.id == tenant_id)
-
-        if tenant is None:
-            return None
-
-        resolved_tenant_id = str(tenant.id)
-        self._tenants[resolved_tenant_id] = tenant
-        if tenant.is_default:
-            self._default_tenant_id = resolved_tenant_id
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == tenant_object_id)
+        if tenant is None and tenant_object_id != tenant_id:
+            tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == tenant_id)
         return tenant
 
     def _cache_key(self, tenant_id: str) -> str:
@@ -115,6 +98,8 @@ class config_controller:
     async def load_config(self, force_db: bool = False, tenant_id: str | None = None) -> str | None:
         try:
             tenant = await self._get_tenant(tenant_id)
+            if tenant is None:
+                return None
             resolved_tenant_id = str(tenant.id)
             config = None
             if not force_db:
@@ -142,15 +127,35 @@ class config_controller:
             if not tenant.is_default:
                 default_tenant = await self._get_tenant()
                 default_config = {}
-                default_record = await self._engine.find_one(db_system_model, (db_system_model.tenant_id == str(default_tenant.id)) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS)) if default_tenant else None
-                if default_record and default_record.value:
-                    default_config = json.loads(default_record.value)
+                if default_tenant:
+                    default_record = await self._engine.find_one(db_system_model, (db_system_model.tenant_id == str(default_tenant.id)) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
+                    if default_record and default_record.value:
+                        default_config = json.loads(default_record.value)
                 for key in self.ADMIN_SETTING_KEYS:
                     config[key] = default_config.get(key, "")
                 config[AllowedKeys.AI_ENDPOINT_ENABLED.value] = "1" if (
                     config.get(AllowedKeys.AI_ENDPOINT_ENABLED.value) == "1"
                     and default_config.get(AllowedKeys.AI_ENDPOINT_ENABLED.value) == "1"
                 ) else "0"
+                if not str(config.get(AllowedKeys.APP_NAME.value) or "").strip():
+                    config[AllowedKeys.APP_NAME.value] = default_config.get(AllowedKeys.APP_NAME.value, "")
+                if not str(config.get(AllowedKeys.S_ONION.value) or "").strip():
+                    config[AllowedKeys.S_ONION.value] = default_config.get(AllowedKeys.S_ONION.value, "")
+                try:
+                    tenant_meta = json.loads(config.get(AllowedKeys.META_INFO.value) or "{}") or {}
+                except (ValueError, TypeError):
+                    tenant_meta = {}
+                try:
+                    default_meta = json.loads(default_config.get(AllowedKeys.META_INFO.value) or "{}") or {}
+                except (ValueError, TypeError):
+                    default_meta = {}
+                meta_changed = False
+                for meta_key in ("S_HOME_HEADER_DATA_SOURCES", "S_HOME_HEADER_ADVERSARIES", "S_HOME_HEADER_PRICING"):
+                    if not str(tenant_meta.get(meta_key) or "").strip() and default_meta.get(meta_key):
+                        tenant_meta[meta_key] = default_meta.get(meta_key)
+                        meta_changed = True
+                if meta_changed:
+                    config[AllowedKeys.META_INFO.value] = json.dumps(tenant_meta)
             self._configs[resolved_tenant_id] = config
             if tenant.is_default:
                 self._config = config
@@ -180,7 +185,7 @@ class config_controller:
         if any(not value for value in required):
             return False
         try:
-            smtp_port = int(str(meta_info.get("ACCOUNTS_SMTP_PORT")))
+            smtp_port = int(str(meta_info.get("ACCOUNTS_SMTP_PORT", "")))
         except ValueError:
             return False
         return 1 <= smtp_port <= 65535
@@ -192,6 +197,10 @@ class config_controller:
         except (TypeError, ValueError):
             return False
         return cls._is_smtp_values_configured(meta_info if isinstance(meta_info, dict) else {})
+
+    @staticmethod
+    async def _is_backup_schedule() -> bool:
+        return await config_controller.getInstance().get_cached(AllowedKeys.BACKUP_SCHEDULE, "0")
 
     def _redact_sensitive_meta_info(self, meta_info_raw: str, include_email_config: bool = False) -> str:
         try:
@@ -212,7 +221,11 @@ class config_controller:
 
         file_name = f"{base}_custom.png"
         resource_path = ResourceManager.get_instance().system_resource_path(file_name, tenant)
-        return f"/api/s/static/system/{resource_path.name}"
+        asset_url = f"/api/s/static/system/{resource_path.name}"
+        try:
+            return f"{asset_url}?v={resource_path.stat().st_mtime_ns}"
+        except OSError:
+            return asset_url
 
     def _build_system_info_from_cache(self, tenant_id: str, tenant: db_tenant_model, include_email_config: bool = False) -> config_data:
         fresh_config = dict(self._configs.get(tenant_id, {}))
@@ -220,7 +233,6 @@ class config_controller:
         fresh_config[AllowedKeys.LOGO_URL.value] = self.asset("logo_url", tenant)
         fresh_config[AllowedKeys.LOGO_WIDE_LIGHT.value] = self.asset("logo_wide_light", tenant)
         fresh_config[AllowedKeys.LOGO_WIDE_DARK.value] = self.asset("logo_wide_dark", tenant)
-        fresh_config[AllowedKeys.AUTH_DASHBOARD_ICON.value] = self.asset("auth_dashboard_icon", tenant)
         meta_info = fresh_config.get(AllowedKeys.META_INFO.value) or json.dumps({
             "S_HOME_HEADER_DATA_SOURCES": "https://www.orionintelligence.org/sources",
             "S_HOME_HEADER_ADVERSARIES": "https://www.orionintelligence.org/adversaries",
@@ -232,7 +244,7 @@ class config_controller:
         return config_data(settings=fresh_config)
 
     async def get_system_info(self, include_email_config: bool = False, tenant_id: str | None = None) -> config_data:
-        self.SYSTEM_DIR = self.BASE_DIR / "static" / "resource" / "system"
+        self.SYSTEM_DIR = self.BASE_DIR / "workspace" / "resource" / "system"
         tenant = await self._get_tenant(tenant_id)
         if tenant is None:
             raise RuntimeError("Tenant configuration is unavailable")
@@ -251,7 +263,7 @@ class config_controller:
             return
         if not self._is_tenant_branding_editor(current_user):
             raise HTTPException(status_code=403, detail="Only tenant maintainers can update branding")
-        if not self._is_admin(current_user) and str(getattr(current_user, "tenant_uuid", "")) != tenant_id:
+        if not self._is_admin(current_user) and str(getattr(current_user, "tenant_id", "")) != tenant_id:
             raise HTTPException(status_code=403, detail="Tenant settings cannot be updated across tenants")
         if settings is not None and not self._is_admin(current_user):
             disallowed = set(settings).difference(self.TENANT_EDITABLE_SETTINGS)
@@ -278,6 +290,8 @@ class config_controller:
                 raise HTTPException(status_code=400, detail="meta_info must be a JSON object")
             for key in self.LEGACY_ALERT_CONNECTOR_META_KEYS:
                 submitted_meta_info.pop(key, None)
+            if current_user is not None and not self._is_admin(current_user):
+                submitted_meta_info = {k: v for k, v in submitted_meta_info.items() if k in self.TENANT_EDITABLE_META_KEYS}
             existing_meta_info = {}
             if self._configs.get(resolved_tenant_id, {}).get(AllowedKeys.META_INFO.value):
                 existing_meta_info = json.loads(self._configs[resolved_tenant_id][AllowedKeys.META_INFO.value])
@@ -300,8 +314,10 @@ class config_controller:
             AllowedKeys.APP_NAME.value: AllowedKeys.APP_NAME,
             AllowedKeys.META_INFO.value: AllowedKeys.META_INFO,
             AllowedKeys.AI_ENDPOINT_ENABLED.value: AllowedKeys.AI_ENDPOINT_ENABLED,
+            AllowedKeys.BACKUP_SCHEDULE.value: AllowedKeys.BACKUP_SCHEDULE,
             AllowedKeys.ADMIN_ROOT_ALLOWED.value: AllowedKeys.ADMIN_ROOT_ALLOWED,
             AllowedKeys.S_ONION.value: AllowedKeys.S_ONION,
+            AllowedKeys.EXTENSION_VERSION.value: AllowedKeys.EXTENSION_VERSION,
         }
         system_settings = dict(self._configs.get(resolved_tenant_id, {}))
         for key_str, value in settings.items():
@@ -349,7 +365,7 @@ class config_controller:
         if file_name is None:
             raise HTTPException(status_code=400, detail="Invalid system resource")
 
-        requested_tenant_id = tenant_id or getattr(current_user, "tenant_uuid", None)
+        requested_tenant_id = tenant_id or getattr(current_user, "tenant_id", None)
         tenant = await self._get_tenant(requested_tenant_id)
         if tenant is None:
             raise HTTPException(status_code=404, detail="Tenant configuration is unavailable")
@@ -392,9 +408,12 @@ class config_controller:
         )
 
         prefix = "/api/s/static/system/"
+        try:
+            asset_url = f"{prefix}{file_name}?v={(system_dir / file_name).stat().st_mtime_ns}"
+        except OSError:
+            asset_url = prefix + file_name
         return {
-            AllowedKeys.LOGO_URL: prefix + file_name if allowed_key == AllowedKeys.LOGO_URL else None,
-            AllowedKeys.LOGO_WIDE_LIGHT: prefix + file_name if allowed_key == AllowedKeys.LOGO_WIDE_LIGHT else None,
-            AllowedKeys.LOGO_WIDE_DARK: prefix + file_name if allowed_key == AllowedKeys.LOGO_WIDE_DARK else None,
-            AllowedKeys.AUTH_DASHBOARD_ICON: prefix + file_name if allowed_key == AllowedKeys.AUTH_DASHBOARD_ICON else None,
+            AllowedKeys.LOGO_URL: asset_url if allowed_key == AllowedKeys.LOGO_URL else None,
+            AllowedKeys.LOGO_WIDE_LIGHT: asset_url if allowed_key == AllowedKeys.LOGO_WIDE_LIGHT else None,
+            AllowedKeys.LOGO_WIDE_DARK: asset_url if allowed_key == AllowedKeys.LOGO_WIDE_DARK else None,
         }

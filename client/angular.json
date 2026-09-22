@@ -10,19 +10,19 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-builders/custom-webpack:browser",
+          "builder": "@angular/build:application",
           "options": {
-            "customWebpackConfig": {
-              "path": "./webpack.config.js",
-              "replaceDuplicatePlugins": true
+            "outputPath": {
+              "base": "build",
+              "browser": ""
             },
-            "outputPath": "build",
             "baseHref": "/",
             "deployUrl": "/",
             "index": "src/index.html",
-            "main": "src/main.ts",
+            "browser": "src/main.ts",
             "polyfills": [
-              "zone.js"
+              "zone.js",
+              "@angular/localize/init"
             ],
             "allowedCommonJsDependencies": [
               "canvg",
@@ -44,6 +44,10 @@
               "rgbcolor",
               "html2canvas",
               "i18n-iso-countries",
+              "leaflet",
+              "leaflet.markercluster",
+              "maplibre-gl",
+              "@maplibre/maplibre-gl-leaflet",
               "jspdf",
               "vis-data",
               "vis-network",
@@ -51,25 +55,17 @@
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
-              "src/favicon.ico",
               "src/llms.txt",
-              "src/assets",
-              "src/assets/images",
-              "src/assets/fonts"
+              "src/assets"
             ],
             "styles": [
               "node_modules/leaflet/dist/leaflet.css",
               "node_modules/leaflet.markercluster/dist/MarkerCluster.css",
               "node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css",
-              "src/styles.scss",
-              {
-                "input": "src/tailwind.css",
-                "bundleName": "tailwind-social",
-                "inject": false
-              }
+              "node_modules/maplibre-gl/dist/maplibre-gl.css",
+              "src/styles.scss"
             ],
-            "scripts": [
-            ]
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -103,29 +99,20 @@
               "extractLicenses": true,
               "namedChunks": false,
               "assets": [
-                "src/favicon.ico",
                 "src/llms.txt",
-                "src/assets",
-                "src/assets/images",
-                "src/assets/fonts"
+                "src/assets"
               ],
               "styles": [
                 "node_modules/leaflet/dist/leaflet.css",
                 "node_modules/leaflet.markercluster/dist/MarkerCluster.css",
                 "node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css",
-                "src/styles.scss",
-                {
-                  "input": "src/tailwind.css",
-                  "bundleName": "tailwind-social",
-                  "inject": false
-                }
+                "node_modules/maplibre-gl/dist/maplibre-gl.css",
+                "src/styles.scss"
               ],
-              "scripts": [
-              ]
+              "scripts": []
             },
             "development": {
               "aot": false,
-              "buildOptimizer": false,
               "optimization": false,
               "sourceMap": {
                 "scripts": false,
@@ -136,10 +123,6 @@
               "namedChunks": true
             },
             "instrumented": {
-              "customWebpackConfig": {
-                "path": "./webpack.instrument.js",
-                "replaceDuplicatePlugins": true
-              },
               "optimization": false,
               "sourceMap": true
             }
@@ -147,7 +130,7 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
+          "builder": "@angular/build:dev-server",
           "options": {
             "proxyConfig": "proxy.conf.json",
             "hmr": true
@@ -166,13 +149,13 @@
           "defaultConfiguration": "development"
         },
         "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "builder": "@angular/build:extract-i18n",
           "options": {
             "buildTarget": "client:build"
           }
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "polyfills": [
               "zone.js",
@@ -181,25 +164,17 @@
             ],
             "tsConfig": "tsconfig.spec.json",
             "assets": [
-              "src/favicon.ico",
               "src/llms.txt",
-              "src/assets/images",
-              "src/assets",
-              "src/assets/fonts"
+              "src/assets"
             ],
             "styles": [
               "node_modules/leaflet/dist/leaflet.css",
               "node_modules/leaflet.markercluster/dist/MarkerCluster.css",
               "node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css",
-              "src/styles.scss",
-              {
-                "input": "src/tailwind.css",
-                "bundleName": "tailwind-social",
-                "inject": false
-              }
+              "node_modules/maplibre-gl/dist/maplibre-gl.css",
+              "src/styles.scss"
             ],
-            "scripts": [
-            ]
+            "scripts": []
           }
         }
       }

@@ -40,10 +40,6 @@ class LicenseName(str, Enum):
     ENTERPRISE = "enterprise"
 
 
-def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
-
-
 class db_user_account(Model):
     username: str = Field(unique=True)
     password: str
@@ -51,7 +47,7 @@ class db_user_account(Model):
     role: user_role = Field(default=user_role.MEMBER)
     status: Optional[UserStatus] = Field(default=None)
 
-    tenant_uuid: str = Field(default="")
+    tenant_id: str = Field(default="")
     verification_token: Optional[str] = Field(default=None)
     verification_expiry: Optional[datetime] = Field(default=None)
     password_reset_token: Optional[str] = Field(default=None)
@@ -60,6 +56,7 @@ class db_user_account(Model):
     twofa_enabled: bool = Field(default=False)
     twofa_secret: Optional[str] = Field(default=None)
     recovery_key_hash: Optional[str] = Field(default=None)
+    mail_passphrase: Optional[str] = Field(default=None)
     reset_twofa_on_password_reset: bool = Field(default=False)
     password_reset_required: bool = Field(default=False)
 
@@ -115,6 +112,7 @@ class db_user_account(Model):
         return pwd_context.hash(password)
 
     @model_validator(mode="before")
+    @classmethod
     def validate_licenses(cls, values):
         if values.get("permissions") is None:
             values["permissions"] = []

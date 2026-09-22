@@ -1,20 +1,22 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { popupAnimation } from '../../../../shared/animations/popup.animations';
 import { FocusDirective } from '../../../../shared/directive/focus.directive';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-takedown-rejection-popup',
   standalone: true,
-  imports: [FormsModule, FocusDirective],
+  imports: [FormsModule, FocusDirective, TranslatePipe],
   templateUrl: './takedown-rejection-popup.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [popupAnimation],
 })
 export class TakedownRejectionPopupComponent {
   readonly target = input('');
   readonly isSubmitting = input(false);
   readonly submitted = output<string>();
-  readonly cancelled = output<void>();
+  readonly cancelled = output();
   reason = '';
 
   get trimmedReason(): string {
@@ -26,8 +28,8 @@ export class TakedownRejectionPopupComponent {
   }
 
   onBackdrop(event: MouseEvent): void {
-    const eventTargetElement = event.target as HTMLElement | null;
-    if (eventTargetElement?.dataset?.['role'] === 'backdrop') {
+    const eventTargetElement = event.target;
+    if (eventTargetElement instanceof HTMLElement && eventTargetElement.dataset.role === 'backdrop') {
       this.cancel();
     }
   }

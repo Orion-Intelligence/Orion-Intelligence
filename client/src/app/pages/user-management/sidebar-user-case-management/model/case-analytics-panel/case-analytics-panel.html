@@ -1,47 +1,47 @@
 <div data-testid="case-analytics-panel">
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4" data-testid="case-analytics-summary">
         <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-4">
-            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Visible Cases</p>
+            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Visible Cases' | translate }}</p>
             <div class="text-2xl font-bold tabular-nums text-[var(--color-text1)]">{{ filteredCases.length }} / {{ cases.length }}</div>
         </div>
         <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-4">
-            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Active</p>
+            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Active' | translate }}</p>
             <div class="text-2xl font-bold tabular-nums text-sky-300 [body.light-theme_&]:text-sky-700">{{ activeCaseCount }}</div>
         </div>
         <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-4">
-            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Critical Severity</p>
+            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Critical Severity' | translate }}</p>
             <div class="text-2xl font-bold tabular-nums text-red-300 [body.light-theme_&]:text-red-700">{{ criticalCaseCount }}</div>
         </div>
         <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-4">
-            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">High Priority</p>
+            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'High Priority' | translate }}</p>
             <div class="text-2xl font-bold tabular-nums text-orange-300 [body.light-theme_&]:text-orange-700">{{ highPriorityCaseCount }}</div>
         </div>
         <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-4">
-            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Unassigned</p>
+            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Unassigned' | translate }}</p>
             <div class="text-2xl font-bold tabular-nums text-amber-300 [body.light-theme_&]:text-amber-700">{{ unassignedCaseCount }}</div>
         </div>
         <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-4">
-            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Open Tasks</p>
+            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Open Tasks' | translate }}</p>
             <div class="text-2xl font-bold tabular-nums text-[var(--color-text1)]">{{ openTaskCount }}</div>
         </div>
         <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-4">
-            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Artifacts</p>
+            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Artifacts' | translate }}</p>
             <div class="text-2xl font-bold tabular-nums text-[var(--color-text1)]">{{ artifactCount }}</div>
         </div>
         <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-4">
-            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Avg Age / Stale</p>
-            <div class="text-2xl font-bold tabular-nums text-[var(--color-text1)]">{{ averageAgeDays }}d / {{ staleCaseCount }}</div>
+            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Avg Age / Stale' | translate }}</p>
+            <div class="text-2xl font-bold tabular-nums text-[var(--color-text1)]">{{ averageAgeDays }} {{ (averageAgeDays === 1 ? 'day' : 'days') | translate }} / {{ staleCaseCount }}</div>
         </div>
     </div>
 
     <div class="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
         <section class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]/45 p-4" data-testid="case-analytics-status-chart">
-            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">Status Distribution</h2>
+            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">{{ 'Status Distribution' | translate }}</h2>
             <div class="space-y-3">
                 @for (item of statusChart; track item.key) {
                 <div>
                     <div class="mb-1 flex items-center justify-between gap-3 text-xs">
-                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label }}</span>
+                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label | translate }}</span>
                         <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
                     </div>
                     <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
@@ -53,12 +53,12 @@
         </section>
 
         <section class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]/45 p-4" data-testid="case-analytics-severity-chart">
-            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">Severity Distribution</h2>
+            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">{{ 'Severity Distribution' | translate }}</h2>
             <div class="space-y-3">
                 @for (item of severityChart; track item.key) {
                 <div>
                     <div class="mb-1 flex items-center justify-between gap-3 text-xs">
-                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label }}</span>
+                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label | translate }}</span>
                         <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
                     </div>
                     <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
@@ -70,12 +70,12 @@
         </section>
 
         <section class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]/45 p-4" data-testid="case-analytics-priority-chart">
-            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">Priority Distribution</h2>
+            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">{{ 'Priority Distribution' | translate }}</h2>
             <div class="space-y-3">
                 @for (item of priorityChart; track item.key) {
                 <div>
                     <div class="mb-1 flex items-center justify-between gap-3 text-xs">
-                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label }}</span>
+                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label | translate }}</span>
                         <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
                     </div>
                     <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
@@ -87,13 +87,13 @@
         </section>
 
         <section class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]/45 p-4" data-testid="case-analytics-type-chart">
-            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">Case Type Distribution</h2>
+            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">{{ 'Case Type Distribution' | translate }}</h2>
             @if (caseTypeChart.length) {
             <div class="space-y-3">
                 @for (item of caseTypeChart; track item.key) {
                 <div>
                     <div class="mb-1 flex items-center justify-between gap-3 text-xs">
-                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label }}</span>
+                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label | translate }}</span>
                         <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
                     </div>
                     <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
@@ -104,19 +104,19 @@
             </div>
             } @else {
             <div class="grid min-h-[160px] place-items-center rounded-[8px] border border-dashed border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]/45 px-4 text-center text-sm text-[var(--color-text4)]">
-                No matching case types
+                {{ 'No matching case types' | translate }}
             </div>
             }
         </section>
 
         <section class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]/45 p-4" data-testid="case-analytics-intake-chart">
-            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">Intake Source</h2>
+            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">{{ 'Intake Source' | translate }}</h2>
             @if (intakeSourceChart.length) {
             <div class="space-y-3">
                 @for (item of intakeSourceChart; track item.key) {
                 <div>
                     <div class="mb-1 flex items-center justify-between gap-3 text-xs">
-                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label }}</span>
+                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label | translate }}</span>
                         <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
                     </div>
                     <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
@@ -127,19 +127,19 @@
             </div>
             } @else {
             <div class="grid min-h-[160px] place-items-center rounded-[8px] border border-dashed border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]/45 px-4 text-center text-sm text-[var(--color-text4)]">
-                No intake data
+                {{ 'No intake data' | translate }}
             </div>
             }
         </section>
 
         <section class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]/45 p-4" data-testid="case-analytics-task-chart">
-            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">Task Status</h2>
+            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">{{ 'Task Status' | translate }}</h2>
             @if (taskStatusChart.length) {
             <div class="space-y-3">
                 @for (item of taskStatusChart; track item.key) {
                 <div>
                     <div class="mb-1 flex items-center justify-between gap-3 text-xs">
-                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label }}</span>
+                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label | translate }}</span>
                         <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
                     </div>
                     <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
@@ -150,19 +150,19 @@
             </div>
             } @else {
             <div class="grid min-h-[160px] place-items-center rounded-[8px] border border-dashed border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]/45 px-4 text-center text-sm text-[var(--color-text4)]">
-                No tasks found
+                {{ 'No tasks found' | translate }}
             </div>
             }
         </section>
 
         <section class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]/45 p-4" data-testid="case-analytics-workload-chart">
-            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">Analyst Workload</h2>
+            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">{{ 'Analyst Workload' | translate }}</h2>
             @if (analystWorkloadChart.length) {
             <div class="space-y-3">
                 @for (item of analystWorkloadChart; track item.key) {
                 <div>
                     <div class="mb-1 flex items-center justify-between gap-3 text-xs">
-                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label }}</span>
+                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.key === 'unassigned' ? (item.label | translate) : item.label }}</span>
                         <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
                     </div>
                     <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
@@ -173,13 +173,13 @@
             </div>
             } @else {
             <div class="grid min-h-[160px] place-items-center rounded-[8px] border border-dashed border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]/45 px-4 text-center text-sm text-[var(--color-text4)]">
-                No workload data
+                {{ 'No workload data' | translate }}
             </div>
             }
         </section>
 
         <section class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]/45 p-4" data-testid="case-analytics-attention-list">
-            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">Needs Attention</h2>
+            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">{{ 'Needs Attention' | translate }}</h2>
             @if (attentionCases.length) {
             <div class="space-y-2">
                 @for (caseItem of attentionCases; track caseItem.caseId) {
@@ -190,8 +190,8 @@
                             <p class="mt-0.5 mb-0 text-xs font-medium text-[var(--color-text4)]">{{ caseItem.caseId }} · {{ getUpdatedLabel(caseItem) }}</p>
                         </div>
                         <div class="flex min-w-[150px] shrink-0 justify-end gap-1.5">
-                            <span class="rounded-full px-2.5 py-1 text-[10px] font-bold capitalize" [ngClass]="getToneClass(caseItem.severity)">Severity: {{ caseItem.severity }}</span>
-                            <span class="rounded-full bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-[10px] font-bold capitalize text-[var(--color-text3)]">Priority: {{ caseItem.priority }}</span>
+                            <span class="rounded-full px-2.5 py-1 text-[10px] font-bold capitalize" [ngClass]="getToneClass(caseItem.severity)">{{ 'Severity' | translate }}: {{ caseItem.severity | translate }}</span>
+                            <span class="rounded-full bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-[10px] font-bold capitalize text-[var(--color-text3)]">{{ 'Priority' | translate }}: {{ caseItem.priority | translate }}</span>
                         </div>
                     </div>
                 </div>
@@ -199,7 +199,7 @@
             </div>
             } @else {
             <div class="grid min-h-[160px] place-items-center rounded-[8px] border border-dashed border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]/45 px-4 text-center text-sm text-[var(--color-text4)]">
-                No active cases need attention
+                {{ 'No active cases need attention' | translate }}
             </div>
             }
         </section>

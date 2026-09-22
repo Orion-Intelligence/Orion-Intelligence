@@ -2,18 +2,16 @@ import asyncio
 import copy
 import json
 import hashlib
-import locale
 import re
 from pathlib import Path
 from datetime import datetime, timezone
-
+import builtins
 from fastapi import HTTPException
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
 from urllib.parse import urlparse, urlunparse
 
 from deep_translator import GoogleTranslator
-from starlette.requests import Request
 from stopwords import get_stopwords
 
 from orion.constants import constant
@@ -44,26 +42,20 @@ class helper_controller:
             return {}
 
     @staticmethod
-    def create_template_context(request: Request, response_data: dict) -> dict:
-        return {"request": request, "vars": response_data}
+    def extract_stealer_hash(stealer_log):
+        email = stealer_log["email"][0] if stealer_log.get("email") else None
+        username = stealer_log["username"][0] if stealer_log.get("username") else None
+        domain = stealer_log["domain"][0] if stealer_log.get("domain") else None
+        ip = stealer_log["ip"][0] if stealer_log.get("ip") else None
+        channel = stealer_log.get("channel")
 
-
-    @staticmethod
-    def extract_stealer_hash(log):
-        email = log["email"][0] if log.get("email") else None
-        username = log["username"][0] if log.get("username") else None
-        domain = log["domain"][0] if log.get("domain") else None
-        ip = log["ip"][0] if log.get("ip") else None
-        channel = log.get("channel")
-
-        if log.get("type") in ("c", "credential"):
-            if not email and not username:
-                return None
+        if stealer_log.get("type") in ("c", "credential"):
             val = email or username
         else:
-            if not any([email, username, domain, ip, channel]):
-                return None
             val = email or username or domain or ip or channel
+
+        if not val:
+            return None
 
         seed = f"{val}|{channel or ''}"
         return hashlib.sha256(seed.lower().encode("utf-8", "ignore")).hexdigest()
@@ -121,13 +113,6 @@ class helper_controller:
         else:
             raise ValueError("Input must be a dictionary or a string")
         return hashlib.sha256(data_string.encode('utf-8')).hexdigest()
-
-    @staticmethod
-    def on_create_random_search_count(p_doc_size):
-        locale.setlocale(locale.LC_ALL, '')
-        m_doc_size = 1000 * p_doc_size / 10
-        m_doc_size = int(m_doc_size * 2.36 + ((m_doc_size * 2.36) / 2) * 3)
-        return f'{m_doc_size * 100:n}'
 
     @staticmethod
     def detect_and_translate(text: str, target_lang: str) -> str:
@@ -226,8 +211,7 @@ class helper_controller:
             autoescape=True
         )
         satellite_asset = map_entities_env.get_template(CONSTANTS.S_SATELLITE_ASSET_FILE_NAME).render()
-        version, data = helper_controller.parse_satellite_asset(satellite_asset)
-        constant.map_entities_version = version
+        _, data = helper_controller.parse_satellite_asset(satellite_asset)
         constant.map_entities_data = data
 
     @staticmethod
@@ -268,7 +252,6 @@ class helper_controller:
             REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.SATELLITE_ASSET_VERSION, None, None])
         stored_version = int(stored_version or 0)
 
-        constant.map_entities_version = version
         constant.map_entities_data = data
 
         if stored_version and version <= stored_version:
@@ -333,6 +316,67 @@ class helper_controller:
                 await asyncio.sleep(5)
 
     @staticmethod
+    async def init_persona_posts_task(build_dir):
+        asyncio.create_task(helper_controller.init_persona_posts(build_dir))
+
+    @staticmethod
+    async def init_persona_posts(build_dir):
+
+        if build_dir is None:
+            return
+
+        build_dir = Path(build_dir)
+        posts_file = None
+        candidates = [
+            build_dir / "assets" / "data" / "persona_posts" / "posts.json",
+            build_dir.parent / "client" / "src" / "assets" / "data" / "persona_posts" / "posts.json",
+        ]
+
+        for candidate in candidates:
+            if candidate.exists():
+                posts_file = candidate
+                break
+
+        if not posts_file:
+            log.g().w("Persona posts file not found, skipping dump.")
+            return
+
+        try:
+            from orion.services.mongo_manager.mongo_controller import mongo_controller
+            from orion.services.mongo_manager.shared_model.db_social_profile_management_model import db_persona_posts
+            
+            engine = mongo_controller.get_instance().get_engine()
+            collection = engine.get_collection(db_persona_posts)
+
+            count = await collection.count_documents({})
+            if count > 0:
+                log.g().i(f"Persona posts already dumped ({count} records). Skipping.")
+                return
+
+            log.g().i(f"Loading persona posts from: {posts_file} (This may take a minute...)")
+
+            def load_json():
+                with builtins.open(posts_file, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            
+            data = await asyncio.to_thread(load_json)
+
+            if not isinstance(data, list):
+                log.g().e("Persona posts file is not a valid JSON array.")
+                return
+
+            log.g().i(f"Parsed {len(data)} persona post records. Inserting into MongoDB...")
+
+            chunk_size = 500
+            for i in range(0, len(data), chunk_size):
+                chunk = data[i:i + chunk_size]
+                await collection.insert_many(chunk)
+
+            log.g().i("Successfully dumped persona posts to MongoDB.")
+        except Exception as ex:
+            log.g().e(f"Error during persona posts dump: {str(ex)}")
+
+    @staticmethod
     def clone_model(model):
         return copy.deepcopy(model)
 
@@ -344,7 +388,7 @@ class helper_controller:
     @staticmethod
     def extract_domains_from_text(text: str) -> list[str]:
         url_regex = re.compile(
-            r'(?:https?://)?(?:www\.)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(?:[/?][^\s]*)?', re.IGNORECASE)
+            r'(?:https?://)?(?:www\.)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(?:[/?]\S*)?', re.IGNORECASE)
         matches = url_regex.findall(text)
         domains = set()
         for match in matches:
@@ -353,13 +397,6 @@ class helper_controller:
                 domain = domain[4:]
             domains.add(domain)
         return sorted(domains)
-
-    @staticmethod
-    def strip_query(query, size=20):
-        query["size"] = size
-        query.pop("highlight", None)
-        query.pop("suggest", None)
-        return query
 
     @staticmethod
     def transform_query_match(query: str, matchtype: str) -> str:
@@ -508,9 +545,9 @@ class helper_controller:
         ranked_results = response.get("Result") or []
 
         ranked_results.sort(
-            key=lambda item: (
-                latest_document_timestamp(item),
-                float(item.get("_score") or 0),
+            key=lambda document: (
+                latest_document_timestamp(document),
+                float(document.get("_score") or 0),
             ),
             reverse=True,
         )

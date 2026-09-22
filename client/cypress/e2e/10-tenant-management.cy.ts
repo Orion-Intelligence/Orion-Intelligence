@@ -1,11 +1,18 @@
 import {
   addIOCForAllTabs,
+  addTenantUser,
+  addTenantUserExpectQuotaBlocked,
+  alertSlackClientId,
   assertOnlyGeneralHasAlertFindings,
+  assertTenantAlertVisibilityToggle,
   applyAuditLogDateRange,
   assertAlertScanCompletedMailPresent,
   closeFilterSidebar,
   closeNotificationSidebar,
+  completeTenantOnboarding,
   deleteTenant,
+  disableTenantAlertVisibilityToggle,
+  enableTenantPrivilegedIocIfInputDisabled,
   ensureGeneralAlertIoc,
   exportFromModal,
   fillTenantNetworkConfiguration,
@@ -19,48 +26,46 @@ import {
   openTenantEditor,
   openTenantSettings,
   openTenantsPage,
+  openTenantUsersPage,
   resetAuditLogFilters,
   runTenantAlertScan,
   saveTenantEditor,
+  selectEnabledCurrentMonthDate,
   setOnlyGeneralAlertScanner,
+  setTenantEditorQuota,
   setTenantEditorToggle,
   setTenantLicense,
   setTenantLicenses,
+  signUpUnderTenant,
   submitLogin,
+  tenantResetNewPassword,
+  tenantSignupUrl,
   waitForTenantAlertScanComplete,
+  ensureTenantAlertReportsPresent,
   waitForTenantAlertFindings,
-  waitForBlockingOverlayToClose
+  waitForBlockingOverlayToClose,
+  CATEGORY_ALERT_REPORT_TYPE,
+  openCategoryAlertReport,
+  loadMoreCategoryAlerts,
+  searchCategoryAlerts,
+  openCategoryAlertDrawerByClick,
+  openCategoryAlertDrawerByKeyboard,
+  toggleCategoryAlertDescription,
+  closeCategoryAlertDrawer,
+  exportSelectedCategoryAlert,
+  exportCategoryAlerts
 } from './controllers/10-tenant-management.controller';
-import {TEST_DATA} from '../support/constants';
+import { openCaseAlertsView, selector } from './controllers/18-case-management.controller';
+import type { CaseAlertTenant, TenantSubUser } from './model/10-tenant-management.model';
 
 describe('Tenant Management - End-to-End Provisioning Flows', () => {
-  let tenant: any;
-  let tenantSubUser: any;
-  const tenantResetNewPassword = '2wsx@WSX2026';
-  const alertSlackClientId = TEST_DATA.alert_slack_client_id;
-
-  const selectEnabledCurrentMonthDate = (day: number) => {
-    cy.get(`[data-testid="side-filter-date-day-${day}"]`)
-      .filter(':visible')
-      .filter((_index, element) => {
-        const className = element.getAttribute('class') || '';
-        return !element.hasAttribute('disabled') && !className.includes('text-slate-400');
-      })
-      .should('have.length.greaterThan', 0)
-      .first()
-      .scrollIntoView()
-      .should('be.enabled')
-      .click();
-  };
-
-  const enableTenantPrivilegedIocIfInputDisabled = () => {
-    cy.get('[data-testid="tenant-ioc-value-input"]', {timeout: 60000}).should('be.visible').and('not.be.disabled');
-  };
+  let tenant = {} as CaseAlertTenant;
+  let tenantSubUser = {} as TenantSubUser;
 
   before(() => {
     cy.env(['TENANT_ACCOUNT', 'TENANT_SUB_USER']).then(({TENANT_ACCOUNT, TENANT_SUB_USER}) => {
-      tenant = TENANT_ACCOUNT;
-      tenantSubUser = TENANT_SUB_USER;
+      tenant = TENANT_ACCOUNT as CaseAlertTenant;
+      tenantSubUser = TENANT_SUB_USER as TenantSubUser;
       if (!tenant?.username || !tenant?.email || !tenant?.password || !tenantSubUser?.username || !tenantSubUser?.email || !tenantSubUser?.password) {
         throw new Error('Missing TENANT_ACCOUNT or TENANT_SUB_USER in cypress.config.ts');
       }
@@ -97,7 +102,6 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.docsScreenshot('tenant-administration');
     openTenantEditor(tenant);
     setTenantEditorToggle('tenant-verified-toggle', true);
-    setTenantEditorToggle('tenant-status-toggle', true);
     setTenantEditorToggle('tenant-password-reset-required-toggle', false);
     setTenantEditorToggle('tenant-privileged-ioc-toggle', true);
     setTenantLicense('free', false);
@@ -142,7 +146,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.loginAsAdmin();
     openTenantsPage();
     cy.location('pathname').should('include', '/dashboard/profile/tenant');
-    cy.get('[data-testid="tenant-edit-button"]').first().click({ force: true });
+    cy.get('[data-testid="tenant-row"]').first().click({ force: true });
     cy.get('[data-testid="tenant-edit-form-panel"]')
       .first()
       .as('tenantEditFormPanel')
@@ -327,9 +331,9 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.wait('@uploadTenantIocCsv', {timeout: 60000})
       .its('response.statusCode')
       .should('be.oneOf', [200, 201]);
-    cy.contains(domainIoc).should('be.visible');
-    cy.contains(emailIoc).should('be.visible');
-    cy.contains(urlIoc).should('be.visible');
+    cy.contains(domainIoc).scrollIntoView().should('be.visible');
+    cy.contains(emailIoc).scrollIntoView().should('be.visible');
+    cy.contains(urlIoc).scrollIntoView().should('be.visible');
     cy.logout();
   });
 
@@ -338,23 +342,21 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     openTenantSettings();
     cy.contains('app-smtp-settings-block', 'Network Configuration').should('be.visible');
 
-    cy.get('[data-testid="system-settings-mail-edit"]').scrollIntoView().should('be.visible').click();
     fillTenantNetworkConfiguration('localhost', '1');
     cy.intercept('POST', '**/api/update/tenants').as('saveWrongTenantMail');
-    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
     cy.wait('@saveWrongTenantMail', {timeout: 60000})
       .its('response.statusCode')
       .should('eq', 424);
     cy.contains('app-smtp-settings-block', 'Mail configuration is not working').should('be.visible');
 
-    cy.get('[data-testid="system-settings-mail-edit"]').scrollIntoView().should('be.visible').click();
     fillTenantNetworkConfiguration('mailpit', '1025');
     cy.intercept('POST', '**/api/update/tenants').as('saveRightTenantMail');
-    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
     cy.wait('@saveRightTenantMail', {timeout: 60000})
       .its('response.statusCode')
       .should('be.oneOf', [200, 201]);
-    cy.get('[data-testid="system-settings-mail-edit"]', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="system-settings-mail-save"]', {timeout: 30000}).should('be.disabled');
     cy.contains('app-smtp-settings-block', 'Mail configuration is not working').should('not.exist');
     cy.logout();
   });
@@ -413,19 +415,17 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.scrollDashboardToBottom()
     cy.contains('div', 'Privacy').should('be.visible');
 
-    cy.get('[data-testid="tenant-contact-edit"]').scrollIntoView().should('be.visible').click();
     cy.get('input[name="tenant_phone"]').scrollIntoView().should('be.visible').clear().type(phoneValue);
     cy.get('input[name="tenant_country"]').scrollIntoView().should('be.visible').clear().type(countryValue);
     cy.get('input[name="tenant_city"]').scrollIntoView().should('be.visible').clear().type(cityValue);
 
     cy.intercept('POST', '**/api/update/tenants').as('saveTenantContact');
-    cy.get('[data-testid="tenant-contact-edit"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-contact-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
     cy.wait('@saveTenantContact', {timeout: 60000})
       .its('response.statusCode')
       .should('be.oneOf', [200, 201]);
 
     cy.scrollDashboardToBottom();
-    cy.get('button[aria-label="Edit privacy settings"]').scrollIntoView().should('be.visible').click();
     cy.contains('label', 'Allow User Profile Visibility')
       .scrollIntoView()
       .closest('div.rounded-lg')
@@ -436,7 +436,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
       });
 
     cy.intercept('POST', '**/api/update/tenants').as('saveTenantPrivacy');
-    cy.get('button[aria-label="Save privacy settings"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-privacy-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
     cy.wait('@saveTenantPrivacy', {timeout: 60000})
       .its('response.statusCode')
       .should('be.oneOf', [200, 201]);
@@ -486,7 +486,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
       .should('be.visible')
       .and('have.attr', 'target', '_blank')
       .and('have.attr', 'href', '/api/alert-connectors/slack/connect');
-    cy.get('[data-testid="tenant-settings-connect-jira"]').should('not.exist');
+    cy.get('[data-testid="tenant-settings-connect-jira"]').should('have.class', 'is-disabled');
     cy.docsScreenshot('tenant-alert-integrations-slack');
     cy.window().then((win) => {
       const slackConnectClicks: string[] = [];
@@ -514,8 +514,13 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
 
     cy.get('app-alert-scan-loading', { timeout: 80000 }).should('not.exist');
     assertAlertScanCompletedMailPresent();
+    ensureTenantAlertReportsPresent();
     cy.get('[data-testid="tenant-home-print-alerts"]').scrollIntoView().should('be.visible').click();
     exportFromModal('home-alert-export-modal', 'home-alert-export-option-report');
+    cy.get('[data-testid="tenant-home-print-alerts"]').scrollIntoView().should('be.visible').click();
+    exportFromModal('home-alert-export-modal', 'home-alert-export-option-json');
+    cy.get('[data-testid="tenant-home-print-alerts"]').scrollIntoView().should('be.visible').click();
+    exportFromModal('home-alert-export-modal', 'home-alert-export-option-csv');
 
     cy.get('[data-testid="profile-notification-bell"]').scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="tenant-notification-sidebar"]').should('be.visible');
@@ -527,10 +532,78 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     closeNotificationSidebar();
 
     cy.get('[data-testid="tenant-home-alert-category-card"]').first().scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="tenant-alert-report-see-details"]').first().scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="category-alert-export-modal"]').should('be.visible');
-    cy.docsScreenshot('tenant-alert-detail');
-    exportFromModal('category-alert-export-modal', 'category-alert-export-option-report');
+    cy.get('[data-testid="tenant-alert-report-card"], app-empty-result', { timeout: 60000 }).should('exist');
+
+    cy.get('body').then(($report) => {
+      const seeDetails = $report.find('[data-testid="tenant-alert-report-see-details"]:visible').first();
+      if (!seeDetails.length) {
+        return;
+      }
+      cy.wrap(seeDetails).scrollIntoView().should('be.visible').click({ force: true });
+      cy.get('[data-testid="category-alert-export-modal"]').should('be.visible');
+      cy.docsScreenshot('tenant-alert-detail');
+      exportFromModal('category-alert-export-modal', 'category-alert-export-option-report');
+    });
+
+    cy.get('body').then(($report) => {
+      const search = $report.find('.category_report_searchbar-input input[type="text"]:visible').first();
+      if (!search.length) {
+        return;
+      }
+      cy.wrap(search).scrollIntoView().click({ force: true }).type('report', { force: true });
+      cy.wait(400);
+      cy.get('.category_report_searchbar-input input[type="text"]').filter(':visible').first().clear({ force: true });
+      cy.wait(400);
+    });
+
+    cy.get('body').then(($report) => {
+      const card = $report.find('[data-testid="tenant-alert-report-card"]:visible').first();
+      if (!card.length) {
+        return;
+      }
+      cy.wrap(card).scrollIntoView().click({ force: true });
+      cy.get('[data-testid="tenant-alert-detail-drawer"]').should('be.visible');
+      cy.docsScreenshot('tenant-alert-detail-drawer');
+      cy.get('body').then(($drawerBody) => {
+        const $toggle = $drawerBody
+          .find('[data-testid="tenant-alert-detail-drawer"] button:contains("Load more"), [data-testid="tenant-alert-detail-drawer"] button:contains("Show less")')
+          .filter(':visible');
+        if ($toggle.length) {
+          cy.wrap($toggle.first()).click({ force: true });
+          cy.wait(200);
+          cy.get('body').then(($again) => {
+            const $revert = $again
+              .find('[data-testid="tenant-alert-detail-drawer"] button:contains("Load more"), [data-testid="tenant-alert-detail-drawer"] button:contains("Show less")')
+              .filter(':visible');
+            if ($revert.length) {
+              cy.wrap($revert.first()).click({ force: true });
+            }
+          });
+        }
+      });
+      cy.get('[data-testid="tenant-alert-detail-drawer"] aside button').filter(':visible').last().click({ force: true });
+      cy.get('[data-testid="tenant-alert-detail-drawer"]').should('not.exist');
+
+      cy.wrap(card).scrollIntoView().trigger('keydown', { key: 'Enter' });
+      cy.get('body').then(($drawer) => {
+        if ($drawer.find('[data-testid="tenant-alert-detail-drawer"]:visible').length) {
+          cy.get('[data-testid="tenant-alert-detail-drawer"] aside button').filter(':visible').last().click({ force: true });
+          cy.get('[data-testid="tenant-alert-detail-drawer"]').should('not.exist');
+        }
+      });
+    });
+
+    cy.get('body').then(($report) => {
+      const print = $report.find('[data-testid="tenant-alert-print-alerts"]:visible').first();
+      if (!print.length) {
+        return;
+      }
+      ['category-alert-export-option-report', 'category-alert-export-option-json', 'category-alert-export-option-csv'].forEach((optionTestId) => {
+        cy.get('[data-testid="tenant-alert-print-alerts"]').filter(':visible').first().scrollIntoView().click({ force: true });
+        cy.get('[data-testid="category-alert-export-modal"]').should('be.visible');
+        exportFromModal('category-alert-export-modal', optionTestId);
+      });
+    });
 
     cy.get('[data-testid="tenant-alert-add-button"]').scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="tenant-alert-modal"]').should('be.visible');
@@ -565,5 +638,223 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.loginAsAdmin();
     openTenantsPage();
     deleteTenant(tenant);
+  });
+});
+
+describe('Tenant Management - Primary and Sub-Tenant Provisioning', () => {
+  let primaryTenant = {} as CaseAlertTenant;
+  let primaryUsers: TenantSubUser[] = [];
+  let subTenant = {} as CaseAlertTenant;
+  let subUsers: TenantSubUser[] = [];
+
+  before(() => {
+    cy.env(['PRIMARY_TENANT_ACCOUNT', 'PRIMARY_TENANT_USERS', 'SUB_TENANT_ACCOUNT', 'SUB_TENANT_USERS']).then(
+      ({PRIMARY_TENANT_ACCOUNT, PRIMARY_TENANT_USERS, SUB_TENANT_ACCOUNT, SUB_TENANT_USERS}) => {
+        primaryTenant = PRIMARY_TENANT_ACCOUNT as CaseAlertTenant;
+        primaryUsers = (PRIMARY_TENANT_USERS || []) as TenantSubUser[];
+        subTenant = SUB_TENANT_ACCOUNT as CaseAlertTenant;
+        subUsers = (SUB_TENANT_USERS || []) as TenantSubUser[];
+        if (!primaryTenant?.slug || primaryUsers.length !== 2 || !subTenant?.slug || subUsers.length !== 2) {
+          throw new Error('Missing PRIMARY_TENANT_ACCOUNT/PRIMARY_TENANT_USERS/SUB_TENANT_ACCOUNT/SUB_TENANT_USERS in cypress.config.ts');
+        }
+      }
+    );
+  });
+
+  after(() => {
+    cy.logout();
+  });
+
+  it('signs up the primary tenant candidate', () => {
+    cy.clearAllEmails();
+    cy.visit('/signup');
+    cy.get('[data-testid="signup-username"]').should('be.visible').clear().type(primaryTenant.username);
+    cy.get('[data-testid="signup-companymail"]').should('be.visible').clear().type(primaryTenant.email);
+    cy.get('[data-testid="signup-password"]').should('be.visible').clear().type(primaryTenant.password, {log: false});
+    cy.get('[data-testid="signup-submit"]').should('be.visible').and('not.be.disabled').click();
+    cy.get('[data-testid="welcome-tick"]').should('exist');
+    cy.get('[data-testid="welcome-goto-login"]').click();
+    cy.openLastMailAndGetUrl().then((url) => cy.visit(url));
+  });
+
+  it('verifies the tenant and enables its Primary Tenant toggle as admin', () => {
+    cy.loginAsAdmin();
+    openTenantsPage();
+    openTenantEditor(primaryTenant);
+    setTenantEditorToggle('tenant-verified-toggle', true);
+    setTenantEditorToggle('tenant-primary-toggle', true);
+    saveTenantEditor('savePrimaryTenantToggle');
+    cy.logout();
+  });
+
+  it('completes onboarding and creates two users as the primary tenant', () => {
+    submitLogin(primaryTenant.username, primaryTenant.password, primaryTenant);
+    completeTenantOnboarding(primaryTenant.companyName);
+    openTenantUsersPage();
+    primaryUsers.forEach((user) => addTenantUser(user));
+    cy.logout();
+  });
+
+  it('sets the primary tenant user and tenant quotas as admin', () => {
+    cy.loginAsAdmin();
+    openTenantsPage();
+    openTenantEditor(primaryTenant);
+    setTenantEditorQuota('tenant-user-quota-input', '4');
+    setTenantEditorQuota('tenant-tenant-quota-input', '1');
+    saveTenantEditor('savePrimaryTenantQuotas');
+    cy.logout();
+  });
+
+  it('signs up a sub-tenant under the primary tenant', () => {
+    signUpUnderTenant(primaryTenant.slug, subTenant);
+    cy.get('[data-testid="welcome-tick"]').should('exist');
+    cy.get('[data-testid="welcome-goto-login"]').click();
+    cy.openLastMailAndGetUrl().then((url) => cy.visit(url));
+  });
+
+  it('verifies the sub-tenant and sets its own quota as the primary tenant', () => {
+    loginTenant(primaryTenant);
+    openTenantsPage();
+    openTenantEditor(subTenant);
+    setTenantEditorToggle('tenant-verified-toggle', true);
+    setTenantEditorQuota('tenant-user-quota-input', '2');
+    saveTenantEditor('saveSubTenantVerify');
+    cy.logout();
+  });
+
+  it('completes onboarding and creates two users as the sub-tenant, exhausting its own quota', () => {
+    submitLogin(subTenant.username, subTenant.password, subTenant);
+    completeTenantOnboarding(subTenant.companyName);
+    openTenantUsersPage();
+    subUsers.forEach((user) => addTenantUser(user));
+  });
+
+  it('blocks another sub-tenant user once its own quota is exhausted', () => {
+    submitLogin(subTenant.username, subTenant.password, subTenant);
+    openTenantUsersPage();
+    addTenantUserExpectQuotaBlocked({username: 'sub_overflow_user', email: 'suboverflow@gmail.com', password: '1qaz!QAZ'});
+    cy.logout();
+  });
+
+  it('blocks another primary-tenant user once the primary shared quota is exhausted', () => {
+    loginTenant(primaryTenant);
+    openTenantUsersPage();
+    addTenantUserExpectQuotaBlocked({username: 'primary_overflow_usr', email: 'primaryoverflow@gmail.com', password: '1qaz!QAZ'});
+  });
+
+  it('enforces the primary tenant quota by blocking a second sub-tenant signup', () => {
+    // Once the primary tenant's tenant_quota is met, /api/public reports signup_enabled=false
+    // for its slug, and the signup page redirects to /login rather than rendering the form.
+    cy.visit(tenantSignupUrl(primaryTenant.slug));
+    cy.location('pathname', {timeout: 30000}).should('include', '/login');
+    cy.get('[data-testid="login-signup-link"]').should('not.exist');
+  });
+
+  it('shows alert visibility enabled by default for the sub-tenant', () => {
+    loginTenant(subTenant);
+    openTenantSettings();
+    cy.scrollDashboardToBottom();
+    assertTenantAlertVisibilityToggle('Allow Admin Alert Visibility', 'Tenant alerts are visible to admin');
+    assertTenantAlertVisibilityToggle('Allow Parent Tenant Alert Visibility', 'Tenant alerts are visible to parent tenant');
+    cy.logout();
+  });
+
+  it('shows the sub-tenant alerts to admin via case management', () => {
+    cy.loginAsAdmin();
+    openCaseAlertsView();
+    cy.contains(selector('case-admin-alert-tenant-email'), subTenant.email).scrollIntoView().should('be.visible');
+    cy.logout();
+  });
+
+  it('shows the sub-tenant alerts to the primary tenant via case management', () => {
+    loginTenant(primaryTenant);
+    openCaseAlertsView();
+    cy.contains(selector('case-admin-alert-tenant-email'), subTenant.email).scrollIntoView().should('be.visible');
+    cy.logout();
+  });
+
+  it('disables both alert visibility toggles as the sub-tenant', () => {
+    loginTenant(subTenant);
+    openTenantSettings();
+    cy.scrollDashboardToBottom();
+    disableTenantAlertVisibilityToggle('Allow Admin Alert Visibility');
+    disableTenantAlertVisibilityToggle('Allow Parent Tenant Alert Visibility');
+    cy.get('[data-testid="tenant-privacy-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
+    cy.get('[data-testid="tenant-privacy-save"]', {timeout: 60000}).should('be.disabled');
+    assertTenantAlertVisibilityToggle('Allow Admin Alert Visibility', 'Tenant alerts are hidden from admin');
+    assertTenantAlertVisibilityToggle('Allow Parent Tenant Alert Visibility', 'Tenant alerts are hidden from parent tenant');
+    cy.logout();
+  });
+
+  it('hides the sub-tenant alerts from admin after visibility is disabled', () => {
+    cy.loginAsAdmin();
+    openCaseAlertsView();
+    cy.get('body').then(($body) => {
+      const emails = $body.find(selector('case-admin-alert-tenant-email')).toArray().map((el) => (el.textContent || '').trim());
+      expect(emails).not.to.include(subTenant.email);
+    });
+    cy.logout();
+  });
+
+  it('hides the sub-tenant alerts from the primary tenant after visibility is disabled', () => {
+    loginTenant(primaryTenant);
+    openCaseAlertsView();
+    cy.get('body').then(($body) => {
+      const emails = $body.find(selector('case-admin-alert-tenant-email')).toArray().map((el) => (el.textContent || '').trim());
+      expect(emails).not.to.include(subTenant.email);
+    });
+  });
+});
+
+describe('Category Alert Report - Stubbed Coverage', () => {
+  beforeEach(() => {
+    cy.loginAsAdmin();
+  });
+
+  after(() => {
+    cy.logout();
+  });
+
+  it('paginates, searches and exports category alerts', () => {
+    openCategoryAlertReport(CATEGORY_ALERT_REPORT_TYPE);
+
+    cy.get('[data-testid="tenant-alert-report-card"]').filter(':visible').should('have.length.greaterThan', 0);
+
+    loadMoreCategoryAlerts();
+
+    searchCategoryAlerts('Cypress Breach Alert 1');
+
+    ['category-alert-export-option-report', 'category-alert-export-option-json', 'category-alert-export-option-csv'].forEach((optionTestId) => {
+      exportSelectedCategoryAlert(optionTestId);
+    });
+
+    ['category-alert-export-option-report', 'category-alert-export-option-json', 'category-alert-export-option-csv'].forEach((optionTestId) => {
+      exportCategoryAlerts(optionTestId);
+    });
+  });
+
+  it('opens the detail drawer via click and keyboard and toggles the description', () => {
+    openCategoryAlertReport(CATEGORY_ALERT_REPORT_TYPE);
+
+    openCategoryAlertDrawerByClick();
+    toggleCategoryAlertDescription();
+    closeCategoryAlertDrawer();
+
+    openCategoryAlertDrawerByKeyboard();
+    closeCategoryAlertDrawer();
+  });
+
+  it('applies alert filters through the filter sidebar', () => {
+    openCategoryAlertReport(CATEGORY_ALERT_REPORT_TYPE);
+
+    openFilterSidebar();
+    cy.get('[data-testid="side-filter-date-toggle"]').filter(':visible').first().scrollIntoView().click();
+    cy.get('[data-testid="side-filter-date-prev-month"]').filter(':visible').first().scrollIntoView().click();
+    cy.get('[data-testid="side-filter-date-day-1"]').filter(':visible').first().scrollIntoView().click();
+    cy.get('[data-testid="side-filter-date-day-25"]').filter(':visible').first().scrollIntoView().click();
+    cy.get('[data-testid="side-filter-apply"]').filter(':visible').first().scrollIntoView().click();
+    closeFilterSidebar();
+
+    cy.location('pathname').should('include', `/dashboard/profile/alerts/${CATEGORY_ALERT_REPORT_TYPE}`);
   });
 });

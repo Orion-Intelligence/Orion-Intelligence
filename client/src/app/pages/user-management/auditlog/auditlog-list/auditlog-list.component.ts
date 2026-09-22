@@ -1,9 +1,8 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { Observable } from 'rxjs';
-import { AuditLogCallbackModel } from '../../../../shared/model/auditlog/auditlog.model';
-import { AuditlogService } from '../../../../services/auditlog/auditlog.service';
-import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
+import { AuditLogCallbackModel } from '../model/auditlog.model';
+import { AuditlogService } from '../services/auditlog.service';
 import { AppService } from '../../../../services/core/app/app.service';
 import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
@@ -12,7 +11,8 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   selector: 'app-auditlog-list',
   imports: [AsyncPipe, DatePipe, ConfirmationPopupComponent, TranslatePipe],
   templateUrl: './auditlog-list.component.html',
-  animations: [fadeInDashboardItem],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrls: ['./auditlog-list.component.css'],
 })
 export class AuditlogListComponent {
   auditData$: Observable<AuditLogCallbackModel | null>;

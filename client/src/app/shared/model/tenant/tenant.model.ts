@@ -19,7 +19,10 @@ export interface TenantModel {
     subscription?: boolean;
     postal_code?: string;
     verified?: boolean;
+    is_primary?: boolean;
+    parent_tenant_id?: string | null;
     user_quota?: number;
+    tenant_quota?: number;
     status?: TenantStatus;
     licenses?: string[];
     quotaExceeded?: boolean;
@@ -28,6 +31,7 @@ export interface TenantModel {
     profile_visibility_enabled?: boolean;
     event_management_enabled?: boolean;
     alerts_visible_to_admin?: boolean;
+    alerts_visible_to_parent?: boolean;
     privileged_ioc?: boolean;
     alert_run_time?: string | null;
     allowed_alert_categories?: string[] | null;
@@ -35,6 +39,7 @@ export interface TenantModel {
     accounts_mail?: string;
     accounts_smtp_server?: string;
     accounts_smtp_port?: string;
+    [key: string]: unknown;
 }
 export interface User {
     username: string;

@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 
 from orion.helper_manager.env_handler import env_handler
+from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 
 
 class CONSTANTS:
@@ -20,6 +21,9 @@ class CONSTANTS:
     S_SETTINGS_SEARCH_MAX_DYNAMIC_RESOURCE_LIMIT = 1
     S_SETTINGS_COUNTRY_DOCUMENT_SIZE = 500
 
+    ELASTIC_SEARCH_REQUEST_TIMEOUT = 120
+    ELASTIC_WRITE_REQUEST_TIMEOUT = 220
+
     S_SUPER_PASSWORD = env_handler.get_instance().env("S_SUPER_PASSWORD_V1")
     S_AUTH_SECRET_KEY = env_handler.get_instance().env("JWT_SECRET_KEY")
     S_CRAWL_SECRET_KEY = env_handler.get_instance().env("S_CRAWLER_PASSWORD")
@@ -28,15 +32,22 @@ class CONSTANTS:
     S_AUTH_OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="token")
     S_AUTH_PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
     S_ENCRYPTION_KEY = env_handler.get_instance().env("ENCRYPTION_KEY")
+    S_STEALER_KEY = env_handler.get_instance().env("STEALER_KEY") or S_ENCRYPTION_KEY
 
-    BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-    IMAGE_DIR = BASE_DIR / "static" / "resource" / "tenant"
+    BASE_DIR = Path(__file__).resolve().parents[2]
+    IMAGE_DIR = BASE_DIR / "workspace" / "resource" / "tenant"
     S_SATELLITE_ASSET_FILE_NAME = "satellite_assets.json"
     S_CASE_ARTIFACT_RESOURCE_DIR = (
         Path(__file__).resolve().parents[2]
-        / "static"
+        / "workspace"
         / "resource"
         / "case_artifacts"
+    )
+    S_SESSION_RESOURCE_DIR = (
+        Path(__file__).resolve().parents[2]
+        / "workspace"
+        / "resource"
+        / "session_data"
     )
     S_CASE_ARTIFACT_SCREENSHOT_ALLOWED = {"image/png"}
     S_CASE_ARTIFACT_FILE_ALLOWED = {
@@ -46,6 +57,41 @@ class CONSTANTS:
         "text/plain",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     }
+    MAX_BACKUPS = 2
+    BACKUP_BATCH_SIZE = 1000
+    BACKUP_MANIFEST_NAME = "manifest.json"
+    BACKUP_MANIFEST_VERSION = 2
+    BACKUP_TENANTS_DIR = "tenants"
+    BACKUP_TENANT_COLLECTION = "db_tenant_model"
+    BACKUP_TENANT_USER_COLLECTION = "db_user_account"
+    BACKUP_TENANT_USER_FIELD = "tenant_id"
+    BACKUP_TENANT_PARENT_FIELD = "parent_tenant_id"
+    BACKUP_TENANT_ELASTIC_INDICES = {ELASTIC_INDEX.S_SIEM_INDEX}
+    BACKUP_TENANT_ELASTIC_FIELD = "tenant_id"
+    BACKUP_TENANT_MONGO_DIR = "mongo"
+    BACKUP_TENANT_ELASTIC_DIR = "elastic"
+    BACKUP_TENANT_FILES_DIR = "files"
+    RESTORE_TENANT_MARKER_NAME = ".restore_tenant_in_progress"
+    RESTORE_TENANT_ROLLBACK_PREFIX = "rollback_tenant_"
+    IMPORT_TENANT_STAGE_PREFIX = "import_tenant_"
+    BACKUP_EXPORT_PAYLOAD_NAME = "tenant.enc"
+    RESERVED_TENANT_SLUGS = ("www", "mail", "api", "admin", "static", "app", "localhost")
+    BACKUP_IMPORT_MAX_INFLATION = 100
+    BACKUP_TENANT_ADMIN_FIELDS = ("licenses", "user_quota", "tenant_quota", "is_primary", "parent_tenant_id", "is_default", "status", "verified", "slug", "subscription", "privileged_ioc")
+    BACKUP_DISK_HEADROOM = 1.5
+    BACKUP_EXCLUDED_ELASTIC_INDICES = {ELASTIC_INDEX.S_STEALERLOGS_INDEX}
+    BACKUP_UNSETTABLE_INDEX_SETTINGS = {"creation_date", "uuid", "version", "provided_name", "resize", "routing"}
+    BACKUP_JOB_KEY = "backup_job"
+    BACKUP_JOB_HEARTBEAT_SECONDS = 30
+    BACKUP_JOB_STALE_SECONDS = 120
+    BACKUP_JOB_STALE_MESSAGE = "Backup worker stopped responding"
+    RESTORE_MARKER_NAME = ".restore_in_progress"
+    RESTORE_ROLLBACK_PREFIX = "rollback_"
+    RESTORE_ROLLBACK_MAX_AGE_HOURS = 12
+    RESTORE_QUIESCE_DRAIN_SECONDS = 3
+    MAINTENANCE_FLAG = BASE_DIR / "static" / ".maintenance"
+    TENANT_FENCE_FILE = BASE_DIR / "backups" / ".fenced_tenants"
+    MAINTENANCE_CACHE_TTL_SECONDS = 1.0
 
 allowed_key_titles: dict[str, str] = {}
 mail_template = None
@@ -53,4 +99,3 @@ alert_mail_template = None
 license_rules = {}
 url_rules = {}
 map_entities_data = {}
-map_entities_version = 0

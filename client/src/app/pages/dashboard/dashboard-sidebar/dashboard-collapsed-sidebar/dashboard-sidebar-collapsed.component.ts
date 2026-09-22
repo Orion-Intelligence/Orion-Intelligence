@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { AsyncPipe, NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
@@ -7,24 +7,31 @@ import { sidebarItemTooltips } from '../../../../shared/constants/shared-enums';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { SidebarHomepageService } from '../../../../services/dashboard/sidebar.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { Category } from '../../../../shared/constants/pages';
+import { SelectionStoreService } from '../../../../services/dashboard/selection.service';
+import { getOwnProperty } from '../../../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-dashboard-sidebar-collapsed',
   standalone: true,
   imports: [NgClass, AsyncPipe, RouterLink, TooltipDirective, LowerPipe, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './dashboard-sidebar-collapsed.component.html',
 })
 export class SidebarSectionComponent {
+  private readonly availableSubIcons = new Set<string>([ 'account', 'all', 'apk-scan', 'archive', 'auditlog', 'basic-scan', 'basic', 'case-management', 'cloud', 'cracked', 'credential', 'cryptocurrency', 'cve', 'dashboard', 'databases', 'drugs', 'email-breach', 'email', 'event-management', 'forum', 'forums', 'full', 'general', 'hacked', 'hacking', 'homepage', 'ioc', 'leaks', 'listing', 'logs', 'marketplaces', 'mastodon', 'mitre', 'national-identity', 'news', 'pastebin', 'phishing', 'playstore-scanner', 'port-scan', 'reddit', 'repository-scan', 'seo-scan', 'settings', 'social-scanner', 'social', 'software-scanner', 'statistics', 'stolen', 'system-settings', 'telegram', 'tenant-settings', 'tenant', 'tools', 'tracking', 'twitter', 'users', 'view-profiles', 'view-tenants', 'wanted-list', 'warfare', 'zeroday', ]);
+
   protected readonly itemTooltips = sidebarItemTooltips;
 
   readonly title = input('');
   readonly icon = input('');
   readonly items = input<string[]>([]);
-  readonly category = input<any>();
+  readonly category = input.required<Category>();
   readonly routePrefix = input('');
-  readonly selectionStore = input<any>();
+  readonly selectionStore = input.required<SelectionStoreService>();
   readonly tooltip = input('');
-  readonly sectionSelected = output<any>();
+  readonly sectionSelected = output<Category>();
   readonly optionSelected = output<string>();
 
   constructor(protected licenseService: LicenseService, private sidebarHomepageService: SidebarHomepageService) {}
@@ -46,7 +53,7 @@ export class SidebarSectionComponent {
   }
 
   getItemTooltip(item: string): string {
-    const mapped = this.itemTooltips[item];
+    const mapped = getOwnProperty(this.itemTooltips, item);
     if (mapped) {
       return mapped;
     }
@@ -55,7 +62,7 @@ export class SidebarSectionComponent {
 
   getItemIcon(item: string): string {
     const normalized = item.toLowerCase().replace(/\s+/g, '-');
-    const mapped = {
+    const iconAliases: Record<string, string> = {
       apt: 'mitre',
       malware: 'phishing',
       iocs: 'ioc',
@@ -63,7 +70,9 @@ export class SidebarSectionComponent {
       'text-analysis': 'phishing',
       'crypto-scanner': 'cryptocurrency',
       feeder: 'account',
-    }[normalized] || normalized;
-    return `/assets/images/sidebar/sub_${mapped}.svg`;
+    };
+    const mapped = getOwnProperty(iconAliases, normalized) ?? normalized;
+    const icon = this.availableSubIcons.has(mapped) ? mapped : 'all';
+    return `/assets/images/sidebar/sub_${icon}.svg`;
   }
 }

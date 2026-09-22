@@ -1,23 +1,24 @@
-import { Component, effect, OnInit, input, output } from '@angular/core';
+import { Component, effect, OnInit, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgOptimizedImage } from '@angular/common';
 import { FilterModel } from '../../model/filter/filter.model';
 import { last } from 'rxjs';
-import { filterAnimation } from '../../animations/filter.animation';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { DatePickerComponent } from './date-picker/date-picker.component';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { ScrollService } from '../../services/scroll.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
-import { UiDropdownComponent, UiDropdownOption } from '../../components/ui-dropdown/ui-dropdown.component';
-import { SuggestionService } from '../../../services/entity_filter_suggestions/suggestions.service';
+import { UiDropdownComponent, UiDropdownOption } from '../ui-dropdown/ui-dropdown.component';
+import { SuggestionService } from './services/suggestions.service';
+import { getOwnProperty, setOwnProperty } from '../../utils/type-guards.util';
+
 
 @Component({
   selector: 'app-filters',
   templateUrl: './filters.component.html',
   standalone: true,
   imports: [FormsModule, NgOptimizedImage, TooltipDirective, DatePickerComponent, TranslatePipe, UiDropdownComponent],
-  animations: [filterAnimation],
+  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class FiltersComponent implements OnInit {
   private suggestionRequestIds: Record<string, number> = {};
@@ -65,21 +66,21 @@ export class FiltersComponent implements OnInit {
   }
 
   onSelectionChange(key: string, value: string | null) {
-    this.selectedFilters[key] = value;
-    if (this.filterModel.filters[key]) {
-      this.filterModel.filters[key].selected = value ?? '';
+    setOwnProperty(this.selectedFilters, key, value);
+    if (getOwnProperty(this.filterModel.filters, key)) {
+      getOwnProperty(this.filterModel.filters, key).selected = value ?? '';
     }
   }
 
   onDropdownSearch(key: string, query: string) {
-    const filter = this.filterModel.filters[key];
+    const filter = getOwnProperty(this.filterModel.filters, key);
     if (!filter?.suggestionSource && !filter?.suggestionEndpoint) {
       return;
     }
 
     const trimmedQuery = query.trim();
-    const requestId = (this.suggestionRequestIds[key] || 0) + 1;
-    this.suggestionRequestIds[key] = requestId;
+    const requestId = (getOwnProperty(this.suggestionRequestIds, key) || 0) + 1;
+    setOwnProperty(this.suggestionRequestIds, key, requestId);
     if (!trimmedQuery && filter.options.length) {
       this.dropdownLoading = { ...this.dropdownLoading, [key]: false };
       return;
@@ -88,44 +89,18 @@ export class FiltersComponent implements OnInit {
     this.dropdownLoading = { ...this.dropdownLoading, [key]: true };
     this.suggestionService.loadSuggestion(filter.suggestionSource, key, trimmedQuery, filter.suggestionEndpoint, filter.suggestionParams).subscribe({
       next: values => {
-        if (this.suggestionRequestIds[key] !== requestId) {
+        if (getOwnProperty(this.suggestionRequestIds, key) !== requestId) {
           return;
         }
         this.setDropdownOptions(key, values.map(value => ({ key: value, label: value })));
         this.dropdownLoading = { ...this.dropdownLoading, [key]: false };
       },
       error: () => {
-        if (this.suggestionRequestIds[key] === requestId) {
+        if (getOwnProperty(this.suggestionRequestIds, key) === requestId) {
           this.dropdownLoading = { ...this.dropdownLoading, [key]: false };
         }
       }
     });
-  }
-
-  onNumberInputChange(key: string, rawValue: string | null) {
-    const filter = this.filterModel.filters[key];
-    const digitsOnly = String(rawValue ?? '').replace(/\D+/g, '');
-
-    if (!digitsOnly) {
-      this.onSelectionChange(key, null);
-      return;
-    }
-
-    let numericValue = Number.parseInt(digitsOnly, 10);
-    if (Number.isNaN(numericValue)) {
-      this.onSelectionChange(key, null);
-      return;
-    }
-
-    if (typeof filter.min === 'number') {
-      numericValue = Math.max(filter.min, numericValue);
-    }
-
-    if (typeof filter.max === 'number') {
-      numericValue = Math.min(filter.max, numericValue);
-    }
-
-    this.onSelectionChange(key, String(numericValue));
   }
 
   applyFilters() {
@@ -136,7 +111,7 @@ export class FiltersComponent implements OnInit {
   }
 
   closeFilter() {
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.filterClose.emit(undefined);
   }
 
@@ -145,13 +120,13 @@ export class FiltersComponent implements OnInit {
     this.selectedFilters = {};
     this.dashboard.selectedFilters.set({});
     this.filterChanged.emit({});
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.filterReset.emit(undefined);
     this.closeFilter();
   }
 
   private setDropdownOptions(key: string, options: UiDropdownOption[]) {
-    const filter = this.filterModel.filters[key];
+    const filter = getOwnProperty(this.filterModel.filters, key);
     if (!filter) {
       return;
     }

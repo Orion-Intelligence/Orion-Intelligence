@@ -1,22 +1,21 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { switchMap, timer, map, distinctUntilChanged, combineLatest } from 'rxjs';
 import { ResultComponent } from '../../../shared/partials/result/result.component';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { NgClass } from '@angular/common';
 import { CredentialListComponent } from './credential-list/credential-list.component';
-import { StealerLogCallbackModel } from '../../../shared/model/results/credentials/credential.callback.model';
+import { CredentialResultItem, StealerLogCallbackModel, StealerLogResultItem } from '../../../shared/model/results/credentials/credential.callback.model';
 import { SortType } from '../../../shared/constants/shared-enums';
 import { HelperService } from '../../../shared/services/helper.service';
 import { stealer_filters } from '../../../shared/constants/filters';
 import { FormsModule } from '@angular/forms';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
-import { RankedCallbackModel } from '../../../shared/model/results/consolidated/ranked.callback.model';
+import { RankedCallbackModel, RankedResultItem } from '../../../shared/model/results/consolidated/ranked.callback.model';
 import { IocSearchComponent } from "../../../shared/partials/ioc-search/ioc-search.component";
 import { finalize } from 'rxjs/operators';
 import { PasswordSchemaComponent } from './password-schema/password-schema.component';
-import { PasswordSchemaFilter } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
+import { PasswordSchemaFilter, StealerlogsSearchFilters } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
 import { ScanHelperMethods } from '../../../shared/partials/scan-helper-methods/scan-helper-methods.component';
 import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { CREDENTIAL_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
@@ -26,8 +25,21 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { DomainIndexSidebarComponent } from './domain-index-sidebar/domain-index-sidebar.component';
 import { ScrollTopComponent } from '../../../shared/partials/scroll-top/scroll-top.component';
 import { AiToolRoutingService } from '../../../shared/services/ai-tool-routing.service';
+import { getOwnProperty, setOwnProperty } from '../../../shared/utils/type-guards.util';
+import { ApiService } from '../../../shared/services/api.service';
+import { LicenseService } from '../../../services/licenses/licenses.service';
+import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
+import { TranslationService } from '../../../shared/services/translation.service';
+
 
 type IocResultTab = 'stealers' | 'threats';
+
+const CARD_TAG_MATCH = /m_(?:creditcard|fullbin):/;
+const CARD_TAG_REPLACE = /m_(?:creditcard|fullbin):/g;
+const PASSWORD_TAG_MATCH = /m_(?:search_all|domain|email):/;
+const PASSWORD_TERM = 'm_password:*';
+const PASSWORD_TERM_REPLACE = /\s*&&\s*m_password:\*/g;
+const TAGGED_TERM_MATCH = /^m_[a-z_]+:/;
 
 @Component({
   selector: 'app-credential',
@@ -46,29 +58,34 @@ type IocResultTab = 'stealers' | 'threats';
     ScrollTopComponent,
     TranslatePipe],
   templateUrl: './credential.component.html',
-  animations: [fadeInDashboardItem],
+  styleUrls: ['./credential.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class CredentialComponent implements OnInit {
   private pendingRequests = 0;
   private searchRequestId = 0;
   private rankedRequestId = 0;
   private stealerIocPage = 1;
+  private lastSearchSection = '';
   private threatIocPage = 1;
 
   protected readonly filters = stealer_filters;
 
   readonly reportExportOptions = CREDENTIAL_REPORT_EXPORT_OPTIONS;
-  searchQuery: string = '';
-  isLoading: boolean = false;
-  firstTrigger: boolean = true;
-  user: any;
-  url: string = '';
-  ioc: any;
+  readonly cardClassifiers: { value: string; label: string }[] = [{ value: StealerlogsSearchFilters.CREDITCARD, label: 'All' }, { value: StealerlogsSearchFilters.FULLBIN, label: 'Full BIN' }];
+  cardClassifier: string = StealerlogsSearchFilters.CREDITCARD;
+  passwordOnly = false;
+  searchQuery = '';
+  isLoading = false;
+  firstTrigger = true;
+  user = '';
+  url = '';
+  ioc = '';
   type: string;
   stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
   rankedResult: RankedCallbackModel = new RankedCallbackModel();
-  breachesApiTime: any = 0;
-  allSearchApiTime: any = 0;
+  breachesApiTime = 0;
+  allSearchApiTime = 0;
   showPasswordscheme = false;
   showSubdomains = false;
   isExportChoiceOpen = false;
@@ -87,8 +104,48 @@ export class CredentialComponent implements OnInit {
     this.isLoading = this.pendingRequests > 0;
   }
 
-  constructor(protected helperService: HelperService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private reportExportService: ReportExportService, private aiToolRoutingService: AiToolRoutingService) {
-    this.type = this.route.snapshot.data['type'];
+  constructor(protected helperService: HelperService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private reportExportService: ReportExportService, private aiToolRoutingService: AiToolRoutingService, private apiService: ApiService, protected licensesService: LicenseService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {
+    this.type = this.route.snapshot.data.type;
+  }
+
+  get canDismissResults(): boolean {
+    return this.licensesService.canDismissResults();
+  }
+
+  onHideDismissedToggle(): void {
+    this.fetchSearchResults();
+  }
+
+  toggleHideDismissed(): void {
+    this.dashboardService.consolidatedParamModel.hide_dismissed = !this.dashboardService.consolidatedParamModel.hide_dismissed;
+    this.onHideDismissedToggle();
+  }
+
+  onDismissStealerLog(item: StealerLogResultItem): void {
+    const hashOf = (result: StealerLogResultItem | null | undefined): string =>
+      String(result?.dismiss_id ?? result?.hash ?? result?.m_hash ?? result?._id ?? result?.id ?? '');
+    const stealerLogHash = hashOf(item);
+    if (!stealerLogHash) {
+      this.messageNotificationService.show(this.translationService.translate('Cannot dismiss: result has no identifier'), 'fail');
+      return;
+    }
+    const restoring = !!item.dismissed;
+    const endpoint = restoring ? 'search/result/restore' : 'search/result/dismiss';
+    const matches = (result: StealerLogResultItem): boolean => hashOf(result) === stealerLogHash;
+    this.apiService.post(endpoint, { hash: stealerLogHash, type: 'stealer_log' }).subscribe({
+      next: () => {
+        const hideDismissed = this.dashboardService.consolidatedParamModel.hide_dismissed;
+        const updatedResult = (this.stealerlogCallbackModel.Result ?? [])
+          .filter(result => !(hideDismissed && !restoring && matches(result)))
+          .map(result => matches(result) ? new StealerLogResultItem({ ...result, dismissed: !restoring }) : result);
+        this.stealerlogCallbackModel = new StealerLogCallbackModel({ ...this.stealerlogCallbackModel, Result: updatedResult });
+        this.dashboardService.stealerlogCallbackModel = this.stealerlogCallbackModel;
+        this.messageNotificationService.show(this.translationService.translate(restoring ? 'Result restored' : 'Result dismissed'), 'success');
+      },
+      error: () => {
+        this.messageNotificationService.show(this.translationService.translate(restoring ? 'Failed to restore result' : 'Failed to dismiss result'), 'fail');
+      },
+    });
   }
 
   get aiToolType(): string {
@@ -163,20 +220,20 @@ export class CredentialComponent implements OnInit {
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
       .subscribe(([params]) => {
-        this.url = params['url'];
-        this.user = params['user'];
-        this.dashboardService.consolidatedParamModel.url = params['url'] || '';
-        this.dashboardService.consolidatedParamModel.user = params['user'] || '';
+        this.url = params.url;
+        this.user = params.user;
+        this.dashboardService.consolidatedParamModel.url = params.url ?? '';
+        this.dashboardService.consolidatedParamModel.user = params.user ?? '';
         if (this.firstTrigger) {
           this.firstTrigger = false;
-          if(params['q']){
-            this.searchQuery="m_search_all:"+params['q'];
+          if(params.q){
+            this.searchQuery="m_search_all:"+params.q;
           }
-          else if(params['url']){
-            this.searchQuery="m_search_all:"+params['url'];
+          else if(params.url){
+            this.searchQuery="m_search_all:"+params.url;
           }
-          else if(params['user']){
-            this.searchQuery="m_search_all:"+params['user'];
+          else if(params.user){
+            this.searchQuery="m_search_all:"+params.user;
           }
           this.fetchSearchResults(false);
           this.fetchRanked();
@@ -187,10 +244,65 @@ export class CredentialComponent implements OnInit {
   }
 
   triggerSearch(searchQuery: string): void {
-    this.searchQuery = searchQuery;
+    this.resetSectionFilters(searchQuery);
+    this.searchQuery = this.applyPasswordFilter(searchQuery.replace(CARD_TAG_REPLACE, `${this.cardClassifier}:`));
     this.dashboardService.consolidatedParamModel.page = 1;
     this.fetchSearchResults();
     this.fetchRanked();
+  }
+
+  get isCardSearch(): boolean {
+    return CARD_TAG_MATCH.test(this.searchQuery);
+  }
+
+  selectCardClassifier(classifier: string): void {
+    if (this.cardClassifier === classifier) {
+      return;
+    }
+    this.cardClassifier = classifier;
+    this.searchQuery = this.searchQuery.replace(CARD_TAG_REPLACE, `${classifier}:`);
+    this.dashboardService.consolidatedParamModel.page = 1;
+    this.fetchSearchResults();
+  }
+
+  get isPasswordFilterable(): boolean {
+    const base = this.stripPasswordFilter(this.searchQuery);
+    return !base || PASSWORD_TAG_MATCH.test(base);
+  }
+
+  selectPasswordFilter(passwordOnly: boolean): void {
+    if (this.passwordOnly === passwordOnly) {
+      return;
+    }
+    this.passwordOnly = passwordOnly;
+    this.searchQuery = this.applyPasswordFilter(this.searchQuery);
+    this.dashboardService.consolidatedParamModel.page = 1;
+    this.fetchSearchResults();
+  }
+
+  private resetSectionFilters(searchQuery: string): void {
+    const base = this.stripPasswordFilter(searchQuery);
+    const section = CARD_TAG_MATCH.test(base) ? 'card' : (!base || PASSWORD_TAG_MATCH.test(base) ? 'identity' : 'other');
+    if (section !== this.lastSearchSection) {
+      this.cardClassifier = StealerlogsSearchFilters.CREDITCARD;
+      this.passwordOnly = false;
+    }
+    this.lastSearchSection = section;
+  }
+
+  private stripPasswordFilter(query: string): string {
+    return query.replace(PASSWORD_TERM_REPLACE, '').replace(PASSWORD_TERM, '').trim();
+  }
+
+  private applyPasswordFilter(query: string): string {
+    const base = this.stripPasswordFilter(query);
+    if (!this.passwordOnly) {
+      return base;
+    }
+    if (!base) {
+      return PASSWORD_TERM;
+    }
+    return base.split(/\s+/).map(token => TAGGED_TERM_MATCH.test(token) ? `${token} && ${PASSWORD_TERM}` : token).join(' ');
   }
 
   fetchSearchResults(reset = true): void {
@@ -199,9 +311,9 @@ export class CredentialComponent implements OnInit {
     this.dashboardService.consolidatedParamModel.page = 1;
     this.isLoadingMore = false;
     this.resetIocPaginationState();
-    const cleanedParams: any = {};
+    const cleanedParams: Params = {};
     Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
-      cleanedParams[key] = value;
+      setOwnProperty(cleanedParams, key, value);
     });
     this.router.navigate([], {
       queryParams: cleanedParams,
@@ -260,16 +372,16 @@ export class CredentialComponent implements OnInit {
       this.fetchRanked();
       return;
     }
-    this.stealerlogCallbackModel.Result = this.helperService.sortByKey<any>(this.stealerlogCallbackModel.Result, key, order);
+    this.stealerlogCallbackModel.Result = this.helperService.sortByKey<StealerLogResultItem>(this.stealerlogCallbackModel.Result, key, order);
     this.cdr.detectChanges();
   }
 
-  reloadFilters(_: Record<string, string | null>) {
+  reloadFilters(): void {
     this.fetchSearchResults();
     this.fetchRanked();
   }
 
-  resetFilters(_: undefined) {
+  resetFilters(): void {
     this.fetchSearchResults(true);
     this.fetchRanked();
   }
@@ -289,7 +401,8 @@ export class CredentialComponent implements OnInit {
     this.dashboardService
       .fetchConsolidatedRankededResults('search/consolidated/ioc', this.dashboardService.consolidatedParamModel)
       .pipe(switchMap(response => timer(500).pipe(map(() => response))), finalize(() => {
-        this.setLoading(-1), this.dashboardService.consolidatedParamModel.ioc = '';
+        this.setLoading(-1);
+        this.dashboardService.consolidatedParamModel.ioc = '';
       }))
       .subscribe(response => {
         if (requestId !== this.rankedRequestId) {
@@ -332,8 +445,7 @@ export class CredentialComponent implements OnInit {
       this.dashboardService.consolidatedParamModel.category = "";
       this.dashboardService.fetchConsolidatedRankededResults('search/consolidated/ioc', this.dashboardService.consolidatedParamModel)
         .pipe(finalize(() => {
-          this.isLoadingMore = false;
-          this.dashboardService.consolidatedParamModel.ioc = '';
+          this.clearIocLoadMoreState();
         })).subscribe(response => {
           const addedCount = this.appendRankedLoadMoreResults(response);
           this.hasMoreThreatResults = addedCount > 0;
@@ -347,8 +459,7 @@ export class CredentialComponent implements OnInit {
 
     this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealer/ioc', this.dashboardService.consolidatedParamModel)
       .pipe(finalize(() => {
-        this.isLoadingMore = false;
-        this.dashboardService.consolidatedParamModel.ioc = '';
+        this.clearIocLoadMoreState();
       })).subscribe(response => {
         const addedCount = this.appendStealerLoadMoreResults(response);
         this.hasMoreStealerResults = addedCount > 0;
@@ -356,6 +467,11 @@ export class CredentialComponent implements OnInit {
           this.stealerIocPage = nextPage;
         }
       });
+  }
+
+  private clearIocLoadMoreState(): void {
+    this.isLoadingMore = false;
+    this.dashboardService.consolidatedParamModel.ioc = '';
   }
 
   selectIocResultTab(tab: IocResultTab): void {
@@ -399,7 +515,7 @@ export class CredentialComponent implements OnInit {
   }
 
   getAggregatedDataWells(): number {
-    const stealer = new Set((this.stealerlogCallbackModel?.Result ?? []).map(item => item['m_index'])).size;
+    const stealer = new Set((this.stealerlogCallbackModel?.Result ?? []).map(item => item.m_index)).size;
     const ranked = new Set((this.rankedResult?.result ?? []).map(item => item.rank_index)).size;
     return stealer + ranked;
   }
@@ -476,11 +592,11 @@ export class CredentialComponent implements OnInit {
       recordType: 'stealer',
       recordIndex: String(index + 1),
       searchQuery,
-      email: this.toExportValue(item?.['email']),
-      username: this.toExportValue(item?.['username']),
-      domain: this.toExportValue(item?.['domain']),
-      source: this.toExportValue(item?.['channel'] || item?.['filename'] || item?.['file']),
-      hash: this.toExportValue(item?.['m_hash']),
+      email: this.toExportValue(item?.email),
+      username: this.toExportValue(item?.username),
+      domain: this.toExportValue(item?.domain),
+      source: this.toExportValue(item?.channel ?? item?.filename ?? item?.file),
+      hash: this.toExportValue(item?.m_hash),
       title: '-',
       url: '-',
       rank: '-',
@@ -499,33 +615,33 @@ export class CredentialComponent implements OnInit {
       username: '-',
       domain: '-',
       source: '-',
-      hash: this.toExportValue(item?.['m_hash']),
-      title: this.toExportValue(item?.['m_title'], 160),
-      url: this.toExportValue(item?.['m_url'], 160),
-      rank: this.toExportValue(item?.['rank_index']),
-      date: this.toExportValue(item?.['m_date'] || item?.['m_update_date']),
-      team: this.toExportValue(item?.['m_team']),
-      summary: this.toExportValue(item?.['m_important_content'] || item?.['m_content'], 240)
+      hash: this.toExportValue(item?.m_hash),
+      title: this.toExportValue(item?.m_title, 160),
+      url: this.toExportValue(item?.m_url, 160),
+      rank: this.toExportValue(item?.rank_index),
+      date: this.toExportValue(item?.m_date ?? item?.m_update_date),
+      team: this.toExportValue(item?.m_team),
+      summary: this.toExportValue(item?.m_important_content ?? item?.m_content, 240)
     }));
   }
 
-  private buildStealerPdfBlocks(records: any[]): GraphReportTableRow {
+  private buildStealerPdfBlocks(records: StealerLogResultItem[]): GraphReportTableRow {
     const recordBlocks = records.map((item, index): GraphReportRecordBlock => {
-      const identity = this.firstAvailableExportValue(item?.['email'], item?.['username'], item?.['user']);
-      const domain = this.firstAvailableExportValue(item?.['domain'], item?.['source_domain'], item?.['ip']);
+      const identity = this.firstAvailableExportValue(item?.email, item?.username, item?.user);
+      const domain = this.firstAvailableExportValue(item?.domain, item?.source_domain, item?.ip);
       const values: Record<string, string> = {};
-      this.addExportField(values, 'Email', item?.['email'], 180);
-      this.addExportField(values, 'Username', item?.['username'], 180);
-      this.addExportField(values, 'Password', item?.['password'], 220);
-      this.addExportField(values, 'Domain', item?.['domain'], 240);
-      this.addExportField(values, 'Source Domain', item?.['source_domain'], 240);
-      this.addExportField(values, 'IP Address', item?.['ip'], 180);
-      this.addExportField(values, 'Channel', this.firstAvailableExportValue(item?.['channel'], item?.['m_channel'], item?.['source_channel'], item?.['m_source_channel']), 240);
-      this.addExportField(values, 'Date / Year', this.firstAvailableExportValue(item?.['date'], item?.['timestamp'], item?.['m_date'], item?.['m_update_date']), 160);
-      this.addExportField(values, 'File Type', this.normalizeFileType(this.firstAvailableExportValue(item?.['file_type'], item?.['fileType'], item?.['type'])), 140);
-      this.addExportField(values, 'Hash', this.firstAvailableExportValue(item?.['m_hash'], item?.['hash']), 220);
-      this.addExportField(values, 'Raw Trace', item?.['raw'], 900);
-      this.addExportField(values, 'File Name', this.firstAvailableExportValue(item?.['filename'], item?.['file'], item?.['m_file']), 220);
+      this.addExportField(values, 'Email', item?.email, 180);
+      this.addExportField(values, 'Username', item?.username, 180);
+      this.addExportField(values, 'Password', item?.password, 220);
+      this.addExportField(values, 'Domain', item?.domain, 240);
+      this.addExportField(values, 'Source Domain', item?.source_domain, 240);
+      this.addExportField(values, 'IP Address', item?.ip, 180);
+      this.addExportField(values, 'Channel', this.firstAvailableExportValue(item?.channel, item?.m_channel, item?.source_channel, item?.m_source_channel), 240);
+      this.addExportField(values, 'Date / Year', this.firstAvailableExportValue(item?.date, item?.timestamp, item?.m_date, item?.m_update_date), 160);
+      this.addExportField(values, 'File Type', this.normalizeFileType(this.firstAvailableExportValue(item?.file_type, item?.fileType, item?.type)), 140);
+      this.addExportField(values, 'Hash', this.firstAvailableExportValue(item?.m_hash, item?.hash), 220);
+      this.addExportField(values, 'Raw Trace', item?.raw, 900);
+      this.addExportField(values, 'File Name', this.firstAvailableExportValue(item?.filename, item?.file, item?.m_file), 220);
       this.appendAdditionalExportFields(values, item, new Set([
         '_id',
         'email',
@@ -568,27 +684,27 @@ export class CredentialComponent implements OnInit {
     };
   }
 
-  private buildRankedPdfBlocks(records: any[], recordOffset = 0): GraphReportTableRow {
+  private buildRankedPdfBlocks(records: RankedResultItem[], recordOffset = 0): GraphReportTableRow {
     const recordBlocks = records.map((item, index): GraphReportRecordBlock => {
-      const title = this.firstAvailableExportValue(item?.['m_title'], item?.['m_important_content'], item?.['m_url']);
-      const primaryUrl = this.firstAvailableExportValue(item?.['m_url'], item?.['m_base_url'], item?.['m_domain'], item?.['m_weblink']);
+      const title = this.firstAvailableExportValue(item?.m_title, item?.m_important_content, item?.m_url);
+      const primaryUrl = this.firstAvailableExportValue(item?.m_url, item?.m_base_url, item?.m_domain, item?.m_weblink);
       const values: Record<string, string> = {};
-      this.addExportField(values, 'Title', item?.['m_title'], 260);
+      this.addExportField(values, 'Title', item?.m_title, 260);
       this.addExportField(values, 'URL', primaryUrl, 320);
-      this.addExportField(values, 'Domain', this.firstAvailableExportValue(item?.['m_domain'], item?.['m_root_domain']), 240);
-      this.addExportField(values, 'Email', item?.['m_email'], 180);
-      this.addExportField(values, 'Username', this.firstAvailableExportValue(item?.['m_username'], item?.['m_user']), 180);
-      this.addExportField(values, 'Password', item?.['m_password'], 220);
-      this.addExportField(values, 'IP Address', item?.['m_ip'], 180);
-      this.addExportField(values, 'Channel', this.firstAvailableExportValue(item?.['m_channel'], item?.['m_source_channel']), 240);
-      this.addExportField(values, 'Rank', this.firstAvailableExportValue(item?.['rank_index'], item?.['m_rank_index']), 160);
-      this.addExportField(values, 'Team', item?.['m_team'], 180);
-      this.addExportField(values, 'Date / Year', this.firstAvailableExportValue(item?.['m_date'], item?.['m_update_date'], item?.['m_year']), 160);
-      this.addExportField(values, 'Content Type', item?.['m_content_type'], 200);
-      this.addExportField(values, 'Source', this.firstAvailableExportValue(item?.['m_source'], item?.['m_file']), 220);
-      this.addExportField(values, 'Hash', this.firstAvailableExportValue(item?.['m_hash'], item?.['hash']), 220);
-      this.addExportField(values, 'Important Content', item?.['m_important_content'], 900);
-      this.addExportField(values, 'Content', item?.['m_content'], 900);
+      this.addExportField(values, 'Domain', this.firstAvailableExportValue(item?.m_domain, item?.m_root_domain), 240);
+      this.addExportField(values, 'Email', item?.m_email, 180);
+      this.addExportField(values, 'Username', this.firstAvailableExportValue(item?.m_username, item?.m_user), 180);
+      this.addExportField(values, 'Password', item?.m_password, 220);
+      this.addExportField(values, 'IP Address', item?.m_ip, 180);
+      this.addExportField(values, 'Channel', this.firstAvailableExportValue(item?.m_channel, item?.m_source_channel), 240);
+      this.addExportField(values, 'Rank', this.firstAvailableExportValue(item?.rank_index, item?.m_rank_index), 160);
+      this.addExportField(values, 'Team', item?.m_team, 180);
+      this.addExportField(values, 'Date / Year', this.firstAvailableExportValue(item?.m_date, item?.m_update_date, item?.m_year), 160);
+      this.addExportField(values, 'Content Type', item?.m_content_type, 200);
+      this.addExportField(values, 'Source', this.firstAvailableExportValue(item?.m_source, item?.m_file), 220);
+      this.addExportField(values, 'Hash', this.firstAvailableExportValue(item?.m_hash, item?.hash), 220);
+      this.addExportField(values, 'Important Content', item?.m_important_content, 900);
+      this.addExportField(values, 'Content', item?.m_content, 900);
       this.appendAdditionalExportFields(values, item, new Set([
         '_id',
         'm_title',
@@ -654,20 +770,22 @@ export class CredentialComponent implements OnInit {
     }
     let key = label;
     let suffix = 2;
-    while (fields[key]) {
+    while (getOwnProperty(fields, key)) {
       key = `${label} ${suffix}`;
       suffix += 1;
     }
-    fields[key] = text;
+    setOwnProperty(fields, key, text);
   }
 
   private appendAdditionalExportFields(fields: Record<string, string>, record: Record<string, unknown>, excludedKeys: Set<string>): void {
     Object.keys(record ?? {})
       .filter(key => !excludedKeys.has(key))
-      .filter(key => !this.shouldSkipExportField(key, record[key]))
-      .filter(key => this.isSimpleExportValue(record[key]))
+      .filter(key => !this.shouldSkipExportField(key, getOwnProperty(record, key)))
+      .filter(key => this.isSimpleExportValue(getOwnProperty(record, key)))
       .sort((a, b) => this.toExportLabel(a).localeCompare(this.toExportLabel(b)))
-      .forEach(key => this.addExportField(fields, this.toExportLabel(key), record[key], 320));
+      .forEach(key => {
+        this.addExportField(fields, this.toExportLabel(key), getOwnProperty(record, key), 320);
+      });
   }
 
   private getExportSearchQuery(): string {
@@ -679,7 +797,7 @@ export class CredentialComponent implements OnInit {
   }
 
   private shouldSkipExportField(key: string, value: unknown): boolean {
-    if (key === 'delimiter') {
+    if (key === 'delimiter' || key === 'dismissed' || key === 'dismiss_id') {
       return true;
     }
     return key === 'm_sub_host' && this.toExportValue(value) === '/';
@@ -743,7 +861,7 @@ export class CredentialComponent implements OnInit {
     return added;
   }
 
-  private appendUniqueResults(existing: any[], incoming: any[]): { merged: any[]; added: number } {
+  private appendUniqueResults<T extends CredentialResultItem>(existing: T[], incoming: T[]): { merged: T[]; added: number } {
     const seen = new Set(existing.map((item, index) => this.getResultIdentity(item, `existing-${index}`)));
     const additions = incoming.filter((item, index) => {
       const key = this.getResultIdentity(item, `incoming-${index}`);
@@ -756,8 +874,8 @@ export class CredentialComponent implements OnInit {
     return { merged: [...existing, ...additions], added: additions.length };
   }
 
-  private getResultIdentity(item: any, fallback: string): string {
-    return String(item?.raw || item?._id || item?.id || item?.m_hash || item?.hash || item?.m_message_id || item?.m_url || fallback);
+  private getResultIdentity(item: CredentialResultItem, fallback: string): string {
+    return String(item?.raw ?? item?._id ?? item?.id ?? item?.m_hash ?? item?.hash ?? item?.m_message_id ?? item?.m_url ?? fallback);
   }
 
   openScheme() {
@@ -790,5 +908,4 @@ export class CredentialComponent implements OnInit {
     }
     this.fetchSearchResults(true);
   }
-
 }

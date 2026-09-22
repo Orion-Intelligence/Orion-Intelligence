@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ProfileComponent } from '../../profile/profile.component';
 import { NavigationEnd, Router, UrlTree } from '@angular/router';
 import { filter } from 'rxjs';
-import { NgClass, NgOptimizedImage, TitleCasePipe } from '@angular/common';
+import { NgClass, NgOptimizedImage } from '@angular/common';
 import { AppService } from '../../../../services/core/app/app.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { SupportComponent } from "../../support/support.component";
@@ -12,7 +12,8 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
 @Component({
   selector: 'app-dashboard-header',
   standalone: true,
-  imports: [FormsModule, ProfileComponent, NgClass, TitleCasePipe, NgOptimizedImage, SupportComponent, TranslatePipe],
+  imports: [FormsModule, ProfileComponent, NgClass, NgOptimizedImage, SupportComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './dashboard-header.component.html',
 })
 export class DashboardHeaderComponent implements OnInit {
@@ -33,7 +34,7 @@ export class DashboardHeaderComponent implements OnInit {
 
   updateBreadcrumb(url: string) {
     const urlTree: UrlTree = this.router.parseUrl(url);
-    const segments = urlTree.root.children['primary']?.segments.map((segment) => segment.path) ?? [];
+    const segments = urlTree.root.children.primary?.segments.map((segment) => segment.path) ?? [];
     const formatLabel = (segment: string) => segment === 'netint' ? 'Network Intel' : segment === 'ai' ? 'AI' : segment;
     this.breadcrumb = segments.length > 1
       ? segments.slice(1).map((segment) => ({ path: segment, label: formatLabel(segment) }))
@@ -108,10 +109,10 @@ export class DashboardHeaderComponent implements OnInit {
   }
 
   supportOpenPopup() {
-    this.supportPopup = true; // open popup
+    this.supportPopup = true;
   }
 
   supportClosePopup() {
-    this.supportPopup = false; // close popup
+    this.supportPopup = false;
   }
 }

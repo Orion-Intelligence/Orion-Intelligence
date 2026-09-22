@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { EMPTY, lastValueFrom, Observable, timer } from 'rxjs';
-import { expand, switchMap, takeWhile } from 'rxjs/operators';
-import { SatelliteGeocodeResponse, SatelliteGeocodeResult } from '../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { lastValueFrom, Observable } from 'rxjs';
+import { SatelliteGeocodeResponse, SatelliteGeocodeResult } from '../../satellite-intel/model/satellite-intel-api.models';
 import { ApiService } from '../../../../shared/services/api.service';
+import { pollWhilePending } from '../utils/polling.util';
 
 @Injectable({ providedIn: 'root' })
 export class GeoFencingGeocodeService {
@@ -21,34 +21,28 @@ export class GeoFencingGeocodeService {
   }
 
   private createPolledRequest<T>(call: () => Observable<T>, getStatus: (value: T) => string | undefined): Observable<T> {
-    return call().pipe(expand((value: T) => {
-      if (this.isPendingOrBusy(getStatus(value))) {
-        return timer(this.pollDelayMs).pipe(switchMap(() => call()));
-      }
-      return EMPTY;
-    }),
-    takeWhile((value: T) => this.isPendingOrBusy(getStatus(value)), true),);
+    return pollWhilePending(call, (value) => this.isPendingOrBusy(getStatus(value)), this.pollDelayMs);
   }
 
   private isPendingOrBusy(status: string | undefined): boolean {
     return status === 'pending' || status === 'busy';
   }
 
-  private getResponseStatus(value: any): string | undefined {
-    return value?.result?.status || value?.status;
+  private getResponseStatus(value: SatelliteGeocodeResponse): string | undefined {
+    return value.result?.status ?? value.status;
   }
 
-  private getResponseResult(value: any): any {
-    return value?.result !== undefined && value?.result !== null ? value.result : value;
+  private getResponseResult(value: SatelliteGeocodeResponse): SatelliteGeocodeResponse['result'] | SatelliteGeocodeResponse {
+    return value.result ?? value;
   }
 
-  private getResponseError(value: any): { message: string } | null {
+  private getResponseError(value: SatelliteGeocodeResponse): { message: string } | null {
     if (this.getResponseStatus(value) !== 'error') {
       return null;
     }
 
     return {
-      message: value?.result?.error_message || value?.result?.message || value?.message || 'Request failed',
+      message: value.result?.error_message ?? value.result?.message ?? value.message ?? 'Request failed',
     };
   }
 }

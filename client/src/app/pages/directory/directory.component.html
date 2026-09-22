@@ -1,22 +1,22 @@
 <div class="w-full p-3 md:p-4">
   <span id="top"></span>
 
-  <div class="ui-page-container w-full max-w-[2400px]">
+  <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-[#f9fbff] [body.light-theme_&]:shadow-none p-5 w-full max-w-[2400px]">
     <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 class="ui-page-title">{{ 'Directory' | translate }}</h1>
-        <p class="ui-page-description">{{ 'Live onion services and monitoring status.' | translate }}</p>
+        <h1 data-testid="directory-page-title" class="text-[20px] font-semibold leading-[1.2] text-[var(--color-text1)]">{{ 'Directory' | translate }}</h1>
+        <p data-testid="directory-page-description" class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Live onion services and monitoring status.' | translate }}</p>
       </div>
 
-      <button type="button" (click)="openSidebar()" class="ui-btn ui-btn-secondary gap-2">
-        <img alt="Filter Icon" height="16" ngSrc="/assets/images/shared/theme/filter_icon.svg" width="16" class="ui-filter-icon">
+      <button type="button" (click)="openSidebar()" class="inline-flex items-center justify-center border text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] border-[var(--color-border)] bg-[var(--color-blue-820)] text-[var(--color-text2)] hover:bg-[var(--color-blue-810)] gap-2">
+        <img alt="" height="16" ngSrc="/assets/images/shared/theme/filter_icon.svg" width="16" class="ui-filter-icon">
         {{ 'Filter' | translate }}
       </button>
 
       @if (isFilterOpen$ | async) {
-        <div class="ui-filter-sidebar-overlay fixed inset-0 z-[1190]" (click)="closeSidebar()"></div>
+        <div class="!bg-[rgba(7,12,20,0.42)] [animation:ui-overlay-fade-in_180ms_ease-out] [body.light-theme_&]:!bg-[rgba(23,34,53,0.18)] fixed inset-0 z-[1190]" (click)="closeSidebar()"></div>
       }
-      <div class="ui-filter-sidebar-panel fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full" [ngClass]="{ 'translate-x-[102%]': !(isFilterOpen$ | async), 'translate-x-0': (isFilterOpen$ | async) }">
+      <div class="ui-filter-sidebar-panel !shadow-none will-change-transform [backface-visibility:hidden] [contain:layout_paint] fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [body.light-theme_&]:border-l-[var(--color-border)] [body.light-theme_&]:bg-white max-[450px]:w-full" [ngClass]="{ 'translate-x-[102%]': !(isFilterOpen$ | async), 'translate-x-0': (isFilterOpen$ | async) }">
         <app-filters (filterChanged)="applyFilters($event)" (filterClose)="closeSidebar()"
           (filterReset)="resetFilters()" [filterModel]="filterModel"
         [isFilterOpen]="isFilterOpen$ | async"></app-filters>

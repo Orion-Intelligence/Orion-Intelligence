@@ -16,7 +16,7 @@
 <p align="left" aria-label="Orion project resources">
   <a href="https://orion-search.readthedocs.io" title="Read the Orion documentation"><img src="docs/_static/readme-documentation.svg" alt="Read the Orion documentation" width="232" height="38"></a>
   &nbsp;
-  <a href="https://stats.uptimerobot.com/xV0BS3KMq7" title="View Orion service health"><img src="docs/_static/readme-status.svg" alt="View Orion live service health" width="232" height="38"></a>
+  <a href="https://uptime.orionintelligence.org/status/orion-intelligence" title="View Orion service health"><img src="docs/_static/readme-status.svg" alt="View Orion live service health" width="232" height="38"></a>
 </p>
 
 Orion Platform is a comprehensive, web-based solution that combines the functionality of a browser, search engine, crawler, and data aggregation tools to empower OSINT (Open Source Intelligence) experts. Built on top of Docker, Orion provides a user-friendly interface to explore, search, and visualize data extracted by its powerful Orion Crawler.
@@ -292,11 +292,6 @@ Orion follows a clear path from source collection to analyst action:
       <td valign="top"><a href="https://github.com/Orion-Intelligence/Orion-Crawler"><strong>Orion Crawler</strong></a><br><sub>ECOSYSTEM SERVICE</sub></td>
       <td valign="top"><sub>Scheduled crawling across hidden-web and monitored sources, with distributed task execution and private-network routing.</sub></td>
       <td valign="top"><img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-Celery-37814A?style=flat-square&amp;logo=celery&amp;logoColor=white" alt="Celery"> <img src="https://img.shields.io/badge/-Playwright-2EAD33?style=flat-square&amp;logo=playwright&amp;logoColor=white" alt="Playwright"> <img src="https://img.shields.io/badge/-Redis-DC382D?style=flat-square&amp;logo=redis&amp;logoColor=white" alt="Redis"> <img src="https://img.shields.io/badge/-Tor-7D4698?style=flat-square&amp;logo=torproject&amp;logoColor=white" alt="Tor"></td>
-    </tr>
-    <tr>
-      <td valign="top"><a href="https://github.com/Orion-Intelligence/Orion-Collector"><strong>Orion Collector</strong></a><br><sub>ECOSYSTEM SERVICE</sub></td>
-      <td valign="top"><sub>Extensible source-collection framework for targeted acquisition and custom ingestion workflows.</sub></td>
-      <td valign="top"><img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-Playwright-2EAD33?style=flat-square&amp;logo=playwright&amp;logoColor=white" alt="Playwright"> <img src="https://img.shields.io/badge/-Beautiful_Soup-59666C?style=flat-square" alt="Beautiful Soup"> <img src="https://img.shields.io/badge/-Redis-DC382D?style=flat-square&amp;logo=redis&amp;logoColor=white" alt="Redis"></td>
     </tr>
   </tbody>
 </table>

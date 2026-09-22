@@ -8,10 +8,10 @@
       <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="" aria-hidden="true" class="h-4 w-4 opacity-80 transition duration-200 [filter:saturate(0.55)_brightness(1.12)] [body.light-theme_&]:opacity-100 [body.light-theme_&]:filter-none" [ngClass]="{ 'rotate-180': isRangePickerOpen }" />
     </span>
     @if (isRangePickerOpen && filteredArcRangeOptions.length) {
-      <div class="absolute left-0 right-0 top-[calc(100%+4px)] z-30 max-h-[180px] overflow-y-auto rounded-[10px] border-0 bg-[rgba(28,39,53,0.94)] py-1 shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm [body.light-theme_&]:!bg-white">
+      <div class="absolute left-0 right-0 top-[calc(100%+4px)] z-30 max-h-[180px] overflow-y-auto rounded-[10px] border-0 bg-[rgba(28,39,53,0.94)] py-1 shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm [body.light-theme_&]:!bg-white [body.light-theme_&]:ring-[#d7e2ef]">
         @for (range of filteredArcRangeOptions; track range.index) {
-          <button type="button" (mousedown)="onRangeOptionMouseDown($event, range)" class="block w-full px-3 py-1.5 text-left text-[12px] font-semibold text-[#C4D4E6] transition-colors hover:bg-[rgba(65,86,110,0.64)] hover:text-white [body.light-theme_&]:!bg-white [body.light-theme_&]:hover:!bg-white" [ngClass]="range.index === selectedArcRangeIndex ? 'bg-[rgba(78,102,130,0.52)] text-white' : ''">
-            {{ range.label }}
+          <button type="button" (mousedown)="onRangeOptionMouseDown($event, range)" class="block w-full px-3 py-1.5 text-left text-[12px] font-semibold text-[#C4D4E6] transition-colors hover:bg-[rgba(65,86,110,0.64)] hover:text-white" [ngClass]="range.index === selectedArcRangeIndex ? 'bg-[rgba(78,102,130,0.52)] text-white [body.light-theme_&]:!bg-[#e3effc] [body.light-theme_&]:!text-[#0f5fa8]' : '[body.light-theme_&]:!bg-white [body.light-theme_&]:!text-[var(--color-text2)] [body.light-theme_&]:hover:!bg-[#eef5ff] [body.light-theme_&]:hover:!text-[var(--color-text1)]'">
+            {{ range.label | translate }}
           </button>
         }
       </div>
@@ -20,13 +20,13 @@
 </div>
 <div class="mt-2 grid max-h-[220px] grid-cols-2 gap-2 overflow-auto pr-1 max-[640px]:max-h-[160px] max-[420px]:grid-cols-1">
   @for (item of categoryLegend; track item.categoryKey) {
-    <button data-testid="threat-lens-category-layer" type="button" (click)="arcCategorySelect.emit(item.categoryKey)" [disabled]="!item.arcCount" class="w-full rounded-[10px] px-3 py-2 text-left text-[12px] text-[#C4D4E6] ring-1 ring-inset ring-[rgba(143,166,190,0.20)] transition-colors disabled:cursor-not-allowed disabled:opacity-55 [body.light-theme_&]:!bg-white [body.light-theme_&]:hover:!bg-white" [ngClass]="selectedArcCategoryKey === item.categoryKey ? 'bg-[rgba(78,102,130,0.52)] text-white' : 'bg-[rgba(22,34,48,0.88)] hover:bg-[rgba(65,86,110,0.64)] hover:text-white'">
+    <button data-testid="threat-lens-category-layer" type="button" (click)="arcCategorySelect.emit(item.categoryKey)" [disabled]="!item.arcCount" class="w-full rounded-[10px] px-3 py-2 text-left text-[12px] text-[#C4D4E6] ring-1 ring-inset ring-[rgba(143,166,190,0.20)] transition-colors disabled:cursor-not-allowed disabled:opacity-55" [ngClass]="selectedArcCategoryKey === item.categoryKey ? 'bg-[rgba(78,102,130,0.52)] text-white [body.light-theme_&]:!bg-[#e3effc] [body.light-theme_&]:!text-[#0f5fa8] [body.light-theme_&]:ring-[#b9cee4]' : 'bg-[rgba(22,34,48,0.88)] hover:bg-[rgba(65,86,110,0.64)] hover:text-white [body.light-theme_&]:!bg-white [body.light-theme_&]:!text-[var(--color-text2)] [body.light-theme_&]:ring-[#d7e2ef] [body.light-theme_&]:hover:!bg-[#eef5ff] [body.light-theme_&]:hover:!text-[var(--color-text1)]'">
       <div class="flex items-center gap-3">
         <span class="flex min-w-0 items-center gap-2">
           <svg viewBox="0 0 12 12" class="h-3 w-3 shrink-0" [attr.color]="item.colorHex" aria-hidden="true">
             <circle cx="6" cy="6" r="5" [attr.fill]="item.colorHex"></circle>
           </svg>
-          <span class="truncate font-semibold text-[var(--color-text1)]">{{ item.label }}</span>
+          <span class="truncate font-semibold text-[var(--color-text1)]">{{ item.label | translate }}</span>
         </span>
       </div>
     </button>

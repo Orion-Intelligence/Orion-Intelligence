@@ -2,6 +2,8 @@ import asyncio
 from asyncio import sleep
 from pathlib import Path
 from migrations.migration import migration_manager
+from orion.api.interactive.backup_manager.backup_manager import BackupManager
+from orion.api.interactive.social_manager.social_scanner import social_scanner
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
@@ -32,6 +34,7 @@ class service_manager:
         self._is_available = False
 
     async def init_services(self, build_dir=None, run_migrations: bool = True):
+        self.prepare_runtime_dirs()
         build_dir = build_dir or self.default_build_dir()
         while not self._is_available:
             try:
@@ -57,9 +60,14 @@ class service_manager:
                 await config_controller.getInstance().load_config(force_db=True)
                 await asyncio.sleep(5)
 
+                async with redis_controller.getInstance().lock("backup:startup_recovery", timeout=3600, blocking_timeout=3600):
+                    await BackupManager.get_instance().resolve_interrupted_restore()
+                    await BackupManager.get_instance().resolve_interrupted_tenant_restore()
+
                 await arango_controller.get_instance().link_connection()
                 await arango_controller.get_instance().initialize()
                 await test_manager.get_instance().reset_test_arango_and_import_mocks()
+                await social_scanner.get_instance().resume_pending()
 
                 self._is_available = True
                 return True
@@ -96,7 +104,14 @@ class service_manager:
 
     async def build_map_assets(self, build_dir):
         await helper_controller.init_map_entities_task(build_dir)
+        await helper_controller.init_persona_posts_task(build_dir)
+
+    @staticmethod
+    def prepare_runtime_dirs():
+        base = Path(__file__).resolve().parents[3]
+        for directory in ("workspace/parser/parser_files", "workspace/logs", "workspace/resource", "backups"):
+            (base / directory).mkdir(parents=True, exist_ok=True)
 
     @staticmethod
     def default_build_dir():
-        return Path(__file__).resolve().parents[3] / "build"
+        return Path(__file__).resolve().parents[3] / "workspace" / "build"

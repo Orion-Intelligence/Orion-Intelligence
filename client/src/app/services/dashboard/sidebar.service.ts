@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { LicenseService } from '../licenses/licenses.service';
 import { ScrollService } from '../../shared/services/scroll.service';
+import { getOwnProperty } from '../../shared/utils/type-guards.util';
+import { RISK_LEVEL_BY_TYPE } from './sidebar.const';
 
 @Injectable({
   providedIn: 'root'
@@ -18,33 +20,11 @@ export class SidebarHomepageService {
       return 'Not Found';
     }
 
-    switch (normalized) {
-      case 'general':
-      case 'seo scanning':
-        return 'Low';
-      case 'breach':
-      case 'exploit':
-      case 'feed':
-      case 'playstore-scanning':
-      case 'social-scanner':
-      case 'email-breach':
-      case 'stealerlogs':
-      case 'software-scanning':
-        return 'Critical';
-      case 'defacement':
-      case 'advanced scanning':
-      case 'repo scanning':
-        return 'High';
-      case 'social':
-      case 'discussion':
-        return 'Medium';
-      default:
-        return 'Unknown';
-    }
+    return getOwnProperty(RISK_LEVEL_BY_TYPE, normalized) ?? 'Unknown';
   }
 
   private formatRisk(value?: string): string {
-    const normalized = (value || '').trim().toLowerCase();
+    const normalized = (value ?? '').trim().toLowerCase();
     if (!normalized) {
       return '';
     }

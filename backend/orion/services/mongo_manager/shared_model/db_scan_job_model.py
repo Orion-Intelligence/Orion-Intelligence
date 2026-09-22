@@ -51,6 +51,7 @@ class ScanJobNotificationResponse(BaseModel):
     scan_id: str
     title: str = ""
     target: str = ""
+    api_reference: str = ""
     status: ScanJobStatus
     seen: bool = False
     created_at: datetime

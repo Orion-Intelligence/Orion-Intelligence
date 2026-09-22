@@ -17,6 +17,7 @@ html_theme = "shibuya"
 exclude_patterns = [
     "api_docs/**",
     "public_index.md",
+    "llm_rules.md",
 ]
 
 if public_build:
@@ -36,6 +37,8 @@ myst_enable_extensions = [
 myst_heading_anchors = 3
 
 html_static_path = ["_static"]
+html_copy_source = False
+html_show_sourcelink = False
 
 html_theme_options = {
     "color_mode": "dark",
@@ -46,7 +49,7 @@ html_css_files = [
 ]
 
 
-def _use_public_index(app, docname, source):
+def _use_public_index(_app, docname, source):
     if public_build and docname == master_doc:
         source[0] = (Path(__file__).parent / "public_index.md").read_text(encoding="utf-8")
 

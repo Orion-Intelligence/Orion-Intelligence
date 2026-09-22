@@ -1,0 +1,40 @@
+import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { AlertWebhookSettingsForm } from './model/alert-webhook-settings.model';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+
+@Component({
+  selector: 'app-alert-webhook-settings-block',
+  standalone: true,
+  imports: [CommonModule, FormsModule, TranslatePipe],
+  host: { class: 'block sm:col-span-2' },
+  templateUrl: './alert-webhook-settings-block.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrls: ['./alert-webhook-settings-block.component.scss']
+})
+export class AlertWebhookSettingsBlockComponent {
+  @Input({ required: true }) form!: AlertWebhookSettingsForm;
+  @Input() isDirty = false;
+  @Input() context: 'system' | 'tenant' = 'system';
+  @Input() isAdmin = false;
+  @Input() errorState = false;
+
+  @Output() save = new EventEmitter<void>();
+
+  get slackRedirectUri(): string {
+    return `${window.location.origin}/api/alert-connectors/slack/callback`;
+  }
+
+  get jiraRedirectUri(): string {
+    return `${window.location.origin}/api/alert-connectors/jira/callback`;
+  }
+
+  get isSystemContext(): boolean {
+    return this.context === 'system';
+  }
+
+  get isTenantContext(): boolean {
+    return this.context === 'tenant';
+  }
+}

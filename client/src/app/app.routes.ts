@@ -8,19 +8,22 @@ import { TenantGuard } from './shared/guards/tenant-guard.guard';
 import { DashboardResolver } from './shared/resolvers/dashboard.resolver';
 import { IocResolver } from './shared/resolvers/ioc.resolver';
 import { ConfigResolver } from './shared/resolvers/config.resolver';
-import { OnboardingGuard } from './shared/guards/onboarding-guar';
+import { OnboardingGuard } from './shared/guards/onboarding-guard';
 import { NotificationGuard } from './shared/guards/notification.guard';
 const loadPhoneLookupComponent = () => import('./sections/api/phone-lookup/phone-lookup.component').then(m => m.PhoneLookupComponent);
+const loadDkimLookupComponent = () => import('./sections/api/dkim-lookup/dkim-lookup.component').then(m => m.DkimLookupComponent);
 const loadLoginComponent = () => import('./pages/login/login.component').then(m => m.LoginComponent);
+const loadExtensionPrivacyComponent = () => import('./pages/legal/extension-privacy/extension-privacy.component').then(m => m.ExtensionPrivacyComponent);
+const loadProjectPrivacyComponent = () => import('./pages/legal/project-privacy/project-privacy.component').then(m => m.ProjectPrivacyComponent);
 const loadSignupComponent = () => import('./pages/signup/signup.component').then(m => m.SignupComponent);
 const loadDashboardComponent = () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent);
 const loadHomepageComponent = () => import('./pages/homepage/homepage.component').then(m => m.HomepageComponent);
 const loadDirectoryComponent = () => import('./pages/directory/directory.component').then(m => m.DirectoryComponent);
-const loadDashboardApiComponent = () => import('./sections/api/dashboard-api/dashboard-api.component').then(m => m.DashboardApiComponent);
+const loadDashboardApiComponent = () => import('./pages/api/dashboard-api/dashboard-api.component').then(m => m.DashboardApiComponent);
 const loadDashboardResultContainer = () => import('./pages/intel-panel/dashboard-result-container/dashboard-result-container.component').then(m => m.DashboardResultContainer);
-const loadReportComponent = () => import('./sections/report/templates/report_general/report.component').then(m => m.ReportComponent);
-const loadReportDefacementComponent = () => import('./sections/report/templates/report-defacement/report-defacement.component').then(m => m.ReportDefacementComponent);
-const loadReportChatComponent = () => import('./sections/report/templates/report-chat/report-chat.component').then(m => m.ReportChatComponent);
+const loadReportComponent = () => import('./pages/report/templates/report_general/report.component').then(m => m.ReportComponent);
+const loadReportDefacementComponent = () => import('./pages/report/templates/report-defacement/report-defacement.component').then(m => m.ReportDefacementComponent);
+const loadReportChatComponent = () => import('./pages/report/templates/report-chat/report-chat.component').then(m => m.ReportChatComponent);
 const loadCredentialComponent = () => import('./pages/root-searches/credentials/credential.component').then(m => m.CredentialComponent);
 const loadErrorHandlerComponent = () => import('./shared/partials/error-handler/error-handler.component').then(m => m.ErrorHandlerComponent);
 const loadDashboardConsolidatedComponent = () => import('./pages/root-searches/dashboard-consolidated/dashboard-consolidated.component').then(m => m.DashboardConsolidatedComponent);
@@ -48,10 +51,11 @@ const loadAlertScannerSettingsComponent = () => import('./pages/user-management/
 const loadManageProfileComponent = () => import('./pages/tenant/tenant-management/view-profile/manage-profile.component').then(m => m.ManageProfileComponent);
 const loadViewTenantComponent = () => import('./pages/tenant/tenant-management/view-tenant/view-tenant.component').then(m => m.ViewTenantComponent);
 const loadSidebarProfileSystemSettingsComponent = () => import('./pages/user-management/sidebar-user-system-settings/sidebar-user-system-settings.component').then(m => m.SidebarProfileSystemSettingsComponent);
+const loadBackupRestoreComponent = () => import('./pages/user-management/backup-restore/backup-restore.component').then(m => m.BackupRestoreComponent);
 const loadTenantSettingsComponent = () => import('./pages/user-management/sidebar-user-settings/tenant-settings/tenant-settings.component').then(m => m.TenantSettingsComponent);
-const loadFileScannerComponent = () => import('./sections/api/ioc-extractor/file-scanner.component').then(m => m.FileScannerComponent);
-const loadTextAnalysisComponent = () => import('./sections/api/text-analysis/text-analysis.component').then(m => m.TextAnalysisComponent);
-const loadSocialMapperComponent = () => import('./pages/graphs/social-graph/social-mapper.component').then(m => m.SocialMapperComponent);
+const loadFileScannerComponent = () => import('./pages/api/ioc-extractor/file-scanner.component').then(m => m.FileScannerComponent);
+const loadTextAnalysisComponent = () => import('./pages/api/text-analysis/text-analysis.component').then(m => m.TextAnalysisComponent);
+const loadSocialMapperComponent = () => import('./pages/social-cti/social-mapper.component').then(m => m.SocialMapperComponent);
 const loadNetworkIntelComponent = () => import('./pages/root-searches/network-intel/network-intel').then(m => m.NetworkIntel);
 const loadSidebarUserCaseManagement = () => import('./pages/user-management/sidebar-user-case-management/sidebar-user-case-management').then(m => m.SidebarUserCaseManagement);
 const loadUserProfileActivityComponent = () => import('./pages/profile/user-profile-activity/user-profile-activity.component').then(m => m.UserProfileActivityComponent);
@@ -133,6 +137,16 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: loadLoginComponent,
     data: { animation: 'LoginPage' }
+  },
+  {
+    path: 'privacy/extension',
+    loadComponent: loadExtensionPrivacyComponent,
+    data: { animation: 'ExtensionPrivacyPage' }
+  },
+  {
+    path: 'privacy',
+    loadComponent: loadProjectPrivacyComponent,
+    data: { animation: 'PrivacyPage' }
   },
   {
     path: 'case-share/:shareId',
@@ -217,7 +231,7 @@ export const routes: Routes = [
       },
       {
         path: 'ctigraph',
-        loadComponent: () => import('./pages/graphs/cti-graph/graphs.component').then(m => m.GraphComponent),
+        loadComponent: () => import('./pages/cti-graph/graphs.component').then(m => m.GraphComponent),
         data: { animation: 'ctigraph' }
       },
       {
@@ -229,6 +243,11 @@ export const routes: Routes = [
         path: 'social-intel',
         loadComponent: loadSocialMapperComponent,
         data: { animation: 'SocialMapper' }
+      },
+      {
+        path: 'manage-profiles',
+        loadComponent: () => import('./pages/manage-profiles/manage-profiles.component').then(m => m.ManageProfilesComponent),
+        data: { animation: 'CategoryPage' }
       },
       {
         path: 'ai',
@@ -253,7 +272,7 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'email-breach',
+            redirectTo: 'social-scanner',
             pathMatch: 'full'
           },
           {
@@ -312,6 +331,15 @@ export const routes: Routes = [
               animation: 'TextAnalysisAPI',
               title: 'Phone & Domain Lookup',
               description: 'Analyze phone numbers and domains for OSINT intelligence'
+            }
+          },
+          {
+            path: 'dkim-lookup',
+            loadComponent: loadDkimLookupComponent,
+            data: {
+              animation: 'TextAnalysisAPI',
+              title: 'DKIM Checker',
+              description: 'Analyze domains and selectors to verify DKIM public keys'
             }
           },
           {
@@ -892,6 +920,11 @@ export const routes: Routes = [
             path: 'system-settings',
             loadComponent: loadSidebarProfileSystemSettingsComponent,
             data: { type: 'srttings', animation: 'CategoryPage' }
+          },
+          {
+            path: 'backup-restore',
+            loadComponent: loadBackupRestoreComponent,
+            data: { type: 'backup-restore', animation: 'CategoryPage' }
           },
           {
             path: 'case-management',

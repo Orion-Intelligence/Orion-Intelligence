@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnChanges, input, output } from '@angular/core';
-import { CalendarCell } from '../../../model/filter/calendar-cell.model';
+import { Component, HostListener, OnChanges, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { CalendarCell } from './model/calendar-cell.model';
 import { FilterModel } from '../../../model/filter/filter.model';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 
@@ -10,6 +10,7 @@ type DatePickerSelectionMode = 'range' | 'single';
   selector: 'app-date-picker',
   standalone: true,
   imports: [CommonModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './date-picker.component.html',
 })
 export class DatePickerComponent implements OnChanges {
@@ -79,7 +80,7 @@ export class DatePickerComponent implements OnChanges {
       this.toDate = this.fromDate;
     }
 
-    const pivot = this.fromDate || this.getMaxSelectableDate();
+    const pivot = this.fromDate ?? this.getMaxSelectableDate();
     this.viewYear = pivot.getFullYear();
     this.viewMonth = pivot.getMonth();
     this.buildCalendar();
@@ -204,7 +205,7 @@ export class DatePickerComponent implements OnChanges {
 
   private buildCalendar(): void {
     const first = new Date(this.viewYear, this.viewMonth, 1);
-    const startOffset = first.getDay(); // sunday-based
+    const startOffset = first.getDay();
     const start = new Date(this.viewYear, this.viewMonth, 1 - startOffset);
 
     const next: CalendarCell[] = [];
@@ -220,7 +221,7 @@ export class DatePickerComponent implements OnChanges {
   }
 
   private parseIso(value?: string): Date | null {
-    const v = (value || '').trim();
+    const v = (value ?? '').trim();
     if (!v) {
       return null;
     }

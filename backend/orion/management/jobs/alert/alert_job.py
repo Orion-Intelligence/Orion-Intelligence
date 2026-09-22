@@ -5,9 +5,9 @@ from bson import ObjectId
 
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.api.interactive.alert_manager.alert_summary_helper import AlertSummaryHelper
-from orion.api.interactive.search_manager.search_model import search_model
+from orion.api.interactive.search_manager.search_manager import search_manager
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
-from orion.api.server.crawl_manager.crawl_model import crawl_model
+from orion.api.server.crawl_manager.crawl_manager import crawl_manager
 from orion.management.jobs.alert.alert_buffer import AlertScanBuffer
 from orion.management.jobs.alert.cancellation_service import CancellationService
 from orion.management.jobs.alert.category_processor import CategoryAlertProcessor
@@ -35,8 +35,8 @@ class alert_job:
         self._engine = mongo_controller.get_instance().get_engine()
         self._tenant_manager = TenantManager.get_instance()
         self._alert_manager = AlertManager.getInstance()
-        self._search_model = search_model.getInstance()
-        self._crawl_model = crawl_model.getInstance()
+        self._search_model = search_manager.getInstance()
+        self._crawl_model = crawl_manager.getInstance()
         self._cancellation_service = CancellationService()
         self._cancel_scan_flags = self._cancellation_service._cancel_scan_flags
         self._tenant_ioc_service = TenantIocService()
@@ -73,12 +73,6 @@ class alert_job:
         if category == "scanning":
             return bool(allowed_categories.intersection(SCANNING_ALERT_CATEGORIES))
         return cls._normalize_alert_category(category) in allowed_categories
-
-    async def _handle_scanning_alert(self, tenant_id: str, ioc_value: str, ioc_type: str, scan_type: str):
-        return await self._scanning_processor.handle_scanning_alert(tenant_id, ioc_value, ioc_type, scan_type)
-
-    async def _handle_dynamic_scanning_alert( self, tenant_id: str, ioc_type: str, ioc_value: str, scan_type: str, search_payload: dict, dynamic_search_category: str, model_cls):
-        return await self._dynamic_scanning_processor.handle_dynamic_scanning_alert( tenant_id, ioc_type, ioc_value, scan_type, search_payload, dynamic_search_category, model_cls,)
 
     async def _process_tenant_alerts(self, tenant: db_tenant_model, category: str, allowed_categories: set[str] | None = None):
         tenant_key = self._cancellation_service.ensure_tenant(self._value(tenant, "id", ""))
@@ -230,9 +224,6 @@ class alert_job:
             "admin_mail_sent": admin_mail_sent,
         }
 
-    async def run_all_categories(self):
-        return await self.run_tenant_batch()
-
     async def run_default_scheduled_categories(self):
         return await self.run_tenant_batch(
             tenant_filter=lambda tenant: self.tenant_alert_run_time(tenant) is None
@@ -251,7 +242,7 @@ class alert_job:
         return await self._tenant_ioc_service.get_iocs_of_tenant(tenant)
 
     async def run_all_categories_for_api(self, current_user) -> dict:
-        tenant_id = current_user.tenant_uuid
+        tenant_id = current_user.tenant_id
         await self._alert_manager.getInstance().set_scan_running(tenant_id, True)
         current_tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id))
         start_time = datetime.now(timezone.utc)

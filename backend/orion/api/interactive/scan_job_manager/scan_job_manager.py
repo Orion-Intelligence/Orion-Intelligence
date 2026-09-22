@@ -31,7 +31,7 @@ class ScanJobManager:
         ScanJobManager.__instance = self
 
     @classmethod
-    def is_terminal_status(self, scan_status: str | ScanJobStatus | None) -> bool:
+    def is_terminal_status(cls, scan_status: str | ScanJobStatus | None) -> bool:
         return str(scan_status or "").strip().lower() in {ScanJobStatus.PARTIAL.value, ScanJobStatus.DONE.value, ScanJobStatus.ERROR.value, ScanJobStatus.CANCELLED.value, ScanJobStatus.EXPIRED.value}
 
     @staticmethod
@@ -57,12 +57,12 @@ class ScanJobManager:
         return str(value or "")
 
     @classmethod
-    def _job_status_from_response(self, response: Dict[str, Any]) -> ScanJobStatus:
+    def _job_status_from_response(cls, response: Dict[str, Any]) -> ScanJobStatus:
         result = response.get("result")
-        if isinstance(result, dict) and result.get("status"):
-            response_status = str(result.get("status")).strip().lower()
-        else:
-            response_status = str(response.get("status") or "").strip().lower()
+        raw_status: Any = result.get("status") if isinstance(result, dict) else None
+        if not raw_status:
+            raw_status = response.get("status") or ""
+        response_status = str(raw_status).strip().lower()
 
         if response_status in {"error", "failed", "failure"}:
             return ScanJobStatus.ERROR
@@ -89,7 +89,7 @@ class ScanJobManager:
     def _as_response_dict(response: Any) -> Dict[str, Any]:
         if isinstance(response, dict):
             return response
-        body = getattr(response, "body", None)
+        body: Any = getattr(response, "body", None)
         if body:
             try:
                 return json.loads(body.decode("utf-8"))
@@ -131,6 +131,7 @@ class ScanJobManager:
             scan_id=str(job.id),
             title=job.title,
             target=self._scan_target(job, target),
+            api_reference=job.api_reference,
             status=self._scan_status_value(job, status_value),
             seen=job.seen,
             created_at=job.created_at,
@@ -142,7 +143,6 @@ class ScanJobManager:
         notification = self._build_scan_notification(job, status_value, target)
         return ScanJobDetailResponse(
             **notification.model_dump(),
-            api_reference=job.api_reference,
             payload=job.payload,
             response=job.response,
         )
@@ -151,7 +151,8 @@ class ScanJobManager:
         scan_status = self._scan_status_value(job)
         is_unseen_or_incomplete = not job.seen or not self.is_terminal_status(scan_status.value)
         latest_date = job.created_at or job.updated_at or datetime.min
-        return (0 if is_unseen_or_incomplete else 1, -latest_date.timestamp())
+        priority = 0 if is_unseen_or_incomplete else 1
+        return priority, -latest_date.timestamp()
 
     async def create_job(self, current_user, api_reference: str, payload: Dict[str, Any], metadata: Optional[Dict[str, Any]] = None, force_new: bool = False, confirm_duplicates: bool = True) -> Dict[str, Any]:
         config = self._route_config(api_reference)
@@ -197,6 +198,12 @@ class ScanJobManager:
             log.g().w(f"Scan audit logging skipped: {str(ex)}")
         return {**self._build_scan_detail(job, ScanJobStatus.QUEUED.value, target).model_dump(), "source": "new"}
 
+    async def _get_owned_job(self, scan_id, current_user):
+        job = await self._engine.find_one(db_scan_job_model, (db_scan_job_model.id == ObjectId(scan_id)) & (db_scan_job_model.user_uuid == str(current_user.id)))
+        if not job:
+            raise HTTPException(status_code=404, detail="Scan job not found")
+        return job
+
     async def run_tracked_scan(self, current_user, api_reference: str, payload: Dict[str, Any], metadata: Optional[Dict[str, Any]], runner: Callable[[], Awaitable[Any]], force_new: bool = False, confirm_duplicates: bool = True) -> Dict[str, Any]:
         created = await self.create_job(current_user, api_reference, payload, metadata, force_new, confirm_duplicates,)
         if created.get("requires_confirmation"):
@@ -204,9 +211,7 @@ class ScanJobManager:
 
         scan_id = created.get("scan_id")
 
-        job = await self._engine.find_one(db_scan_job_model,(db_scan_job_model.id == ObjectId(scan_id)) & (db_scan_job_model.user_uuid == str(current_user.id)))
-        if not job:
-            raise HTTPException(status_code=404, detail="Scan job not found")
+        job = await self._get_owned_job(scan_id, current_user)
 
         if created.get("source") in {"previous_completed", "existing_running"}:
             response = job.response or {"status": "pending", "progress": 5, "step": "queued"}
@@ -336,17 +341,13 @@ class ScanJobManager:
         if not scan_id:
             raise HTTPException(status_code=400, detail="Scan ID is required")
 
-        job = await self._engine.find_one(db_scan_job_model, (db_scan_job_model.id == ObjectId(scan_id)) & (db_scan_job_model.user_uuid == str(current_user.id)))
-        if not job:
-            raise HTTPException(status_code=404, detail="Scan job not found")
+        job = await self._get_owned_job(scan_id, current_user)
         job.seen = True
         await self._engine.save(job)
         return {"message": "Scan marked as seen"}
 
     async def delete_job(self, scan_id: str, current_user) -> Dict[str, Any]:
-        job = await self._engine.find_one(db_scan_job_model, (db_scan_job_model.id == ObjectId(scan_id)) & (db_scan_job_model.user_uuid == str(current_user.id)))
-        if not job:
-            raise HTTPException(status_code=404, detail="Scan job not found")
+        job = await self._get_owned_job(scan_id, current_user)
 
         await self._engine.delete(job)
         return {"message": "Scan deleted"}

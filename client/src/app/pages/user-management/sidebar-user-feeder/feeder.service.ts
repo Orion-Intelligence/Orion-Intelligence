@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { FeederCatalogResponse, FeederOwnerUser, FeederScriptItem, FeederScriptListResponse, FeederUploadResponse, } from '../../../shared/model/profile/feeder.model';
+import { FeederCatalogResponse, FeederOwnerUser, FeederScriptItem, FeederScriptListResponse, FeederUploadResponse, } from './model/feeder.model';
 import { ApiService } from '../../../shared/services/api.service';
 
 @Injectable({ providedIn: 'root' })
@@ -33,6 +33,10 @@ export class FeederService {
 
   deleteValue(scriptId: string, value: string): Observable<{ message?: string }> {
     return this.apiService.post<{ message?: string }>(`profile/feeder/scripts/${scriptId}/delete-value`, { value });
+  }
+
+  deleteAllValues(scriptId: string): Observable<{ message?: string }> {
+    return this.apiService.post<{ message?: string }>(`profile/feeder/scripts/${scriptId}/delete-all-values`, {});
   }
 
   toggleScript(scriptId: string): Observable<{ message?: string; script?: FeederScriptItem }> {

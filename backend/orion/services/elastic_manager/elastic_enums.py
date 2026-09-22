@@ -173,9 +173,14 @@ class ELASTIC_ENUMS:
         "m_url": ["url.keyword"],
         "m_username": ["username.keyword"],
         "m_email": ["email.keyword"],
-        "m_ip": ["ip.keyword"],
+        "m_password": ["password.keyword"],
+        "m_ip": ["ip.keyword", "ipv4.keyword"],
         "m_creditcard": ["bin.keyword"],
-        "m_search_all": ["domain.keyword", "domain", "username.keyword", "email.keyword", "bin.keyword"]
+        "m_fullbin": ["credit_card.keyword"],
+        "m_cookie": ["service_domain.keyword"],
+        "m_phone": ["phone.keyword"],
+        "m_extra": ["extra"],
+        "m_search_all": ["domain.keyword", "domain", "username.keyword", "email.keyword", "bin.keyword", "phone.keyword", "service_domain.keyword", "extra"]
     }
 
     mapping_consolidated_iocs = {

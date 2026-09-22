@@ -24,6 +24,7 @@ class session_manager:
     __lock = threading.Lock()
     WEB_SESSION_CLIENT = "web"
     EXTENSION_SESSION_CLIENT = "extension"
+    EXTENSION_SESSION_TTL = 30 * 24 * 60 * 60
 
     @staticmethod
     def get_instance():
@@ -37,16 +38,19 @@ class session_manager:
         if session_manager.__instance is not None:
             raise Exception("This class is a singleton!")
         session_manager.__instance = self
-        from orion.services.mongo_manager.mongo_controller import mongo_controller
-        self._engine = mongo_controller.get_instance().get_engine()
         self._redis = redis_controller.getInstance()
         self._session_ttl = 30 * 60
 
+    @property
+    def _engine(self):
+        from orion.services.mongo_manager.mongo_controller import mongo_controller
+        return mongo_controller.get_instance().get_engine()
+
     @staticmethod
-    def tenant_identifier(tenant_or_id) -> str | None:
-        if tenant_or_id is None:
+    def tenant_identifier(tenant_id) -> str | None:
+        if tenant_id is None:
             return None
-        tenant_id = getattr(tenant_or_id, "id", tenant_or_id)
+        tenant_id = getattr(tenant_id, "id", tenant_id)
         return str(tenant_id) if tenant_id is not None else None
 
     @staticmethod
@@ -63,31 +67,82 @@ class session_manager:
 
     @staticmethod
     async def _tenant_fernet(user) -> Fernet:
-        dek = await KeyManager.get_instance().get_or_create_dek(str(user.tenant_uuid))
+        dek = await KeyManager.get_instance().get_or_create_dek(str(user.tenant_id))
         return Fernet(dek)
 
     @classmethod
-    def ensure_user_tenant_access(self, user, tenant_or_id) -> None:
-        tenant_id = self.tenant_identifier(tenant_or_id)
+    def ensure_user_tenant_access(cls, user, tenant_id) -> None:
+        tenant_id = cls.tenant_identifier(tenant_id)
         if tenant_id is None:
             return
-        if not user or str(getattr(user, "tenant_uuid", "") or "") != tenant_id:
+        if not user or str(getattr(user, "tenant_id", "") or "") != tenant_id:
             raise HTTPException(status_code=403, detail="Tenant access forbidden")
+
+    async def get_parent_tenant(self, tenant_id) -> db_tenant_model | None:
+        tenant_id = str(tenant_id or "")
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id)) if ObjectId.is_valid(tenant_id) else None
+        if tenant is not None and not getattr(tenant, "verified", True):
+            raise HTTPException(status_code=401, detail="account approval pending")
+        parent_tenant_id = str(getattr(tenant, "parent_tenant_id", None) or "")
+        if not parent_tenant_id:
+            return None
+        parent_tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(parent_tenant_id)) if ObjectId.is_valid(parent_tenant_id) else None
+        if not parent_tenant or not parent_tenant.verified:
+            raise HTTPException(status_code=401, detail="account blocked")
+        return parent_tenant
+
+    async def ensure_quota_access(self, user) -> None:
+        if LicenseName.MAINTAINER in (getattr(user, "licenses", None) or []):
+            return
+        from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
+
+        tenant_id = str(getattr(user, "tenant_id", "") or "")
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id)) if ObjectId.is_valid(tenant_id) else None
+        reason = await TenantManager.get_instance().quota_exceeded_reason(tenant)
+        if reason == "tenant":
+            raise HTTPException(status_code=403, detail="Tenant quota exceeded. Contact your administrator.")
+        if reason == "user":
+            raise HTTPException(status_code=403, detail="User quota exceeded. Contact your administrator.")
+
+    async def parent_has_subscription(self, parent_tenant) -> bool:
+        if parent_tenant is None:
+            return False
+        maintainer_user = await self._engine.find_one(db_user_account, (db_user_account.tenant_id == str(parent_tenant.id)) & (db_user_account.licenses == LicenseName.MAINTAINER))
+        return bool(getattr(maintainer_user, "subscription", False))
+
+    @staticmethod
+    def _strip_bearer(token: str) -> str:
+        token = token.strip()
+        if token.startswith("Bearer "):
+            token = token[len("Bearer "):].strip()
+        return token
+
+    @staticmethod
+    def _decode_token(token: str, verify_exp: bool = True) -> dict:
+        return jwt.decode(
+            token,
+            CONSTANTS.S_AUTH_SECRET_KEY,
+            algorithms=[CONSTANTS.S_AUTH_ALGORITHM],
+            options={"verify_exp": verify_exp}, )
+
+    async def _resolve_user_or_forbidden(self, token: str, tenant_id=None):
+        user = (
+            await self.get_current_user(token)
+            if tenant_id is None
+            else await self.get_current_user(token, tenant_id=tenant_id)
+        )
+        if not user or isinstance(user, JSONResponse):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
+        return user
 
     async def get_current_user(self, token: str, tenant_id=None):
         if not token:
             raise HTTPException(status_code=401, detail="Missing or invalid token")
 
-        token = token.strip()
-        if token.startswith("Bearer "):
-            token = token[len("Bearer "):].strip()
+        token = self._strip_bearer(token)
 
         try:
-            payload = jwt.decode(
-                token,
-                CONSTANTS.S_AUTH_SECRET_KEY,
-                algorithms=[CONSTANTS.S_AUTH_ALGORITHM],
-                options={"verify_exp": True}, )
+            payload = self._decode_token(token)
             username: str = payload.get("sub")
             if not username:
                 raise HTTPException(status_code=401, detail="Missing or invalid token")
@@ -117,13 +172,7 @@ class session_manager:
             raise HTTPException(status_code=401, detail="Invalid token")
 
     async def get_current_role(self, token: str, tenant_id=None) -> str:
-        user = (
-            await self.get_current_user(token)
-            if tenant_id is None
-            else await self.get_current_user(token, tenant_id=tenant_id)
-        )
-        if not user or isinstance(user, JSONResponse):
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
+        user = await self._resolve_user_or_forbidden(token, tenant_id)
 
         role = user.role
         try:
@@ -133,13 +182,7 @@ class session_manager:
         return role
 
     async def get_current_status(self, token: str, tenant_id=None) -> str:
-        user = (
-            await self.get_current_user(token)
-            if tenant_id is None
-            else await self.get_current_user(token, tenant_id=tenant_id)
-        )
-        if not user or isinstance(user, JSONResponse):
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
+        user = await self._resolve_user_or_forbidden(token, tenant_id)
 
         user_status = user.status
         try:
@@ -156,29 +199,35 @@ class session_manager:
             if expires_delta is None:
                 expires_delta = timedelta(minutes=30)
 
-        user = None
+        user: db_user_account | None = None
         if username:
             user = await self._engine.find_one(db_user_account, db_user_account.username == username)
 
-        if not free and user and user.role != user_role.CRAWLER and expires_delta > timedelta(minutes=30):
+        token_client = self._session_client(to_encode)
+        if token_client == self.EXTENSION_SESSION_CLIENT and not free:
+            expires_delta = timedelta(seconds=self.EXTENSION_SESSION_TTL)
+        elif not free and user and user.role != user_role.CRAWLER and expires_delta > timedelta(minutes=30):
             expires_delta = timedelta(minutes=30)
 
-        expire = datetime.now(timezone.utc) + expires_delta if not free else None
+        expire: datetime | None = datetime.now(timezone.utc) + expires_delta if not free else None
 
         session_id = None
         if user and user.role != user_role.CRAWLER and not free:
-            session_client = self._session_client(to_encode)
-            session_id = secrets.token_urlsafe(32)
-            if session_client == self.WEB_SESSION_CLIENT:
+            session_client = token_client
+            redis_key = self._session_redis_key(user, session_client)
+            if session_client == self.EXTENSION_SESSION_CLIENT:
+                existing_sid = await self._redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
+                session_id = existing_sid or secrets.token_urlsafe(32)
+            else:
+                session_id = secrets.token_urlsafe(32)
                 user.current_session_id = session_id
                 await self._engine.save(user)
-            redis_key = self._session_redis_key(user, session_client)
-            await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, session_id, self._session_ttl])
+            await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, session_id, self._client_session_ttl(session_client)])
 
-        if session_id:
-            to_encode.update({"exp": expire.timestamp(), "sid": session_id})
-        elif not free:
+        if expire is not None:
             to_encode.update({"exp": expire.timestamp()})
+        if session_id:
+            to_encode.update({"sid": session_id})
 
         if free:
             to_encode.update({"free": True})
@@ -218,6 +267,8 @@ class session_manager:
             if not user:
                 raise HTTPException(status_code=401, detail="User not found")
             self.ensure_user_tenant_access(user, tenant_id)
+            await self.get_parent_tenant(user.tenant_id)
+            await self.ensure_quota_access(user)
 
             stored_secret = user.twofa_secret
             secret = payload.get("tfa_secret")
@@ -256,7 +307,7 @@ class session_manager:
                 access_ttl = timedelta(minutes=30)
 
             access_token, _role = await self.create_access_token({"sub": username}, access_ttl)
-            onboarding_exists = await self.get_instance().has_onboarding(str(user.tenant_uuid))
+            onboarding_exists = await self.get_instance().has_onboarding(str(user.tenant_id))
 
             session = await self._build_session(user, onboarding_exists, reset_token)
             return {"access_token": access_token, "token_type": "bearer", "session": session}  # nosec B105
@@ -298,7 +349,7 @@ class session_manager:
                 raise HTTPException(status_code=401, detail="User not found")
             self.ensure_user_tenant_access(user, tenant_id)
 
-            maintainer_user = await self._engine.find_one(db_user_account, (db_user_account.tenant_uuid == user.tenant_uuid) & (db_user_account.licenses == LicenseName.MAINTAINER))
+            maintainer_user = await self._engine.find_one(db_user_account, (db_user_account.tenant_id == user.tenant_id) & (db_user_account.licenses == LicenseName.MAINTAINER))
             if not maintainer_user:
                 raise HTTPException(status_code=401, detail="Maintainer user not found")
             session_id = payload.get("sid")
@@ -308,19 +359,23 @@ class session_manager:
 
                 await self._ensure_active_session(user, session_id, self._session_client(payload), "Invalid token")
 
+            parent_tenant = await self.get_parent_tenant(user.tenant_id)
+            await self.ensure_quota_access(user)
             role_name = (getattr(user.role, "value", str(user.role))).split(".")[-1].lower()
             acct_at = maintainer_user.account_verify_at
             if isinstance(acct_at, datetime):
                 acct_at = acct_at if acct_at.tzinfo else acct_at.replace(tzinfo=timezone.utc)
             if role_name == "member" and not bool(getattr(user, "subscription", False)) and acct_at is not None and (
-                    datetime.now(timezone.utc) - acct_at).days >= 30:
+                    datetime.now(timezone.utc) - acct_at).days >= 30 and not await self.parent_has_subscription(parent_tenant):
                 raise HTTPException(status_code=402, detail="Trial expired. Please subscribe to continue.")
 
-            onboarding_exists = await self.has_onboarding(str(user.tenant_uuid))
+            onboarding_exists = await self.has_onboarding(str(user.tenant_id))
 
             base_expiry = time.time() + CONSTANTS.S_AUTH_ACCESS_TOKEN_EXPIRE_MINUTES * 60 * 60 * 24
             if user.role != user_role.CRAWLER:
                 base_expiry = time.time() + 15 * 60
+            if self._session_client(payload) == self.EXTENSION_SESSION_CLIENT:
+                base_expiry = time.time() + self.EXTENSION_SESSION_TTL
 
             if user.role in user_role.CRAWLER:
                 new_token_payload = {"sub": username, "exp": base_expiry}
@@ -362,16 +417,10 @@ class session_manager:
         if not ptoken:
             return
 
-        token = ptoken.strip()
-        if token.startswith("Bearer "):
-            token = token[len("Bearer "):].strip()
+        token = self._strip_bearer(ptoken)
 
         try:
-            payload = jwt.decode(
-                token,
-                CONSTANTS.S_AUTH_SECRET_KEY,
-                algorithms=[CONSTANTS.S_AUTH_ALGORITHM],
-                options={"verify_exp": False}, )
+            payload = self._decode_token(token, verify_exp=False)
         except jwt.InvalidTokenError:
             return
 
@@ -403,6 +452,8 @@ class session_manager:
         redis_sid = await self._redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
 
         if redis_sid is None:
+            if session_client == self.EXTENSION_SESSION_CLIENT:
+                raise HTTPException(status_code=401, detail=invalid_detail)
             if session_client == self.WEB_SESSION_CLIENT and user.current_session_id != session_id:
                 raise HTTPException(status_code=401, detail=invalid_detail)
             await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, session_id, self._session_ttl])
@@ -412,7 +463,12 @@ class session_manager:
             raise HTTPException(status_code=401, detail=invalid_detail)
         if session_client == self.WEB_SESSION_CLIENT and redis_sid != user.current_session_id:
             raise HTTPException(status_code=401, detail=invalid_detail)
-        await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, redis_sid, self._session_ttl])
+        await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, redis_sid, self._client_session_ttl(session_client)])
+
+    def _client_session_ttl(self, session_client: str) -> int:
+        if session_client == self.EXTENSION_SESSION_CLIENT:
+            return self.EXTENSION_SESSION_TTL
+        return self._session_ttl
 
     def _session_client(self, payload: dict) -> str:
         client = str((payload or {}).get("client") or "").strip().lower()

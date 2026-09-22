@@ -1,6 +1,6 @@
 
 import { CommonModule } from '@angular/common';
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { ExportChoiceOption } from '../../model/report/export-choice.model';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
@@ -8,6 +8,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   selector: 'app-export-choice-modal',
   standalone: true,
   imports: [CommonModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './export-choice-modal.component.html'
 })
 export class ExportChoiceModalComponent {
@@ -23,7 +24,7 @@ export class ExportChoiceModalComponent {
 
   onOverlayClick(event: MouseEvent): void {
     if ((event.target as HTMLElement).classList.contains('export-choice-overlay')) {
-      // TODO: The 'emit' function requires a mandatory void argument
+
       this.closed.emit(undefined);
     }
   }

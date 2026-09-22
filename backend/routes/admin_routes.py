@@ -1,13 +1,20 @@
+from bson import ObjectId
+from bson.errors import InvalidId
 from fastapi import APIRouter, HTTPException, Query, Request, Depends, UploadFile
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 
 from configs.app_dependency import license_required, status_required, role_required, get_current_user
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
+from orion.api.interactive.backup_manager.backup_manager import BackupManager
+from orion.api.interactive.backup_manager.backup_store_io import BackupStoreIO
 from orion.api.interactive.resource_manager.resource_manager import ResourceManager
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.api.server.config_manager.model.config_data import config_data
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, user_role
 from orion.services.mail_manager.mail_manager import mail_manager
+from orion.services.mongo_manager.mongo_controller import mongo_controller
+from orion.services.mongo_manager.shared_model.db_backup_model import BackupType
+from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 
 admin_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 
@@ -16,12 +23,24 @@ async def tenant_branding_editor(current_user=Depends(get_current_user)):
         return current_user
 
     licenses = {
-        license
-        for license in (getattr(current_user, "licenses", None) or [])
+        license_name
+        for license_name in (getattr(current_user, "licenses", None) or [])
     }
     if LicenseName.MAINTAINER.value in licenses:
         return current_user
     raise HTTPException(status_code=403, detail="Tenant branding permission required")
+
+
+async def root_admin_required(current_user=Depends(get_current_user), _role=Depends(role_required([user_role.ADMIN]))):
+    engine = mongo_controller.get_instance().get_engine()
+    try:
+        tenant_object_id = ObjectId(str(getattr(current_user, "tenant_id", "")))
+    except (InvalidId, TypeError) as exc:
+        raise HTTPException(status_code=403, detail="Tenant level restore is limited to root tenant admins") from exc
+    tenant = await engine.find_one(db_tenant_model, db_tenant_model.id == tenant_object_id)
+    if tenant is None or not tenant.is_default:
+        raise HTTPException(status_code=403, detail="Tenant level restore is limited to root tenant admins")
+    return current_user
 
 
 @admin_routes.get(
@@ -35,20 +54,20 @@ async def block_row_action(name: str = Query(...)):
 
 
 @admin_routes.post(
-    "/admin/api/db_user_account/edit/{id}",
+    "/admin/api/db_user_account/edit/{user_id}",
     dependencies=[Depends(role_required([user_role.ADMIN]))],
 )
-async def custom_edit_api(id: str, request: Request):
-    await auth_manager.edit_userStatus_and_sendMail_from_admin(id, request)
+async def custom_edit_api(user_id: str, request: Request):
+    await auth_manager.edit_userStatus_and_sendMail_from_admin(user_id, request)
     return RedirectResponse(url="/admin/db_user_account/list", status_code=303)
 
 
 @admin_routes.post(
-    "/admin/api/db_user_account/edit/{id}/",
+    "/admin/api/db_user_account/edit/{user_id}/",
     dependencies=[Depends(role_required([user_role.ADMIN]))],
 )
-async def custom_edit_api_trailing(id: str, request: Request):
-    await auth_manager.edit_userStatus_and_sendMail_from_admin(id, request)
+async def custom_edit_api_trailing(user_id: str, request: Request):
+    await auth_manager.edit_userStatus_and_sendMail_from_admin(user_id, request)
     return RedirectResponse(url="/admin/db_user_account/list", status_code=303)
 
 
@@ -81,9 +100,86 @@ async def upload_system_image(request: Request, file: UploadFile, key: str = "lo
 )
 async def verify_mail_configuration(current_user=Depends(get_current_user)):
     try:
-        await mail_manager.get_instance().send_test_mail(tenant_id=str(current_user.tenant_uuid))
+        await mail_manager.get_instance().send_test_mail(tenant_id=str(current_user.tenant_id))
         return {"status": "working"}
     except HTTPException:
         raise
     except Exception as exc:
         raise HTTPException(status_code=400, detail="Mail configuration is not working") from exc
+
+
+@admin_routes.get(
+    "/api/admin/backups",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
+async def list_backups():
+    return await BackupManager.get_instance().list_backups()
+
+
+@admin_routes.post(
+    "/api/admin/backups/instant",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
+async def create_instant_backup():
+    return await BackupManager.get_instance().start_backup(BackupType.INSTANT)
+
+
+@admin_routes.get(
+    "/api/admin/backups/status",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
+async def backup_job_status():
+    return await BackupManager.get_instance().job_status()
+
+
+@admin_routes.delete(
+    "/api/admin/backups/{backup_id}",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
+async def delete_backup(backup_id: str):
+    return await BackupManager.get_instance().delete_backup(backup_id)
+
+
+@admin_routes.post(
+    "/api/admin/backups/{backup_id}/restore",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
+async def restore_backup(backup_id: str):
+    return await BackupManager.get_instance().start_restore(backup_id)
+
+
+@admin_routes.get(
+    "/api/admin/backups/{backup_id}/tenants",
+    dependencies=[Depends(root_admin_required)],
+)
+async def list_backup_tenants(backup_id: str):
+    return await BackupManager.get_instance().list_backup_tenants(backup_id)
+
+
+@admin_routes.post(
+    "/api/admin/backups/{backup_id}/tenants/{tenant_id}/restore",
+    dependencies=[Depends(root_admin_required)],
+)
+async def restore_backup_tenant(backup_id: str, tenant_id: str):
+    return await BackupManager.get_instance().start_tenant_restore(backup_id, tenant_id)
+
+
+@admin_routes.post(
+    "/api/admin/backups/import",
+    dependencies=[Depends(root_admin_required)],
+)
+async def import_backup_tenant(file: UploadFile):
+    return await BackupManager.get_instance().start_tenant_import(file)
+
+
+@admin_routes.get(
+    "/api/admin/backups/{backup_id}/download",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
+async def download_backup(backup_id: str):
+    backup_dir, name = await BackupManager.get_instance().resolve_download(backup_id)
+    return StreamingResponse(
+        BackupStoreIO.iter_zip(backup_dir, name),
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{name}.zip"'},
+    )

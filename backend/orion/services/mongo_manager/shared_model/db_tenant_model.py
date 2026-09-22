@@ -43,8 +43,20 @@ class TenantStatus(str, Enum):
     ACTIVE = "active"
     DISABLE = "disable"
 
+class DismissedIocType(str, Enum):
+    STEALER_LOG = "stealer_log"
+    BREACH = "breach"
+    EXPLOIT = "exploit"
+    SOCIAL = "social"
+
+class DismissedIoc(EmbeddedModel):
+    hash: str
+    user_id: str
+    type: str = DismissedIocType.STEALER_LOG.value
+
 class db_tenant_model(Model):
     iocs: List[IocCategory] = []
+    dismissed_iocs: List[DismissedIoc] = []
     name: str
     slug: Optional[str] = None
     phone: str = ""
@@ -52,15 +64,19 @@ class db_tenant_model(Model):
     subscription: bool = False
     city: str = ""
     is_default: bool = False
+    is_primary: bool = False
+    parent_tenant_id: Optional[str] = None
     postal_code: str = ""
     verified: bool = False
     user_quota: int = 0
+    tenant_quota: int = 0
     status: TenantStatus = TenantStatus.DISABLE
     licenses: List[str] = []
     email: Optional[str] = ""
     profile_visibility_enabled: bool = True
     event_management_enabled: bool = False
     alerts_visible_to_admin: bool = True
+    alerts_visible_to_parent: bool = True
     privileged_ioc: bool = False
     alert_run_time: Optional[str] = None
     allowed_alert_categories: Optional[List[str]] = None
@@ -81,6 +97,10 @@ class db_tenant_model(Model):
     def validate_slug(cls, value):
         return normalize_tenant_slug(value)
 
+class ResultDismissRequest(BaseModel):
+    hash: str
+    type: str = DismissedIocType.STEALER_LOG.value
+
 class TenantRequest(BaseModel):
     id: str = "-1"
     iocs: List[IocCategory] = []
@@ -92,11 +112,14 @@ class TenantRequest(BaseModel):
     postal_code: str = ""
     verified: Optional[bool] = None
     user_quota: Optional[int] = None
+    tenant_quota: Optional[int] = None
+    is_primary: Optional[bool] = None
     status: Optional[TenantStatus] = None
     licenses: List[str] = []
     profile_visibility_enabled: Optional[bool] = None
     event_management_enabled: Optional[bool] = None
     alerts_visible_to_admin: Optional[bool] = None
+    alerts_visible_to_parent: Optional[bool] = None
     privileged_ioc: Optional[bool] = None
     alert_run_time: Optional[str] = None
     allowed_alert_categories: Optional[List[str]] = None

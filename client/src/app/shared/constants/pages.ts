@@ -9,12 +9,12 @@ export enum Category {
     EXPLOIT = 'Exploit',
     APT_INTEL = 'APT Intel',
     FEED = 'Feed',
-    CONSOLIDATED = 'Consolidated',
     STEALERLOGS = 'Stealerlogs',
     TENANT = 'Tenant',
     PROFILE = 'Profile',
     NETINT = 'NETINT',
-    SATELLITE_INTEL = 'SATELLITE_INTEL'
+    SATELLITE_INTEL = 'SATELLITE_INTEL',
+    SOCIAL_INTEL = 'SocialIntel'
 }
 export enum BreachSubCategory {
     DATABASES = 'Databases'
@@ -35,7 +35,8 @@ export enum ApiSubCategory {
     FILE = 'File-Scanner',
     TEXT_ANALYSIS = 'Text-Analysis',
     CRYPTO = 'Crypto-Scanner',
-    PHONE_LOOKUP = 'Phone-Lookup'
+    PHONE_LOOKUP = 'Phone-Lookup',
+    DKIM_LOOKUP = 'DKIM-Lookup'
 }
 export enum SocialSubCategory {
     ALL = 'All',
@@ -46,9 +47,6 @@ export enum SocialSubCategory {
     FORUM = 'Forum',
     REDDIT = 'Reddit',
     FACEBOOK = 'Facebook',
-    INSTAGRAM = 'Instagram',
-    LINKEDIN = 'LinkedIn',
-    TIKTOK = 'TikTok',
     YOUTUBE = 'YouTube',
 }
 export enum ExploitSubCategory {
@@ -67,17 +65,11 @@ export enum FeedSubCategory {
     NEWS = 'News',
     TRACKING = 'Tracking'
 }
+export enum SocialIntelSubCategory {
+    MONITORING = 'Social Monitoring',
+    PROFILE_INTELLIGENCE = 'Profile Intelligence'
+}
 export enum TenantSubCategory {
-    VIEW_PROFILE = 'View-Profiles',
-    VIEW_TENANT = 'View-Tenants',
-    AUDITLOG = 'Auditlog'
-}
-export enum NETINTSubCategory {
-    VIEW_PROFILE = 'View-Profiles',
-    VIEW_TENANT = 'View-Tenants',
-    AUDITLOG = 'Auditlog'
-}
-export enum SatelliteIntelSubCategory {
     VIEW_PROFILE = 'View-Profiles',
     VIEW_TENANT = 'View-Tenants',
     AUDITLOG = 'Auditlog'
@@ -97,5 +89,6 @@ export enum ProfileSubCategory {
     AUDITLOG = 'Auditlog',
     TENANT = 'Tenant',
     SYSTEM_SETTINGS = 'System-Settings',
+    BACKUP_RESTORE = 'Backup-Restore',
     CASE_MANAGEMENT = 'Case-Management'
 }

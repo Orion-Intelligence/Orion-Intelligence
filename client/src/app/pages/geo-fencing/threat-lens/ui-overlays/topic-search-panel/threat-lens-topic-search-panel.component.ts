@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
@@ -7,6 +7,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
   selector: 'app-threat-lens-topic-search-panel',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './threat-lens-topic-search-panel.component.html',
 })
 export class ThreatLensTopicSearchPanelComponent {

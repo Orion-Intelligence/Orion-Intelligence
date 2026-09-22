@@ -1,18 +1,17 @@
-export interface SelectedFileFromInput {
-    input: HTMLInputElement;
-    file: File;
-}
+
+import type { SelectedFileFromInput } from './model/file-input.model';
+export type { SelectedFileFromInput } from './model/file-input.model';
+
 export function getFirstFileFromInputEvent(event: Event): SelectedFileFromInput | null {
-  const inputElement = event.target as HTMLInputElement | null;
-  const file = inputElement?.files?.[0] ?? null;
-  if (!inputElement || !file) {
+  const inputElement = event.target;
+  if (!(inputElement instanceof HTMLInputElement)) {
+    return null;
+  }
+  const file = inputElement.files?.[0] ?? null;
+  if (!file) {
     return null;
   }
   return { input: inputElement, file };
-}
-export function readTextInputValue(event: Event): string {
-  const inputElement = event.target as HTMLInputElement | null;
-  return inputElement?.value ?? '';
 }
 function readFile(file: Blob, readMode: 'text' | 'dataUrl'): Promise<string> {
   return new Promise<string>((resolve, reject) => {

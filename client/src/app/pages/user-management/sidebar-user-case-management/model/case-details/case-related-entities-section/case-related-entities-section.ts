@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
-import { Case, CaseEntity } from '../../../../../../shared/model/case-management/case.model';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Case, CaseEntity } from '../../case.model';
 import { TooltipDirective } from '../../../../../../shared/directive/tooltip-directive.directive';
 import { EntityDetailsComponent } from '../../entity-details/entity-details';
 import { caseListItemMotion, caseModeSwapMotion, caseSectionMotion } from '../case-details.animations';
@@ -14,6 +14,7 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
   imports: [CommonModule, EntityDetailsComponent, TooltipDirective, CaseEditDrawerComponent, TranslatePipe],
   animations: [caseListItemMotion, caseModeSwapMotion, caseSectionMotion],
   host: { class: 'block' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-related-entities-section.html'
 })
 export class CaseRelatedEntitiesSectionComponent {
@@ -21,7 +22,7 @@ export class CaseRelatedEntitiesSectionComponent {
 
   editingRelatedEntityId: string | null = null;
   readonly store = inject(CaseDetailsStore);
-  $index: any;
+  $index: unknown;
 
   get caseData(): Case {
     return this.store.caseData as Case;
@@ -45,7 +46,7 @@ export class CaseRelatedEntitiesSectionComponent {
 
   get selectedEditableRelatedEntity(): CaseEntity | null {
     const relatedEntities = this.getRelatedEntities(this.editedCase);
-    return relatedEntities.find(entity => entity.entityId === this.editingRelatedEntityId) || null;
+    return relatedEntities.find(entity => entity.entityId === this.editingRelatedEntityId) ?? null;
   }
 
   get selectedEditableRelatedEntityIndex(): number {
@@ -57,7 +58,7 @@ export class CaseRelatedEntitiesSectionComponent {
     return getRelatedCaseEntities(caseItem);
   }
 
-  getLinkableEntities(currentEntityId?: string, caseItem: Case | null = this.editedCase || this.caseData): CaseEntity[] {
+  getLinkableEntities(currentEntityId?: string, caseItem: Case | null = this.editedCase ?? this.caseData): CaseEntity[] {
     return getLinkableCaseEntities(caseItem, currentEntityId);
   }
 

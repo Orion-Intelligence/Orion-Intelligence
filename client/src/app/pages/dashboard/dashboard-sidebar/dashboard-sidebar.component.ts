@@ -1,6 +1,6 @@
-import { Component, OnDestroy, OnInit, output } from '@angular/core';
+import { Component, OnDestroy, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
 import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
-import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, ExploitSubCategory, FeedSubCategory, SocialSubCategory, TenantSubCategory, ProfileSubCategory } from '../../../shared/constants/pages';
+import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, ExploitSubCategory, FeedSubCategory, SocialSubCategory, SocialIntelSubCategory, TenantSubCategory, ProfileSubCategory } from '../../../shared/constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
@@ -16,14 +16,19 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ChatWidgetComponent } from '../../root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { SidebarShellComponent } from '../../../shared/partials/sidebar-shell/sidebar-shell.component';
 
 @Component({
   selector: 'app-dashboard-sidebar',
   standalone: true,
-  imports: [NgOptimizedImage, NgClass, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective, ChatWidgetComponent, TranslatePipe],
+  imports: [NgOptimizedImage, NgClass, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective, ChatWidgetComponent, TranslatePipe, SidebarShellComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './dashboard-sidebar.component.html',
 })
 export class DashboardSidebarComponent implements OnInit, OnDestroy {
+  private readonly resizeHandler = () => {
+    this.checkScreenWidth();
+  };
   private readonly closeForSubscriptionHandler = () => {
     if (this.sidebar_default) {
       this.onToggleSidebar(this.mobile_menu_status);
@@ -40,11 +45,20 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
   socialCategories = Object.values(SocialSubCategory);
+  socialIntelCategories = Object.values(SocialIntelSubCategory);
   tenantCategories = Object.values(TenantSubCategory);
   category = Category;
+  socialIntelSubCategory = SocialIntelSubCategory;
   readonly menuToggle = output<undefined>();
 
   constructor(protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService) {
+  }
+
+  get documentationUrl(): string {
+    if (this.appService.userSessionData()?.tenant?.isDefault) {
+      return 'https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html';
+    }
+    return '/documentation';
   }
 
   ngOnInit() {
@@ -61,7 +75,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       .subscribe((e: NavigationEnd) => {
         this.handleProfileRoute(e.urlAfterRedirects);
       });
-    window.addEventListener('resize', this.checkScreenWidth.bind(this));
+    window.addEventListener('resize', this.resizeHandler);
     window.addEventListener('close-dashboard-sidebar', this.closeForSubscriptionHandler);
     this.checkScreenWidth();
   }
@@ -79,7 +93,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    window.removeEventListener('resize', this.checkScreenWidth.bind(this));
+    window.removeEventListener('resize', this.resizeHandler);
     window.removeEventListener('close-dashboard-sidebar', this.closeForSubscriptionHandler);
   }
 
@@ -129,6 +143,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         case Category.FEED:
           firstSubcategory = this.newsCategories[0];
           break;
+        case Category.SOCIAL_INTEL:
+          firstSubcategory = this.socialIntelCategories[0];
+          break;
         case Category.TENANT:
           firstSubcategory = this.tenantCategories[0];
           break;
@@ -166,7 +183,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     this.scrollService.scrollReportToTop();
   }
 
-  onToggleSidebar(mobile_menu_status: boolean = false) {
+  onToggleSidebar(mobile_menu_status = false) {
     this.menuToggle.emit(undefined);
     this.sidebar_default = !this.sidebar_default;
     this.mobile_menu_status = mobile_menu_status;
@@ -193,9 +210,10 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   getProfileCategories(): string[] {
     const categories = Object.values(ProfileSubCategory);
-    const canAccessFeeder = this.licenseService.getLicenses().some(license => ['feeder', 'enterprise'].includes(license));
-    const canAccessCaseManagement = this.isAdmin() || this.licenseService.isMaintainer() || (this.isAnalyst() && (this.appService.userSessionData().user.permissions || []).includes('case_management'));
+    const canAccessFeeder = this.appService.userSessionData().tenant.isDefault && this.licenseService.getLicenses().some(license => ['feeder', 'enterprise'].includes(license));
+    const canAccessCaseManagement = this.isAdmin() || this.licenseService.isMaintainer() || ((this.isAnalyst() || this.isMember()) && (this.appService.userSessionData().user.permissions ?? []).includes('case_management'));
     const isMobileDemo = this.appService.isMobileMode();
+    const canAccessBackup = !this.appService.userSessionData().tenant.parentTenantId;
 
     if (this.isAdmin()) {
       return categories.filter(c => c !== ProfileSubCategory.IOC &&
@@ -211,8 +229,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         (canAccessCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT));
     }
     if (this.isMember() && this.licenseService.getLicenses().includes('maintainer')) {
-      return categories.filter(c => c !== ProfileSubCategory.TENANT &&
-        c !== ProfileSubCategory.TAKEDOWN &&
+      return categories.filter(c => (this.licenseService.isPrimaryMaintainer() || c !== ProfileSubCategory.TENANT) &&
+        (canAccessBackup || c !== ProfileSubCategory.BACKUP_RESTORE) &&
+        (this.licenseService.canReviewTakedowns() || c !== ProfileSubCategory.TAKEDOWN) &&
         c !== ProfileSubCategory.EVENT_MANAGEMENT &&
         c !== ProfileSubCategory.LOG_MANAGER &&
         c !== ProfileSubCategory.AUDITLOG &&
@@ -224,6 +243,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     if (this.isAnalyst()) {
       return categories.filter(c => c !== ProfileSubCategory.TENANT &&
         c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+        c !== ProfileSubCategory.BACKUP_RESTORE &&
         c !== ProfileSubCategory.TAKEDOWN &&
         c !== ProfileSubCategory.MONITORING &&
         c !== ProfileSubCategory.EVENT_MANAGEMENT &&
@@ -238,6 +258,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     }
     return categories.filter(c => c !== ProfileSubCategory.TENANT &&
       c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+      c !== ProfileSubCategory.BACKUP_RESTORE &&
       c !== ProfileSubCategory.TAKEDOWN &&
       c !== ProfileSubCategory.MONITORING &&
       c !== ProfileSubCategory.EVENT_MANAGEMENT &&

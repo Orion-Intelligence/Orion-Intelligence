@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
@@ -9,6 +9,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   selector: 'app-message-notification',
   imports: [CommonModule, TranslatePipe],
   templateUrl: './message-notification.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [messageNotificationAnimation],
 })
 export class MessageNotificationComponent {

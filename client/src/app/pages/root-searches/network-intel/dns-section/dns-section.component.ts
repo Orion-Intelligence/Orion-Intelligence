@@ -1,18 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, SimpleChanges, effect, input, output, signal } from '@angular/core';
+import { Component, OnDestroy, SimpleChanges, effect, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
+import { formatElapsedClock, shouldActivateOnKeydown } from '../network-intel.util';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { vulnerabilityContentMotion } from '../../../../shared/animations/vulnerability.content.motion.animation';
-import { DnsResult, IpRowState } from '../../../../shared/model/network-intel/network-intel.model';
+import { DnsEmailSecurity, DnsResult, IpRowState } from '../../../../shared/model/network-intel/network-intel.model';
 import { IpDetailComponent } from '../ip-detail/ip-detail.component';
 import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { getOwnProperty } from '../../../../shared/utils/type-guards.util';
 
 @Component({
   selector: 'app-network-intel-dns-section',
   standalone: true,
   imports: [CommonModule, IpDetailComponent, TranslatePipe],
   templateUrl: './dns-section.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem, vulnerabilityContentMotion],
 })
 export class DnsSectionComponent implements OnDestroy {
@@ -22,6 +25,7 @@ export class DnsSectionComponent implements OnDestroy {
       this.elapsedNowMs.set(Date.now());
     }
   }, 1000);
+  private readonly dnsRecordOrder = ['A', 'AAAA', 'MX', 'TXT', 'NS', 'CNAME', 'SOA', 'CAA'];
 
   readonly errorMessageInput = input<string | null>(null, { alias: 'errorMessage' });
   readonly ipRowsInput = input<IpRowState[]>([], { alias: 'ipRows' });
@@ -49,6 +53,22 @@ export class DnsSectionComponent implements OnDestroy {
     return this.ui.isEmbeddedInConsolidated(this.router.url);
   }
 
+  get dnsRecordGroups(): { type: string; values: string[] }[] {
+    const records = this.dnsResult()?.records ?? {};
+    return this.dnsRecordOrder
+      .filter((type) => Array.isArray(getOwnProperty(records, type)) && (getOwnProperty(records, type) as string[]).length > 0)
+      .map((type) => ({ type, values: getOwnProperty(records, type) as string[] }));
+  }
+
+  get emailSecurity(): DnsEmailSecurity | null {
+    return this.dnsResult()?.email_security ?? null;
+  }
+
+  get hasDnsRecords(): boolean {
+    const email = this.emailSecurity;
+    return this.dnsRecordGroups.length > 0 || !!email?.spf || !!email?.dmarc;
+  }
+
   get progressValue(): number {
     return this.ui.getProgressValue(this.progress());
   }
@@ -58,7 +78,7 @@ export class DnsSectionComponent implements OnDestroy {
   }
 
   getRowLoadingStepLabel(row: IpRowState): string {
-    return this.ui.getLoadingStepLabel(row.step || `Loading details for ${row.ip}...`);
+    return this.ui.getLoadingStepLabel(row.step ?? `Loading details for ${row.ip}...`);
   }
 
   getRowProgressValue(row: IpRowState): number {
@@ -72,11 +92,7 @@ export class DnsSectionComponent implements OnDestroy {
       return '00:00';
     }
     const elapsedSeconds = Math.max(0, Math.floor((now - startedAtMs) / 1000));
-    const hours = Math.floor(elapsedSeconds / 3600);
-    const minutes = Math.floor((elapsedSeconds % 3600) / 60);
-    const seconds = elapsedSeconds % 60;
-    const clock = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    return hours ? `${String(hours).padStart(2, '0')}:${clock}` : clock;
+    return formatElapsedClock(elapsedSeconds);
   }
 
   get showLoadingSkeleton(): boolean {
@@ -87,20 +103,14 @@ export class DnsSectionComponent implements OnDestroy {
     return this.hasSearched() && !this.isScanning() && !this.errorMessage && !!this.dnsResult() && this.ipRows.length === 0;
   }
 
-  isProgressSegmentActive(index: number): boolean {
-    return index < Math.ceil(this.progress() / 5);
-  }
-
   trackByIp(_: number, row: IpRowState): string {
     return row.ip;
   }
 
   onRowKeydown(event: KeyboardEvent, row: IpRowState): void {
-    if (event.target !== event.currentTarget || (event.key !== 'Enter' && event.key !== ' ')) {
-      return;
+    if (shouldActivateOnKeydown(event)) {
+      this.toggleRow.emit(row);
     }
-    event.preventDefault();
-    this.toggleRow.emit(row);
   }
 
   ngOnDestroy(): void {
@@ -108,10 +118,10 @@ export class DnsSectionComponent implements OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['ipRows']) {
+    if (changes.ipRows) {
       const totalPages = this.totalPages;
       this.currentPage = Math.min(this.currentPage, totalPages);
-      if (!changes['ipRows'].previousValue || changes['ipRows'].previousValue !== changes['ipRows'].currentValue) {
+      if (!changes.ipRows.previousValue || changes.ipRows.previousValue !== changes.ipRows.currentValue) {
         this.currentPage = 1;
       }
     }

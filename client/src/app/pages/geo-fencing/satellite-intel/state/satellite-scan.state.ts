@@ -1,6 +1,6 @@
 import { Subscription } from 'rxjs';
 import { filter, map, switchMap, take } from 'rxjs/operators';
-import { SatelliteAnomalyResponse, SatelliteCompareResponse } from '../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteAnomalyResponse, SatelliteCompareResponse } from '../model/satellite-intel-api.models';
 import { SatelliteIntelViewport } from '../../enums/geo-fencing.enums';
 import { SatelliteIntelService } from '../satellite-intel-service';
 import { MonthCompareService } from '../ui-overlays/month-compare-section/month-compare.service';
@@ -49,13 +49,13 @@ export class SatelliteScanState {
     const request$ = this.monthCompareService.runCompare(viewport.lat, viewport.lon, viewport.delta, imageType, month)
       .pipe(filter((response) => !this.satelliteService.isPendingResponse(response)),
         take(1),
-        map((response) => this.satelliteService.getResponseResult(response)),
+        map((response) => response.result ?? null),
         switchMap((compareResult) => this.monthCompareService.runAnomalyScan(viewport.lat, viewport.lon, viewport.delta)
           .pipe(filter((response) => !this.satelliteService.isPendingResponse(response)),
             take(1),
             map((response) => ({
               compareResult,
-              anomalyResult: this.satelliteService.getResponseResult(response),
+              anomalyResult: response.result ?? null,
             })),),),);
 
     this.sub = request$.subscribe({

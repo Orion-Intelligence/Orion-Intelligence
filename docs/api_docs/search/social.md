@@ -4,7 +4,7 @@
 
 Search social media intelligence reports using free-text queries and structured filters such as hashtag, platform, organization, domain, or country.
 
-The request is an HTTP POST with a JSON body matching the `search_social_param_model` schema:
+The request is an HTTP POST with a JSON body matching the `search_consolidated_param_model` schema:
 
 ```json
 {

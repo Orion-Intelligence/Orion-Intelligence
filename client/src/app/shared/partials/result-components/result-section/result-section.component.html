@@ -1,6 +1,6 @@
 <div class="mt-4 space-y-4">
   @for (section of filteredListItems; track section; let i = $index) {
-    <div class="report-section-surface rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] p-3">
+    <div class="report-section-surface rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] p-3 [.light-theme_&]:!border-[#d7e2ef] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-none">
       <h3 class="text-base font-semibold text-[var(--color-text1)]">{{ 'Section' | translate }} {{ i + 1 }}</h3>
       <p data-testid="report-metadata-section-value" [class]="isSectionExpanded(i) ? 'mt-2 whitespace-pre-wrap break-words text-sm text-[var(--color-text3)]' : 'mt-2 overflow-hidden break-words text-sm text-[var(--color-text3)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]'">{{ section }}</p>
       @if (shouldShowSectionToggle(section)) {

@@ -44,16 +44,6 @@ class CaseStatus(str, Enum):
     CLOSED = "closed"
 
 
-class ArtifactReportSource(str, Enum):
-    STRATEGIC = "strategic"
-    BREACH = "breach"
-    DEFACEMENT = "defacement"
-    SOCIAL = "social"
-    FEED = "feed"
-    EXPLOIT = "exploit"
-    STEALER_LOGS = "stealerlogs"
-
-
 class Severity(str, Enum):
     INFO = "info"
     LOW = "low"
@@ -345,6 +335,14 @@ class CaseTask(EmbeddedModel):
     completedAt: Optional[datetime] = None
 
 
+class CaseCommunication(EmbeddedModel):
+    communicationId: str
+    name: str
+    url: str
+    platform: str = ""
+    sessionResourceId: str = ""
+
+
 class CaseLink(EmbeddedModel):
     targetCaseId: str
     relationship: CaseLinkRelationship = Field(default=CaseLinkRelationship.RELATED)
@@ -379,7 +377,7 @@ class CaseShare(EmbeddedModel):
 
 class db_case_model(Model):
     caseId: str = Field(index=True)
-    tenant_uuid: str = Field(index=True)
+    tenant_id: str = Field(index=True)
 
     title: str
     description: str = ""
@@ -410,6 +408,7 @@ class db_case_model(Model):
     tasks: List[CaseTask] = Field(default_factory=list)
     comments: List[CaseComment] = Field(default_factory=list)
     linkedCases: List[CaseLink] = Field(default_factory=list)
+    communications: List[CaseCommunication] = Field(default_factory=list)
     shares: List[CaseShare] = Field(default_factory=list)
 
     closure: Optional[CaseClosure] = None

@@ -41,7 +41,7 @@ class ChatShareManager:
                 "typ": "chat_share",
                 "shareId": share_id,
                 "jti": str(uuid4()),
-                "tenant_uuid": str(current_user.tenant_uuid),
+                "tenant_id": str(current_user.tenant_id),
                 "userId": str(current_user.id),
                 "exp": expires_at.timestamp(),
             },
@@ -50,7 +50,7 @@ class ChatShareManager:
         )
         await self._engine.save(db_chat_share_model(
             shareId=share_id,
-            tenant_uuid=str(current_user.tenant_uuid),
+            tenant_id=str(current_user.tenant_id),
             userId=str(current_user.id),
             tokenHash=CaseHelperMethods.hash_share_token(token),
             messages=[ChatShareMessage(**message.model_dump()) for message in messages],
@@ -83,7 +83,7 @@ class ChatShareManager:
         record = await self._engine.find_one(
             db_chat_share_model,
             (db_chat_share_model.shareId == share_id)
-            & (db_chat_share_model.tenant_uuid == payload.get("tenant_uuid"))
+            & (db_chat_share_model.tenant_id == payload.get("tenant_id"))
             & (db_chat_share_model.userId == payload.get("userId")),
         )
         if not record or record.tokenHash != CaseHelperMethods.hash_share_token(token):

@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LicenseName } from '../../shared/model/licenses/license.rules';
+import { getOwnProperty } from '../../shared/utils/type-guards.util';
+import { LICENSE_LABEL } from './license.const';
 import { license_rules } from '../../shared/constants/shared-enums';
 import { Observable, of } from 'rxjs';
 import { SubscriptionService } from '../dashboard/subscription.service';
@@ -7,13 +9,10 @@ import { Router } from '@angular/router';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { AppService } from '../core/app/app.service';
 import { AuthService } from '../authetication/auth.service';
-interface CombinedRule {
-    modules: Set<string> | 'all';
-    cti_graph: boolean;
-    mapping: boolean;
-    scanning: boolean;
-    maintainer: boolean;
-}
+import type { CombinedRule } from './model/licenses.model';
+export type { CombinedRule } from './model/licenses.model';
+
+
 
 type AlertLicenseTarget = string | {
     licenses?: string[] | null;
@@ -96,10 +95,10 @@ export class LicenseService {
           combined.modules.add(m);
         }
       }
-      combined.cti_graph ||= rule.cti_graph;
-      combined.mapping ||= rule.mapping;
-      combined.scanning ||= rule.scanning;
-      combined.maintainer ||= rule.maintainer;
+      combined.cti_graph ||= !!rule.cti_graph;
+      combined.mapping ||= !!rule.mapping;
+      combined.scanning ||= !!rule.scanning;
+      combined.maintainer ||= !!rule.maintainer;
     }
     return combined;
   }
@@ -163,7 +162,7 @@ export class LicenseService {
   }
 
   canUseAlertType(type?: string | null): boolean {
-    const rawType = (type || '').trim().toLowerCase();
+    const rawType = (type ?? '').trim().toLowerCase();
     if (!rawType) {
       return false;
     }
@@ -179,7 +178,7 @@ export class LicenseService {
   }
 
   getAlertLicenses(type?: string | null): string[] {
-    const rawType = (type || '').trim().toLowerCase();
+    const rawType = (type ?? '').trim().toLowerCase();
     const alertType = this.normalizeAlertType(rawType);
     const isScanningAlert = SCANNING_ALERT_TYPES.has(rawType);
     return Object.entries(license_rules)
@@ -201,10 +200,10 @@ export class LicenseService {
     }
     const type = typeof target === 'string'
       ? target
-      : (target?.type || target?.categoryName || '');
+      : (target?.type ?? target?.categoryName ?? '');
     const alertLicenses = typeof target === 'string'
       ? []
-      : (target?.licenses || []);
+      : (target?.licenses ?? []);
     if (alertLicenses.length > 0 && this.getAlertAccessLicenses().some(license => alertLicenses.includes(license))) {
       return true;
     }
@@ -239,37 +238,32 @@ export class LicenseService {
     return this.getCombinedRule().maintainer;
   }
 
+  isPrimaryMaintainer(): boolean {
+    return this.isMaintainer() && this.appService.userSessionData().tenant.isPrimary === true;
+  }
+
   canViewTenantAlerts(): boolean {
-    const permissions = this.appService.userSessionData().user.permissions || [];
-    return this.isAdmin() || (this.isAnalyst() && permissions.includes('case_management') && this.appService.userSessionData().tenant.isDefault);
+    const permissions = this.appService.userSessionData().user.permissions ?? [];
+    const tenant = this.appService.userSessionData().tenant;
+    return this.isAdmin() || this.isPrimaryMaintainer() || (this.isAnalyst() && permissions.includes('case_management') && (tenant.isDefault || tenant.isPrimary === true));
+  }
+
+  canUseOrionMail(): boolean {
+    const session = this.appService.userSessionData();
+    return this.isAdmin() || this.isMaintainer() || (session.user.permissions ?? []).includes('orion_mail');
+  }
+
+  canDismissResults(): boolean {
+    const permissions = this.appService.userSessionData().user.permissions ?? [];
+    return this.isAdmin() || this.isMaintainer() || permissions.includes('dismiss_result');
   }
 
   canReviewTakedowns(): boolean {
     const tenant = this.appService.userSessionData().tenant;
-    const isRootTenant = tenant.isDefault;
-    return this.isAdmin() && isRootTenant;
+    return (this.isAdmin() && tenant.isDefault) || this.isPrimaryMaintainer();
   }
 
   getLicenseLabel(license: LicenseName | string): string {
-    switch (license) {
-      case LicenseName.MAINTAINER:
-        return 'Maintainer';
-      case LicenseName.FREE:
-        return 'Free';
-      case LicenseName.FEEDER:
-        return 'Feeder';
-      case LicenseName.OSINT_BASIC:
-        return 'OSINT Basic';
-      case LicenseName.OSINT_ADVANCED:
-        return 'OSINT Advanced';
-      case LicenseName.SOCIAL_MAPPER:
-        return 'Social Mapper';
-      case LicenseName.PENTESTER:
-        return 'Pentester';
-      case LicenseName.ENTERPRISE:
-        return 'Enterprise';
-      default:
-        return license;
-    }
+    return getOwnProperty(LICENSE_LABEL, license as LicenseName) ?? license;
   }
 }

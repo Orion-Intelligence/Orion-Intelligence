@@ -1,4 +1,4 @@
-<div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+<div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]">
     <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
         <div class="flex items-center gap-1.5">
             <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Related Entities' |
@@ -9,7 +9,7 @@
 
         <div class="flex items-center gap-2">
             @if (canManageCases() && !caseData.closure) {
-            <button type="button" (click)="store.openAddRelatedEntity()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800 [body.light-theme_&]:hover:border-sky-700/40 [body.light-theme_&]:hover:bg-sky-200/70 [body.light-theme_&]:hover:text-sky-900" data-testid="case-related-entity-add">
+            <button type="button" (click)="store.openAddRelatedEntity()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-2.5 text-sm font-semibold text-[var(--color-text1)] transition-[background-color,border-color,color] hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [body.light-theme_&]:border-[#b7cbe1] [body.light-theme_&]:bg-[#eef5fc] [body.light-theme_&]:hover:border-[#8fb3d8] [body.light-theme_&]:hover:bg-[#e4effa]" data-testid="case-related-entity-add">
                 <i class="bi bi-plus-lg"></i> {{ 'common.actions.add' | translate }}
             </button>
             }
@@ -168,7 +168,7 @@
                             <div class="space-y-2">
                                 @for (profile of entity.socialProfiles; track $index) {
                                 <div @caseListItemMotion class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-xs text-[var(--color-text2)]">
-                                    <span class="font-semibold text-sky-300">
+                                    <span class="font-semibold text-sky-300 [body.light-theme_&]:text-sky-700">
                                         {{ getDisplayLabel(profile.platform, profile.platformOtherValue) }}
                                     </span>
                                     <span class="ml-1">{{ profile.username }}</span>
@@ -180,7 +180,7 @@
                                     }
 
                                     @if (profile.profileUrl) {
-                                    <a [href]="profile.profileUrl" target="_blank" rel="noopener" class="ml-2 text-sky-300 hover:text-sky-200">
+                                    <a [href]="profile.profileUrl" target="_blank" rel="noopener" class="ml-2 text-sky-300 hover:text-sky-200 [body.light-theme_&]:text-sky-700 [body.light-theme_&]:hover:text-sky-900">
                                         {{ 'Open' | translate }}
                                     </a>
                                     }
@@ -199,7 +199,7 @@
                             <div class="space-y-2">
                                 @for (identifier of entity.identifiers; track $index) {
                                 <div @caseListItemMotion class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-xs text-[var(--color-text2)]">
-                                    <span class="font-semibold text-green-300">
+                                    <span class="font-semibold text-green-300 [body.light-theme_&]:text-emerald-700">
                                         {{ getDisplayLabel(identifier.type,
                                         identifier.identifierTypeOtherValue) }}
                                     </span>
@@ -212,7 +212,7 @@
                                     }
 
                                     @if (identifier.verified) {
-                                    <span class="ml-1 text-green-300">{{ 'Verified' | translate }}</span>
+                                    <span class="ml-1 text-green-300 [body.light-theme_&]:text-emerald-700">{{ 'Verified' | translate }}</span>
                                     }
                                 </div>
                                 }

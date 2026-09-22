@@ -1,7 +1,7 @@
 import asyncio
 import ipaddress
 import socket
-from typing import Optional
+from typing import Any, Optional
 from urllib.parse import urlparse
 
 from fastapi import Depends, HTTPException, Request, UploadFile, status
@@ -12,7 +12,7 @@ from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, user_role, UserStatus
 from orion.services.permission_manager.permission_models import UserPermission
 from orion.services.session_manager.session_manager import session_manager
-from configs.auth_cookie import token_from_request
+from configs.auth_cookie import extension_token_from_request, token_from_request
 from orion.constants import constant
 
 oauth2_scheme = OAuth2PasswordBearer(
@@ -37,7 +37,7 @@ def get_request_token(request: Request, token: str | None) -> str | None:
 
 
 def enforce_request_tenant_access(user, request: Request):
-    session_manager.ensure_user_tenant_access(user, getattr(request.state, "tenant", None))
+    session_manager.ensure_user_tenant_access(user, session_manager.tenant_identifier(getattr(request.state, "tenant", None)))
     return user
 
 
@@ -78,13 +78,39 @@ def role_required(required_roles: list[user_role]):
     return verify_role
 
 
-async def get_current_user(request: Request, token: str = Depends(oauth2_scheme)):
-    session_mgr = session_manager.get_instance()
-    token = get_request_token(request, token)
-    user = await session_mgr.get_current_user(token)
+def permission_required(required_permissions: list[UserPermission]):
+    async def verify_permission(current_user=Depends(get_current_user)):
+        if _enum_value(getattr(current_user, "role", None)) == user_role.ADMIN.value:
+            return True
+
+        permissions = [_enum_value(permission) for permission in (getattr(current_user, "permissions", None) or [])]
+        if any(_enum_value(required_permission) in permissions for required_permission in required_permissions):
+            return True
+
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
+
+    return verify_permission
+
+
+async def default_tenant_required(request: Request):
+    if not getattr(getattr(request.state, "tenant", None), "is_default", False):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
+    return True
+
+
+async def _authenticate_request(request: Request, token: str | None):
+    user = await session_manager.get_instance().get_current_user(token)
     enforce_request_tenant_access(user, request)
     enforce_password_reset(user, request)
     return user
+
+
+async def get_current_user(request: Request, token: str = Depends(oauth2_scheme)):
+    return await _authenticate_request(request, get_request_token(request, token))
+
+
+async def get_extension_user(request: Request, token: str = Depends(oauth2_scheme)):
+    return await _authenticate_request(request, extension_token_from_request(request) or token)
 
 
 async def get_is_free_token(request: Request, token: str = Depends(oauth2_scheme)) -> bool:
@@ -124,10 +150,23 @@ async def case_management_required(current_user=Depends(get_current_user)):
         return True
 
     permissions = [_enum_value(permission) for permission in (current_user.permissions or [])]
-    if role == user_role.ANALYST.value and UserPermission.CASE_MANAGEMENT.value in permissions:
+    if role in (user_role.ANALYST.value, user_role.MEMBER.value) and UserPermission.CASE_MANAGEMENT.value in permissions:
         return True
 
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Case management permission required")
+
+
+async def dismiss_result_required(current_user=Depends(get_current_user)):
+    role = _enum_value(getattr(current_user, "role", None))
+    licenses = {_enum_value(license_name) for license_name in (current_user.licenses or [])}
+    if role == user_role.ADMIN.value or LicenseName.MAINTAINER.value in licenses:
+        return True
+
+    permissions = [_enum_value(permission) for permission in (current_user.permissions or [])]
+    if UserPermission.DISMISS_RESULT.value in permissions:
+        return True
+
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Dismiss result permission required")
 
 
 def _extract_scan_host(target: str) -> str:
@@ -172,12 +211,12 @@ async def _validate_public_scan_target(target: str) -> None:
 
 
 async def _scan_domain_with_type(payload, user_id: str, scan_type: Optional[str] = None):
-    from orion.api.server.crawl_manager.crawl_model import crawl_model
+    from orion.api.server.crawl_manager.crawl_manager import crawl_manager
 
     await _validate_public_scan_target(payload.domain)
     if scan_type:
         payload.scanType = scan_type
-    return await crawl_model.getInstance().scan_domain(payload, user_id=user_id)
+    return await crawl_manager.getInstance().scan_domain(payload, user_id=user_id)
 
 
 async def _read_scan_upload(file: UploadFile) -> bytes:
@@ -194,13 +233,13 @@ def _enforce_demo_safe_search(param, current_user, is_free: bool = False) -> Non
         param.safe = True
 
 
-def status_required(status_required: list[UserStatus], bypass_roles: Optional[list[user_role]] = None):
+def status_required(required_statuses: list[UserStatus], bypass_roles: Optional[list[user_role]] = None):
     async def verify_status(user_status: UserStatus = Depends(get_current_status),
             role: user_role = Depends(get_current_role), ):
         if bypass_roles and role in bypass_roles:
             return user_status
 
-        if user_status not in status_required:
+        if user_status not in required_statuses:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
         return user_status
 
@@ -230,7 +269,7 @@ def license_required(feature: str, bypass_roles: Optional[list[user_role]] = Non
 
     return checker
 def get_user_permissions(user):
-    final = {"modules": set(), "cti_graph": False, "mapping": False, "scanning": False, "maintainer": False, "geo_fencing": False}
+    final: dict[str, Any] = {"modules": set(), "cti_graph": False, "mapping": False, "scanning": False, "maintainer": False, "geo_fencing": False}
 
     for lic in user.licenses:
         rules = constant.license_rules.get(lic, {})

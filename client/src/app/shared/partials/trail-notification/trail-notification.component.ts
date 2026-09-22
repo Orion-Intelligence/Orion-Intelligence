@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 
 import { SubscriptionService } from '../../../services/dashboard/subscription.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -7,6 +7,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   selector: 'app-trail-notification',
   standalone: true,
   imports: [TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trail-notification.component.html'
 })
 export class TrailNotificationComponent {

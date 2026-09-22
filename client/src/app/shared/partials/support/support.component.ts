@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, output } from '@angular/core';
+import { Component, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
@@ -11,6 +11,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   selector: 'app-support',
   imports: [NgClass, FormsModule, TranslatePipe],
   templateUrl: './support.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [popupAnimation, overlayAnimation],
 })
 export class SupportComponent {
@@ -25,7 +26,7 @@ export class SupportComponent {
 
   close() {
     this.resetForm();
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.closePopup.emit(undefined);
   }
 
@@ -75,6 +76,6 @@ export class SupportComponent {
               message?: string;
           };
       } | null | undefined;
-    return error?.error?.detail || error?.error?.message || 'Failed to send message';
+    return error?.error?.detail ?? error?.error?.message ?? 'Failed to send message';
   }
 }

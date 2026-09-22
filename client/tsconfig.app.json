@@ -7,9 +7,7 @@
     "types": []
   },
   "files": [
-    "src/main.ts",
-    "src/app/pages/graphs/social-graph/social-mapper.component.ts",
-    "src/app/pages/homepage/world-heatmap/world-heatmap.component.ts"
+    "src/main.ts"
   ],
   "include": [
     "src/**/*.d.ts"

@@ -1,4 +1,4 @@
-<div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+<div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]">
     <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
         <div class="flex items-center gap-1.5">
             <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Linked Cases' | translate
@@ -8,7 +8,7 @@
         @if (canManageCases() && !caseData.closure) {
         <div class="flex items-center gap-2">
             @if (hasLinkableCases(caseData)) {
-            <button type="button" (click)="store.openAddLinkedCase()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800 [body.light-theme_&]:hover:border-sky-700/40 [body.light-theme_&]:hover:bg-sky-200/70 [body.light-theme_&]:hover:text-sky-900" data-testid="case-linked-case-add">
+            <button type="button" (click)="store.openAddLinkedCase()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-2.5 text-sm font-semibold text-[var(--color-text1)] transition-[background-color,border-color,color] hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [body.light-theme_&]:border-[#b7cbe1] [body.light-theme_&]:bg-[#eef5fc] [body.light-theme_&]:hover:border-[#8fb3d8] [body.light-theme_&]:hover:bg-[#e4effa]" data-testid="case-linked-case-add">
                 <i class="bi bi-plus-lg"></i> {{ 'common.actions.add' | translate }}
             </button>
             }
@@ -50,7 +50,7 @@
                             'Relationship' | translate }}</label>
                         <select [(ngModel)]="linkedCase.relationship" name="linked-relationship" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-linked-case-relationship-select">
                             @for (relationship of caseLinkRelationshipOptions; track relationship.value) {
-                            <option [value]="relationship.value">{{ relationship.label }}</option>
+                            <option [value]="relationship.value">{{ relationship.label | translate }}</option>
                             }
                         </select>
                     </div>
@@ -111,7 +111,7 @@
                             'Relationship' | translate }}</label>
                         <select [(ngModel)]="newLinkedCase.relationship" name="new-linked-relationship" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-linked-case-relationship-select">
                             @for (relationship of caseLinkRelationshipOptions; track relationship.value) {
-                            <option [value]="relationship.value">{{ relationship.label }}</option>
+                            <option [value]="relationship.value">{{ relationship.label | translate }}</option>
                             }
                         </select>
                     </div>

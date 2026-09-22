@@ -38,7 +38,7 @@ class AuditLogManager:
 
     async def search_audit(self, current_user, search_type: str, q: str) -> str:
         return await self.register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             json.dumps({"search_type": search_type, "q": q})
         )
@@ -64,8 +64,9 @@ class AuditLogManager:
         skip = (page - 1) * page_size
 
         start = end = None
-        if getattr(param, "daterange", None):
-            parts = [p.strip() for p in param.daterange.split(",")]
+        daterange = getattr(param, "daterange", None)
+        if daterange:
+            parts = [p.strip() for p in daterange.split(",")]
             if len(parts) == 2:
                 start, end = self._parse_iso(parts[0]), self._parse_iso(parts[1])
             elif len(parts) == 1:
@@ -82,18 +83,18 @@ class AuditLogManager:
         if getattr(current_user, "role", None) == user_role.MEMBER:
             filters.append(db_audit_log.actor_id == str(current_user.id))
         elif LicenseName.MAINTAINER in (current_user.licenses or []):
-            filters.append(db_audit_log.tenant_id == str(current_user.tenant_uuid))
+            filters.append(db_audit_log.tenant_id == str(current_user.tenant_id))
 
         if getattr(param, "actor_id", None):
             actor = await self._engine.find_one(
                 db_user_account,
-                (db_user_account.tenant_uuid == str(current_user.tenant_uuid)) & (db_user_account.username == param.actor_id),
+                (db_user_account.tenant_id == str(current_user.tenant_id)) & (db_user_account.username == param.actor_id),
             )
             if not actor:
                 return {"items": [], "page": page}
             filters.append(db_audit_log.actor_id == str(actor.id))
 
-        query = {}
+        query: Any = {}
         for item in filters:
             query = item if query == {} else (query & item)
 
@@ -108,25 +109,21 @@ class AuditLogManager:
         tenant_ids = list({item.tenant_id for item in items})
 
         users = await self._engine.find(db_user_account, in_(db_user_account.id, actor_ids))
-        tenant_users = await self._engine.find(db_user_account, in_(db_user_account.tenant_uuid, tenant_ids))
+        tenant_users = await self._engine.find(db_user_account, in_(db_user_account.tenant_id, tenant_ids))
 
         users_by_id = {str(user.id): user.username for user in users}
         tenants_by_id = {}
         for user in tenant_users:
             if LicenseName.MAINTAINER in (user.licenses or []):
-                tenants_by_id[user.tenant_uuid] = (user.email or user.username or "").strip()
+                tenants_by_id[user.tenant_id] = (user.email or user.username or "").strip()
 
         resolved_items = []
         for item in items:
-            actor_name = users_by_id.get(item.actor_id)
-            tenant_name = tenants_by_id.get(item.tenant_id)
-            if actor_name is None or tenant_name is None:
-                continue
             resolved_items.append({
                 **item.model_dump(),
                 "id": str(item.id),
-                "actor_id": actor_name,
-                "tenant_id": tenant_name,
+                "actor_id": users_by_id.get(item.actor_id) or item.actor_id,
+                "tenant_id": tenants_by_id.get(item.tenant_id) or item.tenant_id,
             })
 
         return {"items": resolved_items, "page": page}

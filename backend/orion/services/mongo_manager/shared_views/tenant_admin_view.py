@@ -17,7 +17,7 @@ class TenantAdminView(ModelView):
         self._engine = engine
 
     async def before_create(self, request: Request, data: dict, obj: Any):
-        if data.get("is_default") is True:
+        if data.get("is_default"):
             existing = await self._engine.find_one(
                 db_tenant_model, db_tenant_model.is_default == True)
             if existing:
@@ -31,7 +31,7 @@ class TenantAdminView(ModelView):
         if "is_default" in data and current.is_default:
             raise FormValidationError({"is_default": "Default tenant cannot be changed"})
 
-        if data.get("is_default") is True:
+        if data.get("is_default"):
             existing = await self._engine.find_one(
                 db_tenant_model, (db_tenant_model.is_default == True) & (db_tenant_model.id != obj.id), )
             if existing:
@@ -46,7 +46,7 @@ class TenantAdminView(ModelView):
 
             users = await self._engine.find(db_user_account)
             for user in users:
-                if str(tenant.id) != str(user.tenant_uuid):
+                if str(tenant.id) != str(user.tenant_id):
                     continue
 
                 image_path = CONSTANTS.IMAGE_DIR / f"{user.id}.enc"
@@ -55,7 +55,7 @@ class TenantAdminView(ModelView):
 
                 await self._engine.delete(user)
 
-            tenant_keys = await self._engine.find(db_keys, db_keys.auth_id == str(tenant.id))
+            tenant_keys = await self._engine.find(db_keys, db_keys.tenant_id == str(tenant.id))
             for key in tenant_keys:
                 await self._engine.delete(key)
 

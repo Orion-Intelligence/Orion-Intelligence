@@ -11,6 +11,7 @@ from orion.api.interactive.feeder_manager.models.feeder_models import FeederScri
 from orion.constants import constant
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
+from orion.services.permission_manager.permission_models import UserPermission
 from orion.services.mongo_manager.shared_model.db_feeder_script_model import db_feeder_script_model, osint_feeder
 
 
@@ -232,7 +233,6 @@ class FeederHelper:
         rule = constant.url_rules.get(rule_key) or {}
         rule_type = str(rule.get("rule_type") or "")
         record_name = self.value_record_name(rule_key)
-        record = None
         if rule_type == "shared":
             record = await self._engine.find_one(
                 self.model,
@@ -265,17 +265,20 @@ class FeederHelper:
                 rule_key=rule_key,
                 entry_kind="values",
                 values=self.merge_value_entries([], normalized_urls),
-                feeder=osint_feeder(
-                    author_id=str(current_user.id),
-                    author_name=current_user.username,
-                    index_date=datetime.now(timezone.utc),
-                    index_status=True,
-                    last_failure_date=None,
-                    last_failure_message=None,
-                    last_success_date=None,
-                ),
+                feeder=self._default_osint_feeder(current_user),
             )
         await self._engine.save(record)
+
+    def _default_osint_feeder(self, current_user) -> osint_feeder:
+        return osint_feeder(
+            author_id=str(current_user.id),
+            author_name=current_user.username,
+            index_date=datetime.now(timezone.utc),
+            index_status=True,
+            last_failure_date=None,
+            last_failure_message=None,
+            last_success_date=None,
+        )
 
     def encrypt_script_content(self, content: str) -> str:
         return self._cipher.encrypt(content.encode("utf-8")).decode()
@@ -297,8 +300,11 @@ class FeederHelper:
         encrypted_content = self.encrypt_script_content(content)
 
         existing_feeder = existing.feeder if existing and existing.feeder else None
-        existing_author_id = existing_feeder.author_id if existing_feeder else None
-        existing_author_name = existing_feeder.author_name if existing_feeder else None
+        existing_author_id = None
+        existing_author_name = None
+        if existing_feeder:
+            existing_author_id = existing_feeder.author_id
+            existing_author_name = existing_feeder.author_name
         if existing_author_id and existing_author_id != str(current_user.id) and current_user.role != user_role.ADMIN:
             raise HTTPException(status_code=409, detail="Script owner already exists")
 
@@ -319,20 +325,12 @@ class FeederHelper:
                 url=url,
                 rule_key=rule_key,
                 entry_kind="script",
-                feeder=osint_feeder(
-                    author_id=str(current_user.id),
-                    author_name=current_user.username,
-                    index_date=datetime.now(timezone.utc),
-                    index_status=True,
-                    last_failure_date=None,
-                    last_failure_message=None,
-                    last_success_date=None,
-                ),
+                feeder=self._default_osint_feeder(current_user),
             )
 
         await self._engine.save(record)
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             "feeder_script_uploaded",
         )
@@ -341,7 +339,7 @@ class FeederHelper:
     @staticmethod
     def script_query(current_user, rule_key: str | None = None):
         query = {}
-        if current_user.role != user_role.ADMIN:
+        if current_user.role != user_role.ADMIN and UserPermission.MONITORING not in (getattr(current_user, "permissions", None) or []):
             query["feeder.author_id"] = str(current_user.id)
         if rule_key:
             query["rule_key"] = rule_key

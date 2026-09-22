@@ -1,0 +1,171 @@
+@if (resultsLoading()) {
+  <div class="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-820)] [body.light-theme_&]:bg-[#f5f9fe]">
+    @for (row of shimmerRows; track $index) {
+      <div class="border-b border-[var(--color-border)] px-3 py-3 last:border-b-0 sm:px-4">
+        <div class="min-w-0 space-y-2">
+          <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(90deg,var(--ui-shimmer-edge),var(--ui-shimmer-base),var(--ui-shimmer-edge))] h-3.5 w-2/5 rounded"></div>
+          <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(90deg,var(--ui-shimmer-edge),var(--ui-shimmer-base),var(--ui-shimmer-edge))] h-3 w-1/4 rounded"></div>
+        </div>
+      </div>
+    }
+  </div>
+} @else {
+  @if (confirmClear()) {
+    <app-confirmation-popup [warning]="true" [confirmLabel]="'Clear'" [message]="clearConfirmationMessage()" (confirmed)="handleClearConfirmation($event)"></app-confirmation-popup>
+  }
+  <div class="mb-3 flex flex-wrap items-end justify-between gap-3">
+    <div class="flex w-full flex-wrap items-end gap-3 sm:w-auto">
+      <div class="w-full sm:w-72">
+        <label for="manage-profiles-results-profile-filter" class="mb-1.5 block text-[11px] font-semibold text-[var(--color-text4)]">{{ 'Account' | translate }}</label>
+        <app-ui-dropdown class="block" id="manage-profiles-results-profile-filter" menuId="manage-profiles-results-profile-filter-menu" testId="manage-profiles-results-profile-filter" [options]="profileOptions()" [selected]="selectedProfileId() || null" [placeholder]="'All profiles' | translate" [allowEmpty]="true" (valueChange)="selectProfile($event)"></app-ui-dropdown>
+      </div>
+      <div class="w-full sm:w-40">
+        <label for="manage-profiles-results-view" class="mb-1.5 block text-[11px] font-semibold text-[var(--color-text4)]">{{ 'Show' | translate }}</label>
+        <app-ui-dropdown class="block" id="manage-profiles-results-view" menuId="manage-profiles-results-view-menu" testId="manage-profiles-results-view" [options]="viewOptions" [selected]="view()" [searchable]="false" [translateLabels]="true" (valueChange)="selectView($event)"></app-ui-dropdown>
+      </div>
+    </div>
+    <button type="button" data-testid="manage-profiles-results-clear" [disabled]="clearing() || !hasClearableResults()" (click)="requestClear()" class="group inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-red-400/25 bg-red-500/[0.06] px-2.5 text-[11px] font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] hover:border-red-400/45 hover:bg-red-500/[0.12] focus-visible:ring-1 focus-visible:ring-red-400/55 disabled:cursor-not-allowed disabled:opacity-60" [title]="selectedProfileId() ? 'Clear results for the selected profile' : 'Clear all results'">
+      <i class="bi bi-trash3 text-[11px] text-red-400 transition-colors group-hover:text-red-300" aria-hidden="true"></i>
+      <span>{{ (clearing() ? 'Clearing' : clearLabel()) | translate }}</span>
+    </button>
+  </div>
+  <div data-testid="manage-profiles-results-list" class="overflow-hidden rounded-xl border border-[var(--ui-table-shell-border)] bg-[var(--ui-table-row-odd)] shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
+    @for (row of visibleRows(); track row.key) {
+      <section data-testid="manage-profiles-result-row" [attr.data-running]="row.running ? 'true' : 'false'" class="group relative border-b border-[var(--ui-table-row-border)] odd:bg-[var(--ui-table-row-odd)] even:bg-[var(--ui-table-row-even)] last:border-b-0">
+        <div class="pointer-events-none absolute inset-y-0 left-0 w-0 bg-[var(--color-blue-640)] transition-[width] group-hover:w-0.5"></div>
+        <div (click)="toggleResult(row.key)" (keydown.enter)="toggleResult(row.key)" (keydown.space)="toggleResult(row.key)" role="button" tabindex="0" [attr.aria-expanded]="isResultExpanded(row.key)" class="flex flex-wrap items-center gap-3 px-3 py-3 hover:bg-[var(--ui-table-row-hover)] sm:px-4" [ngClass]="row.ads.length || row.posts.length ? 'cursor-pointer' : 'cursor-default'">
+          @if (row.platform) {
+            <span [attr.data-platform]="safePlatform(row.platform)" class="manage-profile-logo-tile flex h-8 w-8 flex-shrink-0 self-start items-center justify-center overflow-hidden rounded-[9px] p-1 text-white shadow-[0_4px_12px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.08)] ring-1 ring-inset ring-white/[0.06] [body.light-theme_&]:text-[var(--color-text2)] [body.light-theme_&]:shadow-[0_3px_8px_rgba(15,23,42,0.09),inset_0_1px_0_rgba(255,255,255,0.85)] [body.light-theme_&]:ring-[#d5e2ee]/70"><app-social-icon [platformName]="platformLabel(row.platform)"></app-social-icon></span>
+          }
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-2">
+              @if (row.running) {
+                <span aria-hidden="true" class="h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-sky-400/30 border-t-sky-400"></span>
+              }
+              <h2 class="mb-0 truncate text-[13px] font-semibold text-[var(--color-text1)]">{{ row.title | translate }}</h2>
+              <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-text3)] [body.light-theme_&]:bg-[#eef4fb]">{{ row.activityLabel | translate }}</span>
+              @if (row.isManual) {
+                <span class="rounded-full border border-sky-400/20 bg-sky-400/[0.08] px-2 py-0.5 text-[10px] font-semibold text-sky-500">{{ 'Manual' | translate }}</span>
+              } @else {
+                <span class="rounded-full border border-violet-400/20 bg-violet-400/[0.08] px-2 py-0.5 text-[10px] font-semibold text-violet-500">{{ 'Automate' | translate }}</span>
+              }
+              @if (row.running) {
+                <span data-testid="manage-profiles-result-running" class="rounded-full border border-amber-400/20 bg-amber-400/[0.08] px-2 py-0.5 text-[10px] font-semibold text-amber-400">{{ 'Running' | translate }}</span>
+              } @else if (row.error) {
+                <span class="rounded-full border border-red-400/15 bg-red-500/[0.06] px-2 py-0.5 text-[10px] font-semibold text-red-400">{{ (row.sessionExpired ? 'Session Expired' : 'Failed') | translate }}</span>
+              } @else {
+                <span class="rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-2 py-0.5 text-[10px] font-semibold text-emerald-300">{{ (row.activity === 'posting' ? 'Published' : 'Completed') | translate }}</span>
+              }
+            </div>
+            <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ row.profileLabel }}@if (personaName(row.profileId); as pn) { · <span class="text-[var(--color-text3)]">{{ pn }}</span>} · {{ row.dateTime | date: 'medium' }}</p>
+            @if (row.running && row.step) {
+              <p class="mb-0 mt-1 truncate text-[11px] text-[var(--color-text3)]">{{ row.step }}</p>
+            }
+            @if (row.postUrl) {
+              <a [href]="row.postUrl" target="_blank" rel="noopener noreferrer" class="mt-1 inline-flex max-w-full items-center gap-1 text-[11px] font-medium text-[var(--color-blue-640)] hover:underline"><span class="truncate">{{ row.postUrl }}</span></a>
+            }
+            @if (row.errorReason) {
+              <p class="mb-0 mt-1 line-clamp-2 text-[11px] text-[var(--color-text3)]">{{ row.errorReason }}</p>
+            }
+          </div>
+          @if (row.running) {
+            <button type="button" data-testid="manage-profiles-result-stop" [disabled]="isRunStopping(row.runId)" (click)="stopRun(row, $event)" class="group inline-flex h-7 shrink-0 items-center gap-1.5 rounded-[7px] border border-red-400/25 bg-red-500/[0.06] px-1.5 pr-2 text-[10px] font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] hover:border-red-400/45 hover:bg-red-500/[0.12] focus-visible:ring-1 focus-visible:ring-red-400/55 disabled:cursor-not-allowed disabled:opacity-65" [title]="isRunStopping(row.runId) ? 'Stopping' : 'Stop this run'">
+              <span aria-hidden="true" class="inline-flex h-[18px] w-[18px] items-center justify-center text-red-400 transition-colors group-hover:text-red-300"><i class="bi bi-stop-fill text-[11px]"></i></span>
+              <span>{{ (isRunStopping(row.runId) ? 'Stopping' : row.isManual ? 'Stop' : 'Stop daily run') | translate }}</span>
+            </button>
+          }
+          @if (row.ads.length || row.posts.length) {
+            <i class="bi text-[12px] text-[var(--color-text4)]" [ngClass]="isResultExpanded(row.key) ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+          }
+          <button type="button" data-testid="manage-profiles-result-delete" [disabled]="row.running || isDeleting(row.key)" (click)="deleteRecord(row.key, row.activity, row.profileId, row.dateTime, $event)" class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] border outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-red-400/55 disabled:cursor-not-allowed disabled:opacity-40 border-[#5c2121] bg-[linear-gradient(135deg,rgba(235,120,120,0.22),rgba(238,68,68,0.12))] text-[#ff9e9e] hover:border-[#7d2828] hover:bg-[linear-gradient(135deg,rgba(235,120,120,0.30),rgba(238,68,68,0.18))] hover:text-white [.light-theme_&]:border-[#e1b7b7] [.light-theme_&]:bg-[#fceeee] [.light-theme_&]:text-[#c0392b] [.light-theme_&]:hover:border-[#d88f8f] [.light-theme_&]:hover:bg-[#fae4e4] [.light-theme_&]:hover:text-[#b02a2a]" [title]="'Remove this record' | translate" [attr.aria-label]="'Remove this record' | translate">
+            <i class="bi bi-trash3 text-[11px]" aria-hidden="true"></i>
+          </button>
+        </div>
+        @if (isResultExpanded(row.key) && (row.ads.length || row.posts.length)) {
+          <div class="border-t border-[var(--ui-table-row-border)] bg-[var(--color-blue-820)] px-3 py-2 sm:px-4 [body.light-theme_&]:bg-[#f5f9fe]">
+            @for (ad of row.ads; track ad.url) {
+              <div class="border-b border-[var(--ui-table-row-border)] py-2 last:border-b-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="truncate text-[12px] font-semibold text-[var(--color-text1)]">{{ ad.author || 'Unknown' }}</span>
+                  @if (ad.topic) {
+                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-text3)] [body.light-theme_&]:bg-[#eef4fb]">{{ ad.topic }}</span>
+                  }
+                  <a [href]="ad.url" target="_blank" rel="noopener noreferrer" class="truncate text-[11px] font-medium text-[var(--color-blue-640)] hover:underline">{{ ad.url }}</a>
+                </div>
+                @if (ad.content_text) {
+                  <p class="mb-0 mt-1 line-clamp-2 text-[11px] text-[var(--color-text3)]">{{ ad.content_text }}</p>
+                }
+                <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ 'Likes' | translate }}: {{ ad.likes || '-' }} · {{ 'Shares' | translate }}: {{ ad.shares || '-' }} · {{ 'Views' | translate }}: {{ ad.views || '-' }}</p>
+              </div>
+            }
+            @for (post of row.posts; track post.url) {
+              <div class="border-b border-[var(--ui-table-row-border)] py-2 last:border-b-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="truncate text-[12px] font-semibold text-[var(--color-text1)]">{{ post.author || 'Unknown' }}</span>
+                  @if (post.is_hate_speech) {
+                    <span class="rounded-full border border-red-400/20 bg-red-500/10 px-2 py-0.5 text-[10px] font-medium text-red-400 [body.light-theme_&]:bg-red-50">{{ 'Hate Speech' | translate }}</span>
+                  } @else {
+                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-text3)] [body.light-theme_&]:bg-[#eef4fb]">{{ 'Normal' | translate }}</span>
+                  }
+                  @if (post.label) {
+                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-text3)] [body.light-theme_&]:bg-[#eef4fb]">{{ post.label }}</span>
+                  }
+                  <a [href]="post.url" target="_blank" rel="noopener noreferrer" class="truncate text-[11px] font-medium text-[var(--color-blue-640)] hover:underline">{{ post.url }}</a>
+                </div>
+                @if (post.content_text) {
+                  <p class="mb-0 mt-1 line-clamp-2 text-[11px] text-[var(--color-text3)]">{{ post.content_text }}</p>
+                }
+                <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ 'Likes' | translate }}: {{ post.likes || '-' }} · {{ 'Shares' | translate }}: {{ post.shares || '-' }} · {{ 'Views' | translate }}: {{ post.views || '-' }}</p>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
+    @if (view() === 'posts') {
+      @for (post of visiblePosts(); track post.key) {
+        <section data-testid="manage-profiles-post-row" class="group relative border-b border-[var(--ui-table-row-border)] odd:bg-[var(--ui-table-row-odd)] even:bg-[var(--ui-table-row-even)] last:border-b-0">
+          <div class="pointer-events-none absolute inset-y-0 left-0 w-0 bg-[var(--color-blue-640)] transition-[width] group-hover:w-0.5"></div>
+          @if (post.source === 'published') {
+            <button type="button" data-testid="manage-profiles-post-delete" [disabled]="isDeleting(post.key)" (click)="deleteRecord(post.key, 'posting', post.profileId, post.dateTime, $event)" class="absolute right-3 top-1/2 z-[2] inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-[7px] border outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-red-400/55 disabled:cursor-not-allowed disabled:opacity-40 sm:right-4 border-[#5c2121] bg-[linear-gradient(135deg,rgba(235,120,120,0.22),rgba(238,68,68,0.12))] text-[#ff9e9e] hover:border-[#7d2828] hover:bg-[linear-gradient(135deg,rgba(235,120,120,0.30),rgba(238,68,68,0.18))] hover:text-white [.light-theme_&]:border-[#e1b7b7] [.light-theme_&]:bg-[#fceeee] [.light-theme_&]:text-[#c0392b] [.light-theme_&]:hover:border-[#d88f8f] [.light-theme_&]:hover:bg-[#fae4e4] [.light-theme_&]:hover:text-[#b02a2a]" [title]="'Remove this record' | translate" [attr.aria-label]="'Remove this record' | translate">
+              <i class="bi bi-trash3 text-[11px]" aria-hidden="true"></i>
+            </button>
+          }
+          <div class="grid items-center gap-3 px-3 py-3 pr-10 hover:bg-[var(--ui-table-row-hover)] sm:px-4 sm:pr-12" [ngClass]="post.imageUrl ? 'grid-cols-[auto_1fr]' : 'grid-cols-1'">
+            @if (post.imageUrl) {
+              <a [href]="post.imageUrl" target="_blank" rel="noopener noreferrer" class="relative block h-[72px] w-24 shrink-0 self-start overflow-hidden rounded-md border border-[var(--color-border)]"><img [src]="post.imageUrl" alt="" class="absolute inset-0 h-full w-full object-cover" loading="lazy"></a>
+            }
+            <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="truncate text-[13px] font-semibold text-[var(--color-text1)]">{{ post.author || 'Unknown' }}</span>
+              @if (post.source === 'published') {
+                <span class="rounded-full border border-sky-400/20 bg-sky-400/[0.08] px-2 py-0.5 text-[10px] font-semibold text-sky-500">{{ 'Published' | translate }}</span>
+              } @else if (post.is_hate_speech) {
+                <span class="rounded-full border border-red-400/20 bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold text-red-400 [body.light-theme_&]:bg-red-50">{{ 'Hate Speech' | translate }}</span>
+              } @else {
+                <span class="rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-2 py-0.5 text-[10px] font-semibold text-emerald-300">{{ 'Normal' | translate }}</span>
+              }
+              @if (post.label) {
+                <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-text3)] [body.light-theme_&]:bg-[#eef4fb]">{{ post.label }}</span>
+              }
+            </div>
+            <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ post.profileLabel }}@if (personaName(post.profileId); as pn) { · <span class="text-[var(--color-text3)]">{{ pn }}</span>} · {{ post.dateTime | date: 'medium' }}</p>
+            @if (post.url) {
+              <a [href]="post.url" target="_blank" rel="noopener noreferrer" class="mt-1 inline-flex max-w-full items-center gap-1 text-[11px] font-medium text-[var(--color-blue-640)] hover:underline"><span class="truncate">{{ post.url }}</span></a>
+            }
+            @if (post.content_text) {
+              <p class="mb-0 mt-1 line-clamp-3 text-[11px] text-[var(--color-text3)]">{{ post.content_text }}</p>
+            }
+            @if (post.source === 'crawled') {
+              <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ 'Likes' | translate }}: {{ post.likes || '-' }} · {{ 'Shares' | translate }}: {{ post.shares || '-' }} · {{ 'Views' | translate }}: {{ post.views || '-' }}</p>
+            }
+            </div>
+          </div>
+        </section>
+      }
+    }
+    @if (!visibleRows().length && !visiblePosts().length) {
+      <div class="p-8 text-center text-sm text-[var(--color-text3)]">{{ (view() === 'posts' ? (selectedProfileId() ? 'No posts for this profile yet.' : 'No posts yet.') : view() === 'hate_speech' ? (selectedProfileId() ? 'No profile monitoring results for this profile yet.' : 'No profile monitoring results yet.') : (selectedProfileId() ? 'No activity for this profile yet.' : 'No activity yet.')) | translate }}</div>
+    }
+  </div>
+}

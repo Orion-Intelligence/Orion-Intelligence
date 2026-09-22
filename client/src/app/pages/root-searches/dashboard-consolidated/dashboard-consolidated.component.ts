@@ -1,9 +1,8 @@
-import { AfterViewInit, ChangeDetectorRef, Component, computed, OnInit, signal, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, computed, OnInit, signal, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { AppService } from '../../../services/core/app/app.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest, map, switchMap, take, timer } from 'rxjs';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { TitleCasePipe } from '@angular/common';
 import { ResultComponent } from '../../../shared/partials/result/result.component';
 import { DashboardResultsGeneralComponent } from '../../intel-panel/dashboard-results/dashboard-results-general-grid/dashboard-results-general.component';
@@ -21,11 +20,10 @@ import { consolidated_filters } from '../../../shared/constants/filters';
 import { ALLOWED_CONSOLIDATED_RANKED_SINGLETON } from '../../../shared/constants/shared-enums';
 import { ThreatResultsComponent } from "./defacement-results/threat-results.component";
 import { RankedCallbackModel } from '../../../shared/model/results/consolidated/ranked.callback.model';
-import { HttpClient } from '@angular/common/http';
 import { ConsolidatedScanComponent } from './consolidated-scan/consolidated-scan.component';
+import { isDomainName, isEmailAddress } from '../../../shared/utils/network-validation.util';
 import { StealerLogCallbackModel } from '../../../shared/model/results/credentials/credential.callback.model';
 import { LicenseService } from '../../../services/licenses/licenses.service';
-import { AuthService } from '../../../services/authetication/auth.service';
 import { ConsolidatedIocComponent } from "./consolidated-ioc/consolidated-ioc.component";
 import { scanAnimation } from '../../../shared/animations/scan.animations';
 import { DefacementCallbackModel } from '../../../shared/model/results/defacement/defacement.callback.model';
@@ -34,31 +32,51 @@ import { NetworkIntel } from '../network-intel/network-intel';
 import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-engine/cross-search-card.component';
 import { SatelliteIntel } from "../../geo-fencing/satellite-intel/satellite-intel";
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { ExternalConsolidatedFeedService } from '../../../services/dashboard/external-consolidated-feed.service';
+import { ExternalConsolidatedFeedService } from './services/external-consolidated-feed.service';
+import type { GeneralResultItem } from '../../../shared/model/results/general/general.callback.model';
+import type { LeakResultItem } from '../../../shared/model/results/leak/leak.callback.model';
+import type { AptIntelResultItem } from '../../../shared/model/results/apt-intel/apt-intel.callback.model';
+import type { ExploitResultItem } from '../../../shared/model/results/exploit/exploit.callback.model';
+import type { SocialResultItem } from '../../../shared/model/results/social/social.callback.model';
+import type { ChatResultItem } from '../../../shared/model/results/chat/chat.callback.model';
+import { getOwnProperty, setOwnProperty } from '../../../shared/utils/type-guards.util';
+
+
+const CATEGORY_BY_KEY: Record<string, Category> = {
+  leak_model: Category.BREACH,
+  exploit_model: Category.EXPLOIT,
+  apt_model: Category.APT_INTEL,
+  malware_model: Category.APT_INTEL,
+  defacement_model: Category.DEFACEMENT,
+  chat_model: Category.SOCIAL,
+  generic_model: Category.STRATEGIC,
+  social_model: Category.SOCIAL
+};
 
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
   imports: [ResultComponent, DashboardResultsGeneralComponent, TitleCasePipe, DashboardResultExploitComponent, DashboardResultAptComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent, NetworkIntel, CrossSearchCardComponent, SatelliteIntel, TranslatePipe],
   templateUrl: './dashboard-consolidated.component.html',
-  animations: [scanAnimation, fadeInDashboardItem],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  animations: [scanAnimation],
+  styleUrls: ['./dashboard-consolidated.component.css'],
 })
 export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   protected readonly Math = Math;
-  protected readonly fadeInDashboardItem = fadeInDashboardItem;
   protected readonly consolidated_filters = consolidated_filters;
 
   @ViewChild('domainScan') domainScanComponent!: ConsolidatedScanComponent;
   public consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
   public stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
-  public groupedResults: Record<string, any[]> = {};
-  public response: any;
+  public groupedResults: Record<string, unknown[]> = {};
+  public response: ConsolidatedCallbackModel | null = null;
   public pageCounts: Record<string, number> = {};
   isGrouped = false;
   isIOC = true;
   isNetworkIntel = false;
   isGeoFencing = false;
-  query: string = '';
+  query = '';
   isLoading = signal(false);
   isStealerLogLoading = signal(false);
   firstTrigger = true;
@@ -69,7 +87,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
   rankedResult: RankedCallbackModel = new RankedCallbackModel();
-  rankedApiTime: any;
+  rankedApiTime: unknown;
   showScanCard = computed(() => {
     const isLoading = this.isLoading();
     const isStealerLogLoading = this.isStealerLogLoading();
@@ -92,7 +110,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     return false;
   });
 
-  constructor(public http: HttpClient, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected selectionStore: SelectionStoreService, protected licenseService: LicenseService, protected authService: AuthService, protected externalConsolidatedFeedService: ExternalConsolidatedFeedService) {
+  constructor(public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected selectionStore: SelectionStoreService, protected licenseService: LicenseService, protected externalConsolidatedFeedService: ExternalConsolidatedFeedService) {
     this.pageCounts = {};
   }
 
@@ -108,6 +126,26 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     return (this.defacementResultCount + this.stealerlogResultCount) > 0;
   }
 
+  asGeneralResults(results: unknown[]): (GeneralResultItem | LeakResultItem)[] {
+    return results as (GeneralResultItem | LeakResultItem)[];
+  }
+
+  asAptResults(results: unknown[]): AptIntelResultItem[] {
+    return results as AptIntelResultItem[];
+  }
+
+  asExploitResults(results: unknown[]): ExploitResultItem[] {
+    return results as ExploitResultItem[];
+  }
+
+  asSocialResults(results: unknown[]): SocialResultItem[] {
+    return results as SocialResultItem[];
+  }
+
+  asChatResults(results: unknown[]): ChatResultItem[] {
+    return results as ChatResultItem[];
+  }
+
   ngAfterViewInit(): void {
     this.appService.updatePage(this.dashboardService.consolidatedParamModel.page);
     if (isRouteChanged(this.router.url, this.dashboardService.m_current_route)) {
@@ -118,7 +156,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.consolidatedCallbackModel = {
       ...this.dashboardService.consolidatedCallbackModel
-    } as ConsolidatedCallbackModel;
+    };
     this.populateGroupedResults();
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(take(1))
@@ -137,14 +175,14 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         this.firstTrigger = false;
       });
     this.route.queryParams.subscribe(params => {
-      const tab = params['tab'];
+      const tab = params.tab;
       if (tab) {
         this.onToggleMenu(tab);
       }
     });
   }
 
-  fetchSearchResults(_ = false): void {
+  fetchSearchResults(): void {
     if (this.domainScanComponent) {
       this.domainScanComponent.clearResults();
     }
@@ -169,10 +207,10 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         replaceUrl: true,
       }).then();
     }
-    const cleanedParams: any = {};
+    const cleanedParams: Record<string, unknown> = {};
     Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
       if (value != null && value !== '') {
-        cleanedParams[key] = value;
+        setOwnProperty(cleanedParams, key, value);
       }
     });
     cleanedParams.tab = this.getActiveConsolidatedTab();
@@ -196,7 +234,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     this.dashboardService.fetchConsolidatedGroupedResults('search/consolidated', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(0).pipe(map(() => response)))).subscribe(response => {
       if (response.success && response.data) {
         this.response = response.data;
-        this.consolidatedCallbackModel = this.response;
+        this.consolidatedCallbackModel = response.data;
         this.dashboardService.consolidatedCallbackModel = this.consolidatedCallbackModel;
         this.populateGroupedResults();
       }
@@ -221,7 +259,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         .subscribe(response => {
           if (response.success && response.data) {
             const seen = new Set<string>();
-            response.data.Result = response.data.Result.filter((item: any) => {
+            response.data.Result = response.data.Result.filter((item) => {
               const raw = item?.raw;
               if (!raw) {
                 return true;
@@ -240,11 +278,11 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
   }
 
-  resetFilters(_: undefined) {
-    this.fetchSearchResults(true);
+  resetFilters(): void {
+    this.fetchSearchResults();
   }
 
-  reloadFilters(_: Record<string, string | null>) {
+  reloadFilters(): void {
     this.dashboardService.consolidatedParamModel.page = 1;
     this.fetchSearchResults();
   }
@@ -289,15 +327,15 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       'news_model',
     ];
     models.forEach(model => {
-      this.groupedResults[model] = this.consolidatedCallbackModel[model]?.Result ?? [];
-      this.pageCounts[model] = this.consolidatedCallbackModel[model]?.Page_Count ?? 0;
+      setOwnProperty(this.groupedResults, model, getOwnProperty(this.consolidatedCallbackModel, model)?.Result ?? []);
+      setOwnProperty(this.pageCounts, model, getOwnProperty(this.consolidatedCallbackModel, model)?.Page_Count ?? 0);
     });
     this.externalConsolidatedFeedService.syncActorMalware(this.groupedResults, this.pageCounts);
   }
 
   onUpdateQuery(query: string) {
     this.dashboardService.consolidatedParamModel.q = query;
-    this.dashboardService.consolidatedParamModel.category = this.route.snapshot.routeConfig?.path || 'all';
+    this.dashboardService.consolidatedParamModel.category = this.route.snapshot.routeConfig?.path ?? 'all';
     this.dashboardService.consolidatedParamModel.url = '';
     this.dashboardService.consolidatedParamModel.user = '';
     this.dashboardService.consolidatedParamModel.ioc = '';
@@ -312,13 +350,6 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     else {
       return rankedCount;
     }
-  }
-
-  isIpReportExpandable(): boolean {
-    const totalWithoutDefacement = Object.entries(this.groupedResults)
-      .filter(([key]) => key !== 'defacement_model')
-      .reduce((sum, [_, list]) => sum + list.length, 0);
-    return totalWithoutDefacement == 0;
   }
 
   onSectionSelected(section: Category) {
@@ -360,25 +391,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   getCategoryFromKey(key: string): Category {
-    switch (key) {
-      case 'leak_model':
-        return Category.BREACH;
-      case 'exploit_model':
-        return Category.EXPLOIT;
-      case 'apt_model':
-      case 'malware_model':
-        return Category.APT_INTEL;
-      case 'defacement_model':
-        return Category.DEFACEMENT;
-      case 'chat_model':
-        return Category.SOCIAL;
-      case 'generic_model':
-        return Category.STRATEGIC;
-      case 'social_model':
-        return Category.SOCIAL;
-      default:
-        return Category.BREACH;
-    }
+    return getOwnProperty(CATEGORY_BY_KEY, key) ?? Category.BREACH;
   }
 
   onToggleMenu(tab: string, clearQuery = false): void {
@@ -448,7 +461,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   private restoreDeepSearchQuery(): void {
     const snapshotParams = this.route.snapshot.queryParams;
-    const querySource = this.dashboardService.consolidatedParamModel.q || this.query || snapshotParams['q'];
+    const querySource = this.dashboardService.consolidatedParamModel.q || this.query || snapshotParams.q;
     if (!querySource) {
       return;
     }
@@ -465,30 +478,23 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   hasIOCs(): boolean {
     const categories = this.appService.configData().localSettings.entityfilterCategories;
-    return Object.values(categories).some((arr: any) => Array.isArray(arr) && arr.length > 0);
-  }
-
-  shouldShowSection(): boolean {
-    const totalResults = this.getTotalResultCount();
-    const hasAnyData = totalResults > 0;
-    if (!this.checkMember()) {
-      return hasAnyData;
-    }
-    return hasAnyData && this.hasIOCs();
+    return Object.values(categories).some((arr) => Array.isArray(arr) && arr.length > 0);
   }
 
   isEmailOrUrl(query: string): boolean {
     if (!query) {
       return false;
     }
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const urlRegex = /^(https?:\/\/|www\.|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(?:[/?#][^\s]*)?$/i;
-    if (emailRegex.test(query)) {
+    if (isEmailAddress(query)) {
       return true;
     }
-    if (urlRegex.test(query)) {
-      return true;
+    try {
+      const candidate = query.startsWith('http://') || query.startsWith('https://') ? query : `https://${query}`;
+      const url = new URL(candidate);
+      return (url.protocol === 'http:' || url.protocol === 'https:') && isDomainName(url.hostname);
     }
-    return false;
+    catch {
+      return false;
+    }
   }
 }

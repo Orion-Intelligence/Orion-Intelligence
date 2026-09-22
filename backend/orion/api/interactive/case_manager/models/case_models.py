@@ -2,6 +2,7 @@ from datetime import datetime
 import re
 from typing import List
 from typing import Optional
+from urllib.parse import urlparse
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -30,11 +31,6 @@ def validate_other_value(selected_value, other_value: str, field_name: str) -> N
 
 class CaseRequestModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
-
-class ArtifactReportOption(BaseModel):
-    id: str
-    title: str
 
 
 class SocialMediaProfileModel(CaseRequestModel):
@@ -147,6 +143,28 @@ class CaseTaskModel(CaseRequestModel):
     artifactIds: List[str] = Field(default_factory=list)
 
 
+class CaseCommunicationModel(CaseRequestModel):
+    name: str
+    url: str
+
+    @field_validator("name")
+    @classmethod
+    def validate_communication_name(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Communication name is required")
+        return value
+
+    @field_validator("url")
+    @classmethod
+    def validate_communication_url(cls, value: str) -> str:
+        value = value.strip()
+        parsed = urlparse(value)
+        if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+            raise ValueError("Communication URL must be a valid http or https address")
+        return value
+
+
 class CaseLinkModel(CaseRequestModel):
     targetCaseId: str
     relationship: CaseLinkRelationship = Field(default=CaseLinkRelationship.RELATED)
@@ -167,8 +185,32 @@ class CaseClosureModel(CaseRequestModel):
         return self
 
 
-class CreateCaseRequest(CaseRequestModel):
-    caseId: str
+def validate_case_primary_entity(model):
+    validate_other_value(model.caseType, model.caseTypeOtherValue, "Case type")
+    validate_other_value(
+        model.intakeSource, model.intakeSourceOtherValue, "Intake source"
+    )
+
+    if not model.entities:
+        raise ValueError("At least one case entity is required")
+
+    primary_entity = next(
+        (
+            entity
+            for entity in model.entities
+            if entity.entityId == model.primaryEntityId
+        ),
+        None,
+    )
+    if not primary_entity:
+        raise ValueError("Primary entity ID must match one of the case entities")
+    if primary_entity.role != EntityRole.PRIMARY:
+        raise ValueError("Primary entity must have role primary")
+
+    return model
+
+
+class CaseMutationRequest(CaseRequestModel):
     title: str
     description: str = ""
     caseType: CaseType = Field(default=CaseType.OTHER)
@@ -183,10 +225,18 @@ class CreateCaseRequest(CaseRequestModel):
     assignedAnalystIds: List[str] = Field(default_factory=list)
     artifacts: List[CaseArtifactModel] = Field(default_factory=list)
     entities: List[CaseEntityModel] = Field(default_factory=list)
-    comments: List[CaseCommentModel] = Field(default_factory=list)
     tasks: List[CaseTaskModel] = Field(default_factory=list)
     linkedCases: List[CaseLinkModel] = Field(default_factory=list)
     closure: Optional[CaseClosureModel] = None
+
+    @model_validator(mode="after")
+    def validate_primary_entity(self):
+        return validate_case_primary_entity(self)
+
+
+class CreateCaseRequest(CaseMutationRequest):
+    caseId: str
+    comments: List[CaseCommentModel] = Field(default_factory=list)
 
     @field_validator("caseId", "title", "primaryEntityId")
     @classmethod
@@ -196,51 +246,9 @@ class CreateCaseRequest(CaseRequestModel):
             raise ValueError("Case ID, title, and primary entity ID are required")
         return value
 
-    @model_validator(mode="after")
-    def validate_primary_entity(self):
-        validate_other_value(self.caseType, self.caseTypeOtherValue, "Case type")
-        validate_other_value(
-            self.intakeSource, self.intakeSourceOtherValue, "Intake source"
-        )
 
-        if not self.entities:
-            raise ValueError("At least one case entity is required")
-
-        primary_entity = next(
-            (
-                entity
-                for entity in self.entities
-                if entity.entityId == self.primaryEntityId
-            ),
-            None,
-        )
-        if not primary_entity:
-            raise ValueError("Primary entity ID must match one of the case entities")
-        if primary_entity.role != EntityRole.PRIMARY:
-            raise ValueError("Primary entity must have role primary")
-
-        return self
-
-
-class UpdateCaseRequest(CaseRequestModel):
-    title: str
-    description: str = ""
-    caseType: CaseType = Field(default=CaseType.OTHER)
-    caseTypeOtherValue: str = ""
-    status: CaseStatus = Field(default=CaseStatus.NEW)
-    severity: Severity = Field(default=Severity.LOW)
-    priority: Priority = Field(default=Priority.LOW)
-    intakeSource: IntakeSource = Field(default=IntakeSource.MANUAL)
-    intakeSourceOtherValue: str = ""
-    tags: List[CaseTag] = Field(default_factory=list)
-    primaryEntityId: str
-    assignedAnalystIds: List[str] = Field(default_factory=list)
-    artifacts: List[CaseArtifactModel] = Field(default_factory=list)
-    entities: List[CaseEntityModel] = Field(default_factory=list)
-    tasks: List[CaseTaskModel] = Field(default_factory=list)
+class UpdateCaseRequest(CaseMutationRequest):
     comments: Optional[List[CaseCommentModel]] = None
-    linkedCases: List[CaseLinkModel] = Field(default_factory=list)
-    closure: Optional[CaseClosureModel] = None
 
     @field_validator("title", "primaryEntityId")
     @classmethod
@@ -250,38 +258,13 @@ class UpdateCaseRequest(CaseRequestModel):
             raise ValueError("Title and primary entity ID are required")
         return value
 
-    @model_validator(mode="after")
-    def validate_primary_entity(self):
-        validate_other_value(self.caseType, self.caseTypeOtherValue, "Case type")
-        validate_other_value(
-            self.intakeSource, self.intakeSourceOtherValue, "Intake source"
-        )
-
-        if not self.entities:
-            raise ValueError("At least one case entity is required")
-
-        primary_entity = next(
-            (
-                entity
-                for entity in self.entities
-                if entity.entityId == self.primaryEntityId
-            ),
-            None,
-        )
-        if not primary_entity:
-            raise ValueError("Primary entity ID must match one of the case entities")
-        if primary_entity.role != EntityRole.PRIMARY:
-            raise ValueError("Primary entity must have role primary")
-
-        return self
-
 
 class CaseResponse(BaseModel):
     id: str
     viewerId: str = ""
     viewerRole: str = ""
     caseId: str
-    tenant_uuid: str
+    tenant_id: str
     assignedAnalysts: List[dict] = Field(default_factory=list)
     title: str
     description: str = ""
@@ -308,6 +291,7 @@ class CaseResponse(BaseModel):
     comments: List[dict] = Field(default_factory=list)
     tasks: List[dict] = Field(default_factory=list)
     linkedCases: List[dict] = Field(default_factory=list)
+    communications: List[dict] = Field(default_factory=list)
     closure: Optional[dict] = None
 
 
@@ -379,7 +363,7 @@ class CaseStatusBoardConfig(BaseModel):
             raise ValueError("At least one status is required")
 
         values = [item.value.lower() for item in self.statuses]
-        labels = [(item.label or (item.value).replace("_", " ").replace("-", " ").title()).strip().lower() for item in self.statuses]
+        labels = [(item.label or item.value.replace("_", " ").replace("-", " ").title()).strip().lower() for item in self.statuses]
         if len(values) != len(set(values)):
             raise ValueError("Duplicate status keys are not allowed")
         if len(labels) != len(set(labels)):

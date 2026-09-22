@@ -1,6 +1,6 @@
 import hashlib
-import logging
 import threading
+import traceback
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, Depends, Request
@@ -19,8 +19,7 @@ from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_
 from orion.services.session_manager.session_manager import session_manager
 from orion.services.mail_manager.mail_manager import mail_manager
 from orion.helper_manager.env_handler import env_handler
-
-logger = logging.getLogger(__name__)
+from orion.services.log_manager.log_controller import log
 
 
 class auth_manager:
@@ -53,15 +52,16 @@ class auth_manager:
     @staticmethod
     async def login(mail: str, password: str, free=False, tenant_id=None, client: str = "web"):
         user = await auth_manager.get_instance().authenticate_user(mail, password)
-        if not user:
+        if user is None:
             raise HTTPException(status_code=401, detail="Invalid user or password")
         if user.status == UserStatus.DISABLE:
             raise HTTPException(status_code=401, detail="Account Blocked")
         
         if str(client or "").strip().lower() == session_manager.EXTENSION_SESSION_CLIENT:
-            tenant_id = getattr(user, "tenant_uuid", None)
+            tenant_id = getattr(user, "tenant_id", None)
             
         session_manager.ensure_user_tenant_access(user, tenant_id)
+        await session_manager.get_instance().get_parent_tenant(user.tenant_id)
 
         requested_tenant_id = session_manager.tenant_identifier(tenant_id)
         if user.twofa_enabled:
@@ -85,7 +85,7 @@ class auth_manager:
                 return {"twofa_required": True, "temp_token": temp_token, "provisioning_uri": provisioning_uri, "twofa_secret": secret, "username": user.username}
 
         engine = mongo_controller.get_instance().get_engine()
-        maintainer_user = await engine.find_one(db_user_account, (db_user_account.tenant_uuid == user.tenant_uuid) & (db_user_account.licenses == LicenseName.MAINTAINER))
+        maintainer_user = await engine.find_one(db_user_account, (db_user_account.tenant_id == user.tenant_id) & (db_user_account.licenses == LicenseName.MAINTAINER))
         if not maintainer_user:
                 raise HTTPException(status_code=401, detail="Maintainer user not found")
         role_name = (getattr(user.role, "value", str(user.role))).split(".")[-1].lower()
@@ -93,17 +93,17 @@ class auth_manager:
         if isinstance(acct_at, datetime):
             acct_at = acct_at if acct_at.tzinfo else acct_at.replace(tzinfo=timezone.utc)
 
-        if not getattr(user, "tenant_uuid", None):
+        if not getattr(user, "tenant_id", None):
             raise HTTPException(status_code=401, detail="account not found")
         tenant = await engine.find_one(
-            db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
+            db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_id))
         if tenant and not tenant.verified:
             raise HTTPException(status_code=401, detail="account approval pending")
-        if tenant and tenant.status == TenantStatus.DISABLE:
-            raise HTTPException(status_code=401, detail="account blocked")
+        parent_tenant = await session_manager.get_instance().get_parent_tenant(user.tenant_id)
+        await session_manager.get_instance().ensure_quota_access(user)
 
         if (role_name == "member" and not bool(getattr(user, "subscription", False)) and acct_at is not None and (
-                datetime.now(timezone.utc) - acct_at).days >= 30):
+                datetime.now(timezone.utc) - acct_at).days >= 30 and not await session_manager.get_instance().parent_has_subscription(parent_tenant)):
             raise HTTPException(status_code=402, detail="Trial expired. Please subscribe to continue")
 
         if role_name == "member" and user.status != UserStatus.ACTIVE:
@@ -126,12 +126,12 @@ class auth_manager:
             data=token_data, expires_delta=access_token_expires, free=free)
 
         await AuditLogManager.get_instance().register(
-            str(user.tenant_uuid), str(user.id), "User login")
+            str(user.tenant_id), str(user.id), "User login")
 
-        onboarding_exists = await session_manager.get_instance().has_onboarding(str(user.tenant_uuid))
+        onboarding_exists = await session_manager.get_instance().has_onboarding(str(user.tenant_id))
 
         session_data = {"role": role, "username": user.username, "status": user.status, "hasOnboarding": onboarding_exists, "subscription": user.subscription, "verificationDate": user.account_verify_at, "licenses": [
-            license.value for license in user.licenses], "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": reset_token, }
+            user_license.value for user_license in user.licenses], "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": reset_token, }
 
 
         return {"access_token": access_token, "token_type": "bearer", "session": session_data, }  # nosec B105
@@ -148,7 +148,7 @@ class auth_manager:
             raise HTTPException(status_code=400, detail="Verification link expired")
 
         tenant = await engine.find_one(
-            db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
+            db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_id))
         if not tenant:
             raise HTTPException(status_code=404, detail="Tenant not found")
 
@@ -162,7 +162,7 @@ class auth_manager:
         await engine.save(user)
 
         await AuditLogManager.get_instance().register(
-            str(user.tenant_uuid), str(user.id), "User verified")
+            str(user.tenant_id), str(user.id), "User verified")
 
         if constant.mail_template is not None:
             html_content = constant.mail_template.render(
@@ -183,7 +183,7 @@ class auth_manager:
             to=user.email,
             subject=MailSubject.TENANT_ACCESS.value,
             body=html_content,
-            tenant_id=str(user.tenant_uuid))
+            tenant_id=str(user.tenant_id))
 
         return {
             "message": "Email verified successfully. You may continue onboarding.",
@@ -219,7 +219,7 @@ class auth_manager:
         await engine.save(user)
 
         await AuditLogManager.get_instance().register(
-            str(user.tenant_uuid), str(user.id), "Password updated")
+            str(user.tenant_id), str(user.id), "Password updated")
 
         return {"message": "Password reset successfully."}
 
@@ -236,7 +236,7 @@ class auth_manager:
                     raise HTTPException(status_code=403, detail="Account is not active")
 
                 tenant = await engine.find_one(
-                    db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
+                    db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_id))
                 if not tenant:
                     raise HTTPException(status_code=404, detail="Tenant not found")
 
@@ -244,7 +244,7 @@ class auth_manager:
                     user, reset_twofa=reset_twofa)
                 await engine.save(user)
                 await AuditLogManager.get_instance().register(
-                    str(user.tenant_uuid), str(user.id), "Password reset requested")
+                    str(user.tenant_id), str(user.id), "Password reset requested")
 
                 app_url = env_handler.get_instance().env("APP_URL")
                 forgot_url = TenantManager.build_tenant_url(
@@ -257,9 +257,9 @@ class auth_manager:
                     url=forgot_url)
                 await mail_manager.get_instance().send_verification_mail(
                     to=user.email, subject=MailSubject.ACCOUNT_RECOVERY.value,
-                    body=html_content, tenant_id=str(user.tenant_uuid))
+                    body=html_content, tenant_id=str(user.tenant_id))
             except Exception:
-                logger.exception("Password reset email could not be sent")
+                log.g().e("Password reset email could not be sent: " + traceback.format_exc().strip())
 
         return {"message": "If the email is registered, a password reset email has been sent."}
 
@@ -273,7 +273,7 @@ class auth_manager:
             try:
                 await auth_manager.forgot_password(user.email, tenant_id, reset_twofa=True)
             except Exception:
-                logger.exception("Account recovery email could not be sent")
+                log.g().e("Account recovery email could not be sent: " + traceback.format_exc().strip())
         return {"message": "If the recovery details are valid, a password reset email has been sent."}
 
     @staticmethod
@@ -295,7 +295,7 @@ class auth_manager:
         await engine.save(user)
 
         await AuditLogManager.get_instance().register(
-            str(user.tenant_uuid), str(user.id), "User status updated")
+            str(user.tenant_id), str(user.id), "User status updated")
 
         if old_status != "onboarding" and new_status == "onboarding":
             await mail_manager.get_instance().send_verification_mail(
@@ -303,6 +303,6 @@ class auth_manager:
                 subject="Your account has been approved",
                 body=f"Hi {user.username},\n\nYour account is now approved. "
                      f"You can log in and start onboarding.\n\nBest regards,\nTeam",
-                tenant_id=str(user.tenant_uuid))
+                tenant_id=str(user.tenant_id))
 
         return user

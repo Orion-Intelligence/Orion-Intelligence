@@ -1,16 +1,3 @@
-const platformColorCache = new Map<string, string>();
-export function getPlatformColor(platformName: string): string {
-  if (platformColorCache.has(platformName)) {
-    return platformColorCache.get(platformName)!;
-  }
-  let hash = 0;
-  for (let i = 0; i < platformName.length; i++) {
-    hash = platformName.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const color = `hsl(${hash % 360}, 50%, 40%)`;
-  platformColorCache.set(platformName, color);
-  return color;
-}
 export function formatFollowers(count?: number): string {
   if (count === undefined) {
     return 'N/A';
@@ -28,10 +15,10 @@ export function formatKey(key: string): string {
     .replace(/_/g, ' ')
     .replace(/(?:^|\s)\S/g, (a) => a.toUpperCase());
 }
-export function isUrl(value: any): boolean {
+export function isUrl(value: unknown): boolean {
   return typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://'));
 }
-export function isImageUrl(value: any): boolean {
+export function isImageUrl(value: unknown): boolean {
   if (typeof value !== 'string') {
     return false;
   }

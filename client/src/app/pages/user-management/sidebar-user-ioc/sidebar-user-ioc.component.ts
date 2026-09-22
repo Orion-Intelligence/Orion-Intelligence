@@ -1,15 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { ApiService } from '../../../shared/services/api.service';
 import { AppService } from '../../../services/core/app/app.service';
 import { search_filter_labels } from '../../../shared/constants/shared-enums';
 import { TenantModel } from '../../../shared/model/tenant/tenant.model';
-import { TenantIocSelectorComponent } from '../../../shared/components/tenant-ioc-selector/tenant-ioc-selector.component';
+import { TenantIocSelectorComponent } from '../../../shared/partials/tenant-ioc-selector/tenant-ioc-selector.component';
+import { getOwnProperty } from '../../../shared/utils/type-guards.util';
+import { isTenantIocPrivileged } from '../ioc-privilege.util';
+
 
 @Component({
   selector: 'app-sidebar-user-ioc',
   imports: [CommonModule, TenantIocSelectorComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './sidebar-user-ioc.component.html',
 })
 export class SidebarUserIocComponent implements OnInit {
@@ -40,7 +44,7 @@ export class SidebarUserIocComponent implements OnInit {
           const backendIoc = backendData.iocs.find(i => i.ioc_id === key);
           return {
             ioc_id: key,
-            name: search_filter_labels[key] || key,
+            name: getOwnProperty(search_filter_labels, key) || key,
             values: backendIoc ? backendIoc.values : []
           };
         })
@@ -51,10 +55,7 @@ export class SidebarUserIocComponent implements OnInit {
   }
 
   isPrivilegedIoc(): boolean {
-    const tenantPrivileged = this.appService.tenantData().privileged_ioc;
-    return tenantPrivileged === undefined
-      ? this.appService.userSessionData().tenant.privilegedIoc !== true
-      : tenantPrivileged !== true;
+    return isTenantIocPrivileged(this.appService);
   }
 
   update(): void {
@@ -69,7 +70,7 @@ export class SidebarUserIocComponent implements OnInit {
     this.appService.tenantData.set({ ...this.appService.tenantData(), ...filteredOnboardingData });
     this.apiService.post('update/tenants', filteredOnboardingData).subscribe({
       next: () => void 0,
-      error: (_err) => void 0,
+      error: () => void 0,
     });
   }
 

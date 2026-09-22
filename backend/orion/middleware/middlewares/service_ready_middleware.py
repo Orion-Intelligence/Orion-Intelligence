@@ -1,4 +1,4 @@
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, RedirectResponse
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from orion.management.managers.service_manager import service_manager
@@ -16,8 +16,10 @@ class service_ready_middleware:
         )
         return (
             path == "/"
+            or path == "/static/maintenance.html"
             or path == "/robots.txt"
             or path.startswith("/assets/")
+            or path.startswith("/extensions/")
             or path.startswith("/api/s/static/")
             or path.endswith(frontend_files)
         )
@@ -28,6 +30,19 @@ class service_ready_middleware:
             return
 
         path = scope.get("path", "")
+        headers = dict(scope.get("headers", []))
+        browser_navigation = (
+            scope.get("method") in {"GET", "HEAD"}
+            and b"text/html" in headers.get(b"accept", b"")
+            and headers.get(b"x-requested-with", b"") != b"XMLHttpRequest"
+        )
+        if not service_manager.get_instance().check_status() and (
+            path == "/" or (browser_navigation and not self._can_serve_before_services(path))
+        ):
+            response = RedirectResponse(url="/static/maintenance.html", status_code=307)
+            await response(scope, receive, send)
+            return
+
         if not service_manager.get_instance().check_status() and not self._can_serve_before_services(path):
             response = JSONResponse(status_code=503, content={"detail": "Service Not Ready"})
             await response(scope, receive, send)

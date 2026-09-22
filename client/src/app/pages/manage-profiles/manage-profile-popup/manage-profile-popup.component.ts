@@ -1,0 +1,190 @@
+import { Component, input, output, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { finalize, Observable } from 'rxjs';
+import { UiDropdownComponent, UiDropdownOption } from '../../../shared/partials/ui-dropdown/ui-dropdown.component';
+import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
+import { ManageProfilesService } from '../manage-profiles.service';
+import { PlatformEntry, SessionEntry, SocialPersona, SocialPersonaCreateRequest, SocialPlatform, SocialProfile, SocialProfileConnectRequest, SocialProfilePurpose } from '../model/manage-profiles.model';
+import { CaseEditDrawerComponent } from '../../user-management/sidebar-user-case-management/model/case-details/case-edit-drawer/case-edit-drawer';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { getOwnProperty } from '../../../shared/utils/type-guards.util';
+import { safePlatform } from '../manage-profiles.util';
+
+import { ManageProfilePopupMode, ManageProfilePopupSaveEvent } from '../model/manage-profiles.interfaces.model';
+
+@Component({
+  selector: 'app-manage-profile-popup',
+  standalone: true,
+  imports: [FormsModule, UiDropdownComponent, CaseEditDrawerComponent, TranslatePipe],
+  templateUrl: './manage-profile-popup.component.html',
+})
+export class ManageProfilePopupComponent {
+  readonly mode = input.required<ManageProfilePopupMode>();
+  readonly persona = input<SocialPersona | null>(null);
+  readonly profile = input<SocialProfile | null>(null);
+  readonly platforms = input<PlatformEntry[]>([]);
+  readonly sessions = input<Record<string, SessionEntry[]>>({});
+  readonly profiles = input<SocialProfile[]>([]);
+  readonly personas = input<SocialPersona[]>([]);
+  readonly closed = output<void>();
+  readonly saved = output<ManageProfilePopupSaveEvent>();
+  readonly sessionsRequested = output<void>();
+  readonly saving = signal(false);
+  readonly formError = signal('');
+  readonly personaForm = signal<SocialPersonaCreateRequest>({ name: '', age_group: '18-24', gender: 'unspecified', country: '', city: '', interests: [] });
+  readonly profileForm = signal<SocialProfileConnectRequest>({ platform: '', session_id: '', profile_name: '', profile_username: '', purposes: [], persona_id: '' });
+  readonly ageGroups: UiDropdownOption[] = ['13-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map(value => ({ key: value, label: value }));
+  readonly genders: UiDropdownOption[] = [{ key: 'male', label: 'Male' }, { key: 'female', label: 'Female' }, { key: 'unspecified', label: 'Unspecified' }];
+  readonly interests: UiDropdownOption[] = ['Animals', 'Comedy', 'Travel', 'Food', 'Sports', 'Beauty & Style', 'Art', 'Gaming', 'Science & Education', 'Dance', 'DIY', 'Auto', 'Music', 'Life Hacks', 'Oddly Satisfying', 'Outdoors', 'Fandom'].map(value => ({ key: value, label: value }));
+  readonly purposes: UiDropdownOption[] = [{ key: 'posting', label: 'Posting' }, { key: 'ad_monitoring', label: 'Ad Monitoring' }];
+
+  constructor(private service: ManageProfilesService, private notification: MessageNotificationService) {}
+
+  ngOnInit(): void {
+    const persona = this.persona();
+    const profile = this.profile();
+    if (persona) {
+      this.personaForm.set({
+        name: persona.name,
+        age_group: persona.age_group,
+        gender: persona.gender,
+        country: persona.country ?? '',
+        city: persona.city ?? '',
+        interests: [...(persona.interests || []).slice(0, 3)],
+      });
+    }
+    if (profile) {
+      this.profileForm.set({
+        platform: profile.platform,
+        session_id: profile.session_id ?? '',
+        profile_name: profile.profile_name ?? '',
+        profile_username: profile.profile_username ?? '',
+        purposes: [...(profile.purposes || [])],
+        persona_id: profile.assigned_persona_id ?? '',
+      });
+    }
+  }
+
+  close(): void {
+    if (!this.saving()) {
+      this.closed.emit();
+    }
+  }
+
+  save(): void {
+    if (this.mode() === 'persona') {
+      this.savePersona();
+      return;
+    }
+    this.saveProfile();
+  }
+
+  onPersonaField(field: keyof SocialPersonaCreateRequest, value: string | string[]): void {
+    this.personaForm.update(form => ({ ...form, [field]: value }));
+  }
+
+  onInterestChange(values: string[]): void {
+    if (values.length > 3) {
+      this.notification.show('You can select up to 3 interests');
+    }
+    this.personaForm.update(form => ({ ...form, interests: values.slice(0, 3) }));
+  }
+
+  onProfilePlatform(value: string | null): void {
+    this.profileForm.update(form => ({ ...form, platform: safePlatform(value ?? '') as SocialPlatform, session_id: '' }));
+  }
+
+  onProfileSession(value: string | null): void {
+    this.profileForm.update(form => ({ ...form, session_id: value ?? '' }));
+  }
+
+  onProfilePurposes(values: string[]): void {
+    this.profileForm.update(form => ({ ...form, purposes: values as SocialProfilePurpose[] }));
+  }
+
+  onProfilePersona(value: string | null): void {
+    this.profileForm.update(form => ({ ...form, persona_id: value ?? '' }));
+  }
+
+  personaOptions(): UiDropdownOption[] {
+    return this.personas().map(persona => ({ key: persona.persona_id, label: persona.name }));
+  }
+
+  platformOptions(): UiDropdownOption[] {
+    return this.platforms()
+      .map(entry => ({ key: safePlatform(entry.platform), label: entry.platform }))
+      .filter((option, index, values) => !!option.key && values.findIndex(item => item.key === option.key) === index);
+  }
+
+  availableSessionOptions(): UiDropdownOption[] {
+    const platform = this.profileForm().platform;
+    if (!platform) {
+      return [];
+    }
+    const currentProfileId = this.profile()?.profile_id ?? '';
+    const regularProfiles = this.profiles().filter(p => !(p.purposes || []).includes('hate_speech_monitoring'));
+    const used = new Set(regularProfiles.filter(profile => profile.profile_id !== currentProfileId).map(profile => profile.session_id).filter(Boolean));
+
+    return (getOwnProperty(this.sessions(), platform) ?? [])
+      .filter(session => !used.has(session.id))
+      .map(session => ({ key: session.id, label: `Session #${session.id.slice(0, 8)} - ${new Date(session.capturedAt).toLocaleString()}` }));
+  }
+
+  adultStatusLabel(): string {
+    return this.personaForm().age_group === '13-17' ? 'Minor' : 'Adult';
+  }
+
+  selectedPlatformEmptyText(): string {
+    const platform = this.profileForm().platform;
+    return platform ? `No available ${this.platformLabel(platform)} sessions. Add a session first.` : 'Select a platform to view available sessions.';
+  }
+
+  title(): string {
+    return this.mode() === 'persona' ? (this.persona() ? 'Edit Persona' : 'Add Persona') : (this.profile() ? 'Edit Account' : 'Add Account');
+  }
+
+  private savePersona(): void {
+    const form = this.personaForm();
+    if (!form.name.trim()) {
+      this.formError.set('Persona name is required');
+      return;
+    }
+    this.saving.set(true);
+    const personaId = this.persona()?.persona_id ?? '';
+    const request = personaId ? this.service.updatePersona(personaId, form) : this.service.createPersona(form);
+    this.submitSaveRequest(request, 'persona', 'Failed to save persona');
+  }
+
+  private submitSaveRequest(request: Observable<unknown>, savedKind: ManageProfilePopupSaveEvent, errorMessage: string): void {
+    request.pipe(finalize(() => {
+      this.saving.set(false);
+    })).subscribe({
+      next: () => {
+        this.saved.emit(savedKind);
+      },
+      error: (error) => {
+        this.formError.set(error?.error?.detail ?? errorMessage);
+      },
+    });
+  }
+
+  private saveProfile(): void {
+    const form = this.profileForm();
+    if (!form.platform || !form.session_id) {
+      this.formError.set('Select a platform and available session');
+      return;
+    }
+    if ((form.purposes || []).length === 0) {
+      this.formError.set('Select at least one action or purpose');
+      return;
+    }
+    this.saving.set(true);
+    const profileId = this.profile()?.profile_id ?? '';
+    const request = profileId ? this.service.updateProfile(profileId, form) : this.service.connectProfile(form);
+    this.submitSaveRequest(request, 'profile', 'Failed to save profile');
+  }
+
+  private platformLabel(platform: string): string {
+    return this.platforms().find(entry => safePlatform(entry.platform) === platform)?.platform ?? platform;
+  }
+}

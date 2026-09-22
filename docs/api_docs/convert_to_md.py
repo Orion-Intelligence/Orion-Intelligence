@@ -20,10 +20,12 @@ def main():
     ns = {"__builtins__": {"True": True, "False": False, "None": None}}
     exec(text, ns)
 
-    SYSTEM_INFO_DOCS = ns.get("SYSTEM_INFO_DOCS", {})
-    REPORT_DOCS = ns.get("REPORT_DOCS", {})
-    SEARCH_DOCS = ns.get("SEARCH_DOCS", {})
-    DYNAMIC_DOCS = ns.get("DYNAMIC_DOCS", {})
+    SYSTEM_INFO_DOCS: dict = ns.get("SYSTEM_INFO_DOCS", {})
+    REPORT_DOCS: dict = ns.get("REPORT_DOCS", {})
+    SEARCH_DOCS: dict = ns.get("SEARCH_DOCS", {})
+    DYNAMIC_DOCS: dict = ns.get("DYNAMIC_DOCS", {})
+    SOCIAL_DOCS: dict = ns.get("SOCIAL_DOCS", {})
+    EXTENSION_DOCS: dict = ns.get("EXTENSION_DOCS", {})
 
     if out_dir.exists():
         shutil.rmtree(out_dir)
@@ -31,12 +33,12 @@ def main():
 
     (out_dir / "source_docs.py").write_text(text, encoding="utf-8")
 
-    def write_endpoint(section: str, prefix: str, key: str, doc: dict):
+    def write_endpoint(section: str, prefix: str, key: str, endpoint_doc: dict):
         sec = out_dir / section
         sec.mkdir(parents=True, exist_ok=True)
         md_path = sec / f"{key}.md"
-        desc = (doc.get("description") or "").rstrip()
-        resp = (doc.get("response_description") or "").rstrip()
+        desc = (endpoint_doc.get("description") or "").rstrip()
+        resp = (endpoint_doc.get("response_description") or "").rstrip()
         md = f"# {prefix}: {key}\n\n## Description\n\n{desc}\n\n## Response\n\n{resp}\n"
         md_path.write_text(md, encoding="utf-8")
 
@@ -48,6 +50,10 @@ def main():
         write_endpoint("search", "Search", k, v)
     for k,v in DYNAMIC_DOCS.items():
         write_endpoint("dynamic", "Dynamic", k, v)
+    for k,v in SOCIAL_DOCS.items():
+        write_endpoint("social", "Social", k, v)
+    for k,v in EXTENSION_DOCS.items():
+        write_endpoint("extension", "Extension", k, v)
 
     # ALL.md
     parts = []
@@ -56,6 +62,8 @@ def main():
         ("Reports", REPORT_DOCS),
         ("Search", SEARCH_DOCS),
         ("Dynamic", DYNAMIC_DOCS),
+        ("Social", SOCIAL_DOCS),
+        ("Extension", EXTENSION_DOCS),
     ]:
         parts.append(f"# {section_name}\n")
         for k, doc in dct.items():

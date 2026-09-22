@@ -1,5 +1,5 @@
 @if (visible) {
-  <svg class="tour-overlay fixed inset-0 z-[1000] h-full w-full pointer-events-auto transition-all duration-300" data-testid="demo-tour-overlay" preserveAspectRatio="none" aria-hidden="true">
+  <svg class="tour-overlay pointer-events-auto fixed inset-0 z-[1000] h-full w-full opacity-100 transition-all duration-300 [will-change:opacity] [.light-theme_&]:!opacity-[96%]" data-testid="demo-tour-overlay" preserveAspectRatio="none" aria-hidden="true">
     <defs>
       <mask id="tour-overlay-mask">
         <rect x="0" y="0" width="100%" height="100%" fill="white"></rect>
@@ -8,108 +8,96 @@
           </rect>
         }
       </mask>
-      <radialGradient id="tour-overlay-glow" cx="50%" cy="50%" r="72%">
-        <stop offset="0%" stop-color="rgba(18, 35, 28, 0.22)"></stop>
-        <stop offset="55%" stop-color="rgba(5, 10, 8, 0.7)"></stop>
-        <stop offset="100%" stop-color="rgba(2, 6, 5, 0.9)"></stop>
+      <radialGradient id="tour-overlay-glow" gradientUnits="userSpaceOnUse" color-interpolation="sRGB" [attr.cx]="cutoutRects.length ? cutoutRects[0].left + (cutoutRects[0].width / 2) : '50%'" [attr.cy]="cutoutRects.length ? cutoutRects[0].top + (cutoutRects[0].height / 2) : '50%'" [attr.fx]="cutoutRects.length ? cutoutRects[0].left + (cutoutRects[0].width / 2) : '50%'" [attr.fy]="cutoutRects.length ? cutoutRects[0].top + (cutoutRects[0].height / 2) : '50%'" r="112%">
+        <stop offset="0%" stop-color="rgba(0, 3, 12, 0.94)"></stop>
+        <stop offset="100%" stop-color="rgba(20, 54, 88, 0.66)"></stop>
       </radialGradient>
-      <linearGradient id="tour-spotlight-fill" x1="0" y1="0" x2="0" y2="1">
-        <stop class="tour-spotlight-fill-stop-start" offset="0%"></stop>
-        <stop offset="72%" stop-color="transparent"></stop>
+      <linearGradient id="tour-reveal-fill" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="rgba(52, 211, 153, 0.16)"></stop>
+        <stop offset="55%" stop-color="rgba(16, 185, 129, 0.1)"></stop>
+        <stop offset="100%" stop-color="rgba(5, 150, 105, 0.06)"></stop>
       </linearGradient>
-      <filter id="tour-spotlight-glow" x="-20%" y="-20%" width="140%" height="140%">
-        <feDropShadow class="tour-spotlight-glow-shadow" dx="0" dy="0" stdDeviation="8"></feDropShadow>
-      </filter>
     </defs>
     <rect x="0" y="0" width="100%" height="100%" fill="url(#tour-overlay-glow)" mask="url(#tour-overlay-mask)"></rect>
     @for (cutout of cutoutRects; track $index) {
-      <rect class="tour-spotlight-svg" [class.tour-spotlight-reveal-a]="spotlightRevealVariant === 0" [class.tour-spotlight-reveal-b]="spotlightRevealVariant === 1" [attr.x]="cutout.left" [attr.y]="cutout.top" [attr.width]="cutout.width" [attr.height]="cutout.height" [attr.rx]="cutout.rx" [attr.ry]="cutout.ry" fill="url(#tour-spotlight-fill)" filter="url(#tour-spotlight-glow)">
-      </rect>
+      <rect class="pointer-events-none" [attr.x]="cutout.left" [attr.y]="cutout.top" [attr.width]="cutout.width" [attr.height]="cutout.height" [attr.rx]="cutout.rx" [attr.ry]="cutout.ry" fill="url(#tour-reveal-fill)"></rect>
+      @if ($first && showDashboardSpotlightBorder) {
+        <rect class="pointer-events-none" [attr.x]="cutout.left" [attr.y]="cutout.top" [attr.width]="cutout.width" [attr.height]="cutout.height" [attr.rx]="cutout.rx" [attr.ry]="cutout.ry" fill="none" stroke="rgba(181, 215, 242, 0.16)" stroke-width="1" vector-effect="non-scaling-stroke"></rect>
+      }
     }
   </svg>
 }
 @if (visible && (stepReady || loadingVisible)) {
-  <div class="tour-tooltip fixed z-[1002] overflow-hidden border border-white/12 text-white shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-300" data-testid="demo-tour-tooltip">
-    <div class="relative w-full rounded-[calc(var(--tour-tooltip-radius)-0.1rem)] bg-[linear-gradient(180deg,rgba(255,255,255,0.018),transparent_28%),linear-gradient(180deg,transparent_0%,rgba(255,255,255,0.006)_100%)] p-4">
-      <div class="mb-3 grid">
-        <div class="tour-state-layer tour-state-layer-ready col-start-1 row-start-1" [class.is-active]="stepReady">
-          <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0">
-              <div class="mb-2 inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]/80 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-blue-640)]" data-testid="demo-tour-step">
-                <span class="h-1.5 w-1.5 rounded-full bg-[var(--color-blue-640)] shadow-[0_0_14px_rgba(87,165,235,0.5)]"></span>
-                {{ 'Step' | translate }} {{ currentIndex + 1 }} / {{ totalSteps }}
-              </div>
-              <h3 class="text-lg font-semibold leading-tight text-white">
-                {{ step?.title }}
-              </h3>
+  <div class="tour-tooltip fixed z-[1400] max-h-[calc(100dvh-20px)] w-[var(--tour-tooltip-width,360px)] max-w-[calc(100vw-24px)] overflow-x-hidden overflow-y-auto rounded-xl border-0 bg-[#18313a] font-[Inter] text-[#e1e8f0] opacity-0 outline-none shadow-[0_20px_54px_rgba(0,0,0,0.52)] focus:outline-none focus-visible:outline-none [top:var(--tour-tooltip-top)] [left:var(--tour-tooltip-left)] [bottom:var(--tour-tooltip-bottom,auto)] [transform:translate3d(0,0,0)] [transform-origin:top_left] [transition:top_180ms_ease-out,left_180ms_ease-out,opacity_160ms_ease,box-shadow_160ms_ease] [contain:layout_paint_style] [.tour-tooltip-positioned_&]:!opacity-100 [body.light-theme_&]:bg-[#f3faf9] [body.light-theme_&]:!text-[#172235] [body.light-theme_&]:shadow-[0_16px_36px_rgba(15,23,42,0.18)] motion-reduce:transition-none max-[640px]:max-w-[calc(100vw-20px)]" data-testid="demo-tour-tooltip" role="dialog" aria-modal="true" aria-live="polite" tabindex="-1" [attr.aria-busy]="!stepReady" [attr.aria-labelledby]="stepReady ? 'demo-tour-title' : 'demo-tour-loading-title'" [attr.aria-describedby]="stepReady ? 'demo-tour-description' : 'demo-tour-loading-description'">
+    <div class="relative w-full p-5 max-[640px]:p-4">
+      <div class="mb-4 flex items-start gap-3">
+        <div class="grid min-w-0 flex-1">
+          <div class="tour-state-layer tour-state-layer-ready pointer-events-none col-start-1 row-start-1 opacity-0 [transform:translate3d(0,6px,0)] [transition:opacity_220ms_ease-out,transform_220ms_ease-out] [transition-delay:70ms] [will-change:opacity,transform] [&.is-active]:pointer-events-auto [&.is-active]:!opacity-100 [&.is-active]:![transform:translate3d(0,0,0)] [&:not(.is-active)]:![transition-delay:0ms]" [class.is-active]="stepReady" [attr.aria-hidden]="!stepReady" [attr.inert]="!stepReady ? '' : null">
+            <div class="mb-2 inline-flex items-center gap-2 rounded-[7px] border border-[rgba(87,165,235,0.22)] bg-[rgba(87,165,235,0.09)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.1em] text-[#7cbcff] [body.light-theme_&]:border-[#cfe0f1] [body.light-theme_&]:bg-[#eef6ff] [body.light-theme_&]:text-[#176aa8]" data-testid="demo-tour-step">
+              <span class="h-1.5 w-1.5 rounded-full bg-[#57a5eb] shadow-[0_0_10px_rgba(87,165,235,0.42)]"></span>
+              {{ 'Step' | translate }} {{ currentIndex + 1 }} / {{ totalSteps }}
             </div>
+            <h3 id="demo-tour-title" data-testid="demo-tour-title" class="text-[19px] font-semibold leading-[1.25] tracking-[-0.01em] text-white [.light-theme_&]:text-[var(--color-text1)]">
+              {{ step?.title | translate }}
+            </h3>
           </div>
-        </div>
-        <div class="tour-state-layer tour-state-layer-loading col-start-1 row-start-1" [class.is-active]="!stepReady" [attr.aria-hidden]="stepReady">
-          <div class="flex items-start justify-between gap-3 saturate-[0.96]">
-            <div class="min-w-0">
-              <div class="mb-2 inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]/80 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-blue-640)]">
-                <span class="tour-loader-spinner h-3.5 w-3.5" aria-hidden="true"></span>
-                {{ 'Loading' | translate }}
-              </div>
-              <h3 class="text-lg font-semibold leading-tight text-white">
-                {{ 'Loading step' | translate }}
-              </h3>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div class="mb-3">
-        <div class="h-1.5 overflow-hidden rounded-full bg-white/8">
-          <div class="tour-progress-bar h-full rounded-full"></div>
-        </div>
-      </div>
-
-      <div class="mb-4 grid">
-        <div class="tour-state-layer tour-state-layer-ready col-start-1 row-start-1" [class.is-active]="stepReady">
-          <div>
-            <p class="text-sm leading-6 text-[var(--color-text2)]">
-              {{ step?.description }}
-            </p>
-          </div>
-        </div>
-        <div class="tour-state-layer tour-state-layer-loading col-start-1 row-start-1" [class.is-active]="!stepReady" [attr.aria-hidden]="stepReady">
-          <div class="flex items-center gap-3 text-sm leading-6 text-[var(--color-text2)] saturate-[0.96]">
-            <span class="tour-loader-spinner" aria-hidden="true"></span>
-            <span>{{ 'Preparing data and highlight' | translate }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid">
-        <div class="tour-state-layer tour-state-layer-ready col-start-1 row-start-1" [class.is-active]="stepReady">
-          <div class="flex items-center justify-end gap-2 border-t border-[rgba(255,255,255,0.06)] pt-[0.72rem] max-[640px]:flex-col max-[640px]:items-stretch max-[640px]:gap-[0.65rem]">
-            @if (stepReady && (step?.endOnEnter || step?.captureValueOnEnter)) {
-              <div class="mr-auto rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]/70 px-3 py-1.5 text-[11px] font-medium tracking-[0.14em] text-[var(--color-text2)] uppercase max-[640px]:mr-0">
-                {{ 'Press Enter' | translate }}
-              </div>
-            }
-            <div class="flex items-center gap-2 max-[640px]:block max-[640px]:w-full">
-              <button type="button" (click)="next()" class="tour-primary-button text-xs" data-testid="demo-tour-next" [disabled]="!stepReady">
-                <span>{{ (currentIndex + 1 === totalSteps ? 'Finish' : 'Next') | translate }}</span>
-                <span aria-hidden="true">→</span>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="tour-state-layer tour-state-layer-loading col-start-1 row-start-1" [class.is-active]="!stepReady" [attr.aria-hidden]="stepReady">
-          <div class="flex items-center justify-end gap-2 border-t border-[rgba(255,255,255,0.06)] pt-[0.72rem] saturate-[0.96] max-[640px]:flex-col max-[640px]:items-stretch max-[640px]:gap-[0.65rem]">
-            <div class="mr-auto rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]/70 px-3 py-1.5 text-[11px] font-medium tracking-[0.14em] text-[var(--color-text2)] uppercase max-[640px]:mr-0">
+          <div class="tour-state-layer tour-state-layer-loading pointer-events-none col-start-1 row-start-1 opacity-0 [transform:translate3d(0,6px,0)] [transition:opacity_160ms_ease-out,transform_160ms_ease-out] [will-change:opacity,transform] [&.is-active]:pointer-events-auto [&.is-active]:!opacity-100 [&.is-active]:![transform:translate3d(0,0,0)]" [class.is-active]="!stepReady" [attr.aria-hidden]="stepReady" [attr.inert]="stepReady ? '' : null">
+            <div class="mb-2 inline-flex items-center gap-2 rounded-[7px] border border-[rgba(87,165,235,0.22)] bg-[rgba(87,165,235,0.09)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.1em] text-[#7cbcff] [body.light-theme_&]:border-[#cfe0f1] [body.light-theme_&]:bg-[#eef6ff] [body.light-theme_&]:text-[#176aa8]">
+              <span class="tour-loader-spinner animate-tour-loader-spin h-3.5 w-3.5 flex-none rounded-full border-2 border-[rgba(87,165,235,0.22)] border-t-[#57a5eb] motion-reduce:animate-none" aria-hidden="true"></span>
               {{ 'Loading' | translate }}
             </div>
-            <div class="flex items-center gap-2 max-[640px]:block max-[640px]:w-full">
-              <button type="button" (click)="next()" class="tour-primary-button text-xs" [disabled]="true">
-                <span>{{ (currentIndex + 1 === totalSteps ? 'Finish' : 'Next') | translate }}</span>
-                <span aria-hidden="true">→</span>
-              </button>
-            </div>
+            <h3 id="demo-tour-loading-title" class="text-[19px] font-semibold leading-[1.25] tracking-[-0.01em] text-white [.light-theme_&]:text-[var(--color-text1)]">
+              {{ 'Loading step' | translate }}
+            </h3>
           </div>
+        </div>
+
+        <button data-testid="demo-tour-skip" type="button" (click)="skip()" class="inline-flex h-8 shrink-0 items-center justify-center rounded-[8px] border-0 bg-transparent px-2.5 text-[11px] font-semibold text-[var(--color-text3)] transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#57a5eb]/40 [body.light-theme_&]:hover:bg-[#e7f0f7]" [attr.aria-label]="'Skip' | translate">
+          {{ 'Skip' | translate }}
+        </button>
+      </div>
+
+      <div class="mb-4">
+        <div class="h-1.5 overflow-hidden rounded-full bg-white/10 [body.light-theme_&]:bg-[#dce8f4]" role="progressbar" [attr.aria-label]="'Step' | translate" aria-valuemin="1" [attr.aria-valuemax]="totalSteps" [attr.aria-valuenow]="currentIndex + 1">
+          <div class="tour-progress-bar h-full w-[var(--tour-progress-width)] rounded-full bg-[#57a5eb] shadow-[0_0_10px_rgba(87,165,235,0.35)] [transition:width_220ms_ease-out] [.tour-loading_&]:!transition-none motion-reduce:transition-none"></div>
+        </div>
+      </div>
+
+      <div class="mb-4 grid min-h-[48px]">
+        <div class="tour-state-layer tour-state-layer-ready pointer-events-none col-start-1 row-start-1 opacity-0 [transform:translate3d(0,6px,0)] [transition:opacity_220ms_ease-out,transform_220ms_ease-out] [transition-delay:70ms] [will-change:opacity,transform] [&.is-active]:pointer-events-auto [&.is-active]:!opacity-100 [&.is-active]:![transform:translate3d(0,0,0)] [&:not(.is-active)]:![transition-delay:0ms]" [class.is-active]="stepReady" [attr.aria-hidden]="!stepReady" [attr.inert]="!stepReady ? '' : null">
+          <p id="demo-tour-description" class="text-sm leading-[1.55] text-[var(--color-text3)]">
+            {{ step?.description | translate }}
+          </p>
+        </div>
+        <div class="tour-state-layer tour-state-layer-loading pointer-events-none col-start-1 row-start-1 opacity-0 [transform:translate3d(0,6px,0)] [transition:opacity_160ms_ease-out,transform_160ms_ease-out] [will-change:opacity,transform] [&.is-active]:pointer-events-auto [&.is-active]:!opacity-100 [&.is-active]:![transform:translate3d(0,0,0)]" [class.is-active]="!stepReady" [attr.aria-hidden]="stepReady" [attr.inert]="stepReady ? '' : null">
+          <p id="demo-tour-loading-description" class="text-sm leading-[1.55] text-[var(--color-text3)]">
+            {{ 'Preparing data and highlight' | translate }}
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 border-t border-white/10 pt-3 [body.light-theme_&]:border-[var(--color-border)] max-[640px]:flex-col max-[640px]:items-stretch max-[640px]:gap-3">
+        @if (stepReady && (step?.endOnEnter || step?.captureValueOnEnter)) {
+          <div class="mr-auto rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 py-1.5 text-[10px] font-semibold tracking-[0.1em] text-[var(--color-text3)] uppercase max-[640px]:mr-0 [body.light-theme_&]:bg-[#f8fbff]">
+            {{ 'Press Enter' | translate }}
+          </div>
+        }
+        <div class="flex items-center justify-end gap-2 max-[640px]:w-full">
+          @if (currentIndex > 0) {
+            <button data-testid="demo-tour-back" type="button" (click)="previous()" [disabled]="nextTransitionInProgress" class="inline-flex h-9 min-w-[92px] items-center justify-center gap-2 rounded-[8px] border-0 bg-[#345d74] px-3.5 text-[13px] font-semibold text-[#f2f7fb] shadow-[0_2px_7px_rgba(2,12,24,0.2)] transition-colors duration-[180ms] ease-out hover:bg-[#406d86] active:bg-[#2b5065] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8fc6f5]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#18313a] disabled:cursor-default disabled:opacity-[0.55] [body.light-theme_&]:bg-[#e5eef5] [body.light-theme_&]:text-[#294a63] [body.light-theme_&]:shadow-[0_2px_6px_rgba(15,23,42,0.08)] [body.light-theme_&]:hover:bg-[#d8e7f1] [body.light-theme_&]:active:bg-[#cedfea] [body.light-theme_&]:focus-visible:ring-offset-[#f3faf9] motion-reduce:transition-none max-[640px]:flex-1">
+              <svg aria-hidden="true" class="h-3.5 w-3.5 shrink-0" viewBox="0 0 20 20" fill="none">
+                <path d="M11.75 5.5 7.25 10l4.5 4.5M7.75 10h5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"></path>
+              </svg>
+              <span>{{ 'Back' | translate }}</span>
+            </button>
+          }
+          <button type="button" (click)="next()" class="tour-primary-button inline-flex h-9 min-w-[92px] items-center justify-center gap-2 rounded-[8px] border-0 bg-[#176aa8] px-3.5 text-[13px] font-semibold tracking-[0.01em] text-white shadow-[0_3px_9px_rgba(25,113,190,0.22)] transition-colors duration-[180ms] ease-out hover:bg-[#2075b0] active:bg-[#125f99] focus-visible:bg-[#2075b0] focus-visible:outline-none focus-visible:ring-0 disabled:cursor-default disabled:hover:bg-[#176aa8] disabled:active:bg-[#176aa8] motion-reduce:transition-none max-[640px]:flex-1" data-testid="demo-tour-next" [disabled]="!stepReady || nextTransitionInProgress" [attr.aria-busy]="!stepReady || nextTransitionInProgress">
+            <span>{{ (currentIndex + 1 === totalSteps ? 'Finish' : 'Next') | translate }}</span>
+            <svg aria-hidden="true" class="h-3.5 w-3.5 shrink-0" viewBox="0 0 20 20" fill="none">
+              <path d="m8.25 5.5 4.5 4.5-4.5 4.5M12.25 10h-5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"></path>
+            </svg>
+          </button>
         </div>
       </div>
     </div>

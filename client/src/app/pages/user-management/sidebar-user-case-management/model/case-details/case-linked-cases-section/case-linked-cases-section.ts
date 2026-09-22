@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Case, CaseLink } from '../../../../../../shared/model/case-management/case.model';
-import { CASE_LINK_RELATIONSHIP_OPTIONS } from '../../../../../../shared/model/case-management/case-management.defaults';
+import { Case, CaseLink } from '../../case.model';
+import { CASE_LINK_RELATIONSHIP_OPTIONS } from '../../case-management.defaults';
 import { TooltipDirective } from '../../../../../../shared/directive/tooltip-directive.directive';
 import { caseListItemMotion, caseModeSwapMotion, caseSectionMotion } from '../case-details.animations';
 import { formatCaseLabel } from '../case-details-formatters';
@@ -15,6 +15,7 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
   imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent, TranslatePipe],
   animations: [caseListItemMotion, caseModeSwapMotion, caseSectionMotion],
   host: { class: 'block' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-linked-cases-section.html'
 })
 export class CaseLinkedCasesSectionComponent {
@@ -51,7 +52,7 @@ export class CaseLinkedCasesSectionComponent {
       return null;
     }
 
-    return this.editedCase?.linkedCases?.[this.editingLinkedCaseIndex] || null;
+    return this.editedCase?.linkedCases?.[this.editingLinkedCaseIndex] ?? null;
   }
 
   openEditLinkedCase(index: number): void {
@@ -65,13 +66,13 @@ export class CaseLinkedCasesSectionComponent {
   }
 
   hasLinkedCasesChanged(): boolean {
-    return (this.editedCase?.linkedCases?.length || 0) !== (this.caseData?.linkedCases?.length || 0);
+    return (this.editedCase?.linkedCases?.length ?? 0) !== (this.caseData?.linkedCases?.length || 0);
   }
 
-  getLinkableCases(caseItem: Case | null = this.editedCase || this.caseData, currentSelectedCaseId = ''): Case[] {
+  getLinkableCases(caseItem: Case | null = this.editedCase ?? this.caseData, currentSelectedCaseId = ''): Case[] {
     const currentCaseId = caseItem?.caseId;
 
-    const alreadyLinkedCaseIds = new Set((caseItem?.linkedCases || [])
+    const alreadyLinkedCaseIds = new Set((caseItem?.linkedCases ?? [])
       .map(linkedCase => linkedCase.targetCaseId)
       .filter(caseId => caseId && caseId !== currentSelectedCaseId));
 
@@ -80,7 +81,7 @@ export class CaseLinkedCasesSectionComponent {
       !alreadyLinkedCaseIds.has(item.caseId));
   }
 
-  hasLinkableCases(caseItem: Case | null = this.editedCase || this.caseData, currentSelectedCaseId = ''): boolean {
+  hasLinkableCases(caseItem: Case | null = this.editedCase ?? this.caseData, currentSelectedCaseId = ''): boolean {
     return this.getLinkableCases(caseItem, currentSelectedCaseId).length > 0;
   }
 

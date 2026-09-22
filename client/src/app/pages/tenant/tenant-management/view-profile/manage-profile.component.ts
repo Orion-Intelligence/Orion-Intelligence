@@ -1,11 +1,10 @@
-import { Component, HostListener, OnInit, signal } from '@angular/core';
+import { Component, HostListener, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../../shared/services/api.service';
 import { HttpHeaders } from '@angular/common/http';
 
 import { FormsModule } from '@angular/forms';
 import { AlertAllowedTenantOption, User } from '../../../../shared/model/tenant/tenant.model';
-import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { AddTenantComponent } from "../add-tenant/add-tenant.component";
 import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
@@ -15,50 +14,82 @@ import { finalize, switchMap, tap } from 'rxjs';
 import { NodeResolver } from '../../../../shared/resolvers/session-data-resolver.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { TranslationService } from '../../../../shared/services/translation.service';
+import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/partials/ui-dropdown/ui-dropdown.component';
+import { buildAlertAllowedOptions, loadAlertTenantOptions } from '../../../../shared/utils/alert-allowed-tenants.util';
+import { buildTenantBasePermissionOptions, buildTenantStatusOptions } from '../tenant-form-options.util';
 
 @Component({
   selector: 'app-view-profile',
   imports: [FormsModule, CommonModule, AddTenantComponent, ConfirmationPopupComponent, TooltipDirective, TranslatePipe, UiDropdownComponent],
-  animations: [fadeInDashboardItem],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './manage-profile.component.html',
+  styleUrls: ['./manage-profile.component.css'],
 })
 export class ManageProfileComponent implements OnInit {
   private readonly allAlertsOption = 'all';
 
   protected readonly JSON = JSON;
+  protected readonly LicenseName = LicenseName;
 
   users: User[] = [];
   userSearch = '';
   licenseList = Object.values(LicenseName);
-  permissionOptions: UiDropdownOption[] = [{ key: 'case_management', label: 'Case Management' }];
   alertTenantOptions: AlertAllowedTenantOption[] = [];
-  statusOptions: UiDropdownOption[] = [{ key: 'active', label: 'Active' }, { key: 'disable', label: 'Disable' }];
-  passwordResetOptions: UiDropdownOption[] = [{ key: 'false', label: 'No password reset' }, { key: 'true', label: 'Require password reset' }];
   isLoading = true;
   selectedUserId: string | null = null;
   expandedUserIndex: number | null = null;
-  showAddTenantPopup: boolean = false;
+  showAddTenantPopup = false;
   userToDelete: User | null = null;
   isDeleteConfirmationOpen = signal<boolean>(false);
 
-  constructor(public apiService: ApiService, protected appService: AppService, private nodeResolver: NodeResolver, protected licenseService: LicenseService) {
+  constructor(public apiService: ApiService, protected appService: AppService, private nodeResolver: NodeResolver, protected licenseService: LicenseService, private translationService: TranslationService) {
+  }
+
+  get permissionOptions(): UiDropdownOption[] {
+    const session = this.appService.userSessionData();
+    const options = buildTenantBasePermissionOptions(this.translationService);
+    if (session.user.role === 'admin') {
+      options.push({ key: 'monitoring', label: this.translationService.translate('Monitoring') });
+    }
+    options.push({ key: 'orion_mail', label: this.translationService.translate('Orion Mail') });
+    return options;
+  }
+
+  get statusOptions(): UiDropdownOption[] {
+    return buildTenantStatusOptions(this.translationService);
+  }
+
+  get passwordResetOptions(): UiDropdownOption[] {
+    this.translationService.version();
+    return [
+      { key: 'false', label: this.translationService.translate('No password reset') },
+      { key: 'true', label: this.translationService.translate('Require password reset') }
+    ];
   }
 
   ngOnInit(): void {
-    const headers = new HttpHeaders({});
-    if (this.appService.userSessionData().user.role === 'admin') {
-      this.loadAlertTenantOptions();
+    if (this.canAssignAlertAccess()) {
+      loadAlertTenantOptions(this.apiService, options => this.alertTenantOptions = options);
     }
-    this.apiService.post<User[]>('users', headers).subscribe({
+    this.loadUsers();
+  }
+
+  loadUsers(): void {
+    this.isLoading = true;
+    this.apiService.post<User[]>('users', new HttpHeaders({})).subscribe({
       next: (data) => {
         this.users = data;
         this.isLoading = false;
       },
-      error: (_) => {
+      error: () => {
         this.isLoading = false;
       },
     });
+  }
+
+  canAssignAlertAccess(): boolean {
+    return this.appService.userSessionData().user.role === 'admin' || this.licenseService.isPrimaryMaintainer();
   }
 
   toggleExpandedUser(index: number): void {
@@ -72,21 +103,21 @@ export class ManageProfileComponent implements OnInit {
     const payload = this.buildUserUpdatePayload(user);
     this.isLoading = true;
     this.apiService.post('update/user', payload).pipe(switchMap(() => this.nodeResolver.resolve()), finalize(() => (this.isLoading = false))).subscribe({
-      next: (_) => void 0,
+      next: () => void 0,
       error: () => void 0
     });
   }
 
   @HostListener('document:click', ['$event'])
   handleClickOutside(event: MouseEvent) {
-    const eventTargetElement = event.target as HTMLElement;
-    if (!eventTargetElement.closest('.action-menu')) {
+    const eventTargetElement = event.target;
+    if (!(eventTargetElement instanceof Element) || !eventTargetElement.closest('.action-menu')) {
       this.selectedUserId = null;
     }
   }
 
-  isLicenseDisabled(): boolean {
-    return false;
+  isLicenseDisabled(user: User): boolean {
+    return (user.licenses ?? []).includes(LicenseName.MAINTAINER);
   }
 
   canAssignLicense(license: LicenseName): boolean {
@@ -96,7 +127,7 @@ export class ManageProfileComponent implements OnInit {
     if (this.appService.userSessionData().user.role === 'admin') {
       return true;
     }
-    return (this.appService.userSessionData().tenant.licenses || []).includes(license);
+    return this.appService.userSessionData().tenant.licenses.includes(license);
   }
 
   get licenseDropdownOptions(): UiDropdownOption[] {
@@ -106,13 +137,8 @@ export class ManageProfileComponent implements OnInit {
   }
 
   get alertAllowedOptions(): UiDropdownOption[] {
-    return [
-      { key: this.allAlertsOption, label: 'All' },
-      ...this.alertTenantOptions.map(tenant => ({
-        key: tenant.id,
-        label: tenant.name || tenant.email || tenant.id
-      }))
-    ];
+    this.translationService.version();
+    return buildAlertAllowedOptions(this.allAlertsOption, this.translationService.translate('All'), this.alertTenantOptions);
   }
 
   get filteredUsers(): User[] {
@@ -146,7 +172,7 @@ export class ManageProfileComponent implements OnInit {
   }
 
   onUserLicenseDropdownChange(user: User, nextLicenses: string[]): void {
-    const currentLicenses = user.licenses || [];
+    const currentLicenses = user.licenses ?? [];
     const addedLicense = nextLicenses.find(license => !currentLicenses.includes(license));
     if (addedLicense) {
       this.toggleUserLicense(user, addedLicense as LicenseName);
@@ -156,14 +182,14 @@ export class ManageProfileComponent implements OnInit {
   }
 
   showAlertsAllowed(user: User): boolean {
-    return this.appService.userSessionData().user.role === 'admin' && (user.permissions || []).includes('case_management');
+    return this.canAssignAlertAccess() && (user.permissions ?? []).includes('case_management');
   }
 
   selectedAlertAllowedValues(user: User): string[] {
     if (user.alerts_allowed_all) {
       return [this.allAlertsOption];
     }
-    return user.alerts_allowed_tenant_ids || [];
+    return user.alerts_allowed_tenant_ids ?? [];
   }
 
   onUserPermissionChange(user: User, permissions: string[]): void {
@@ -184,17 +210,6 @@ export class ManageProfileComponent implements OnInit {
     user.alerts_allowed_tenant_ids = values.filter(value => allowedTenantIds.has(value));
   }
 
-  private loadAlertTenantOptions(): void {
-    this.apiService.get<AlertAllowedTenantOption[]>('tenants/alerts/allowed-options').subscribe({
-      next: (options) => {
-        this.alertTenantOptions = options || [];
-      },
-      error: () => {
-        this.alertTenantOptions = [];
-      }
-    });
-  }
-
   private clearAlertAccess(user: User): void {
     user.alerts_allowed_all = false;
     user.alerts_allowed_tenant_ids = [];
@@ -210,11 +225,11 @@ export class ManageProfileComponent implements OnInit {
       return;
     }
     const allowedTenantIds = new Set(this.alertTenantOptions.map(tenant => tenant.id));
-    user.alerts_allowed_tenant_ids = (user.alerts_allowed_tenant_ids || []).filter(id => allowedTenantIds.has(id));
+    user.alerts_allowed_tenant_ids = (user.alerts_allowed_tenant_ids ?? []).filter(id => allowedTenantIds.has(id));
   }
 
   private buildUserUpdatePayload(user: User): User {
-    if (this.appService.userSessionData().user.role !== 'admin') {
+    if (!this.canAssignAlertAccess()) {
       const payload = { ...user };
       delete payload.alerts_allowed_all;
       delete payload.alerts_allowed_tenant_ids;
@@ -224,24 +239,26 @@ export class ManageProfileComponent implements OnInit {
     return user;
   }
 
-  toggleUserLicense(user: any, license: LicenseName) {
-    if (!user.licenses) {
-      user.licenses = [];
-    }
+  toggleUserLicense(user: User, license: LicenseName) {
+    user.licenses ??= [];
     if (user.licenses.includes(license)) {
-      user.licenses = user.licenses.filter((l: LicenseName) => l !== license);
+      user.licenses = user.licenses.filter((l) => l !== license);
+      return;
+    }
+    if (license === LicenseName.FEEDER) {
+      user.licenses.push(LicenseName.FEEDER);
       return;
     }
     if (license === LicenseName.FREE || license === LicenseName.ENTERPRISE) {
-      user.licenses = [license];
+      user.licenses = user.licenses.includes(LicenseName.FEEDER) ? [license, LicenseName.FEEDER] : [license];
       return;
     }
-    user.licenses = user.licenses.filter((l: LicenseName) => l !== LicenseName.FREE && l !== LicenseName.ENTERPRISE);
+    user.licenses = user.licenses.filter((l) => l !== LicenseName.FREE && l !== LicenseName.ENTERPRISE);
     if (license === LicenseName.OSINT_BASIC) {
-      user.licenses = user.licenses.filter((l: LicenseName) => l !== LicenseName.OSINT_ADVANCED);
+      user.licenses = user.licenses.filter((l) => l !== LicenseName.OSINT_ADVANCED);
     }
     if (license === LicenseName.OSINT_ADVANCED) {
-      user.licenses = user.licenses.filter((l: LicenseName) => l !== LicenseName.OSINT_BASIC);
+      user.licenses = user.licenses.filter((l) => l !== LicenseName.OSINT_BASIC);
     }
     user.licenses.push(license);
   }
@@ -264,22 +281,22 @@ export class ManageProfileComponent implements OnInit {
     })).subscribe();
   }
 
-  getUserLicensesLabel(user: any): string {
+  getUserLicensesLabel(user: User): string {
     if (!user.licenses || user.licenses.length === 0) {
-      return 'None';
+      return this.translationService.translate('None');
     }
-    return user.licenses.map((l: LicenseName) => this.licenseService.getLicenseLabel(l)).join(', ');
+    return user.licenses.map((l) => this.licenseService.getLicenseLabel(l)).join(', ');
   }
 
   getUserPermissionsLabel(user: User): string {
     if (!user.permissions || user.permissions.length === 0) {
-      return 'None';
+      return this.translationService.translate('None');
     }
     return user.permissions.map(permission => this.getPermissionLabel(permission)).join(', ');
   }
 
   getPermissionLabel(permission: string): string {
-    return this.permissionOptions.find(option => option.key === permission)?.label || permission;
+    return this.permissionOptions.find(option => option.key === permission)?.label ?? permission;
   }
 
   canEditUser(user: User): boolean {
@@ -287,27 +304,17 @@ export class ManageProfileComponent implements OnInit {
   }
 
   getStatusBadgeClass(status: string): string {
-    const isLightTheme = document.body.classList.contains('light-theme');
     if (status === 'active') {
-      return isLightTheme
-        ? 'bg-emerald-100 text-emerald-800'
-        : 'bg-emerald-500/10 text-emerald-300';
+      return 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800';
     }
-    return isLightTheme
-      ? 'bg-rose-100 text-rose-800'
-      : 'bg-rose-500/10 text-rose-300';
+    return 'bg-rose-500/10 text-rose-300 [body.light-theme_&]:bg-rose-100 [body.light-theme_&]:text-rose-800';
   }
 
   getSubscriptionBadgeClass(subscription?: boolean): string {
-    const isLightTheme = document.body.classList.contains('light-theme');
     if (subscription) {
-      return isLightTheme
-        ? 'bg-sky-100 text-sky-800'
-        : 'bg-sky-500/10 text-sky-300';
+      return 'bg-sky-500/10 text-sky-300 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800';
     }
-    return isLightTheme
-      ? 'bg-slate-100 text-slate-700'
-      : 'bg-slate-500/10 text-slate-300';
+    return 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700';
   }
 
   isAddUserDisabled(): boolean {
@@ -316,10 +323,10 @@ export class ManageProfileComponent implements OnInit {
 
   getAddUserTooltip(): string {
     if (this.appService.userSessionData().tenant.quotaExceeded) {
-      return 'Access blocked';
+      return this.translationService.translate('Access blocked');
     }
     if (!this.appService.getConfig().appSettings.smtp_configured) {
-      return 'SMTP configuration is incomplete';
+      return this.translationService.translate('SMTP configuration is incomplete');
     }
     return '';
   }

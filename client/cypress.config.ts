@@ -1,6 +1,7 @@
 import { defineConfig } from "cypress";
 import registerCodeCoverageTasks from "@cypress/code-coverage/task";
 import fs from "node:fs";
+import { execFileSync } from "node:child_process";
 import path from "node:path";
 
 const isCi =
@@ -8,6 +9,75 @@ const isCi =
     process.env["GITHUB_ACTIONS"] === "true" ||
     process.env["GITLAB_CI"] === "true";
 const coverageEnabled = isCi || process.env["ORION_COVERAGE"] === "true";
+const commandTimeout = Number(process.env["CYPRESS_COMMAND_TIMEOUT"]) || 60000;
+
+const isUnpackedExtension = (candidate: string) =>
+    fs.existsSync(path.join(candidate, "manifest.json"));
+
+const latestSiblingExtensionBuild = (root: string): string | null => {
+    if (!fs.existsSync(root)) {
+        return null;
+    }
+    const builds = fs
+        .readdirSync(root)
+        .filter((name) => name.startsWith("build-"))
+        .map((name) => path.join(root, name, "orion-extension-chrome-dev"))
+        .filter(isUnpackedExtension)
+        .sort((first, second) => fs.statSync(second).mtimeMs - fs.statSync(first).mtimeMs);
+    return builds[0] ?? null;
+};
+
+const unpackCrx = (crxPath: string, outDir: string): string | null => {
+    const buffer = fs.readFileSync(crxPath);
+    if (buffer.subarray(0, 4).toString("utf8") !== "Cr24") {
+        return null;
+    }
+    const version = buffer.readUInt32LE(4);
+    const zipStart = version === 3
+        ? 12 + buffer.readUInt32LE(8)
+        : 16 + buffer.readUInt32LE(8) + buffer.readUInt32LE(12);
+
+    fs.rmSync(outDir, { recursive: true, force: true });
+    fs.mkdirSync(outDir, { recursive: true });
+    const zipPath = path.join(outDir, "extension.zip");
+    fs.writeFileSync(zipPath, buffer.subarray(zipStart));
+    execFileSync("unzip", ["-oq", zipPath, "-d", outDir]);
+    fs.unlinkSync(zipPath);
+    return isUnpackedExtension(outDir) ? outDir : null;
+};
+
+const resolveOrionExtensionPath = (projectRoot: string): string | null => {
+    const explicit = process.env["ORION_EXTENSION_PATH"];
+    if (explicit) {
+        return isUnpackedExtension(explicit) ? explicit : null;
+    }
+
+    const siblingRoot = process.env["ORION_EXTENSION_ROOT"] ?? path.resolve(projectRoot, "..", "..", "orion-extension");
+    const unpacked = latestSiblingExtensionBuild(siblingRoot);
+    if (unpacked) {
+        return unpacked;
+    }
+
+    if (!fs.existsSync(siblingRoot)) {
+        return null;
+    }
+    const crx = fs
+        .readdirSync(siblingRoot)
+        .filter((name) => name.startsWith("build-"))
+        .flatMap((name) => {
+            const dir = path.join(siblingRoot, name);
+            return fs.readdirSync(dir).filter((f) => f.endsWith(".crx")).map((f) => path.join(dir, f));
+        })
+        .sort((first, second) => fs.statSync(second).mtimeMs - fs.statSync(first).mtimeMs)[0];
+    if (!crx) {
+        return null;
+    }
+    try {
+        return unpackCrx(crx, path.join(projectRoot, "cypress", "downloads", "orion-extension-unpacked"));
+    } catch {
+        return null;
+    }
+};
 
 export default defineConfig({
     allowCypressEnv: false,
@@ -54,6 +124,35 @@ export default defineConfig({
             email: "tenant1@gmail.com",
             password: "1qaz!QAZ",
         },
+        PRIMARY_TENANT_ACCOUNT: {
+            username: "primary_tenant1",
+            email: "primary1@primaryorionintelligence.org",
+            password: "1qaz!QAZ",
+            companyName: "orion intelligence primary",
+            slug: "primaryorionintelligence",
+        },
+        PRIMARY_TENANT_USERS: [
+            { username: "primary_t_user1", email: "primaryuser1@gmail.com", password: "1qaz!QAZ" },
+            { username: "primary_t_user2", email: "primaryuser2@gmail.com", password: "1qaz!QAZ" },
+        ],
+        SUB_TENANT_ACCOUNT: {
+            username: "sub_tenant_owner1",
+            email: "sub1@suborionintelligence.org",
+            password: "1qaz!QAZ",
+            companyName: "orion intelligence sub",
+            slug: "suborionintelligence",
+        },
+        SUB_TENANT_USERS: [
+            { username: "sub_tenant_user1", email: "subuser1@gmail.com", password: "1qaz!QAZ" },
+            { username: "sub_tenant_user2", email: "subuser2@gmail.com", password: "1qaz!QAZ" },
+        ],
+        SUB_TENANT_TAKEDOWN_USER: {
+            username: "sub_takedown_user1",
+            email: "sub.takedown.user1@samplemail.test",
+            password: "1qaz!QAZ",
+            role: "Analyst",
+            licenses: ["Enterprise"],
+        },
         CASE_ALERT_TENANTS: [
             {
                 username: "dcasealert1",
@@ -96,6 +195,14 @@ export default defineConfig({
                 permissions: ["case_management"],
                 alertAllowedTenants: "all",
             },
+        },
+        DISMISS_RESULT_USER: {
+            username: "dismiss_result_user1",
+            email: "dismiss.result.user1@samplemail.test",
+            password: "1qaz!QAZ",
+            role: "Analyst",
+            licenses: ["Enterprise"],
+            permissions: ["dismiss_result"],
         },
         TEST_DATA: {
             stealer_ioc_email: "nora.keen@samplemail.test",
@@ -176,11 +283,27 @@ export default defineConfig({
             if (coverageEnabled) {
                 registerCodeCoverageTasks(on, config);
             }
+            const extensionPath = resolveOrionExtensionPath(config.projectRoot);
+            const extensionManifest = extensionPath
+                ? JSON.parse(fs.readFileSync(path.join(extensionPath, "manifest.json"), "utf8"))
+                : null;
+            config.env["extensionLoaded"] = extensionPath !== null;
+            config.env["extensionPath"] = extensionPath ?? "";
+            config.env["extensionName"] = String(extensionManifest?.name ?? "");
+            config.env["extensionVersion"] = String(extensionManifest?.version ?? "");
+            config.env["extensionManifestVersion"] = Number(extensionManifest?.manifest_version ?? 0);
             on("before:browser:launch", (browser, launchOptions) => {
-                if (browser.family === "chromium") {
+                if (browser.family === "chromium" && browser.name !== "electron") {
                     launchOptions.args.push("--start-maximized");
-                    launchOptions.args.push("--window-size=1920,1080");
+                    launchOptions.args.push(`--window-size=${config.viewportWidth},${config.viewportHeight}`);
                     launchOptions.args.push("--force-device-scale-factor=1");
+                    if (extensionPath) {
+                        launchOptions.extensions.push(extensionPath);
+                    }
+                }
+                if (browser.name === "electron") {
+                    launchOptions.preferences.width = config.viewportWidth;
+                    launchOptions.preferences.height = config.viewportHeight;
                 }
                 return launchOptions;
             });
@@ -191,13 +314,14 @@ export default defineConfig({
                 table(_) {
                     return null;
                 },
-                writeDocScreenshot({ data, name, specName }) {
+                writeDocScreenshot({ data, name, specName, variant }) {
                     const screenshotsFolder =
                         typeof config.screenshotsFolder === "string" ? config.screenshotsFolder : "cypress/error";
                     const screenshotRoot = path.resolve(config.projectRoot, screenshotsFolder);
                     const safeSpecName = String(specName || "unknown-spec").replace(/[\\/]/g, "_");
                     const safeName = String(name || "screenshot").replace(/\\/g, "/").replace(/^\/+/, "");
-                    const targetPath = path.resolve(screenshotRoot, safeSpecName, "user-manual", `${safeName}.png`);
+                    const safeVariant = variant === "user-manual-neutral" ? "user-manual-neutral" : "user-manual";
+                    const targetPath = path.resolve(screenshotRoot, safeSpecName, safeVariant, `${safeName}.png`);
 
                     if (!targetPath.startsWith(`${screenshotRoot}${path.sep}`)) {
                         throw new Error(`Refusing to write docs screenshot outside screenshots folder: ${targetPath}`);
@@ -213,12 +337,12 @@ export default defineConfig({
         baseUrl: "http://127.0.0.1:4200",
         viewportWidth: 1920,
         viewportHeight: 1080,
-        defaultCommandTimeout: 60000,
-        requestTimeout: 60000,
-        responseTimeout: 60000,
+        defaultCommandTimeout: commandTimeout,
+        requestTimeout: commandTimeout,
+        responseTimeout: commandTimeout,
         pageLoadTimeout: 60000,
-        execTimeout: 60000,
-        taskTimeout: 60000,
+        execTimeout: commandTimeout,
+        taskTimeout: commandTimeout,
         waitForAnimations: true,
         animationDistanceThreshold: 5,
     },

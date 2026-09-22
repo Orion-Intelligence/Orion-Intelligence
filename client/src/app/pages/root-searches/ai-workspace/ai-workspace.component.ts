@@ -1,11 +1,13 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, signal } from '@angular/core';
+import { countMessageTokens } from './composer-metrics.util';
+import { ComposerLayoutHost } from './composer-layout-host';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { AppService } from '../../../services/core/app/app.service';
-import { AiWorkspaceMessage, AiWorkspaceTrigger } from '../../../shared/model/chat/ai-workspace-message.model';
+import { AiWorkspaceMessage, AiWorkspaceTrigger } from './model/ai-workspace-message.model';
 import { AiWorkspacePrompt } from '../../../shared/constants/shared-enums';
 import { ResultRowHelperService } from '../../../shared/services/result-row-helper.service';
 import { NexusChatService } from './nexus-chat.service';
@@ -13,27 +15,27 @@ import { BotMessageActionsComponent } from './bot-message-actions/bot-message-ac
 import { MessageScrollRailComponent } from './message-scroll-rail/message-scroll-rail.component';
 import { MarkdownPipe } from '../../../shared/pipes/markdown.pipe';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { AiChatSession, NexusChatMessage } from '../../../shared/model/nexus/ai-chat-session.model';
+import { AiChatSession, NexusChatMessage, NexusChatSession } from './model/ai-chat-session.model';
 import { AiChatSidebarComponent } from './ai-chat-sidebar/ai-chat-sidebar.component';
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
 import { AiDirectory } from './ai-directory/ai-directory';
+import { TranslationService } from '../../../shared/services/translation.service';
+import type { PendingNexusStream } from './model/ai-workspace.model';
+export type { PendingNexusStream } from './model/ai-workspace.model';
+
 
 type AiWorkspaceViewMode = 'chat' | 'directory' | 'split';
 
-interface PendingNexusStream {
-  requestId: string;
-  sessionId: string;
-  message: string;
-  baselineMessageCount: number;
-}
+
 
 @Component({
   selector: 'app-ai-workspace',
   standalone: true,
   imports: [CommonModule, DatePipe, FormsModule, BotMessageActionsComponent, MessageScrollRailComponent, AiChatSidebarComponent, AiDirectory, MarkdownPipe, ProfileComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './ai-workspace.component.html',
 })
-export class AiWorkspaceComponent implements OnInit, OnDestroy {
+export class AiWorkspaceComponent extends ComposerLayoutHost implements OnInit, OnDestroy {
   private readonly pendingStreamStorageKey = 'orion.nexus.pending-stream';
   private activeChatRequest?: Subscription;
   private chatHistoryRequest?: Subscription;
@@ -64,13 +66,12 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   editingMessageId: string | null = null;
   editDraft = '';
   messages: AiWorkspaceMessage[] = [];
-  composerExpanded = false;
-  composerRows = 1;
-  composerScrollable = false;
   activeSessionId: string | null = null;
   chatSessions: AiChatSession[] = [];
 
-  constructor(protected readonly appService: AppService, private readonly router: Router, private readonly route: ActivatedRoute, private readonly nexusChatService: NexusChatService, private readonly resultRowHelper: ResultRowHelperService, private readonly cdr: ChangeDetectorRef) { }
+  constructor(protected readonly appService: AppService, private readonly router: Router, private readonly route: ActivatedRoute, private readonly nexusChatService: NexusChatService, private readonly resultRowHelper: ResultRowHelperService, private readonly cdr: ChangeDetectorRef, private readonly translationService: TranslationService) {
+    super(); 
+  }
 
   ngOnInit(): void {
     const requestedView = this.route.snapshot.queryParamMap.get('view');
@@ -144,7 +145,10 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     if (event.pointerId !== this.activeSplitPointerId) {
       return;
     }
-    const divider = event.currentTarget as HTMLElement;
+    const divider = event.currentTarget;
+    if (!(divider instanceof HTMLElement)) {
+      return;
+    }
     if (divider.hasPointerCapture(event.pointerId)) {
       divider.releasePointerCapture(event.pointerId);
     }
@@ -179,7 +183,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
     const text = this.messageDraft.trim();
 
-    if (!text || this.countMessageTokens(text) > this.maxComposerTokens) {
+    if (!text || countMessageTokens(text) > this.maxComposerTokens) {
       return;
     }
 
@@ -189,7 +193,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
     this.cancelMessageEdit();
     this.detachActiveNexusRequest();
-    const requestId = this.resumedRequestId || crypto.randomUUID();
+    const requestId = this.resumedRequestId ?? crypto.randomUUID();
     this.resumedRequestId = null;
 
     const sendToSession = (sessionId: string, sessionMessages: AiWorkspaceMessage[], shouldNameNewChat = false) => {
@@ -227,7 +231,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         }
         this.activeChatRequest = undefined;
       };
-      const fail = (errorText = 'Something went wrong. Try again.') => {
+      const fail = (errorText = this.translationService.translate('Something went wrong. Try again.')) => {
         if (finished) {
           return;
         }
@@ -243,7 +247,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
           return;
         }
         if (!reply.trim()) {
-          fail('Nexus returned no response. Try again.');
+          fail(this.translationService.translate('Nexus returned no response. Try again.'));
           return;
         }
         finished = true;
@@ -267,7 +271,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
             this.cdr.detectChanges();
           }
           if (chunk.error) {
-            fail(chunk.response || 'Something went wrong. Try again.');
+            fail(chunk.response ?? this.translationService.translate('Something went wrong. Try again.'));
             return;
           }
           if (chunk.delta) {
@@ -281,7 +285,9 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
           }
         },
         complete,
-        error: () => fail(),
+        error: () => {
+          fail();
+        },
       });
     };
 
@@ -306,15 +312,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   resizeComposer(): void {
-    const textarea = this.composerInput?.nativeElement;
-    if (!textarea) {
-      return;
-    }
-
-    const lineCount = this.getComposerLineCount(textarea);
-    this.composerRows = Math.min(5, lineCount);
-    this.composerScrollable = lineCount > 5;
-    this.composerExpanded = this.composerRows > 1;
+    this.applyComposerResize(this.composerInput?.nativeElement);
   }
 
   private navigateUserMessageHistory(direction: 'older' | 'newer'): boolean {
@@ -552,7 +550,9 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     }
     this.resultRowHelper.copyToClipboard(text).subscribe((ok) => {
       this.copiedMessageId.set(ok ? message.id : null);
-      setTimeout(() => this.copiedMessageId.set(null), 1200);
+      setTimeout(() => {
+        this.copiedMessageId.set(null);
+      }, 1200);
     });
   }
 
@@ -569,9 +569,11 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.editingMessageId = message.id;
     this.editDraft = message.text;
     requestAnimationFrame(() => {
-      const textarea = document.getElementById(`ai-message-edit-${message.id}`) as HTMLTextAreaElement | null;
-      textarea?.focus();
-      textarea?.setSelectionRange(textarea.value.length, textarea.value.length);
+      const textarea = document.getElementById(`ai-message-edit-${message.id}`);
+      if (textarea instanceof HTMLTextAreaElement) {
+        textarea.focus();
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+      }
     });
   }
 
@@ -583,7 +585,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   saveMessageEdit(message: AiWorkspaceMessage): void {
     const text = this.editDraft.trim();
     const index = this.messages.findIndex(item => item.id === message.id);
-    if (!text || index === -1 || this.countMessageTokens(text) > this.maxComposerTokens) {
+    if (!text || index === -1 || countMessageTokens(text) > this.maxComposerTokens) {
       return;
     }
 
@@ -610,7 +612,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   protected get messageDraftTokenCount(): number {
-    return this.countMessageTokens(this.messageDraft);
+    return countMessageTokens(this.messageDraft);
   }
 
   protected get messageDraftTokenOverflow(): number {
@@ -630,7 +632,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   protected get editDraftTokenCount(): number {
-    return this.countMessageTokens(this.editDraft);
+    return countMessageTokens(this.editDraft);
   }
 
   protected get editDraftTokenOverflow(): number {
@@ -642,7 +644,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   private cancelActiveNexusRequest(): void {
-    if (this.activeChatRequest || this.isSending()) {
+    if (Boolean(this.activeChatRequest) || this.isSending()) {
       this.nexusChatService.cancelNexusChat();
     }
     this.activeChatRequest?.unsubscribe();
@@ -662,11 +664,11 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.activeChatRequest = undefined;
   }
 
-  private createErrorMessage(text: string, errorText = 'Something went wrong. Try again.'): AiWorkspaceMessage {
+  private createErrorMessage(text: string, errorText = this.translationService.translate('Something went wrong. Try again.')): AiWorkspaceMessage {
     return {
       id: crypto.randomUUID(),
       sender: 'error',
-      text: errorText.trim() || 'Something went wrong. Try again.',
+      text: errorText.trim() || this.translationService.translate('Something went wrong. Try again.'),
       time: new Date(),
       retryPayload: text,
     };
@@ -686,8 +688,8 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     try {
       sessionStorage.setItem(this.pendingStreamStorageKey, JSON.stringify(pending));
     }
-    catch {
-      // Reconnection is unavailable when browser session storage is blocked.
+    catch (error) {
+      void error;
     }
   }
 
@@ -715,7 +717,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       sessionStorage.removeItem(this.pendingStreamStorageKey);
     }
     catch {
-      // Nothing to clear when browser session storage is blocked.
+      return;
     }
   }
 
@@ -773,8 +775,8 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       if (!container) {
         return;
       }
-      const lastMessage = container.lastElementChild as HTMLElement | null;
-      if (!lastMessage) {
+      const lastMessage = container.lastElementChild;
+      if (!(lastMessage instanceof HTMLElement)) {
         return;
       }
 
@@ -790,21 +792,9 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   queueComposerResize(): void {
-    requestAnimationFrame(() => this.resizeComposer());
-  }
-
-  private getComposerLineCount(textarea: HTMLTextAreaElement): number {
-    const horizontalPadding = 24;
-    const averageCharWidth = 7;
-    const availableWidth = Math.max(averageCharWidth, textarea.clientWidth - horizontalPadding);
-    const charsPerLine = Math.max(1, Math.floor(availableWidth / averageCharWidth));
-    const lines = (textarea.value || '').split('\n');
-
-    return Math.max(1, lines.reduce((total, line) => total + Math.max(1, Math.ceil(line.length / charsPerLine)), 0));
-  }
-
-  private countMessageTokens(value: string): number {
-    return value.trim().match(/[A-Za-z0-9_]+|[^\sA-Za-z0-9_]/g)?.length ?? 0;
+    requestAnimationFrame(() => {
+      this.resizeComposer();
+    });
   }
 
   private setDirectorySplitPercent(value: number): void {
@@ -832,9 +822,9 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     panels?.style.setProperty('--ai-directory-panel-grow', String(this.directorySplitPercent));
   }
 
-  private mapSession(session: any): AiChatSession {
+  private mapSession(session: NexusChatSession): AiChatSession {
     return {
-      sessionId: session.session_id || session.id,
+      sessionId: session.session_id ?? session.id ?? '',
       title: session.title,
       updatedAt: session.updated_at,
       messageCount: session.message_count ?? (Array.isArray(session.messages) ? session.messages.length : 0),
@@ -962,21 +952,25 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.directoryImportRequest = null;
   }
 
+  private applySelectedSessionHistory(session: AiChatSession): void {
+    this.chatHistoryRequest?.unsubscribe();
+    this.chatHistoryRequest = undefined;
+    this.activeSessionId = session.sessionId;
+    this.syncDirectorySession(session.sessionId);
+    this.messages = [...session.messages];
+    this.isLoadingHistory.set(false);
+    this.cancelMessageEdit();
+    this.queueComposerResize();
+    this.scrollToBottom();
+  }
+
   selectChat(session: AiChatSession, openChat = false): void {
     if (openChat) {
       this.setWorkspaceViewMode('chat');
     }
 
     if (this.isSending() && session.sessionId === this.activeRequestSessionId) {
-      this.chatHistoryRequest?.unsubscribe();
-      this.chatHistoryRequest = undefined;
-      this.activeSessionId = session.sessionId;
-      this.syncDirectorySession(session.sessionId);
-      this.messages = [...session.messages];
-      this.isLoadingHistory.set(false);
-      this.cancelMessageEdit();
-      this.queueComposerResize();
-      this.scrollToBottom();
+      this.applySelectedSessionHistory(session);
       return;
     }
 
@@ -992,15 +986,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     }
 
     if (session.messages.length || session.messageCount === 0) {
-      this.chatHistoryRequest?.unsubscribe();
-      this.chatHistoryRequest = undefined;
-      this.activeSessionId = session.sessionId;
-      this.syncDirectorySession(session.sessionId);
-      this.messages = [...session.messages];
-      this.isLoadingHistory.set(false);
-      this.cancelMessageEdit();
-      this.queueComposerResize();
-      this.scrollToBottom();
+      this.applySelectedSessionHistory(session);
       return;
     }
 

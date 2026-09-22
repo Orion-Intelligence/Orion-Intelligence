@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import sys
+import os
 import re
+from functools import lru_cache
 from pathlib import Path
 
 from PIL import Image, ImageChops, ImageDraw, ImageFont, PngImagePlugin
@@ -12,6 +14,14 @@ ROOT = Path(__file__).resolve().parents[2]
 USER_MANUAL = ROOT / "docs" / "app_docs" / "user_manual.md"
 POSTPROCESS_MARKER_KEY = "orion_docs_postprocessed"
 POSTPROCESS_MARKER_VALUE = "1920x1080-v1"
+
+NEUTRAL_MODE = os.environ.get("ORION_DOCS_NEUTRAL") == "1"
+_BRAND_FULL = re.compile(r"Orion Intelligence", re.IGNORECASE)
+_BRAND_WORD = re.compile(r"\bOrion\b", re.IGNORECASE)
+
+
+def _neutralize_brand(text: str) -> str:
+    return _BRAND_WORD.sub("Intelligence Platform", _BRAND_FULL.sub("Intelligence Platform", text))
 
 
 def load_caption_map() -> dict[str, str]:
@@ -64,6 +74,7 @@ def rounded_mask(size: tuple[int, int], radius: int) -> Image.Image:
     return mask
 
 
+@lru_cache(maxsize=None)
 def render_border(
     size: tuple[int, int],
     radius: int,
@@ -91,6 +102,7 @@ def render_border(
     return border.resize(size, Image.Resampling.LANCZOS)
 
 
+@lru_cache(maxsize=None)
 def load_font(size: int) -> ImageFont.ImageFont:
     candidates = [
         "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
@@ -180,6 +192,8 @@ def process_image(
 
     image = source.convert("RGBA")
     label = label_for_path(path)
+    if NEUTRAL_MODE:
+        label = _neutralize_brand(label)
 
     width, height = image.size
 

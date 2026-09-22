@@ -29,7 +29,7 @@ export interface UserDataModel {
     license: string[];
     permissions?: string[];
     image?: string;
-    preferences?: Record<string, any>;
+    preferences?: Record<string, unknown>;
     demo_tour: boolean;
 }
 export interface TenantDataModel {
@@ -41,15 +41,20 @@ export interface TenantDataModel {
     postalCode: string;
     hasOnboarding: boolean;
     isDefault: boolean;
+    isPrimary?: boolean;
+    parentTenantId?: string | null;
     taxId: string;
     userId: string;
     licenses: string[];
     assignedQuota: string;
     quotaExceeded: boolean;
+    tenantQuotaExceeded?: boolean;
+    accessBlocked?: string;
     image?: string;
     profileVisibilityEnabled?: boolean;
     eventManagementEnabled?: boolean;
     alertsVisibleToAdmin?: boolean;
+    alertsVisibleToParent?: boolean;
     privilegedIoc?: boolean;
     alertRunTime?: string | null;
     allowedAlertCategories?: string[] | null;
@@ -64,7 +69,7 @@ export interface userMetaData {
     password?: string;
     current_password?: string;
     theme?: 'dark-theme' | 'light-theme';
-    preferences?: Record<string, any> & {
+    preferences?: Record<string, unknown> & {
         theme?: 'dark-theme' | 'light-theme';
         profile_visible?: boolean;
     };
