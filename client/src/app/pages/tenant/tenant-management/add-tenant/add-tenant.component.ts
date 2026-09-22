@@ -47,6 +47,7 @@ export class AddTenantComponent extends PasswordMeterHost implements OnInit {
     if (this.isAdmin) {
       options.push({ key: 'monitoring', label: this.translationService.translate('Monitoring') });
     }
+    options.push({ key: 'orion_mail', label: this.translationService.translate('Orion Mail') });
     return options;
   }
 
