@@ -101,7 +101,7 @@ class service_manager:
 
     @staticmethod
     async def build_assets(build_dir):
-        helper_controller.build_assets(build_dir)
+        await asyncio.to_thread(helper_controller.build_assets, build_dir)
 
     async def build_map_assets(self, build_dir):
         await helper_controller.init_map_entities_task(build_dir)

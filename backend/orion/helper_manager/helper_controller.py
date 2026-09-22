@@ -243,7 +243,8 @@ class helper_controller:
 
     @staticmethod
     async def build_satellite_asset_if_needed(map_entities_file):
-        version, data = helper_controller.parse_satellite_asset(map_entities_file.read_text(encoding="utf-8"))
+        version, data = await asyncio.to_thread(
+            lambda: helper_controller.parse_satellite_asset(map_entities_file.read_text(encoding="utf-8")))
         if version <= 0:
             log.g().w("Satellite asset version missing, indexing skipped")
             return False
