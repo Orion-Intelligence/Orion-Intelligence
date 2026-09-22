@@ -14,7 +14,7 @@ class SSO_CONSTANTS:
         value.strip()
         for value in env_handler.get_instance().env(
             "ORION_MAIL_REDIRECT_URIS",
-            "http://localhost:4300/auth/callback,http://mail.localhost:4200/auth/callback,https://mail.orionintelligence.org/auth/callback",
+            "http://localhost:4300/api/auth/callback,http://mail.localhost:4200/api/auth/callback,https://mail.orionintelligence.org/api/auth/callback",
         ).split(",")
         if value.strip()
     }
