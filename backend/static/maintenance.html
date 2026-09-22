@@ -8,11 +8,6 @@
     <link href="/maintenance-assets/logo_url_default.png" rel="icon" type="image/png">
     <link href="/maintenance-assets/logo_url_default.png" rel="apple-touch-icon">
     <title>Orion Intelligence — Maintenance</title>
-    <script>
-        // Decide the operation before painting status content. Without JavaScript,
-        // the static maintenance message remains available.
-        document.documentElement.dataset.status = 'pending';
-    </script>
     <!-- Adapt /assets/libs/error-handler.component.css from the 404 page inline:
          this page must render even when the frontend asset server is offline. -->
     <style>
@@ -47,11 +42,6 @@ body {
     repeating-linear-gradient(0deg, rgb(255 255 255 / 1%) 0, rgb(255 255 255 / 1%) 1px, transparent 1px, transparent 56px),
     repeating-linear-gradient(90deg, rgb(255 255 255 / 1%) 0, rgb(255 255 255 / 1%) 1px, transparent 1px, transparent 56px),
     #111315;
-}
-
-html[data-status="pending"] .notice_header-status,
-html[data-status="pending"] .notice_main {
-  visibility: hidden;
 }
 
 .notice_container *,
@@ -502,7 +492,6 @@ html[data-status="pending"] .notice_main {
 
     const tick = async () => {
         const running = renderJob(await readJob());
-        document.documentElement.dataset.status = 'ready';
         if (!running && await isBackOnline()) {
             window.location.replace('/dashboard/home');
             return;
