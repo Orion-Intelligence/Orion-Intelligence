@@ -1012,9 +1012,9 @@ If graph is empty, adjust filters or use a more specific document/property. If g
 
 ### Overview
 
-Live social graph mapping, username scans, image-based profile discovery, profile mapping, scan history, sessions, graph view, list view, exports, imports, profile popups, followers, following, relationships, context menus, and scan status cards.
+Profile Intelligence is the Social Intelligence profile-search workspace: username scans, image-based discovery, saved profile details, live enrichment, scan history, relationship graphs, and report exports. Social Monitoring is the separate Manage Profiles page for browser sessions, personas, connected accounts, and monitored activity.
 
-**Search terms:** Social Intel, social mapper, social graph, username scan, image search, profile mapping, graph/list view.
+**Search terms:** Social Intelligence, Profile Intelligence, profile search, social mapper, social graph, username scan, image search, profile mapping, graph/list view.
 
 ### Navigation
 
@@ -1037,7 +1037,7 @@ Open Social Intel, scan a username or upload an image, manage discovered profile
 
 ### Troubleshooting
 
-Graph search filters loaded graph content. If image upload returns empty candidates, try a clearer profile image or username scan.
+Graph search filters loaded graph content. If image upload returns empty candidates, try a clearer profile image or username scan. If live fetching fails, review any saved Details, Online Presence, or Stealer Logs that remain visible. For **Login required**, open Login, finish signing in to the platform in the same browser, return, and select Reload. An empty profile with no saved data still needs a successful fetch. See [Profile Search](profile-search-profile-intelligence) for the full workflow.
 
 ## Social Intel Entities
 
@@ -1131,6 +1131,39 @@ Open a profile or relationship node, fetch followers/following/posts/images/meta
 ### Troubleshooting
 
 Buttons can be disabled during active fetches, after completed data loads, or on platforms with limited relationship actions.
+
+## Social Monitoring and Browser Sessions
+
+### Overview
+
+Social Monitoring opens **Manage Profiles**, with **Sessions**, **Personas**, **Persona Monitoring**, **Profile Monitoring**, and **Results** tabs. It is separate from selecting discovered candidates in the profile-search popup.
+
+**Search terms:** Social Monitoring, Manage Profiles, capture session, verify session, expired session, persona, posting, ad monitoring, hate speech, stop daily run.
+
+### Navigation
+
+Social Intelligence > Social Monitoring (`/dashboard/manage-profiles`).
+
+### Steps
+
+1. Install or update the browser extension if prompted, and sign in to the intended social platform account in the same browser.
+2. In **Sessions**, use **Fetch session**, then expand the platform and verify the captured session. Use **Edit** to recapture an expired session. The limit is 10 sessions per platform.
+3. For persona-based activity, add a persona, then use **Persona Monitoring > Add Account** to select its platform, session, persona, and **Posting** or **Ad Monitoring** purpose.
+4. Use the selected account's **Post** or **Ad** control and follow the activity in **Results**. **Post publishes externally**; it is not a profile-data fetch.
+5. For a real profile's content, use **Profile Monitoring > Add Monitoring Profile**, enter the platform and profile URL, attach a usable captured session, and start its monitoring action.
+6. In **Results**, filter by Account and Show, expand findings, and inspect the status and any error reason.
+7. **Stop** cancels a manual run. **Stop daily run** also stops the remaining scheduled batch; completed work is not undone.
+
+### Troubleshooting
+
+- Tabs unavailable: check that the extension is ready and its platforms loaded.
+- No available session: capture another session for the platform or review existing assignments.
+- Session Expired: sign in again, recapture/verify the session, and reconnect the profile.
+- No persona assigned: assign one for Post or Ad activity. A persona can have only one assigned account per platform.
+- No post content available: review the persona's age group and interests. Only one successful manual post per profile is allowed per UTC day.
+- Daily scheduler running: wait before retrying a manual trigger, or use the explicitly labeled stop control if you intend to stop the daily batch.
+
+Deleting a session disconnects the profiles using it. Deleting a persona removes its assignments. Review those confirmations before proceeding. Full instructions are in [Social Monitoring](user_manual.md#social-monitoring).
 
 ## AI Workspace And Report Chat
 
@@ -1390,7 +1423,7 @@ If Add User is disabled, configure Account Mail/SMTP fields in System Settings a
 
 ### Overview
 
-Admin-level tenant records, tenant lists, tenant profile views, tenant verification, tenant status, tenant quotas, assigned licenses, tenant image, tenant metadata, tenant users, tenant review, and admin tenant updates.
+Tenant records, verification, status, quotas, and licenses. Administrators manage top-level tenants; primary maintainers manage their associated sub-tenants. Secondary tenant and sub-tenant refer to the same child organization.
 
 **Search terms:** tenant administration, view tenants, manage tenant, tenant profile, tenant status, tenant verification, tenant licenses.
 
@@ -1414,6 +1447,58 @@ Open Tenant > View Tenants or Profile > Tenant, select the tenant, review detail
 ### Troubleshooting
 
 If tenant screens are missing, check admin/maintainer role and license. Admin tenant management has broader controls than current-tenant settings.
+
+## Create Primary and Secondary Tenants
+
+### Quick answer
+
+Register a top-level tenant through the root domain, then have an administrator enable **Primary Tenant** in **Tenants** and assign its quotas. Register a secondary through that primary's signup page, then have the primary maintainer verify it and allocate its licenses and user quota.
+
+**Search terms:** primary tenant, secondary tenant, sub-tenant, parent tenant, tenant signup, tenant quota, reserved users, account temporarily disabled.
+
+### Checks
+
+- Use the primary's URL for secondary signup; root-domain signup creates a standalone tenant.
+- **Add User** creates an account, not a tenant.
+- The primary's user pool counts its own non-maintainer users plus the quotas reserved for its children. Each child also has its own user limit.
+- No signup link can mean the primary's tenant quota is full.
+- **Account temporarily disabled** directs affected users to their network administrator. The responsible operator must check the tenant's parent, status, verification, and quota warnings.
+- Disabling primary status disables its children; deleting the primary deletes its children as well.
+
+See [Primary Tenants and Sub-Tenants](primary-tenants-and-sub-tenants) for the complete setup and quota example.
+
+## Backup, Restore, and Tenant Exports
+
+### Navigation
+
+Profile/administration > **Backup & Restore** (`/dashboard/profile/backup-restore`). Tenant-row exports are under **Tenants**; administrators configure **Scheduled Backup** under **System Settings**.
+
+**Search terms:** create backup, instant backup, scheduled backup, retention, tenant export, import ZIP, index.html, tenant.enc, recovery date, backup statistics, secondary backup.
+
+### Quick answer
+
+Administrators create system backups. Standalone maintainers recover their own organization, primary maintainers recover their permitted tenant family, and secondary maintainers request recovery through their primary. Tenant exports use an existing backup and do not capture new changes.
+
+### Steps
+
+1. For a current recovery point, ask an administrator to run **Instant Backup** and wait for completion. Scheduled backups use a three-day loop when enabled; only two system backups are retained.
+2. Use **Download** for a listed backup, or **Export** on an authorized tenant row for its latest available recovery point.
+3. Check the **backup taken** date, not just the date you downloaded the file. Export confirmation warns about older data.
+4. Extract a copy of a tenant ZIP and open **index.html** for general statistics: backup/export dates, included tenants, users, documents, search documents, files, and counts by collection/index. A **secondary** badge identifies a child tenant.
+5. To recover, choose **Restore** on a stored backup or **Import** the original tenant export ZIP. Review the date and affected tenants, confirm, and wait for the final result.
+
+An administrator's full-system **index.html** has Overview, Account details, Connections, Findings, Organizations, and Files views, with search and empty-category filtering. It is different from the static tenant-export summary.
+
+### Troubleshooting
+
+- No backup contains the tenant: a system backup must complete after that tenant was created.
+- A secondary cannot manage backups directly: contact its primary maintainer.
+- The tenant ZIP contains **index.html** and **tenant.enc**. The HTML is a statistics summary, not the restore payload; upload the intact ZIP.
+- An administrator's whole-system download is not a tenant import ZIP.
+- Modified, unsupported, or incompatible encrypted payloads are rejected. Cross-installation import needs compatible encryption-key configuration managed by the operator.
+- A busy job, missing disk space, or a recovery requiring manual intervention needs resolution before another attempt.
+
+A tenant restore affects its recovery scope; a system restore places the whole site in maintenance. A restore replaces current data rather than merging later changes. See [Backup and Restore](user_manual.md#backup-and-restore) for permissions, statistics, rollback, and recovery instructions.
 
 ## Audit Logs
 

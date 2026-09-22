@@ -724,145 +724,66 @@ Application errors and exceptions are stored in internal log folders with timest
 
 This logging model helps the platform maintain visibility into system behavior, user activity, and operational events.
 
+(backup-and-recovery)=
 ## 3.6 Backup and Recovery
 
 ### Overview
 
-Orion Intelligence uses a scheduled backup approach to support recovery in the event of system failure, database corruption, infrastructure disruption, or other operational issues affecting platform availability or data integrity.
-
-Backups are maintained to help restore the platform and its critical data when recovery is required. The backup process supports operational continuity and reduces the risk of permanent data loss.
+Orion Intelligence provides application-managed system backups and scoped tenant recovery. Hosting-provider snapshots are a separate infrastructure recovery layer; their availability, retention, and recovery procedure depend on the deployment and must be confirmed by its operator. They do not replace the application's Backup & Restore workflow.
 
 ### Backup Purpose
 
-The purpose of the backup process is to protect Orion Intelligence data and system state by maintaining recoverable copies of critical platform information.
-
-The backup process is designed to support recovery from situations such as:
-
-Database corruption
-
-VPS-level failure
-
-Accidental data loss
-
-Application-level failure
-
-Infrastructure disruption
-
-Critical system misconfiguration
-
-Operational recovery needs
+Backups provide recovery points for accidental data loss, application failure, or database corruption. A recovery point describes the stored state at the backup time, not the time a copy is later downloaded. Tenant exports are generated from an existing backup rather than from a new live snapshot.
 
 ### Backup Solution
 
-Orion Intelligence uses Hostinger for scheduled backup support.
-
-Hostinger backups are maintained on a weekly basis and are used to preserve the platform state for disaster recovery and operational recovery purposes.
-
-These backups provide recovery points that can be used by authorized administrators when restoration is required.
+Authorized administrators create instant system backups or enable the scheduled backup loop. Each system backup also contains tenant-specific portions for organization recovery without restoring unrelated tenants.
 
 ### Backup Scope
 
-The backup process is intended to support recovery of critical Orion Intelligence components and data.
+System backups include MongoDB data, ArangoDB data, Elasticsearch data, logs, resource files, session resources, and tenant portions. Tenant portions include tenant-owned database records, tenant-scoped search records where supported, and associated files. A primary tenant's portion includes the sub-tenant portions captured beneath it.
 
-The backup scope may include:
-
-Application data
-
-Database data
-
-Platform configuration
-
-User-related records
-
-Tenant-related records
-
-System settings
-
-Operational records
-
-Application state required for recovery
-
-The exact recovery scope depends on the available Hostinger backup configuration and the state of the platform at the time the backup is created.
+The application backup is not a complete server image. Infrastructure configuration, environment secrets, and the encryption key needed to read exports require separate operational recovery arrangements.
 
 ### Database Backups
 
-Orion Intelligence databases are included in the backup approach through Hostinger weekly backups.
-
-The platform uses multiple data components, including:
-
-MongoDB
-
-Elasticsearch
-
-ArangoDB
-
-Redis
-
-These components support different platform workloads, including document persistence, indexed search, graph analysis, caching, and task coordination. Backups help preserve the data and system state required to restore platform operations when needed.
+Tenant restores filter incoming database records to the authorized tenant scope. They leave out records owned by another tenant and avoid overwriting conflicting records. Current administrator-controlled settings on an existing tenant, including quotas, licenses, and parent relationships, are preserved through tenant restore. These controls are distinct from a full system restore, which restores the selected system recovery point.
 
 ### Recovery Process
 
-If recovery is required, authorized administrators are responsible for initiating the restoration process using the available Hostinger backup.
+1. Select the required system or tenant scope and check the recovery date.
+2. Review the replacement confirmation; changes made since the recovery point can be lost.
+3. Start Restore, or upload an intact tenant export ZIP through Import.
+4. Follow the job to its final status and review any skipped-record or failure message.
+5. Verify the restored scope and escalate unresolved recovery failures to the platform operator.
 
-The general recovery process includes:
-
-Identify the issue requiring recovery.
-
-Determine the most appropriate available backup point.
-
-Restore the required system state or data from the backup.
-
-Validate that core platform services are operational.
-
-Confirm that users can access the platform and required modules.
-
-Review logs and system behavior after recovery.
+A tenant restore creates a rollback snapshot before replacing data and attempts rollback if replacement or validation fails. Interrupted tenant restores are checked during service startup. A failed rollback requires operator intervention. Tenant maintenance affects the restored tenant scope; whole-system restore uses site-wide maintenance.
 
 ### Recovery Responsibilities
 
-Backup and recovery activities are handled by authorized administrators or infrastructure personnel responsible for Orion Intelligence operations.
-
-These personnel are responsible for:
-
-Monitoring backup availability.
-
-Initiating recovery when required.
-
-Restoring platform data or system state.
-
-Validating service functionality after recovery.
-
-Reviewing system behavior after restoration.
-
-Coordinating with the development or operations team if additional fixes are required.
+Platform operators manage system backup creation, schedule, retention, storage, encryption-key recovery, and failures requiring manual intervention. Authorized maintainers select and validate recovery points for the organizations they manage. A completed download or accepted upload alone does not establish that a restore succeeded.
 
 ### Backup Frequency
 
-Orion Intelligence uses weekly backups through Hostinger.
-
-The weekly backup schedule provides recurring recovery points that can be used in the event of operational disruption or data recovery requirements.
+The scheduled application backup loop runs at three-day intervals when enabled. Instant backups are administrator-triggered. The current retention limit is two system backups across both types, with older backups pruned after a new backup succeeds. Copies needed beyond that rotation must be retained separately under the operator's storage policy.
 
 ### Backup Access
 
-Access to backups is restricted to authorized personnel responsible for platform administration, infrastructure management, or recovery operations.
+- Standalone tenant maintainers can download, restore, and import their own tenant.
+- Primary maintainers can recover their authorized tenant family.
+- Sub-tenant maintainers request backup operations through the primary tenant.
+- Administrators manage system backups; root administrators have the dedicated administrative tenant-recovery operations.
+- Ordinary users without the required privileges do not receive backup-management controls.
 
-Regular platform users do not have access to backup files, recovery controls, or backup management functions.
+Tenant exports contain a readable **index.html** statistics summary and an authenticated encrypted **tenant.enc** payload. The summary exposes dates, tenant identifiers, and counts, not individual backup records. It should still be treated as organizational information. Import requires a supported, intact tenant ZIP and compatible server encryption-key configuration; changing the HTML summary does not change the encrypted recovery data.
 
 ### Backup and Recovery Flow
 
-1. Orion platform operates normally.
-2. Hostinger creates the scheduled weekly backup.
-3. Backup is retained as a recovery point.
-4. Operational issue or recovery need occurs.
-5. Authorized administrator selects an available backup.
-6. System/data restoration is performed.
-7. Platform services are validated after recovery.
+Create a system recovery point, retain or export the required copy, inspect its recovery date and scope, restore through the authorized workflow, then verify the result. Exporting a primary includes its backed-up secondary tenants; a tenant export does not grant authority to restore an unrelated tenant.
 
 ### Backup and Recovery Summary
 
-Orion Intelligence uses Hostinger weekly backups to support recovery from system failure, data corruption, infrastructure disruption, or other operational issues.
-
-Backups provide recovery points for restoring critical platform data and system state. Recovery activities are performed by authorized administrators or infrastructure personnel, and backup access is restricted to authorized personnel only.
+See the [user backup guide](user_manual.md#backup-and-restore) for creation, permissions, export statistics, import, maintenance, and troubleshooting. Keep application recovery instructions separate from deployment-specific hosting-provider disaster recovery.
 
 :::{admonition} SOC 2 Readiness Note
 :class: note
@@ -1446,9 +1367,7 @@ This ensures that database access is controlled by application logic and that us
 
 ### Backup Protection
 
-Orion Intelligence databases are backed up through Hostinger weekly backups. These backups support recovery in the event of database corruption, system failure, infrastructure disruption, or operational issues.
-
-Backup access is restricted to authorized personnel responsible for platform administration, infrastructure management, or recovery operations.
+Orion Intelligence provides application-managed system backups and tenant-scoped recovery as described in [Backup and Recovery](#backup-and-recovery). Tenant exports pair a readable statistics report with an encrypted payload. System operations are administrator-controlled; authorized tenant maintainers can recover their own permitted scope. Hosting-provider snapshots are a separate deployment-specific layer.
 
 ### Log Retention
 
@@ -1589,11 +1508,7 @@ The recovery approach may include:
 
 ### Backup-Based Recovery
 
-Orion Intelligence uses weekly Hostinger backups to support recovery from system failure, database corruption, or infrastructure disruption.
-
-These backups provide recovery points that can be used to restore system state and critical platform data when recovery is required.
-
-Backup-based recovery helps reduce the risk of permanent data loss and supports restoration of platform operations after major incidents.
+Use application-managed system backups for platform data recovery and tenant portions for authorized organization recovery. Infrastructure failures can also require a hosting-provider snapshot or a rebuilt deployment, depending on the operator's recovery arrangements. In every case, verify the recovery date, required encryption-key configuration, affected scope, and final recovery status. See [Backup and Restore](user_manual.md#backup-and-restore).
 
 ### Container-Based Recovery
 
@@ -1675,4 +1590,4 @@ This validation helps confirm that the platform has returned to an operational s
 
 Orion Intelligence uses a backup-based and container-based recovery approach to support restoration after major service disruption, database corruption, infrastructure failure, or application-level failure.
 
-Weekly Hostinger backups provide recovery points, while Docker and Docker Compose support rebuilding and restarting platform services. Disaster recovery activities are performed by authorized personnel responsible for restoring data, validating services, and returning the platform to an operational state.
+Application backups provide data recovery points, while Docker and Docker Compose support rebuilding and restarting platform services. Hosting-provider snapshots may provide an additional infrastructure recovery layer according to the deployment's arrangements. Authorized personnel select the appropriate recovery source, restore data, validate services, and return the platform to an operational state.

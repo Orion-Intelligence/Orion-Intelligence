@@ -1474,9 +1474,54 @@ CTI graph context-menu actions opened directly from the graph canvas.
 
 ### Social Intel
 
-Social Intel is a graph-based username and profile mapping workspace.
+Social Intelligence has two connected workspaces. **Profile Intelligence** is the profile-search and investigation workspace at `/dashboard/social-intel`. **Social Monitoring** opens **Manage Profiles** at `/dashboard/manage-profiles`, where you manage captured browser sessions, personas, monitored accounts, and run results.
 
-It is designed for operators who need to move from a single username, image, or related profile into a richer relationship map of platforms, related accounts, and extracted profile evidence.
+| Workspace | Use it for |
+| --- | --- |
+| Profile Intelligence / profile search | Find accounts from a username or image, inspect saved and live profile data, and explore relationships. |
+| Social Monitoring / Manage Profiles | Connect sessions to accounts, assign personas, run posting or ad monitoring, and review profile-monitoring results. |
+| Social indexed search | Search already indexed social content. This is separate from profile discovery and monitoring. |
+
+The **Manage Profiles** candidate popup inside profile search selects discovered profiles for an investigation. It is different from the full **Manage Profiles** monitoring page.
+
+(profile-search-profile-intelligence)=
+#### Profile Search (Profile Intelligence)
+
+1. Open **Social Intelligence > Profile Intelligence**.
+2. Enter a username or handle and select **Search**, or use **Scan by image** to upload a PNG, JPEG, WebP, or GIF.
+3. Follow the scan in **Scan History**. Open a completed entry to return to its results; use the available cancel, retry, or delete controls on the relevant entry.
+4. Review the discovered platforms. When candidate selection is offered, open the **Manage Profiles** popup, filter platforms or usernames, and select the profiles to investigate.
+5. Select a platform to open its profile. Use **Open Profile** to compare the result with the source account.
+6. Review **Details**, **Online Presence**, **Stealer Logs**, and the platform's supported content or relationship tabs. A tab is available only when the platform and returned data support it.
+7. Use the **Relationship graph** button to explore connections, or return to the profile list for detailed review. Where **Normal** and **Darkweb** source tabs appear, use them to switch result sources.
+
+A matching username is a candidate identity, not proof that two accounts belong to the same person. Compare profile links, names, images, published content, and relationships before treating a match as confirmed.
+
+#### Saved Results, Live Fetching, and Login
+
+A discovery scan can save basic profile details, online-presence matches, and exposure results before a live browser fetch succeeds. These saved results remain visible when available, even if the extension cannot fetch additional data. A failed live fetch does not erase them.
+
+Live fetching needs the Orion browser extension and, for platforms that require authentication, a valid login to that platform in the same browser. When **Login required** appears:
+
+1. Select **Login** to open the platform in a separate tab.
+2. Complete the platform's login, then return to Orion.
+3. Select **Reload** for the affected section after login has completed.
+4. Continue reviewing saved results while live data is unavailable.
+
+The **Details**, **Online Presence**, and **Stealer Logs** panels have their own reload controls. Content and relationship sections expose their own sync state and supported fetch controls. A running indicator means work is still in progress; it does not mean the displayed saved data has already been refreshed. A profile with no saved details or enrichment still shows the fetch prompt or error until data becomes available.
+
+| What you see | What to do |
+| --- | --- |
+| Extension install or update prompt | Follow the browser-specific instructions, then return to the profile. |
+| Login required with saved results below | Log in to the source platform and reload the section; the saved results can still be reviewed. |
+| No saved results and a fetch error | Check the extension, platform session, and profile URL, then retry. |
+| Empty or unavailable content tab | Check whether that platform supports the section and whether the source returned any data. |
+
+#### Exposure Results and Exports
+
+The dashboard's **Exposure Signals** panel shows stealer-log matches for the investigated identity across domains. Inside an individual platform, **Stealer Logs** narrows those matches to that platform's domain when its host can be resolved. These two views can therefore show different counts.
+
+Where an export menu is available, choose PDF, CSV, or JSON. Stealer-log exports use the credentials report layout: each source record retains its labeled fields instead of being squeezed into one wide table. The selected view determines the records included. Treat a saved exposure record as evidence to review, not as confirmation that a credential still works.
 
 #### Social Intel Layout
 
@@ -1555,15 +1600,9 @@ Relationship graph view showing a scanned account, its platform node, and follow
 
 #### Session Management
 
-Social Intel supports multiple sessions in the same way the CTI workspace supports multiple investigative tabs.
+Use the left **Scan History** to reopen saved investigations and the graph controls to retain the relationship view for your account. Reopening a saved scan is different from capturing a browser login session: browser sessions are managed under **Social Monitoring > Sessions** and are used to authenticate platform requests.
 
-Covered session actions include:
-
-- creating a new session
-- renaming a session
-- exporting a social report from the current session
-
-Sessions are useful when you want to separate different investigations, keep one graph focused on one target, or compare multiple usernames without overwriting the previous workspace.
+Export the current investigation from the available report controls when you need to share its findings. A report export is not a browser session file or a tenant backup.
 
 #### Add-Entity Workflow
 
@@ -1634,7 +1673,7 @@ Social Intel list-view mode for profile-by-profile review after graph ingestion.
 
 #### Browser Extension and Captured Sessions
 
-Profile fetching runs through the Orion browser extension, so the profile tabs stay gated until the extension is installed and signed in. When it is missing, Social Intel and the Manage Profiles page show an install prompt: Firefox installs the signed build in one click, while the Chrome package is downloaded and loaded manually from `chrome://extensions` with Developer mode on.
+Live profile fetching runs through the Orion browser extension. Saved recon results can remain available when live fetching fails; profiles with no saved data still need a successful fetch. When it is missing, Social Intel and the Manage Profiles page show an install prompt: Firefox installs the signed build in one click, while the Chrome package is downloaded and loaded manually from `chrome://extensions` with Developer mode on.
 
 ```{figure} ../screenshots/social-extension-install-20260326.png
 :alt: Orion extension install prompt
@@ -1643,7 +1682,7 @@ Profile fetching runs through the Orion browser extension, so the profile tabs s
 Install prompt shown while the Orion extension is not available to the browser.
 ```
 
-The Manage Profiles page lists every supported platform with the number of sessions saved for it. From here users can fetch a session for a platform, and expand a platform to verify, re-capture, or delete an individual saved session.
+The **Sessions** tab on the Social Monitoring / Manage Profiles page lists the platforms returned by the extension and the number of sessions saved for each. From here users can fetch a session for a platform, and expand a platform to verify, re-capture, or delete an individual saved session.
 
 ```{figure} ../screenshots/social-manage-profiles-page-20260326.png
 :alt: Manage Profiles captured sessions
@@ -1778,6 +1817,76 @@ Understanding the legend is important when the graph becomes dense. It tells the
 6. Fetch followers, following, or images where useful.
 7. Rename aliases or add custom entities if the graph needs cleanup.
 8. Export the session when the relationship picture is complete.
+
+### Social Monitoring
+
+Open **Social Intelligence > Social Monitoring** (`/dashboard/manage-profiles`). The page heading is **Manage Profiles**. It has five tabs:
+
+| Tab | Purpose |
+| --- | --- |
+| Sessions | Capture, verify, replace, upload, download, or delete browser sessions for supported platforms. |
+| Personas | Define the demographic and interest settings used by persona-based activities. |
+| Persona Monitoring | Connect an account to a session, assign a persona, and choose posting or ad-monitoring purposes. |
+| Profile Monitoring | Add a real profile URL for hate-speech monitoring. |
+| Results | Review running and completed activities, inspect findings, and stop active runs. |
+
+Install or update the extension when prompted. The other tabs become available once the extension is ready and the platform list has loaded successfully. Platform availability follows the extension and the capabilities enabled for your account.
+
+#### Capture and Maintain Browser Sessions
+
+1. In **Sessions**, find the platform and use **Fetch session** while signed in to the intended platform account in that browser.
+2. Expand the platform row to inspect its saved sessions, capture time, verification state, and detected username.
+3. Use **Verify** to check a session. A successful check shows the detected account; a failed check shows an error to resolve before monitoring.
+4. Use **Edit** to capture a replacement session when the login expires or the wrong account was captured.
+5. Use the platform's upload control or a session's **Download** control when transferring a saved session file through the supported workflow.
+
+Up to **10 sessions per platform** can be saved. Delete an unused session before capturing another when the limit is reached. Session files contain authentication material; keep downloaded copies private. Deleting a session asks for confirmation and disconnects profiles that use it, so capture or attach a replacement before trying to run those profiles again.
+
+#### Create a Persona and Connect an Account
+
+1. Open **Personas > Add Persona**.
+2. Enter a name, age group, gender, country, city, and interests as appropriate. Review the displayed adult status and save the persona.
+3. Open **Persona Monitoring > Add Account**.
+4. Select a platform and an available captured session. Add the account name and username so the connection is recognizable.
+5. Assign a persona and choose at least one **Actions / Purposes** option: **Posting** or **Ad Monitoring**. Save the account.
+6. Check the account's connection and assignment states. Attach a usable session or assign a persona if either is missing.
+
+A persona can be assigned to accounts on different platforms, but cannot be assigned to a second account on the same platform. Session choices exclude sessions already used by another account in that workflow. Removing a persona clears its profile assignments; it does not create a replacement persona.
+
+#### Run Persona Monitoring
+
+The **Post** and **Ad** controls run the selected account, even when its persona is also assigned to accounts on other platforms.
+
+- **Post** publishes content through the connected account. It is an external posting action, not a read-only scan. It requires an assigned persona, a readable session, a supported platform, and content available for that persona's settings. A profile can have one successful manual post per UTC day.
+- **Ad** starts ad detection using the selected account's session and assigned persona. Review the detected ads in **Results**.
+- A running badge identifies the profile currently being processed. Open **Results** for its current step and outcome.
+
+If the application reports that no post content is available, adjust the persona's age group or interests to a supported content set. If a session cannot be read or has expired, capture it again and reconnect it. Manual triggers may be refused while the daily scheduler is running; wait until it finishes before retrying.
+
+#### Monitor a Real Profile
+
+1. Open **Profile Monitoring > Add Monitoring Profile**.
+2. Select the platform, enter the real **Profile URL**, and add an optional name.
+3. Select an available captured session for the platform and save the profile. A usable attached session is required to run monitoring, even if a profile can be saved before one is selected.
+4. Use the profile's monitoring action to start a hate-speech scan.
+5. Open **Results** and select **Profile Monitoring** to inspect the run, or **Posts** to review the collected posts alongside published posts.
+
+This workflow examines the specified profile's content; it does not require creating a posting persona. Findings include the source URL, author, text, available engagement counts, and a **Hate Speech** or **Normal** classification with a label when returned. Review the source and context before acting on a classification.
+
+#### Scheduled Runs, Results, and Stop Controls
+
+The daily scheduler processes eligible persona-assigned accounts using their attached sessions and selected purposes. Accounts without a persona, readable session, or purpose are skipped. Adding a real profile to **Profile Monitoring** does not by itself assign the persona needed by that daily loop; use the profile's manual monitoring control for that workflow.
+
+In **Results**:
+
+- Filter by **Account** and choose **Ads**, **Posts**, or **Profile Monitoring** under **Show**.
+- Distinguish **Manual** activity from scheduled rows labeled **Automate**.
+- Watch **Running** rows for the current step. Completed runs show **Completed** or **Published**; unsuccessful runs show **Failed** or **Session Expired** and the reported reason.
+- Expand a result to review ads or posts, source links, classifications, and available engagement statistics.
+- Use **Stop** to cancel a manual run. **Stop daily run** requests that the active scheduled run and the remaining daily batch stop; it is broader than cancelling just one account's scan. Wait for the stopping state to finish. It does not remove content already published or undo completed work.
+- Use the clear control and review its confirmation when removing saved results. Clearing results is separate from deleting an account, persona, or session.
+
+If a scheduled batch was stopped, it is recorded as handled for that day; restarting the backend does not restart the same daily batch. Results and active-run indicators refresh automatically while the page is open.
 
 ## Result and Report Workflows
 
@@ -2632,37 +2741,63 @@ To delete a tenant:
 
 This permanently removes the tenant and its associated users and keys. Deleting a primary tenant also removes every sub-tenant beneath it, together with their users and keys.
 
+(primary-tenants-and-sub-tenants)=
 #### Primary Tenants and Sub-Tenants
 
-A tenant can be promoted to a primary tenant, which lets it hold its own sub-tenants and administer them without administrator involvement. Sub-tenants are ordinary tenants that carry a parent reference; they sign up through the primary tenant's subdomain and inherit its branding and licensing boundaries.
+**Secondary tenant** and **sub-tenant** mean the same thing: a tenant owned by a primary tenant. The hierarchy has one parent-child level; a sub-tenant is not another independent primary tenant.
 
-To promote a tenant:
+| Tenant type | Who manages it | Relationship |
+| --- | --- | --- |
+| Root/default tenant | Platform administrators | Platform administration and top-level provisioning. |
+| Standalone tenant | Its maintainer for permitted operations; administrators for platform-controlled settings | No parent and no sub-tenants. |
+| Primary tenant | Its maintainer, within administrator-assigned limits | Owns and manages its sub-tenants. |
+| Secondary / sub-tenant | Its own maintainer for local users and settings; its primary maintainer for tenant administration | Belongs to one primary tenant. |
 
-1. Sign in as an administrator and open `Tenants`.
-2. Expand the tenant and enable the `Primary Tenant` toggle.
-3. Set `Tenant Quota` to the number of sub-tenants the primary tenant may hold.
-4. Save the tenant.
+##### Create a Primary Tenant
 
-Promotion raises the tenant's own quotas to the primary defaults when they are lower: a user quota of `15` and a tenant quota of `5`. Non-primary tenants accept a user quota of up to `8` from this page.
+1. Register a top-level tenant through signup on the root platform domain and complete its verification and onboarding.
+2. Sign in as a platform administrator and open **Tenants**.
+3. Expand the tenant, enable **Primary Tenant**, and set **Tenant Quota** and **User Quota**.
+4. Review its status, verification, and licenses, then save.
+5. Give the primary maintainer the tenant's dedicated URL for onboarding its sub-tenants.
 
-Quotas are pooled. The primary tenant's user quota covers its own users plus every user of its sub-tenants, and each sub-tenant's user quota reserves a slice of that pool. Users holding the `maintainer` license are not counted. A sub-tenant created through signup starts with a user quota of `1` when the pool still has room, and `0` when it does not.
+Promotion raises quotas to the primary defaults when they are lower: **15 users** and **5 sub-tenants**. Non-primary tenants accept a user quota of up to **8** from this page. Review the saved values rather than assuming the pre-promotion limits remain unchanged.
 
-The maintainer of a primary tenant can:
+##### Create a Secondary / Sub-Tenant
 
-- open `Tenants` and see only the sub-tenants beneath its own tenant
-- verify a sub-tenant, change its status, and set its user quota within the remaining pool
-- assign sub-tenant licenses from the set the primary tenant itself holds
-- enable Privileged IOC or the AI endpoint for a sub-tenant only when the primary tenant already has that capability
-- require a password reset for a sub-tenant maintainer
-- create users for its own tenant with the `Member`, `Analyst`, or `Demo` role and assign tenant-alert access to them
-- review the tenant alerts of sub-tenants that allow parent visibility
-- accept or reject takedown requests raised by its own tenant and its sub-tenants
+1. Open the **primary tenant's URL** and select **Sign Up**. Signup on the root platform domain creates a top-level tenant instead.
+2. Complete the signup details for the new organization and follow the verification email, which points back to the primary tenant URL.
+3. As the primary maintainer, open **Tenants** and review the new sub-tenant's verification, status, licenses, and user quota.
+4. Allocate the sub-tenant's permitted quota and licenses, then save.
+5. Use the sub-tenant's dedicated URL to sign in as its maintainer, finish onboarding, and add its users in **Tenant Users**.
 
-Sub-tenant users are blocked at login when the primary tenant is unverified, disabled, or no longer marked as primary. A sub-tenant member also inherits the primary tenant's subscription state, so an active subscription on the primary tenant prevents trial-expiry lockout in its sub-tenants.
+If the primary tenant has reached its tenant quota, **Sign Up** is hidden and signup is refused until a sub-tenant is removed or the quota is increased. **Add User** in Tenant Users creates an account in an existing tenant; it does not create a secondary tenant.
 
-When a quota is exceeded, the affected users are stopped at login with an explanatory message, and signed-in sessions display a banner until the tenant reduces usage or the quota is raised. Exceeding the user quota and exceeding the tenant quota are reported separately.
+##### Allocate Quotas and Licenses
 
-Turning off the `Primary Tenant` toggle disables every sub-tenant beneath the tenant. Reducing the licenses of a primary tenant also trims its sub-tenants to the remaining license set and re-levels the affected users.
+The primary user quota covers its own counted users **plus the user quotas reserved for its sub-tenants**. Maintainer accounts are excluded from user counts. For example, with a primary quota of 15, four counted primary users and sub-tenant reservations of 3 and 5 consume 12 slots, leaving 3 available. Each sub-tenant is also limited by its own reservation.
+
+A sub-tenant created through signup starts with a user quota of **1** if there is room in the pool, or **0** otherwise. Freeing a reserved slot may require lowering the sub-tenant's allocation; deleting a user alone does not reduce that reservation.
+
+The primary maintainer can:
+
+- review and administer its own sub-tenants in **Tenants**;
+- change verification, status, and user quota within the available pool;
+- assign licenses from the set held by the primary tenant;
+- enable Privileged IOC or the AI endpoint only when the primary already has that capability;
+- require a password reset for a sub-tenant maintainer;
+- review sub-tenant alerts when parent visibility is enabled;
+- review takedown requests owned by its tenant family.
+
+Administrators manage sub-tenants through the primary tenant rather than editing or deleting them directly. Turning off **Primary Tenant** disables its sub-tenants. Reducing the primary's licenses also trims its sub-tenants' license sets. Deleting a primary tenant deletes its sub-tenants and their users and keys as well.
+
+##### When Access Is Temporarily Disabled
+
+A missing, unverified, disabled, or no-longer-primary parent can block its sub-tenants. Exceeding the primary's user or tenant quota can also block associated sub-tenant accounts. The responsible operator sees the relevant quota warning and must reduce usage or reserved quotas, remove tenants where appropriate, or obtain an increased allocation.
+
+When a signed-in account is blocked, the **Account temporarily disabled** screen directs the user to their network administrator and provides **Log out**. Some quota or account-verification failures can instead prevent sign-in; pass that message to the responsible administrator. The screen does not disclose the underlying administrative reason. A sub-tenant member's subscription checks also follow the primary tenant's subscription state.
+
+For the corresponding backup permissions, see [Backup and Restore](#backup-and-restore).
 
 #### Dedicated Tenant Subdomains and White-Labeling
 
@@ -2774,7 +2909,7 @@ The Backup card controls whether Orion Intelligence creates backups on its own s
 
 When Scheduled Backup is enabled, the platform creates a backup automatically every 3 days. The toggle saves immediately; there is no separate save action for it.
 
-Only the 2 most recent backups are retained. When a new backup would exceed that limit, the oldest existing backup is deleted first. This retention limit is shared across scheduled and manually created backups, so enabling the schedule will eventually displace older manual backups.
+Only the **2 most recent system backups** are retained. After a new backup completes successfully, older backups beyond that limit are removed. Scheduled and manually created backups share this limit, so scheduled backups can eventually displace older manual recovery points. Download any recovery point you need to keep before it leaves the retained set.
 
 ```{figure} ../screenshots/alert-integrations-system-slack-config-20260326.png
 :alt: System Slack alert integration configuration
@@ -2792,27 +2927,135 @@ Administrative settings and platform-management view.
 
 ### Backup and Restore
 
-Backup and Restore lists every backup held by the platform and allows administrators to create, restore, and delete them.
+Open **Backup & Restore** from the profile/administration area (`/dashboard/profile/backup-restore`). The available controls depend on your role and tenant. Administrators manage system backups; eligible tenant maintainers download, restore, or import their permitted tenant data.
 
-Each backup captures:
+#### How Backups Work
 
-- MongoDB collections
-- ArangoDB collections
-- Elasticsearch indices
-- application logs
-- static resource files
+Orion creates a **system backup**, then stores tenant-specific portions inside it. These portions make it possible to recover an organization without restoring the whole platform. A tenant export is extracted from a stored backup: downloading or exporting does **not** create a fresh snapshot.
 
-The listing shows a sequence number, backup name, type, and creation date. Backup type is either `auto` for backups produced by the 3-day schedule, or `instant` for backups created manually.
+| Operation | What it produces or changes |
+| --- | --- |
+| Instant Backup | An administrator creates a new system recovery point. |
+| Scheduled Backup | The platform creates a system recovery point automatically on the configured three-day loop when enabled. |
+| Download on an administrator's backup list | Downloads the selected whole-system backup for administrative recovery. |
+| Download on a maintainer's backup list | Downloads that tenant's portion of the selected recovery point. A primary portion includes its backed-up sub-tenants. |
+| Export on a tenant row | Downloads the latest available backup portion containing that tenant. |
+| Restore | Replaces the selected system or tenant scope with an existing stored recovery point. |
+| Import | Restores an authorized tenant export ZIP uploaded from your computer. |
 
-Administrators can:
+The system backup contains MongoDB data, ArangoDB graph data, Elasticsearch data, application logs, resource files, session resources, and tenant recovery portions. It is an application backup, not a complete operating-system image. Infrastructure snapshots, deployment configuration, and server encryption-key recovery need to be managed separately by the platform operator.
 
-- **Instant Backup** — create a backup immediately. The button shows a progress indicator and stays disabled until the operation finishes.
-- **Restore** — replace current data with the contents of the selected backup. The platform enters maintenance mode until the restore completes.
-- **Delete** — permanently remove a stored backup.
+A tenant portion contains its tenant-owned database records, users and related records, tenant-scoped search data where supported, and associated files. It does not give a maintainer the platform's shared search corpus or unrelated tenants' data. A primary portion contains the sub-tenant portions present at the time of that backup.
 
-Each action asks for confirmation before it runs. When the platform already holds 5 backups, the Instant Backup confirmation warns that the oldest backup will be removed if the operation proceeds.
+The list identifies each backup by name, creation date, and type: **auto** or **instant**. The current retention limit is **2 system backups total**, shared by both types. A new successful backup removes older entries beyond that limit.
 
-Restoring is destructive: collections are cleared before the backup contents are written back. Only administrators can reach these operations.
+#### Who Can Use Which Backup
+
+| Caller | Available scope |
+| --- | --- |
+| Standalone tenant maintainer | Download, restore, and import its own tenant. |
+| Primary tenant maintainer | Its own tenant and associated sub-tenants; restoring its primary backup includes the sub-tenants stored in that backup. |
+| Secondary / sub-tenant maintainer | No independent backup controls; request recovery or export through the primary maintainer. |
+| Platform/root administrator | System backup management and authorized tenant recovery. Tenant export/import of a secondary is performed through its primary bundle. |
+
+Tenant maintainers do not have **Instant Backup**, system-backup deletion, or the schedule toggle. They use recovery points created by administrators or the schedule. A tenant created after the most recent backup will not appear in that recovery point; ask the administrator for a new backup before trying to export it.
+
+#### Create a System Backup
+
+1. Sign in as an authorized administrator and open **Backup & Restore**.
+2. Select **Instant Backup** and review the confirmation. When two backups already exist, the confirmation explains that the oldest will be removed after a new successful backup.
+3. Confirm and watch the progress percentage and current stage.
+4. Wait for the completion message and refreshed list, then check the creation date.
+5. Download the new backup if you need a retained copy outside the server's two-backup rotation.
+
+To enable recurring backups, open **System Settings > Backup** and turn on **Scheduled Backup**. The toggle saves immediately. The background loop checks the setting and runs at three-day intervals; enabling the toggle is not a substitute for **Instant Backup** when you need a current recovery point now.
+
+Only one backup, restore, or import job can run at a time. If a job is already running, wait for its final status before submitting another operation. A started upload or a progress bar is not confirmation that a recoverable backup or restore has completed.
+
+#### Export a Tenant
+
+1. Open **Tenants** and select **Export** on a tenant you are allowed to manage. A standalone maintainer can use **Download** on its own Backup & Restore list instead.
+2. Review the recovery date in the export confirmation. The tenant-row export uses the latest stored backup containing the tenant, and warns when it is more than 24 hours old.
+3. Confirm and save the ZIP. Keep its original filename to retain the timestamp used by import confirmations.
+4. Extract a copy locally and open **index.html** to review the contents summary. Keep the original ZIP intact for a future import.
+
+**The backup date is the recovery point.** For example, a backup taken on Monday and exported on Thursday still restores Monday's data. Changes made after Monday are not included. Ask an administrator for an Instant Backup first if those later changes must be preserved.
+
+#### Read the Export's index.html Statistics
+
+A tenant export ZIP contains a folder with these files:
+
+```text
+tenant-export/
+  index.html   — readable statistics and recovery-point summary
+  tenant.enc   — encrypted tenant data used by Import
+```
+
+The outer folder name varies with the backup and tenant. Open `index.html` in a browser after extraction; it is a static summary that does not need a running Orion server or decrypt the payload.
+
+The summary shows:
+
+- **Backup**: the source backup's name.
+- **Backup taken**: the time of the stored recovery point.
+- **Exported**: when this download was prepared.
+- **Tenants**: how many tenant portions are included.
+- A section for each tenant, identified by slug or ID; child tenants carry a **secondary** badge.
+- Per-tenant **Users**, **Documents**, **Search documents**, and **Files** totals.
+- Database collection and search-index tables with their document counts.
+
+These are backup statistics, not live counts or a browser for individual users, passwords, messages, or records. The **Users** total describes stored accounts, not remaining license/quota capacity. The encrypted `tenant.enc` contains the actual restore data. Editing the HTML summary does not edit or restore that data.
+
+Tenant imports accept the encrypted export produced by a compatible Orion server. Modified payloads and older plain-data ZIPs are rejected. An export from another installation requires compatible server encryption-key configuration; coordinate migration with the platform administrator rather than assuming any Orion installation can import it. The administrator's whole-system ZIP is a different format and is not accepted by the tenant **Import** action.
+
+#### Read the System Backup's Statistics
+
+An administrator's whole-system download also includes **index.html**, but uses the broader backup overview rather than the two-file tenant-export layout. Extract the ZIP and open the top-level report locally to review its embedded backup summary.
+
+- **Overview** summarizes saved items, information types, categories, organizations, and listed files.
+- **Account details**, **Connections**, and **Findings** summarize the MongoDB, ArangoDB, and Elasticsearch portions respectively.
+- **Organizations** shows each included tenant's saved items, people, files, and findings; selecting an organization opens its category summary.
+- Use **Search this view** to filter the current table and **Hide empty** to hide categories with no saved items.
+- **Files** lists files represented by the report. Counts come from the backup summary, not a fresh live-system query.
+
+The local report can show embedded statistics without reading neighboring data files. Record-level browsing requires the report's data-file loading mode and access to the accompanying files; do not publish an administrative backup folder just to enable browsing. The tenant export's **index.html** remains a static statistics-only report with its actual data in **tenant.enc**.
+
+#### Restore From a Stored Backup
+
+1. Open the correct Backup & Restore scope: your organization for tenant recovery, or the administrator view for a whole-system restore.
+2. Review the selected backup's creation date and scope before choosing **Restore**.
+3. Read the confirmation carefully. A restore replaces current in-scope data; later changes may be lost. It is not an append or merge operation.
+4. Confirm and follow the job's progress until it reports success or failure.
+5. Reopen the affected organization and check its users, records, and files after completion.
+
+A tenant restore temporarily places the affected tenant and included sub-tenants in maintenance while data is replaced. Unrelated tenants remain available. A whole-system restore places the site in maintenance.
+
+For an existing tenant, current administrator-controlled tenant settings such as licenses, quotas, status, and parent relationships are retained rather than blindly reverting to older exported values. Records now owned by another tenant, or conflicting with its records, are left out; the completion message reports skipped records when applicable. Ask the administrator to inspect the job logs if that message appears.
+
+#### Import an Exported Tenant ZIP
+
+1. Open **Backup & Restore** as an authorized maintainer or administrator and choose **Import**.
+2. Select the original tenant export ZIP, not `index.html`, `tenant.enc` by itself, or a whole-system backup.
+3. Review the confirmation's recovery date and affected scope. If the file was renamed and its date cannot be determined, inspect `index.html` before proceeding.
+4. Confirm the replacement. A primary export can restore the primary and its included sub-tenants together.
+5. Wait for upload, validation, and the restore job to finish, then verify the result in the application.
+
+The server checks ownership before replacement and verifies the tenant relationships in included child portions. A file belonging to an unrelated tenant is not an alternative way to access or overwrite it.
+
+#### Failure and Recovery Messages
+
+The tenant restore process first creates a rollback snapshot. If replacement or validation fails, it attempts to restore the previous state and reports that the operation was rolled back. An interrupted tenant restore is also checked for recovery when the service starts. If automatic rollback fails, the job reports that operator intervention is required; contact the platform administrator instead of repeatedly importing the same archive.
+
+| Message or situation | Next step |
+| --- | --- |
+| No backups available / no backup contains this tenant | Ask an administrator to complete a system backup after the tenant was created. |
+| Another backup or restore is running | Wait for the active job's final status. |
+| Export belongs to another tenant | Use the correct tenant account or ask the owning primary/root administrator. |
+| Sub-tenant backup is part of the primary backup | Ask the primary maintainer to export or restore the permitted scope. |
+| File is not a tenant export / rejected payload | Use the original supported export ZIP and confirm server compatibility. |
+| Archive too large / insufficient space | Ask the platform operator to check upload limits and available recovery storage. |
+| Restore rolled back or requires manual intervention | Read the final job message and contact the administrator if access or recovery remains blocked. |
+
+For signup and quota setup, see [Primary Tenants and Sub-Tenants](#primary-tenants-and-sub-tenants).
 
 ## Detailed UI Coverage Appendix
 

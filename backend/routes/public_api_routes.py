@@ -50,6 +50,7 @@ async def get_public_config(request: Request):
         tenant_id=str(tenant.id) if tenant else None,
     )
     config.settings["app_url"] = env_handler.get_instance().env("APP_URL", "")
+    config.settings["tenant_login"] = "1" if tenant and not tenant.is_default else "0"
     config.settings["signup_enabled"] = "1" if await TenantManager.get_instance().is_signup_allowed(request.state.tenant) else "0"
     config.settings["orion_mail_url"] = env_handler.get_instance().env("ORION_MAIL_PUBLIC_URL", "http://mail.localhost:4200")
     return config

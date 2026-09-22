@@ -218,9 +218,15 @@ class search_manager:
     @staticmethod
     def _enrich_bin_results(response):
         for item in response.Result or []:
-            if (getattr(item, "type", "") or "").lower() != "bin":
+            card = getattr(item, "credit_card", None) or getattr(item, "pan", None)
+            if isinstance(card, list):
+                card = next((value for value in card if value), None)
+            if (getattr(item, "type", "") or "").lower() not in {"bin", "fullbin"} and not card:
                 continue
-            digits = "".join(filter(str.isdigit, str(getattr(item, "bin", ""))))
+            bin_value = getattr(item, "bin", "")
+            if isinstance(bin_value, list):
+                bin_value = next((value for value in bin_value if value), "")
+            digits = "".join(filter(str.isdigit, str(card or bin_value)))
             if len(digits) < 6:
                 continue
             search_manager.__bin_db = search_manager.__bin_db or SmartBinDB()
@@ -241,7 +247,10 @@ class search_manager:
                 "Issuer": data.get("issuer"),
                 "Country": (data.get("Country") or {}).get("Name"),
                 "Website": data.get("website"),
-                "Luhn": lookup.get("Luhn"),
+                # BIN lookup success does not validate a full card's checksum.
+                "Luhn": (sum((int(digit) * 2 // 10 + int(digit) * 2 % 10) if index % 2 else int(digit)
+                             for index, digit in enumerate(reversed(digits))) % 10 == 0
+                         if card else lookup.get("Luhn")),
             })
             item.__pydantic_extra__ = extras
         return response

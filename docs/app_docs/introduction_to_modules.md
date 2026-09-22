@@ -381,19 +381,18 @@ The Advanced Graph Builder extends normal CTI filters by letting users combine s
 
 ### Social Intel
 
-Social Intel is the graph-oriented social-identity mapping module. It focuses on usernames, profiles, platforms, and relationships across social ecosystems.
+Social Intelligence separates profile investigation from account monitoring:
 
-Use Social Intel when the investigation centers on:
+| Section | Main workflow |
+| --- | --- |
+| **Profile Intelligence** (`/dashboard/social-intel`) | Search a username or image, select candidate profiles, inspect saved and live details, and explore relationships in list or graph view. |
+| **Social Monitoring** (`/dashboard/manage-profiles`) | Capture platform sessions, define personas, connect accounts, monitor profiles, and review manual or scheduled activity. |
 
-- username reuse
-- profile correlation
-- image and reverse-image profile discovery
-- posts, videos, shorts, followers, following, images, and metadata review
-- follower or connection review
-- forum profile, saved profile, wanted-list, and stealer-log context where available
-- graph-based social mapping
+Profile Intelligence includes supported posts, videos, images, followers, following, commenter connections, online-presence matches, and exposure context. When a live extension fetch fails, saved recon results remain available if the scan already found them. Sign in to the source platform and reload when the profile shows **Login required**. Dashboard exposure matches span the identity's domains; platform Stealer Logs narrow matches to that platform where its host is known.
 
-It complements the Social search module: Social finds content, while Social Intel maps identities and relationships.
+Social Monitoring opens the **Manage Profiles** page with Sessions, Personas, Persona Monitoring, Profile Monitoring, and Results tabs. **Post** publishes using a connected account; **Ad** detects ads. Profile Monitoring reviews a real profile's posts for hate speech. Results distinguish manual and automated activity and provide stop controls, including **Stop daily run** for the remaining scheduled batch.
+
+These workflows complement indexed **Social** search, which searches already collected content. See [Profile Search](profile-search-profile-intelligence) and [Social Monitoring](user_manual.md#social-monitoring) for setup and operating steps.
 
 ## Shared Report Workflows
 
@@ -527,6 +526,14 @@ Manage IOCs is the tenant-maintained list of monitored values used in alerting a
 
 IOC management supports manual values and CSV import. CSV files use a `key,value` format and are validated against the supported IOC entity keys before values are merged into the tenant IOC list.
 
+### Backup and Restore
+
+Backup & Restore provides system recovery for administrators and scoped organization recovery for eligible tenant maintainers. Administrators create instant backups or enable the three-day schedule; the current shared retention limit is two system backups. Standalone maintainers access their own tenant, primary maintainers access their tenant family, and secondary maintainers request backups through their primary.
+
+Tenant exports come from existing recovery points, so their backup date can precede the download date. Each tenant export includes **index.html**, a locally readable statistics summary, and **tenant.enc**, the encrypted import payload. The summary shows recovery/export dates, included tenants, and counts for users, database records, search records, and files. Import uses the original ZIP; it does not use the HTML report alone.
+
+See [Backup and Restore](user_manual.md#backup-and-restore) for creating backups, reading export statistics, permissions, maintenance behavior, and recovery steps.
+
 ### Tenant Settings
 
 Tenant Settings stores tenant-level information such as identity, contact, quota, and assigned licenses. It is the central administrative page for tenant configuration.
@@ -539,7 +546,7 @@ Users is the tenant user-management page. It is used to add, review, update, and
 
 Tenants is the higher-privilege administration surface for multi-tenant oversight across the platform. It is used to manage tenant state, licensing, verification, quotas, tenant alert visibility, allowed alert access, alert run time, scheduled alert scans, allowed alert scanner categories, Privileged IOC handling, user permissions, and tenant-specific alert access scopes.
 
-Tenants can be nested one level deep. An administrator marks a tenant as a primary tenant and gives it a tenant quota, after which that tenant holds sub-tenants that sign up through its own subdomain. The maintainer of a primary tenant sees only its own sub-tenants on this page and administers their verification, status, quota, and licenses within the limits of the primary tenant, while administrators manage sub-tenants through the primary tenant rather than directly. User quotas are pooled across a primary tenant and its sub-tenants, and an exceeded user or tenant quota blocks the affected sign-ins until it is resolved.
+Tenants can be nested one level deep. An administrator marks a tenant as a primary tenant and gives it a tenant quota, after which that tenant holds sub-tenants that sign up through its own subdomain. The maintainer of a primary tenant sees only its own sub-tenants on this page and administers their verification, status, quota, and licenses within the limits of the primary tenant, while administrators manage sub-tenants through the primary tenant rather than directly. The primary user pool covers its own counted users plus the quotas reserved for its sub-tenants. Exceeding the permitted allocation can block associated accounts; affected users see an account-disabled screen directing them to their network administrator.
 
 Alert visibility is expressed separately toward administrators and toward the primary tenant, so a sub-tenant can share alerts with its primary tenant while staying hidden from platform administrators, or the reverse. Takedown requests from a primary tenant and its sub-tenants are reviewed by that primary tenant instead of the root administrator.
 

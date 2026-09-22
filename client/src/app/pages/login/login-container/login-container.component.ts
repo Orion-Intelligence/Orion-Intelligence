@@ -46,6 +46,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   retryDuration = 0;
   cooldownComplete = false;
   submitting = false;
+  readonly loginFeatures = [ { label: 'IOC Search', icon: 'bi-search' }, { label: 'Profile Intelligence', icon: 'bi-person-badge-fill' }, { label: 'Social Monitoring', icon: 'bi-broadcast-pin' }, { label: 'Dark Web', icon: 'bi-globe2' }, { label: 'Network Intelligence', icon: 'bi-diagram-3' }, { label: 'Exposure Monitoring', icon: 'bi-shield-check' }, { label: 'Case Management', icon: 'bi-folder-fill' }, { label: 'Reports', icon: 'bi-file-earmark-text' }, ];
 
   constructor(public authService: AuthService, private router: Router, protected appService: AppService, private route: ActivatedRoute, private zone: NgZone, private cdr: ChangeDetectorRef) { }
 

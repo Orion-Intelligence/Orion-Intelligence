@@ -283,7 +283,8 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   get creditCardFields(): CreditCardField[] {
     const item = this.item();
     const fields: CreditCardField[] = [
-      { key: 'bin', label: this.hasFullBin ? 'Card Number' : 'BIN', icon: 'bi-credit-card-2-front-fill', value: this.cardValue },
+      { key: 'credit_card', label: 'Card Number', icon: 'bi-credit-card-2-front-fill', value: this.fullBinValue },
+      { key: 'bin', label: 'BIN', icon: 'bi-credit-card-2-front-fill', value: this.binValue },
       { key: 'Cards', label: 'Cards', icon: 'bi-collection-fill', value: this.cardNumbers.length > 1 ? String(this.cardNumbers.length) : '-' },
       { key: 'Scheme', label: 'Scheme', icon: 'bi-wallet2', value: this.firstValue(item?.Scheme ?? item?.scheme) },
       { key: 'Type', label: 'Type', icon: 'bi-card-text', value: this.firstValue(item?.Type ?? item?.card_type) },
@@ -293,7 +294,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       { key: 'Luhn', label: 'Luhn', icon: 'bi-check2-circle', value: this.formatBooleanValue(item?.Luhn ?? item?.luhn) },
       { key: 'Website', label: 'Website', icon: 'bi-link-45deg', value: this.firstValue(item?.Website ?? item?.website) },
     ];
-    return this.hasFullBin ? fields.filter(field => field.value !== '-') : fields.filter(field => field.key !== 'Cards');
+    return fields.filter(field => (field.key !== 'credit_card' || this.hasFullBin) && (field.key !== 'Cards' || this.cardNumbers.length > 1));
   }
 
   get hasIdentityValues(): boolean {
@@ -672,11 +673,11 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       'dismiss_id'
     ]);
     if (this.isCreditCardRecord) {
-      ['bin', 'Scheme', 'scheme', 'Type', 'card_type', 'Tier', 'tier', 'Issuer', 'issuer', 'Country', 'country', 'Luhn', 'luhn', 'Website', 'website']
+      ['credit_card', 'pan', 'bin', 'Scheme', 'scheme', 'Type', 'card_type', 'Tier', 'tier', 'Issuer', 'issuer', 'Country', 'country', 'Luhn', 'luhn', 'Website', 'website']
         .forEach(key => exclude.add(key));
       const cardGroups = this.creditCardFields
         .filter(field => field.value && field.value !== '-')
-        .map(field => ({ key: field.key, label: field.label, values: [field.value] }));
+        .map(field => ({ key: field.key, label: field.label, values: field.key === 'credit_card' ? this.cardNumbers : [field.value] }));
       const rest = this.buildRestTelemetryGroups(item, exclude);
       return [...cardGroups, ...rest];
     }

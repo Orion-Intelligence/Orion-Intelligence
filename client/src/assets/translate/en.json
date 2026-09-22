@@ -1,4 +1,9 @@
 {
+  "Platform features": "Platform features",
+  "IOC Search": "IOC Search",
+  "Social Monitoring": "Social Monitoring",
+  "Exposure Monitoring": "Exposure Monitoring",
+
   "\" did not match any entities.": "\" did not match any entities.",
   "\" did not match any scans.": "\" did not match any scans.",
   "($100/month)": "($100/month)",
