@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EMPTY, timer } from 'rxjs';
@@ -61,7 +61,7 @@ export class PhoneLookupComponent implements OnInit {
     ].some(Boolean);
   }
 
-  constructor(private api: ApiService, private route: ActivatedRoute, private router: Router) {}
+  constructor(private api: ApiService, private route: ActivatedRoute, private router: Router, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     const q = this.route.snapshot.queryParamMap.get('q')?.trim();
@@ -99,12 +99,15 @@ export class PhoneLookupComponent implements OnInit {
 
     scanReq().pipe(expand(res => (res?.status === 'pending' || res?.status === 'processing' ? timer(3000).pipe(switchMap(() => scanReq())) : EMPTY)), takeWhile(res => res?.status === 'pending' || res?.status === 'processing', true), finalize(() => {
       this.loading = false;
+      this.cdr.markForCheck();
     })).subscribe({
       next: res => {
         this.handleScanResponse(res);
+        this.cdr.markForCheck();
       },
       error: err => {
         this.errorMessage = err?.error?.detail ?? err?.message ?? 'OSINT Analysis failed.';
+        this.cdr.markForCheck();
       }
     });
   }

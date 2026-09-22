@@ -1153,7 +1153,7 @@ async def delete_scan_job(scan_id: str, current_user=Depends(get_current_user)):
 
 
 async def _forward_micros_post(scan_path, payload, current_user, service_label):
-    base_url = str(env_handler.get_instance().env("TRUSTED_MICROS_API_BASE", "") or "").strip().rstrip("/")
+    base_url = str(env_handler.get_instance().env("NETWORK_API_BASE", "") or "").strip().rstrip("/")
     if not base_url:
         raise HTTPException(status_code=500, detail=f"{service_label} service is not configured")
 
