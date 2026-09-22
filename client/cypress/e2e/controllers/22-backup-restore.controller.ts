@@ -84,6 +84,12 @@ function waitForMaintenanceEnd(attempts = 0): Cypress.Chainable<void> {
   });
 }
 
+export function openBackupVisibility() {
+  cy.window().then((win) => cy.stub(win, 'open').as('backupVisibilityTab'));
+  getBackupRows().first().find('[data-testid="visibility-backup-button"]').click();
+  cy.get('@backupVisibilityTab').should('have.been.calledWithMatch', /\/backup-visibility\/[^?]+\?scope=admin/);
+}
+
 export function openMaintenancePage() {
   cy.intercept('GET', '**/api/admin/backups/status', {
     statusCode: 200,

@@ -122,6 +122,12 @@ class BackupManager:
     async def list_backup_tenants(self, backup_id: str):
         return await self._tenant.list_backup_tenants(backup_id)
 
+    async def backup_visibility(self, backup_id: str):
+        return await self._tenant.backup_visibility(backup_id)
+
+    async def tenant_backup_visibility(self, backup_id: str, tenant_id: str):
+        return await self._tenant.tenant_backup_visibility(backup_id, tenant_id)
+
     async def list_backups_for_tenant(self, tenant_id: str):
         return await self._tenant.list_backups_for_tenant(tenant_id)
 

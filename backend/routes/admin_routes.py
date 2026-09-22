@@ -156,6 +156,14 @@ async def list_backup_tenants(backup_id: str):
     return await BackupManager.get_instance().list_backup_tenants(backup_id)
 
 
+@admin_routes.get(
+    "/api/admin/backups/{backup_id}/visibility",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
+async def backup_visibility(backup_id: str):
+    return await BackupManager.get_instance().backup_visibility(backup_id)
+
+
 @admin_routes.post(
     "/api/admin/backups/{backup_id}/tenants/{tenant_id}/restore",
     dependencies=[Depends(root_admin_required)],

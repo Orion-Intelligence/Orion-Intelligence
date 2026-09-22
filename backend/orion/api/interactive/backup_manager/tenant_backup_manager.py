@@ -289,6 +289,122 @@ class TenantBackupManager:
                 })
         return entries
 
+    async def backup_visibility(self, backup_id: str) -> dict:
+        backup = await self._owner._load_backup_by_id(backup_id)
+        backup_dir = self._owner.backup_root / backup.filename
+        manifest = self._owner.read_manifest(backup_dir) or {}
+        recorded = ((manifest.get("tenants") or {}).get("tenants") or {})
+        tenants_dir = backup_dir / CONSTANTS.BACKUP_TENANTS_DIR
+        tenants = []
+        if tenants_dir.is_dir():
+            for parent_dir in sorted(tenants_dir.iterdir()):
+                if not parent_dir.is_dir():
+                    continue
+                for tenant_dir in [parent_dir, *self._child_tenant_dirs(parent_dir)]:
+                    summary = recorded.get(tenant_dir.name) or {}
+                    document = await asyncio.to_thread(
+                        self._read_first_document,
+                        tenant_dir / CONSTANTS.BACKUP_TENANT_MONGO_DIR / f"{CONSTANTS.BACKUP_TENANT_COLLECTION}.ndjson",
+                    ) or {}
+                    parent_tenant_id = "" if tenant_dir == parent_dir else parent_dir.name
+                    parent_tenant_id = parent_tenant_id or str(document.get(CONSTANTS.BACKUP_TENANT_PARENT_FIELD) or "")
+                    kind = "default" if document.get("is_default") else ("secondary" if parent_tenant_id else "primary")
+                    mongo = summary.get("mongo") or {}
+                    elastic = summary.get("elastic") or {}
+                    tenants.append({
+                        "tenant_id": tenant_dir.name,
+                        "name": document.get("name", ""),
+                        "slug": document.get("slug", ""),
+                        "kind": kind,
+                        "parent_tenant_id": parent_tenant_id,
+                        "users": summary.get("users", 0),
+                        "documents": sum(value for value in mongo.values() if isinstance(value, int)),
+                        "search_documents": sum(value for value in elastic.values() if isinstance(value, int)),
+                        "files": summary.get("files", 0),
+                    })
+        admin_mongo = manifest.get("mongo") or {}
+        admin_elastic = manifest.get("elastic") or {}
+        admin_arango = {
+            name: (value.get("count", 0) if isinstance(value, dict) else value)
+            for name, value in (manifest.get("arango") or {}).items()
+        }
+        return {
+            "filename": backup.filename,
+            "backup_type": getattr(backup.backup_type, "value", backup.backup_type),
+            "created_at": manifest.get("created_at") or backup.created_at,
+            "totals": {
+                "tenants": len(tenants),
+                "primary": sum(1 for tenant in tenants if tenant["kind"] == "primary"),
+                "secondary": sum(1 for tenant in tenants if tenant["kind"] == "secondary"),
+            },
+            "admin": {
+                "mongo": admin_mongo,
+                "elastic": admin_elastic,
+                "arango": admin_arango,
+                "documents": sum(value for value in admin_mongo.values() if isinstance(value, int)),
+                "search_documents": sum(value for value in admin_elastic.values() if isinstance(value, int)),
+                "connections": sum(value for value in admin_arango.values() if isinstance(value, int)),
+            },
+            "tenants": tenants,
+        }
+
+    async def tenant_backup_visibility(self, backup_id: str, tenant_id: str) -> dict:
+        backup = await self._owner._load_backup_by_id(backup_id)
+        backup_dir = self._owner.backup_root / backup.filename
+        manifest = self._owner.read_manifest(backup_dir) or {}
+        recorded = ((manifest.get("tenants") or {}).get("tenants") or {})
+        tenants_dir = backup_dir / CONSTANTS.BACKUP_TENANTS_DIR
+        owner_dir = self._tenant_backup_dir(tenants_dir, tenant_id) if tenants_dir.is_dir() else None
+        if owner_dir is None or not owner_dir.is_dir():
+            raise HTTPException(status_code=404, detail="Your organisation is not present in this backup")
+
+        async def build_entry(directory: Path, kind: str, parent: str):
+            summary = recorded.get(directory.name) or {}
+            document = await asyncio.to_thread(
+                self._read_first_document,
+                directory / CONSTANTS.BACKUP_TENANT_MONGO_DIR / f"{CONSTANTS.BACKUP_TENANT_COLLECTION}.ndjson",
+            ) or {}
+            mongo = summary.get("mongo") or {}
+            elastic = summary.get("elastic") or {}
+            entry = {
+                "tenant_id": directory.name,
+                "name": document.get("name", ""),
+                "slug": document.get("slug", ""),
+                "kind": kind,
+                "parent_tenant_id": parent,
+                "users": summary.get("users", 0),
+                "documents": sum(value for value in mongo.values() if isinstance(value, int)),
+                "search_documents": sum(value for value in elastic.values() if isinstance(value, int)),
+                "files": summary.get("files", 0),
+            }
+            return entry, mongo, elastic
+
+        owner_entry, owner_mongo, owner_elastic = await build_entry(owner_dir, "primary", "")
+        tenants = [owner_entry]
+        for child_dir in self._child_tenant_dirs(owner_dir):
+            child_entry, _, _ = await build_entry(child_dir, "secondary", owner_dir.name)
+            tenants.append(child_entry)
+
+        return {
+            "filename": backup.filename,
+            "backup_type": getattr(backup.backup_type, "value", backup.backup_type),
+            "created_at": manifest.get("created_at") or backup.created_at,
+            "totals": {
+                "tenants": len(tenants),
+                "primary": 1,
+                "secondary": sum(1 for tenant in tenants if tenant["kind"] == "secondary"),
+            },
+            "admin": {
+                "mongo": owner_mongo,
+                "elastic": owner_elastic,
+                "arango": {},
+                "documents": owner_entry["documents"],
+                "search_documents": owner_entry["search_documents"],
+                "connections": 0,
+            },
+            "tenants": tenants,
+        }
+
     async def restore_tenant_by_id(self, backup_id: str, tenant_id: str):
         backup = await self._owner._load_backup_by_id(backup_id)
         return await self.restore_tenant(backup.filename, tenant_id, source="ui")

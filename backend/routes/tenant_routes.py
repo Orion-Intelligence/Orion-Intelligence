@@ -518,6 +518,16 @@ async def import_tenant_backup(file: UploadFile, current_user=Depends(get_curren
 
 
 @tenant_routes.get(
+    "/api/tenant/backups/{backup_id}/visibility",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), Depends(tenant_backup_allowed), ], )
+async def tenant_backup_visibility(backup_id: str, current_user=Depends(get_current_user)):
+    return await BackupManager.get_instance().tenant_backup_visibility(
+        backup_id, str(getattr(current_user, "tenant_id", "") or "")
+    )
+
+
+@tenant_routes.get(
     "/api/tenant/backups/{backup_id}/download",
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), Depends(tenant_backup_allowed), ], )

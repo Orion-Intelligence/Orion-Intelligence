@@ -249,6 +249,11 @@ export class BackupRestoreComponent implements OnInit, OnDestroy {
       });
   }
 
+  openVisibility(backup: BackupRecord): void {
+    const scope = this.isTenantScope ? 'tenant' : 'admin';
+    window.open(`/backup-visibility/${backup.id}?scope=${scope}`, '_blank');
+  }
+
   downloadBackup(backup: BackupRecord): void {
     this.downloadingId = backup.id;
     this.http.get(`/api/${this.basePath}/${backup.id}/download`, { responseType: 'blob' })

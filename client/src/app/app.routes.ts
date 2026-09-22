@@ -51,6 +51,7 @@ const loadManageProfileComponent = () => import('./pages/tenant/tenant-managemen
 const loadViewTenantComponent = () => import('./pages/tenant/tenant-management/view-tenant/view-tenant.component').then(m => m.ViewTenantComponent);
 const loadSidebarProfileSystemSettingsComponent = () => import('./pages/user-management/sidebar-user-system-settings/sidebar-user-system-settings.component').then(m => m.SidebarProfileSystemSettingsComponent);
 const loadBackupRestoreComponent = () => import('./pages/user-management/backup-restore/backup-restore.component').then(m => m.BackupRestoreComponent);
+const loadBackupVisibilityComponent = () => import('./pages/user-management/backup-visibility/backup-visibility.component').then(m => m.BackupVisibilityComponent);
 const loadTenantSettingsComponent = () => import('./pages/user-management/sidebar-user-settings/tenant-settings/tenant-settings.component').then(m => m.TenantSettingsComponent);
 const loadFileScannerComponent = () => import('./pages/api/ioc-extractor/file-scanner.component').then(m => m.FileScannerComponent);
 const loadTextAnalysisComponent = () => import('./pages/api/text-analysis/text-analysis.component').then(m => m.TextAnalysisComponent);
@@ -156,6 +157,12 @@ export const routes: Routes = [
     path: 'chat-share/:shareId',
     loadComponent: loadChatShareComponent,
     data: { animation: 'ChatSharePage' }
+  },
+  {
+    path: 'backup-visibility/:id',
+    loadComponent: loadBackupVisibilityComponent,
+    canActivate: [AuthGuard],
+    data: { animation: 'BackupVisibilityPage' }
   },
   {
     path: 'onboarding',
