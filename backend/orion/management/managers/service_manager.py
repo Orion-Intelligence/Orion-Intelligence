@@ -68,9 +68,9 @@ class service_manager:
                 await arango_controller.get_instance().link_connection()
                 await arango_controller.get_instance().initialize()
                 await test_manager.get_instance().reset_test_arango_and_import_mocks()
-                await social_scanner.get_instance().resume_pending()
 
                 self._is_available = True
+                asyncio.create_task(social_scanner.get_instance().resume_pending())
                 return True
             except (OSError, ConnectionRefusedError):
                 await asyncio.sleep(5)

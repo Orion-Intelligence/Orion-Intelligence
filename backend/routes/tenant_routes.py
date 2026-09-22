@@ -439,6 +439,7 @@ async def run_user_ioc_alerts(current_user=Depends(get_current_user)):
         raise HTTPException(
             status_code=202, detail="Scan is still processing")
 
+    await AlertManager.getInstance().set_scan_running(current_user.tenant_id, True)
     asyncio.create_task(
         alert_job.get_instance().run_all_categories_for_api(current_user))
     return {"started": True}

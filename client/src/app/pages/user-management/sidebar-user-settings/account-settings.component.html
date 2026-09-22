@@ -33,7 +33,7 @@
 
         <div>
           <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Tenant / Location' | translate }}</label>
-          <input type="text" [value]="getLocationDisplay() || appService.userSessionData().user.username" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] [body.light-theme_&]:disabled:cursor-not-allowed [body.light-theme_&]:disabled:bg-[#f1f4f8] [body.light-theme_&]:disabled:text-[#52657e]" />
+          <input type="text" [value]="getLocationDisplay()" placeholder="{{ 'No location set' | translate }}" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] placeholder:text-[var(--color-text4)] [body.light-theme_&]:disabled:cursor-not-allowed [body.light-theme_&]:disabled:bg-[#f1f4f8] [body.light-theme_&]:disabled:text-[#52657e]" />
         </div>
 
         <div>

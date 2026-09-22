@@ -13,6 +13,7 @@ export class AppSettingsModel {
   home_header_pricing = '';
   home_header_pricing_allowed = true;
   home_header_whistle_blowing_allowed = false;
+  event_management_enabled = false;
   ai_endpoint_enabled = true;
   backup_schedule = false;
   admin_root_allowed = false;
@@ -27,6 +28,7 @@ export class AppSettingsModel {
       this.ai_endpoint_enabled = data.ai_endpoint_enabled === true || data.ai_endpoint_enabled === '1' || (!hasAiEndpointEnabled && this.ai_endpoint_enabled);
       this.backup_schedule = data.backup_schedule === true || data.backup_schedule === '1';
       this.admin_root_allowed = data.admin_root_allowed === true || data.admin_root_allowed === '1' || data.admin_root_allowed === 'true';
+      this.event_management_enabled = data.event_management_enabled === true || data.event_management_enabled === '1' || data.event_management_enabled === 'true';
       this.version = (data.version as string) || this.version;
       this.app_url = (data.app_url as string) || this.app_url;
       this.orion_mail_url = (data.orion_mail_url as string) || this.orion_mail_url;

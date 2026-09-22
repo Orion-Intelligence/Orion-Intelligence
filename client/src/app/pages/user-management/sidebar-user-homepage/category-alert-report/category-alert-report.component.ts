@@ -640,7 +640,7 @@ export class CategoryAlertReportComponent implements OnInit {
   }
 
   getAlertCardDate(alert: CategoryAlerts): Date {
-    return alert.resultDate ?? alert.detectedOn;
+    return alert.resultDate ?? alert.detectedOn ?? new Date('2025-01-01');
   }
 
   getFilteredIocs(allIOC: AlertAllIoc[]): { label: string, count: number }[] {

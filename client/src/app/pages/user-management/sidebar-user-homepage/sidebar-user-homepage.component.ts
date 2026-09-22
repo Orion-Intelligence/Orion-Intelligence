@@ -170,10 +170,6 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   }
 
   scanIOCs() {
-    if (this.isPrivilegedIoc()) {
-      this.messageNotificationService.show(this.translationService.translate(this.iocPermissionWarning));
-      return;
-    }
     const iocs = this.appService.tenantData().iocs;
     if (!iocs || iocs.length === 0) {
       this.noIocPopup.set(true);

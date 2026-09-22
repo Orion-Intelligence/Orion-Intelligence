@@ -32,7 +32,7 @@ export class TenantBrandingSettingsComponent implements OnInit {
   private snapshot = '';
 
   brandingError = '';
-  form = { app_name: '0', s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '' };
+  form = { app_name: '0', s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', event_management_allowed: true };
 
   constructor(private apiService: ApiService, protected appService: AppService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {
   }
@@ -51,6 +51,7 @@ export class TenantBrandingSettingsComponent implements OnInit {
     this.form.data_sources_url = settings.home_header_data_sources ?? '';
     this.form.adversaries_url = settings.home_header_adversaries ?? '';
     this.form.pricing_url = settings.home_header_pricing ?? '';
+    this.form.event_management_allowed = settings.event_management_enabled === true;
     this.brandingError = '';
     this.snapshot = JSON.stringify(this.form);
   }
@@ -103,6 +104,7 @@ export class TenantBrandingSettingsComponent implements OnInit {
     const settings: Record<string, string> = {
       app_name: this.form.app_name,
       s_onion: this.form.s_onion.trim(),
+      event_management_enabled: this.form.event_management_allowed ? '1' : '0',
       meta_info: JSON.stringify({
         S_HOME_HEADER_DATA_SOURCES: this.form.data_sources_url.trim(),
         S_HOME_HEADER_ADVERSARIES: this.form.adversaries_url.trim(),

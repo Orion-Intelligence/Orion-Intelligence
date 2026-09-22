@@ -547,7 +547,7 @@ export class CredentialComponent implements OnInit {
   }
 
   private buildCombinedReportPayload(): GraphReportPayload {
-    const stealerResults = this.stealerlogCallbackModel?.Result ?? [];
+    const stealerResults = (this.stealerlogCallbackModel?.Result ?? []).filter(item => !item.dismissed);
     const rankedResults = this.rankedResult?.result ?? [];
     const exportSearchQuery = this.getExportSearchQuery();
     const tables: GraphReportTableRow[] = [];
@@ -588,7 +588,7 @@ export class CredentialComponent implements OnInit {
   }
 
   private buildStealerExportRows(searchQuery = this.searchQuery || '-'): Record<string, string>[] {
-    return (this.stealerlogCallbackModel?.Result ?? []).map((item, index) => ({
+    return (this.stealerlogCallbackModel?.Result ?? []).filter(item => !item.dismissed).map((item, index) => ({
       recordType: 'stealer',
       recordIndex: String(index + 1),
       searchQuery,
@@ -600,7 +600,7 @@ export class CredentialComponent implements OnInit {
       title: '-',
       url: '-',
       rank: '-',
-      date: '-',
+      date: this.orDefaultDate(this.toExportValue(item?.m_date ?? item?.m_update_date)),
       team: '-',
       summary: '-'
     }));
@@ -619,7 +619,7 @@ export class CredentialComponent implements OnInit {
       title: this.toExportValue(item?.m_title, 160),
       url: this.toExportValue(item?.m_url, 160),
       rank: this.toExportValue(item?.rank_index),
-      date: this.toExportValue(item?.m_date ?? item?.m_update_date),
+      date: this.orDefaultDate(this.toExportValue(item?.m_date ?? item?.m_update_date)),
       team: this.toExportValue(item?.m_team),
       summary: this.toExportValue(item?.m_important_content ?? item?.m_content, 240)
     }));
@@ -637,7 +637,7 @@ export class CredentialComponent implements OnInit {
       this.addExportField(values, 'Source Domain', item?.source_domain, 240);
       this.addExportField(values, 'IP Address', item?.ip, 180);
       this.addExportField(values, 'Channel', this.firstAvailableExportValue(item?.channel, item?.m_channel, item?.source_channel, item?.m_source_channel), 240);
-      this.addExportField(values, 'Date / Year', this.firstAvailableExportValue(item?.date, item?.timestamp, item?.m_date, item?.m_update_date), 160);
+      this.addExportField(values, 'Date / Year', this.orDefaultDate(this.firstAvailableExportValue(item?.date, item?.timestamp, item?.m_date, item?.m_update_date)), 160);
       this.addExportField(values, 'File Type', this.normalizeFileType(this.firstAvailableExportValue(item?.file_type, item?.fileType, item?.type)), 140);
       this.addExportField(values, 'Hash', this.firstAvailableExportValue(item?.m_hash, item?.hash), 220);
       this.addExportField(values, 'Raw Trace', item?.raw, 900);
@@ -699,7 +699,7 @@ export class CredentialComponent implements OnInit {
       this.addExportField(values, 'Channel', this.firstAvailableExportValue(item?.m_channel, item?.m_source_channel), 240);
       this.addExportField(values, 'Rank', this.firstAvailableExportValue(item?.rank_index, item?.m_rank_index), 160);
       this.addExportField(values, 'Team', item?.m_team, 180);
-      this.addExportField(values, 'Date / Year', this.firstAvailableExportValue(item?.m_date, item?.m_update_date, item?.m_year), 160);
+      this.addExportField(values, 'Date / Year', this.orDefaultDate(this.firstAvailableExportValue(item?.m_date, item?.m_update_date, item?.m_year)), 160);
       this.addExportField(values, 'Content Type', item?.m_content_type, 200);
       this.addExportField(values, 'Source', this.firstAvailableExportValue(item?.m_source, item?.m_file), 220);
       this.addExportField(values, 'Hash', this.firstAvailableExportValue(item?.m_hash, item?.hash), 220);
@@ -751,6 +751,10 @@ export class CredentialComponent implements OnInit {
     const detail = parts.filter(part => part && part !== '-').slice(0, 2).join(' | ');
     const recordNumber = String(index + 1).padStart(3, '0');
     return detail ? `Record ${recordNumber} | ${detail}` : `Record ${recordNumber}`;
+  }
+
+  private orDefaultDate(value: string): string {
+    return value && value !== '-' ? value : '2025-01-01';
   }
 
   private firstAvailableExportValue(...values: unknown[]): string {

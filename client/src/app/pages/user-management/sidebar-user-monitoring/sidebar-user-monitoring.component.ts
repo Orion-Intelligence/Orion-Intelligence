@@ -66,6 +66,6 @@ export class SidebarUserMonitoringComponent implements OnInit {
 
   private canAccessEventManagement(): boolean {
     return (this.licenseService.isAdmin() || this.licenseService.isMaintainer()) &&
-      this.appService.userSessionData().tenant.eventManagementEnabled === true;
+      this.appService.getConfig().appSettings.event_management_enabled === true;
   }
 }

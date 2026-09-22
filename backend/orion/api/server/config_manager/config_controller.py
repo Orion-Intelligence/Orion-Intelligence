@@ -23,7 +23,7 @@ class config_controller:
     CONFIG_CACHE_KEY = "system_config"
     EMAIL_META_KEYS = {"ACCOUNTS_MAIL_PASSWORD", "ACCOUNTS_MAIL", "ACCOUNTS_SMTP_SERVER", "ACCOUNTS_SMTP_PORT"}
     TENANT_EDITABLE_META_KEYS = {"S_HOME_HEADER_DATA_SOURCES", "S_HOME_HEADER_ADVERSARIES", "S_HOME_HEADER_PRICING"}
-    TENANT_EDITABLE_SETTINGS = {AllowedKeys.APP_NAME.value, AllowedKeys.S_ONION.value, AllowedKeys.META_INFO.value}
+    TENANT_EDITABLE_SETTINGS = {AllowedKeys.APP_NAME.value, AllowedKeys.S_ONION.value, AllowedKeys.META_INFO.value, "event_management_enabled"}
     ADMIN_SETTING_KEYS = {
         AllowedKeys.VERSION.value,
         AllowedKeys.EXTENSION_VERSION.value,
@@ -251,11 +251,26 @@ class config_controller:
         resolved_tenant_id = await self.load_config(tenant_id=str(tenant.id))
         if not resolved_tenant_id:
             raise RuntimeError("Tenant configuration is unavailable")
-        return self._build_system_info_from_cache(
+        info = self._build_system_info_from_cache(
             resolved_tenant_id,
             tenant=tenant,
             include_email_config=include_email_config,
         )
+        info.settings["event_management_enabled"] = "1" if getattr(tenant, "event_management_enabled", False) else "0"
+        return info
+
+    async def _apply_event_management(self, tenant: db_tenant_model, enabled: bool) -> None:
+        if tenant.is_default:
+            targets = list(await self._engine.find(db_tenant_model))
+        elif not getattr(tenant, "parent_tenant_id", None):
+            secondaries = await self._engine.find(db_tenant_model, db_tenant_model.parent_tenant_id == str(tenant.id))
+            targets = [tenant, *secondaries]
+        else:
+            targets = [tenant]
+        for target in targets:
+            if getattr(target, "event_management_enabled", None) != enabled:
+                target.event_management_enabled = enabled
+                await self._engine.save(target)
 
 
     def _assert_tenant_editor(self, current_user, tenant_id: str, settings: dict[str, str] | None = None):
@@ -347,6 +362,9 @@ class config_controller:
             ))
 
         await self.load_config(force_db=True, tenant_id=resolved_tenant_id)
+        event_setting = data.settings.get("event_management_enabled")
+        if event_setting is not None:
+            await self._apply_event_management(tenant, event_setting in (True, "1", "true", "True"))
         return await self.get_system_info(
             include_email_config=include_email_config,
             tenant_id=resolved_tenant_id,

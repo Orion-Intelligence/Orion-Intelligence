@@ -7,7 +7,6 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { event_management_filters } from '../../../shared/constants/filters';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
-import { EmptyResultComponent } from '../../../shared/partials/empty-result/empty-result.component';
 import { FiltersComponent } from '../../../shared/partials/filters/filters.component';
 import { IocSearchComponent } from '../../../shared/partials/ioc-search/ioc-search.component';
 import { LoadingFormComponent } from '../../../shared/partials/loading-form/loading-form.component';
@@ -32,7 +31,7 @@ export type { SiemEventRecord,SiemSearchResponse } from './model/sidebar-user-ev
 @Component({
   selector: 'app-sidebar-user-event-management',
   standalone: true,
-  imports: [CommonModule, PaginationComponent, FiltersComponent, EmptyQueryComponent, EmptyResultComponent, LoadingFormComponent, IocSearchComponent, TranslatePipe],
+  imports: [CommonModule, PaginationComponent, FiltersComponent, EmptyQueryComponent, LoadingFormComponent, IocSearchComponent, TranslatePipe],
   templateUrl: './sidebar-user-event-management.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./sidebar-user-event-management.component.css'],
@@ -104,7 +103,7 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
 
   canAccessEventManagement(): boolean {
     return (this.licenseService.isAdmin() || this.licenseService.isMaintainer()) &&
-      !!this.appService.userSessionData().tenant.eventManagementEnabled;
+      this.appService.getConfig().appSettings.event_management_enabled === true;
   }
 
   triggerSearch(searchQuery: string): void {

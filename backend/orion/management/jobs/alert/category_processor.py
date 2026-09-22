@@ -52,7 +52,7 @@ class CategoryAlertProcessor:
 
         try:
             search_param = config.param_model(**search_data)
-            es_response = await self._search(config, search_param)
+            es_response = await self._search(config, search_param, tenant_id)
             es_response_dict = ResponseParser.to_dict(es_response, allow_body=False)
             if es_response_dict is None:
                 return
@@ -76,11 +76,11 @@ class CategoryAlertProcessor:
                 f"category={category}, ioc={ioc_type_name}:{ioc_value}"
             )
 
-    async def _search(self, config: CategorySearchConfig, search_param: Any) -> Any:
+    async def _search(self, config: CategorySearchConfig, search_param: Any, tenant_id: str) -> Any:
         search_func = getattr(self._search_model, config.search_method)
 
         if config.search_method == "search_stealer_iocs":
-            return await search_func(search_param)
+            return await search_func(search_param, tenant_id=tenant_id)
 
         return await search_func(
             search_param,

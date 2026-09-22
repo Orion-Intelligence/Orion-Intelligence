@@ -432,7 +432,7 @@ class search_manager:
 
         return grouped_consolidated_search_callback_model(**results)
 
-    async def search_stealer_iocs(self, param: search_credential_param_model, current_user=None):
+    async def search_stealer_iocs(self, param: search_credential_param_model, current_user=None, tenant_id=None):
 
         document, data_filter  = search_query_generator().on_search_stealer_iocs(param)
 
@@ -454,8 +454,9 @@ class search_manager:
             ]
             response.Result = filtered_results
 
-        if current_user is not None and response and getattr(response, "Result", None):
-            dismissed_hashes = await self._mark_dismissed_stealer_logs(response.Result, str(current_user.tenant_id), DismissedIocType.STEALER_LOG)
+        effective_tenant_id = str(current_user.tenant_id) if current_user is not None else str(tenant_id or "")
+        if effective_tenant_id and response and getattr(response, "Result", None):
+            dismissed_hashes = await self._mark_dismissed_stealer_logs(response.Result, effective_tenant_id, DismissedIocType.STEALER_LOG)
             if getattr(param, "hide_dismissed", True) and dismissed_hashes:
                 response.Result = [item for item in response.Result if not getattr(item, "dismissed", False)]
 

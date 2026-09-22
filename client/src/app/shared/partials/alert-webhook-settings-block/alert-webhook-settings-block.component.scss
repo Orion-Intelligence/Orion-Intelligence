@@ -32,7 +32,7 @@
 .connector-row {
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: var(--color-blue-800);
+  background: var(--color-blue-720);
   padding: 0.75rem;
 }
 
@@ -100,7 +100,7 @@
   height: 2.5rem;
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: var(--color-blue-700);
+  background: var(--color-white);
   color: var(--color-text1);
   font-size: 0.875rem;
   font-weight: 600;
@@ -170,6 +170,7 @@
 .redirect-note-box {
   border: 1px solid rgb(251 146 60 / 35%);
   border-radius: 8px;
+  background: var(--color-white);
   padding: 0.625rem 0.75rem;
 }
 

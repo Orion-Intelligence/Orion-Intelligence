@@ -48,7 +48,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   mailErrorState = false;
   webhookErrorState = false;
   scheduledBackup = false;
-  form = { language: '', version: '', app_name: '0', ai_endpoint_enabled: true, admin_root_allowed: false, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false, accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
+  form = { language: '', version: '', app_name: '0', ai_endpoint_enabled: true, admin_root_allowed: false, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false, event_management_allowed: true, accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
   webhookForm: AlertWebhookSettingsForm = createWebhookForm();
   languageOptions: LanguageOption[] = LANGUAGE_OPTIONS;
   onionPattern = /^(?:https:\/\/|http:\/\/)?[a-z2-7]{56}\.onion\/?$/i;
@@ -109,6 +109,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.form.pricing_url = typeof metaInfo.S_HOME_HEADER_PRICING === 'string' ? metaInfo.S_HOME_HEADER_PRICING : '';
     this.form.documentation_allowed = metaInfo.S_HOME_HEADER_PRICING_ALLOWED === true;
     this.form.whistle_blowing_allowed = metaInfo.S_HOME_HEADER_WHISTLE_BLOWING_ALLOWED === true;
+    this.form.event_management_allowed = settings.event_management_enabled === true;
     this.form.accounts_mail_password = typeof metaInfo.ACCOUNTS_MAIL_PASSWORD === 'string' ? metaInfo.ACCOUNTS_MAIL_PASSWORD : '';
     this.form.accounts_mail = typeof metaInfo.ACCOUNTS_MAIL === 'string' ? metaInfo.ACCOUNTS_MAIL : '';
     this.form.accounts_smtp_server = typeof metaInfo.ACCOUNTS_SMTP_SERVER === 'string' ? metaInfo.ACCOUNTS_SMTP_SERVER : '';
@@ -265,6 +266,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
         app_name: this.form.app_name,
         ai_endpoint_enabled: this.form.ai_endpoint_enabled ? '1' : '0',
         admin_root_allowed: this.form.admin_root_allowed ? '1' : '0',
+        event_management_enabled: this.form.event_management_allowed ? '1' : '0',
         s_onion: this.form.s_onion,
         meta_info: JSON.stringify(this.buildMetaInfo('configuration'))
       }
@@ -367,7 +369,8 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       this.form.ai_endpoint_enabled,
       this.form.admin_root_allowed,
       this.form.documentation_allowed,
-      this.form.whistle_blowing_allowed
+      this.form.whistle_blowing_allowed,
+      this.form.event_management_allowed
     ]);
   }
 
