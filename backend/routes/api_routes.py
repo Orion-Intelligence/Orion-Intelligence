@@ -27,6 +27,7 @@ from orion.helper_manager.env_handler import env_handler
 from orion.api.interactive.takedown_manager.takedown_manager import TakedownManager
 from orion.api.interactive.directory_manager.directory_manager import directory_manager
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
+from orion.api.interactive.feeder_manager.feeder_manager import FeederManager
 from orion.api.interactive.hompage_manager.homepage_manager import homepage_manager
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
@@ -373,6 +374,15 @@ async def get_insight():
 
     insights, latestDocument, country_insight = await asyncio.gather(insights_task, latestDocument_task, countryInsightsTask)
     return {"insights": insights, "latestDocument": latestDocument, "country_insight": country_insight}
+
+
+@api_routes.get(
+    "/api/profile/system-statistics",
+    include_in_schema=False,
+    status_code=200,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))])
+async def get_system_statistics():
+    return await FeederManager.get_instance().get_system_statistics()
 
 
 

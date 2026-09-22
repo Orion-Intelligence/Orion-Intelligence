@@ -19,6 +19,8 @@ from orion.api.interactive.feeder_manager.models.feeder_models import (
     FeederUploadResponse,
 )
 from orion.constants import constant
+from orion.services.elastic_manager.elastic_controller import elastic_controller
+from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, db_user_account, user_role
@@ -91,6 +93,80 @@ class FeederManager:
             limit=safe_limit,
             has_more=(skip + len(scripts)) < total,
         )
+
+    async def get_system_statistics(self) -> dict:
+        scripts = await self._engine.find(self._helper.model)
+        total = len(scripts)
+        enabled = healthy = failing = idle = 0
+        total_values = 0
+        latest_success = None
+        per_rule: dict[str, int] = {}
+        for script in scripts:
+            feeder = script.feeder
+            if getattr(feeder, "index_status", None) is not False:
+                enabled += 1
+            value_count = len(script.values or [])
+            total_values += value_count
+            rule_key = script.rule_key or "unknown"
+            item_count = value_count if (script.entry_kind or "").lower() == "values" else 1
+            per_rule[rule_key] = per_rule.get(rule_key, 0) + item_count
+            last_success = getattr(feeder, "last_success_date", None)
+            last_failure = getattr(feeder, "last_failure_date", None)
+            if last_success and (not last_failure or last_success >= last_failure):
+                healthy += 1
+                if latest_success is None or last_success > latest_success:
+                    latest_success = last_success
+            elif last_failure and (not last_success or last_failure > last_success):
+                failing += 1
+            else:
+                idle += 1
+
+        pipeline_indices = [
+            ("Generic", ELASTIC_INDEX.S_GENERIC_INDEX),
+            ("Leaks", ELASTIC_INDEX.S_LEAK_INDEX),
+            ("Defacement", ELASTIC_INDEX.S_DEFACEMENT_INDEX),
+            ("Chats", ELASTIC_INDEX.S_CHATS_INDEX),
+            ("Exploits", ELASTIC_INDEX.S_EXPLOIT_INDEX),
+            ("APT", ELASTIC_INDEX.S_APT_INDEX),
+            ("Malware", ELASTIC_INDEX.S_MALWARE_INDEX),
+            ("Social", ELASTIC_INDEX.S_SOCIAL_INDEX),
+            ("Stealer Logs", ELASTIC_INDEX.S_STEALERLOGS_INDEX),
+            ("Sanctions", ELASTIC_INDEX.S_OPENSANCTIONS_INDEX),
+            ("SIEM", ELASTIC_INDEX.S_SIEM_INDEX),
+        ]
+        connection = elastic_controller.get_instance().get_connection()
+        indices = []
+        for label, index in pipeline_indices:
+            count = 0
+            try:
+                if connection is not None:
+                    result = await connection.count(index=index)
+                    count = int(result.get("count", 0))
+            except Exception:
+                count = 0
+            indices.append({"label": label, "index": index, "count": count})
+
+        return {
+            "feeder": {
+                "total_scripts": total,
+                "enabled": enabled,
+                "disabled": total - enabled,
+                "healthy": healthy,
+                "failing": failing,
+                "idle": idle,
+                "total_values": total_values,
+                "latest_success": latest_success.isoformat() if latest_success else None,
+                "per_rule": sorted(
+                    [{"rule": rule, "count": count} for rule, count in per_rule.items() if count > 0],
+                    key=lambda item: item["count"],
+                    reverse=True,
+                ),
+            },
+            "elastic": {
+                "indices": indices,
+                "total_documents": sum(item["count"] for item in indices),
+            },
+        }
 
     async def upload_script(self, rule_key: str, mode: str, file: UploadFile | None, values_text: str | None, session_file: UploadFile | None, current_user) -> FeederUploadResponse:
         rule = constant.url_rules.get(rule_key)

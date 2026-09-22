@@ -482,7 +482,12 @@ body {
     };
 
     const tick = async () => {
-        renderJob(await readJob());
+        const job = await readJob();
+        if (job && job.status === 'done') {
+            window.location.assign('/');
+            return;
+        }
+        renderJob(job);
         window.setTimeout(tick, 5000);
     };
 

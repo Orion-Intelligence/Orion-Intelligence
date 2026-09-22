@@ -1,6 +1,5 @@
 import { Route, Routes } from '@angular/router';
 import { AuthGuard } from './shared/guards/auth-guard.guard';
-import { InsightResolver } from './shared/resolvers/insight.resolver';
 import { ReportResolver } from './shared/resolvers/report.resolver';
 import { ReportConsolidatedResolver } from './shared/resolvers/consolidated.resolver';
 import { subscriptionGuard } from './shared/guards/subscription.guard';
@@ -858,7 +857,6 @@ export const routes: Routes = [
           {
             path: 'statistics',
             loadComponent: loadSidebarUserStatisticsComponent,
-            resolve: { insights: InsightResolver },
             data: { type: 'settings', animation: 'ProfilePage' }
           },
           {

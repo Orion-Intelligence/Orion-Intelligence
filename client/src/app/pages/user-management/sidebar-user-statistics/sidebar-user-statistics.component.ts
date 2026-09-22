@@ -1,8 +1,8 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HomeInsightComponent } from "../../homepage/home-insight/home-insight.component";
+import { SidebarUserFeederStatisticsComponent } from "../sidebar-user-feeder-statistics/sidebar-user-feeder-statistics.component";
 @Component({
   selector: 'app-sidebar-user-statistics',
-  imports: [HomeInsightComponent],
+  imports: [SidebarUserFeederStatisticsComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './sidebar-user-statistics.component.html',
 })
