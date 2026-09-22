@@ -95,12 +95,12 @@ export class TenantIocSelectorComponent implements OnChanges {
   }
 
   normalizeDomainValue(value: string): string {
-  return value.trim().toLowerCase().replace(/\.+$/, '');
-}
+    return value.trim().toLowerCase().replace(/\.+$/, '');
+  }
 
- isSubdomainOf(candidate: string, parent: string): boolean {
-  return !!candidate && !!parent && candidate !== parent && candidate.endsWith(`.${parent}`);
-}
+  isSubdomainOf(candidate: string, parent: string): boolean {
+    return !!candidate && !!parent && candidate !== parent && candidate.endsWith(`.${parent}`);
+  }
 
   onIocCsvSelected(event: Event): void {
     if (this.disabled) {

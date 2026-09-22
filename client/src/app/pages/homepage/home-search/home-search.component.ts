@@ -278,12 +278,10 @@ export class HomeSearchComponent implements OnInit, OnDestroy {
       this.insightMoved = true;
     }
     this.insightDragY = Math.max(-this.insightMax, Math.min(0, this.insightStartOffset + dy));
-    if (this.insightFrame === null) {
-      this.insightFrame = window.requestAnimationFrame(() => {
-        this.insightFrame = null;
-        this.renderInsightPosition(this.insightDragY ?? this.insightStartOffset);
-      });
-    }
+    this.insightFrame ??= window.requestAnimationFrame(() => {
+      this.insightFrame = null;
+      this.renderInsightPosition(this.insightDragY ?? this.insightStartOffset);
+    });
   }
 
   onInsightPointerUp(event: PointerEvent): void {
