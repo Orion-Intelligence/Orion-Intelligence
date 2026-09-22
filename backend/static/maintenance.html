@@ -412,7 +412,7 @@ body {
                     <a href="/dashboard/home"><span aria-hidden="true">01</span><span>Homepage<small>Return to the main page</small></span><span aria-hidden="true">→</span></a>
                     <a href="https://github.com/msmannan00/Orion-Search" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">02</span><span>Explore Project<small>View on GitHub · opens in a new tab</small></span><span aria-hidden="true">↗</span></a>
                 </nav>
-                <p class="notice_meta">This page will reconnect automatically when Orion is ready.</p>
+                <p class="notice_meta">Use Homepage to return when maintenance is complete.</p>
             </div>
         </section>
     </main>
@@ -481,21 +481,8 @@ body {
         }
     };
 
-    const isBackOnline = async () => {
-        try {
-            const response = await fetch('/api/public', {cache: 'no-store'});
-            return response.ok;
-        } catch (_) {
-            return false;
-        }
-    };
-
     const tick = async () => {
-        const running = renderJob(await readJob());
-        if (!running && await isBackOnline()) {
-            window.location.replace('/dashboard/home');
-            return;
-        }
+        renderJob(await readJob());
         window.setTimeout(tick, 5000);
     };
 
