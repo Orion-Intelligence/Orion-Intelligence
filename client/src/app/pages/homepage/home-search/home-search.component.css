@@ -1,0 +1,22 @@
+.ui-home-insight-panel {
+  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ui-home-insight-panel.is-dragging {
+  transition: none;
+}
+
+.ui-home-insight-drag-btn {
+  cursor: grab;
+  touch-action: none;
+}
+
+.is-dragging .ui-home-insight-drag-btn {
+  cursor: grabbing;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-home-insight-panel {
+    transition: none;
+  }
+}

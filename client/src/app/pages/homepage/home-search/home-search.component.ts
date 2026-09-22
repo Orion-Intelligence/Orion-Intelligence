@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, OnDestroy, NgZone, ViewChild, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -18,18 +18,23 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   imports: [FormsModule, NgOptimizedImage, CommonModule, RouterLink, SearchFiltersComponent, HomeInsightComponent, WorldHeatmapComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './home-search.component.html',
+  styleUrls: ['./home-search.component.css'],
 })
-export class HomeSearchComponent implements OnInit {
+export class HomeSearchComponent implements OnInit, OnDestroy {
   private insightPointerId: number | null = null;
   private insightStartY = 0;
   private insightStartOffset = 0;
   private insightMoved = false;
   private suppressInsightClick = false;
   private insightMax = 0;
+  private insightFrame: number | null = null;
+  private insightCaptureTarget: HTMLElement | null = null;
   private removeWindowListeners: (() => void) | null = null;
+  private insightTranslateY = 0;
 
   protected readonly tabs = ['IOCs', 'Deep Search', 'Network Intelligence', 'Geo Fencing'];
 
+  @ViewChild('insightPanel') insightPanelRef?: ElementRef<HTMLElement>;
   @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef<HTMLInputElement>;
   @ViewChild('matchTypeDropdown', { static: false }) matchTypeDropdownRef?: ElementRef<HTMLDetailsElement>;
@@ -38,14 +43,13 @@ export class HomeSearchComponent implements OnInit {
   homeInsightExpanded = false;
   public insightDragging = false;
   public insightDragY: number | null = null;
-  insightTranslateY = 0;
   selectedTab='IOCs';
   readonly isRoleAdmin = input<boolean>(true);
   readonly hideToolsSection = input<boolean>(false);
   readonly hideHeatmapAndAnalytics = input<boolean>(false);
   readonly compactLayout = input<boolean>(false);
 
-  constructor( public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService ) {}
+  constructor( public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService, private zone: NgZone ) {}
 
   ngOnInit(): void {
     const cfg = this.app_service.configData();
@@ -63,29 +67,37 @@ export class HomeSearchComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.cancelInsightFrame();
+    this.detachWindowPointerListeners();
+    this.releaseInsightPointer();
+  }
+
   @HostListener('window:resize')
   onResize() {
+    if (this.insightDragging) {
+      this.finishInsightDrag();
+    }
     this.computeInsightMax();
   }
 
   private computeInsightMax() {
-    this.insightMax = Math.round(window.innerHeight * 0.30);
-    this.refreshInsightTransformClass();
+    this.insightMax = Math.min(600, Math.round(window.innerHeight * 0.30));
+    this.renderInsightPosition(this.homeInsightExpanded ? -this.insightMax : 0);
   }
 
-  private getInsightTransform(): string {
-    const max = this.insightMax || Math.round(window.innerHeight * 0.30);
-    const y = this.insightDragging
-      ? (this.insightDragY ?? (this.homeInsightExpanded ? -max : 0))
-      : (this.homeInsightExpanded ? -max : 0);
-    return `translate3d(0, ${y}px, 0)`;
+  private renderInsightPosition(y: number): void {
+    const next = Math.round(Math.max(0, Math.min(this.insightMax, -y)));
+    // Keep drag frames local to the panel; do not recheck the map and analytics.
+    this.insightPanelRef?.nativeElement.classList.replace(`ui-translate-y-neg-${this.insightTranslateY}`, `ui-translate-y-neg-${next}`);
+    this.insightTranslateY = next;
   }
 
-  private refreshInsightTransformClass(): void {
-    const transform = this.getInsightTransform();
-    const match = /,\s*(-?\d+)px,/.exec(transform);
-    const y = match ? Number(match[1]) : 0;
-    this.insightTranslateY = Math.max(0, Math.min(600, Math.round(Math.abs(Math.min(0, y)))));
+  private cancelInsightFrame(): void {
+    if (this.insightFrame !== null) {
+      window.cancelAnimationFrame(this.insightFrame);
+      this.insightFrame = null;
+    }
   }
 
   onSetMatchType(type: string) {
@@ -159,145 +171,158 @@ export class HomeSearchComponent implements OnInit {
   onInsightToggleClick(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    if (this.suppressInsightClick) {
+    // A pointer release already settles the panel. Keyboard clicks still toggle it.
+    if (this.suppressInsightClick && event.detail !== 0) {
       this.suppressInsightClick = false;
       return;
     }
-    if (this.insightDragging || this.insightMoved) {
-      this.insightMoved = false;
+    this.suppressInsightClick = false;
+    if (this.insightDragging) {
       return;
     }
     this.homeInsightExpanded = !this.homeInsightExpanded;
-    this.refreshInsightTransformClass();
+    this.renderInsightPosition(this.homeInsightExpanded ? -this.insightMax : 0);
   }
 
   onInsightPointerDown(event: PointerEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-
-    this.computeInsightMax();
-    const max = this.insightMax;
-
-    const currentTargetElement = event.currentTarget;
-    if (!(currentTargetElement instanceof HTMLElement)) {
+    const target = event.currentTarget;
+    const panel = this.insightPanelRef?.nativeElement;
+    if (event.button !== 0 || !event.isPrimary || this.insightPointerId !== null ||
+        !(target instanceof HTMLElement) || !panel) {
       return;
     }
-    try {
-      currentTargetElement.setPointerCapture(event.pointerId);
-    }
-    catch (error) {
-      void error;
-    }
+    event.preventDefault();
+    event.stopPropagation();
+    target.focus({ preventScroll: true });
+    this.insightMax = Math.min(600, Math.round(window.innerHeight * 0.30));
 
+    // Grabbing during a snap must start at its visible position, not its destination.
+    const transform = window.getComputedStyle(panel).transform;
+    const visibleY = transform === 'none' ? 0 : new DOMMatrixReadOnly(transform).m42;
+    this.insightStartOffset = Math.max(-this.insightMax, Math.min(0, visibleY));
+    this.insightStartY = event.clientY;
+    this.insightDragY = this.insightStartOffset;
     this.insightDragging = true;
     this.insightMoved = false;
     this.suppressInsightClick = false;
     this.insightPointerId = event.pointerId;
+    this.insightCaptureTarget = target;
+    panel.classList.add('is-dragging');
+    this.renderInsightPosition(this.insightStartOffset);
 
-    this.insightStartY = event.clientY;
-    this.insightStartOffset = this.homeInsightExpanded ? -max : 0;
-    this.insightDragY = this.insightStartOffset;
-    this.refreshInsightTransformClass();
-
+    try {
+      target.setPointerCapture(event.pointerId);
+    }
+    catch {
+      // Window listeners also cover browsers that cannot capture this pointer.
+    }
     this.attachWindowPointerListeners();
   }
 
-  private attachWindowPointerListeners() {
+  private attachWindowPointerListeners(): void {
     this.detachWindowPointerListeners();
-
-    const move = (e: PointerEvent) => {
-      this.onInsightPointerMove(e);
-    };
-    const up = (e: PointerEvent) => {
-      this.onInsightPointerUp(e);
-    };
-    const cancel = (e: PointerEvent) => {
-      this.onInsightPointerCancel(e);
-    };
-
-    window.addEventListener('pointermove', move, { passive: false });
-    window.addEventListener('pointerup', up, { passive: false });
-    window.addEventListener('pointercancel', cancel, { passive: false });
-
-    this.removeWindowListeners = () => {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-      window.removeEventListener('pointercancel', cancel);
-      this.removeWindowListeners = null;
-    };
+    this.zone.runOutsideAngular(() => {
+      const move = (event: PointerEvent) => {
+        this.onInsightPointerMove(event);
+      };
+      const up = (event: PointerEvent) => {
+        this.zone.run(() => {
+          this.onInsightPointerUp(event);
+        });
+      };
+      const cancel = (event: PointerEvent) => {
+        this.zone.run(() => {
+          this.onInsightPointerCancel(event);
+        });
+      };
+      const blur = () => {
+        this.zone.run(() => {
+          this.finishInsightDrag();
+        });
+      };
+      window.addEventListener('pointermove', move, { passive: false });
+      window.addEventListener('pointerup', up, { passive: false });
+      window.addEventListener('pointercancel', cancel, { passive: false });
+      window.addEventListener('blur', blur);
+      this.removeWindowListeners = () => {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+        window.removeEventListener('pointercancel', cancel);
+        window.removeEventListener('blur', blur);
+        this.removeWindowListeners = null;
+      };
+    });
   }
 
-  private detachWindowPointerListeners() {
-    if (this.removeWindowListeners) {
-      this.removeWindowListeners();
+  private detachWindowPointerListeners(): void {
+    this.removeWindowListeners?.();
+  }
+
+  private releaseInsightPointer(): void {
+    const pointerId = this.insightPointerId;
+    this.insightPointerId = null;
+    if (pointerId !== null && this.insightCaptureTarget?.hasPointerCapture(pointerId)) {
+      this.insightCaptureTarget.releasePointerCapture(pointerId);
     }
-  }
-
-  private beginInsightPointerAction(event: PointerEvent): number {
-    event.preventDefault();
-    event.stopPropagation();
-    return this.insightMax || Math.round(window.innerHeight * 0.30);
+    this.insightCaptureTarget = null;
   }
 
   onInsightPointerMove(event: PointerEvent): void {
     if (!this.insightDragging || this.insightPointerId !== event.pointerId) {
       return;
     }
-
-    const max = this.beginInsightPointerAction(event);
+    event.preventDefault();
+    event.stopPropagation();
     const dy = event.clientY - this.insightStartY;
-
     if (Math.abs(dy) > 3) {
       this.insightMoved = true;
     }
-
-    const next = this.insightStartOffset + dy;
-    this.insightDragY = Math.max(-max, Math.min(0, next));
-    this.refreshInsightTransformClass();
+    this.insightDragY = Math.max(-this.insightMax, Math.min(0, this.insightStartOffset + dy));
+    if (this.insightFrame === null) {
+      this.insightFrame = window.requestAnimationFrame(() => {
+        this.insightFrame = null;
+        this.renderInsightPosition(this.insightDragY ?? this.insightStartOffset);
+      });
+    }
   }
 
   onInsightPointerUp(event: PointerEvent): void {
     if (this.insightPointerId !== event.pointerId) {
       return;
     }
-
-    const max = this.beginInsightPointerAction(event);
-    const mid = -max / 2;
-    const y = this.insightDragY ?? (this.homeInsightExpanded ? -max : 0);
-
-    if (this.insightMoved) {
-      this.homeInsightExpanded = y <= mid;
-    }
-    else {
-      this.homeInsightExpanded = !this.homeInsightExpanded;
-    }
-
-    this.suppressInsightClick = true;
-    this.insightMoved = false;
-    this.insightPointerId = null;
-    this.insightDragging = false;
-    this.insightDragY = null;
-    this.refreshInsightTransformClass();
-
-    this.detachWindowPointerListeners();
+    // Include the release coordinate even if its last move has not painted yet.
+    this.onInsightPointerMove(event);
+    this.homeInsightExpanded = this.insightMoved
+      ? (this.insightDragY ?? 0) <= -this.insightMax / 2
+      : !this.homeInsightExpanded;
+    this.finishInsightDrag();
   }
 
   onInsightPointerCancel(event: PointerEvent): void {
     if (this.insightPointerId !== event.pointerId) {
       return;
     }
-
     event.preventDefault();
     event.stopPropagation();
+    this.finishInsightDrag();
+  }
 
-    this.insightPointerId = null;
+  private finishInsightDrag(): void {
+    this.cancelInsightFrame();
+    this.renderInsightPosition(this.insightDragY ?? this.insightStartOffset);
+    const panel = this.insightPanelRef?.nativeElement;
+    // Commit the final drag frame before restoring the settling transition.
+    if (panel) {
+      void panel.offsetHeight;
+      panel.classList.remove('is-dragging');
+    }
     this.insightDragging = false;
     this.insightDragY = null;
-    this.suppressInsightClick = true;
     this.insightMoved = false;
-    this.refreshInsightTransformClass();
-
+    this.suppressInsightClick = true;
     this.detachWindowPointerListeners();
+    this.releaseInsightPointer();
+    this.renderInsightPosition(this.homeInsightExpanded ? -this.insightMax : 0);
   }
 
   canViewSocialIntel(): boolean {
