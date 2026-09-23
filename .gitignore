@@ -88,3 +88,4 @@ client/cypress/error/
 
 # generated audit report
 duplication-audit.txt
+.cloud

@@ -6,6 +6,7 @@ import secrets
 from urllib.parse import urlencode, urlsplit
 
 from bson import ObjectId
+from bson.errors import InvalidId
 from fastapi import HTTPException, Request, status
 from fastapi.responses import RedirectResponse
 
@@ -15,6 +16,7 @@ from orion.api.server.sso_manager.model.sso_model import SSOCodeExchangeRequest,
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account
+from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 from orion.services.session_manager.session_manager import session_manager
@@ -66,11 +68,19 @@ class sso_manager:
     def _session_key(session_token: str) -> str:
         return f"orion_mail:session:{hashlib.sha256(session_token.encode()).hexdigest()}"
 
-    @staticmethod
-    def _identity_for_user(user: db_user_account) -> dict[str, str]:
+    async def _tenant_slug(self, tenant_id: str) -> str:
+        try:
+            tenant_object_id = ObjectId(str(tenant_id))
+        except (InvalidId, TypeError):
+            return ""
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == tenant_object_id)
+        return str(getattr(tenant, "slug", "") or "") if tenant else ""
+
+    async def _identity_for_user(self, user: db_user_account) -> dict[str, str]:
         return {
             "user_id": str(user.id),
             "tenant_id": str(user.tenant_id),
+            "tenant_slug": await self._tenant_slug(user.tenant_id),
             "username": str(user.username),
             "email": str(user.email or "").strip().lower(),
             "full_name": str(user.username),
@@ -128,7 +138,7 @@ class sso_manager:
         if not session_id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Orion Intelligence session is unavailable")
         code = secrets.token_urlsafe(48)
-        record = {**self._identity_for_user(user), "session_id": session_id, "redirect_uri": redirect_uri}
+        record = {**(await self._identity_for_user(user)), "session_id": session_id, "redirect_uri": redirect_uri}
         await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [self._code_key(code), json.dumps(record), SSO_CONSTANTS.S_CODE_TTL_SECONDS])
         return RedirectResponse(redirect_uri + "?" + urlencode({"code": code, "state": state}), status_code=status.HTTP_302_FOUND)
 
@@ -142,16 +152,16 @@ class sso_manager:
         if user is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Orion Intelligence session has expired")
         session_token = secrets.token_urlsafe(64)
-        session_record = {**self._identity_for_user(user), "session_id": str(user.current_session_id)}
+        session_record = {**(await self._identity_for_user(user)), "session_id": str(user.current_session_id)}
         await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [self._session_key(session_token), json.dumps(session_record), SSO_CONSTANTS.S_SESSION_TTL_SECONDS])
-        return {"session_token": session_token, "expires_in": SSO_CONSTANTS.S_SESSION_TTL_SECONDS, "identity": self._identity_for_user(user)}
+        return {"session_token": session_token, "expires_in": SSO_CONSTANTS.S_SESSION_TTL_SECONDS, "identity": await self._identity_for_user(user)}
 
     async def verify(self, request: Request, payload: SSOSessionRequest):
         self._require_client(request)
         user = await self._active_user(await self._session_record(payload.session_token) or {})
         if user is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired Orion Mail session")
-        return self._identity_for_user(user)
+        return await self._identity_for_user(user)
 
     async def revoke(self, request: Request, payload: SSOSessionRequest):
         self._require_client(request)
