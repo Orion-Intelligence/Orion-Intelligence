@@ -58,7 +58,9 @@ async def _run_migration_locked(version, app_version=None):
             if hasattr(migration_module, migration_script_name):
                 migration_class = getattr(migration_module, migration_script_name)
                 if hasattr(migration_class, "migrate"):
+                    log.g().i(f"MIGRATION {version_str}: running {migration_script_name}")
                     await migration_class.migrate(version_str.replace(".", "_"))
+                    log.g().i(f"MIGRATION {version_str}: completed {migration_script_name}")
                 else:
                     log.g().w(f"No 'migrate' method in {migration_script_name}")
             else:

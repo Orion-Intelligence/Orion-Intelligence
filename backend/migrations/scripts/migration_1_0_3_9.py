@@ -1,15 +1,12 @@
-from elastic_transport import ApiError
-
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
-from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys, db_system_model
 
 try:
-    from ._elastic_migration_guard import short_elastic_error, should_skip_elastic_index_error
+    from ._elastic_migration_guard import run_update_by_query_with_progress
 except ImportError:
-    from _elastic_migration_guard import short_elastic_error, should_skip_elastic_index_error
+    from _elastic_migration_guard import run_update_by_query_with_progress
 
 
 class migration_1_0_3_9:
@@ -30,67 +27,42 @@ class migration_1_0_3_9:
 
     @staticmethod
     async def remove_invalid_cvss_values(es):
-        for attempt in range(2):
-            try:
-                await es.update_by_query(
-                    index=ELASTIC_INDEX.S_EXPLOIT_INDEX,
-                    body={
-                        "script": {
-                            "lang": "painless",
-                            "source": """
-                            if (!ctx._source.containsKey('m_cvss')) {
-                                return;
-                            }
+        body = {
+            "script": {
+                "lang": "painless",
+                "source": """
+                if (!ctx._source.containsKey('m_cvss')) {
+                    return;
+                }
 
-                            def cvss = ctx._source.get('m_cvss');
-                            def values = cvss instanceof List ? cvss : [cvss];
-                            def cleaned = new ArrayList();
+                def cvss = ctx._source.get('m_cvss');
+                def values = cvss instanceof List ? cvss : [cvss];
+                def cleaned = new ArrayList();
 
-                            for (def value : values) {
-                                if (value == null) {
-                                    continue;
-                                }
-                                if (value instanceof Number) {
-                                    cleaned.add(value);
-                                    continue;
-                                }
-                                try {
-                                    cleaned.add(Double.parseDouble(value.toString()));
-                                } catch (Exception ignored) {
-                                }
-                            }
+                for (def value : values) {
+                    if (value == null) {
+                        continue;
+                    }
+                    if (value instanceof Number) {
+                        cleaned.add(value);
+                        continue;
+                    }
+                    try {
+                        cleaned.add(Double.parseDouble(value.toString()));
+                    } catch (Exception ignored) {
+                    }
+                }
 
-                            if (cleaned.isEmpty()) {
-                                ctx._source.remove('m_cvss');
-                            } else {
-                                ctx._source.put('m_cvss', cleaned);
-                            }
-                        """,
-                        },
-                        "query": {"exists": {"field": "m_cvss"}},
-                    },
-                    allow_no_indices=True,
-                    conflicts="proceed",
-                    ignore_unavailable=True,
-                    refresh=True,
-                    request_timeout=220,
-                )
-                break
-            except ApiError as ex:
-                if not should_skip_elastic_index_error(ex):
-                    raise
-
-                short_message = short_elastic_error(ex)
-                if attempt == 0:
-                    log.g().w(
-                        f"Retrying invalid CVSS cleanup for Elasticsearch index {ELASTIC_INDEX.S_EXPLOIT_INDEX}: {short_message}"
-                    )
-                    continue
-
-                log.g().w(
-                    f"Skipping invalid CVSS cleanup for unavailable Elasticsearch index {ELASTIC_INDEX.S_EXPLOIT_INDEX}: {short_message}"
-                )
-                break
+                if (cleaned.isEmpty()) {
+                    ctx._source.remove('m_cvss');
+                } else {
+                    ctx._source.put('m_cvss', cleaned);
+                }
+            """,
+            },
+            "query": {"exists": {"field": "m_cvss"}},
+        }
+        await run_update_by_query_with_progress(es, ELASTIC_INDEX.S_EXPLOIT_INDEX, body, "1_0_3_9 m_cvss cleanup")
 
     @staticmethod
     async def update_version(engine, version):

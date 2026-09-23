@@ -1,10 +1,12 @@
-from elastic_transport import ApiError
-
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
-from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys, db_system_model
+
+try:
+    from ._elastic_migration_guard import run_update_by_query_with_progress
+except ImportError:
+    from _elastic_migration_guard import run_update_by_query_with_progress
 
 
 class migration_1_0_3_11:
@@ -34,79 +36,42 @@ class migration_1_0_3_11:
 
     @staticmethod
     async def migrate_index(es, index):
-        for attempt in range(2):
-            try:
-                await es.update_by_query(
-                    index=index,
-                    body={
-                        "script": {
-                            "lang": "painless",
-                            "source": """
-                            if (!ctx._source.containsKey('m_platform')) {
-                                return;
-                            }
+        body = {
+            "script": {
+                "lang": "painless",
+                "source": """
+                if (!ctx._source.containsKey('m_platform')) {
+                    return;
+                }
 
-                            def platform = ctx._source.get('m_platform');
-                            if (platform == null) {
-                                ctx._source.remove('m_platform');
-                                return;
-                            }
+                def platform = ctx._source.get('m_platform');
+                if (platform == null) {
+                    ctx._source.remove('m_platform');
+                    return;
+                }
 
-                            def values = platform instanceof List ? platform : [platform];
-                            def cleaned = new ArrayList();
-                            for (def value : values) {
-                                if (value == null) {
-                                    continue;
-                                }
-                                def text = value.toString().trim();
-                                if (text.length() > 0) {
-                                    cleaned.add(text);
-                                }
-                            }
+                def values = platform instanceof List ? platform : [platform];
+                def cleaned = new ArrayList();
+                for (def value : values) {
+                    if (value == null) {
+                        continue;
+                    }
+                    def text = value.toString().trim();
+                    if (text.length() > 0) {
+                        cleaned.add(text);
+                    }
+                }
 
-                            if (cleaned.isEmpty()) {
-                                ctx._source.remove('m_platform');
-                            } else {
-                                ctx._source.put('m_platform', cleaned);
-                            }
-                        """,
-                        },
-                        "query": {"exists": {"field": "m_platform"}},
-                    },
-                    allow_no_indices=True,
-                    conflicts="proceed",
-                    ignore_unavailable=True,
-                    refresh=True,
-                    request_timeout=220,
-                )
-                break
-            except ApiError as ex:
-                if not migration_1_0_3_11.should_skip_index_error(ex):
-                    raise
-
-                short_message = str(ex)[:500]
-                if attempt == 0:
-                    log.g().w(f"Retrying m_platform list migration for Elasticsearch index {index}: {short_message}")
-                    continue
-
-                log.g().w(f"Skipping m_platform list migration for unavailable Elasticsearch index {index}: {short_message}")
-                break
-
-    @staticmethod
-    def should_skip_index_error(ex):
-        status_code = getattr(ex, "status_code", None) or getattr(getattr(ex, "meta", None), "status", None)
-        if status_code == 503:
-            return True
-        if status_code != 404:
-            return False
-
-        message = str(ex).lower()
-        return any(marker in message for marker in (
-            "index_not_found_exception",
-            "no search context found",
-            "no such index",
-            "search_context_missing_exception",
-        ))
+                if (cleaned.isEmpty()) {
+                    ctx._source.remove('m_platform');
+                } else {
+                    ctx._source.put('m_platform', cleaned);
+                }
+            """,
+            },
+            "query": {"exists": {"field": "m_platform"}},
+        }
+        await run_update_by_query_with_progress(es, index, body, "1_0_3_11 m_platform cleanup")
 
     @staticmethod
     async def update_version(engine, version):
