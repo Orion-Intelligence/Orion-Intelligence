@@ -45,8 +45,6 @@ export enum AiWorkspacePrompt {
 export const sidebarItemTooltips: Record<string, string> = {
   'All': 'Comprehensive Overview',
   'General': 'Broad Data Pool',
-  'Stealerlog': 'Telegram Stealer Logs',
-  'Breaches': 'Telegram Breach Data',
   'Forums': 'Forum Intelligence',
   'News': 'Trending Alerts',
   'Stolen': 'Stolen Info Logs',

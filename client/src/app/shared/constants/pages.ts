@@ -5,7 +5,6 @@ export enum Category {
     DIRECTORY = 'Directory',
     DEFACEMENT = 'Defacement',
     SOCIAL = 'Social',
-    TELEGRAM = 'Telegram',
     API = 'Api',
     EXPLOIT = 'Exploit',
     APT_INTEL = 'APT Intel',
@@ -48,11 +47,6 @@ export enum SocialSubCategory {
     REDDIT = 'Reddit',
     FACEBOOK = 'Facebook',
     YOUTUBE = 'YouTube',
-}
-export enum TelegramSubCategory {
-    GENERAL = 'General',
-    STEALERLOG = 'Stealerlog',
-    BREACHES = 'Breaches',
 }
 export enum ExploitSubCategory {
     ALL = 'All',

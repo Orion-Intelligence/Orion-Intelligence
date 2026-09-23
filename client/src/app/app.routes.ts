@@ -604,46 +604,6 @@ export const routes: Routes = [
         ]
       },
       {
-        path: 'telegram',
-        data: { animation: 'SocialPage' },
-        children: [
-          {
-            path: '',
-            redirectTo: 'general',
-            pathMatch: 'full'
-          },
-          {
-            path: 'general',
-            loadComponent: loadDashboardResultContainer,
-            pathMatch: 'full',
-            data: { type: 'social', animation: 'DataBreach' }
-          },
-          {
-            path: 'general/:m_hash',
-            loadComponent: loadReportChatComponent,
-            resolve: { reportdata: ReportResolver },
-            data: { type: 'Social', animation: 'HashPage' }
-          },
-          {
-            path: 'stealerlog',
-            loadComponent: loadCredentialComponent,
-            data: { type: 'credential', animation: 'CategoryPage' }
-          },
-          {
-            path: 'breaches',
-            loadComponent: loadDashboardResultContainer,
-            pathMatch: 'full',
-            data: { type: 'social', animation: 'DataBreach' }
-          },
-          {
-            path: 'breaches/:m_hash',
-            loadComponent: loadReportComponent,
-            resolve: { reportdata: ReportResolver },
-            data: { type: 'Breach', animation: 'HashPage' }
-          }
-        ]
-      },
-      {
         path: 'feed',
         data: { animation: 'FeedPage' },
         children: [

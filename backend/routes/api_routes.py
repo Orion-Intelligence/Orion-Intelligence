@@ -181,14 +181,9 @@ async def search_social(param: search_consolidated_param_model = Body(...), curr
         base_index = [ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX]
         return await search_manager.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
     else:
-        if category in ("telegram", "general"):
+        if category == "telegram":
             param.category = "all"
             base_index = [ELASTIC_INDEX.S_CHATS_INDEX]
-            return await search_manager.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
-        if category == "breaches":
-            param.category = "all"
-            param.network = "telegram"
-            base_index = [ELASTIC_INDEX.S_LEAK_INDEX]
             return await search_manager.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
         if category in ("forum", "forums"):
             param.category = "all"
