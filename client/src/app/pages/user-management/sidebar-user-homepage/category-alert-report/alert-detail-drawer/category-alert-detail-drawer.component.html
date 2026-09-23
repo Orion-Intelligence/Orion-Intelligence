@@ -89,12 +89,6 @@
         }
       </div>
 
-      <div class="sticky bottom-0 mt-auto flex justify-end gap-3 border-t border-[var(--color-border)] bg-[var(--color-blue-830)]/95 px-6 py-4 backdrop-blur">
-        <ng-content select="[alertDetailFooterActions]"></ng-content>
-        <button type="button" class="inline-flex h-10 items-center rounded-[8px] bg-[var(--color-blue-640)] px-4 text-sm font-semibold text-white transition hover:brightness-110 [body.light-theme_&]:bg-sky-700 [body.light-theme_&]:hover:bg-sky-800 [body.light-theme_&]:hover:brightness-100 [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-500/30" (click)="closeAlertDetails()">
-          {{ 'common.actions.close' | translate }}
-        </button>
-      </div>
     </aside>
   </div>
 }

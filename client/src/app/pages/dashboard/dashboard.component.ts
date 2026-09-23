@@ -67,6 +67,10 @@ export class DashboardComponent implements AfterViewInit, OnInit {
       return;
     }
     this.routeAnimationKey = animationKey;
+    if (this.routerOutlet?.activatedRouteData?.noRouteFade) {
+      this.routeFadePhase = null;
+      return;
+    }
     this.routeFadePhase = this.routeFadePhase === 'a' ? 'b' : 'a';
   }
 

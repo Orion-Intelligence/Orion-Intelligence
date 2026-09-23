@@ -1,10 +1,19 @@
 import json
 from typing import Any, Dict
 
+from bson import ObjectId
 from fastapi import HTTPException
 
 from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel, db_alert_model, visible_alerts
+from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
+
+DISMISSED_TYPE_TO_CATEGORY = {
+    "stealer_log": "stealerlogs",
+    "breach": "breach",
+    "exploit": "exploit",
+    "social": "social",
+}
 
 
 class AlertSummaryHelper:
@@ -61,11 +70,17 @@ class AlertSummaryHelper:
 
     def build_alert_summary(self, alerts_list: list[AlertModel]) -> Dict[str, Dict[str, int] | int]:
         counts_by_type: Dict[str, int] = {}
+        dismissed_counts_by_type: Dict[str, int] = {}
         counts_by_risk: Dict[str, int] = {"critical": 0, "high": 0, "medium": 0, "low": 0}
         unseen_total = 0
 
         for alert in alerts_list or []:
             alert_type = (alert.type or "").strip().lower()
+            if bool(getattr(alert, "dismissed", False)):
+                if alert_type:
+                    dismissed_counts_by_type[alert_type] = dismissed_counts_by_type.get(alert_type, 0) + 1
+                continue
+
             if alert_type:
                 counts_by_type[alert_type] = counts_by_type.get(alert_type, 0) + 1
 
@@ -76,20 +91,23 @@ class AlertSummaryHelper:
             if risk in counts_by_risk:
                 counts_by_risk[risk] += 1
 
-        return {"unseen_total": unseen_total, "counts_by_type": counts_by_type, "counts_by_risk": counts_by_risk}
+        return {"unseen_total": unseen_total, "counts_by_type": counts_by_type, "dismissed_counts_by_type": dismissed_counts_by_type, "counts_by_risk": counts_by_risk}
 
     async def get_alert_summary(self, tenant_id: str) -> Dict[str, Dict[str, int] | int]:
         key = self.summary_cache_key(str(tenant_id))
         try:
             cached = await self._redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [key, None, None])
             if cached:
-                return json.loads(cached)
+                summary = json.loads(cached)
+                summary["dismissed_counts_by_type"] = await self._dismissed_counts_by_type(tenant_id)
+                return summary
         except Exception as ex:
             raise HTTPException(status_code=500, detail=f"Redis cache read failed: {ex}")
 
         alerts_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == str(tenant_id))
         alerts = visible_alerts(alerts_doc.alerts if alerts_doc and alerts_doc.alerts else [])
         summary = self.build_alert_summary(alerts)
+        summary["dismissed_counts_by_type"] = await self._dismissed_counts_by_type(tenant_id)
 
         try:
             await self._redis.invoke_trigger(
@@ -100,7 +118,20 @@ class AlertSummaryHelper:
             raise HTTPException(status_code=500, detail=f"Redis cache write failed: {ex}")
 
         return summary
-    
+
+    async def _dismissed_counts_by_type(self, tenant_id: str) -> Dict[str, int]:
+        if not ObjectId.is_valid(str(tenant_id)):
+            return {}
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(str(tenant_id)))
+        if not tenant:
+            return {}
+        counts: Dict[str, int] = {}
+        for entry in getattr(tenant, "dismissed_iocs", None) or []:
+            category = DISMISSED_TYPE_TO_CATEGORY.get(str(getattr(entry, "type", "") or ""))
+            if category:
+                counts[category] = counts.get(category, 0) + 1
+        return counts
+
     @staticmethod
     def new_scan_summary() -> dict:
         return {

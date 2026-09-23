@@ -27,6 +27,7 @@ class AlertModel(EmbeddedModel):
     ioc_type: str = ''
     ioc_value: str = ''
     data_hash: str = ''
+    dismissed: bool = False
     title: str = ''
     description: str = ''
     source: str = ''

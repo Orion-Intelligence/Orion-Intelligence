@@ -154,6 +154,7 @@ class ElasticsearchResultMapper:
             "content_types": content_types,
             "all_ioc": ResultMetadataMapper.all_iocs_for_result(result, ioc_type, ioc_value),
             "data_hash": data_hash,
+            "dismissed": bool(result.get("dismissed", False)),
             "raw_findings": RawFindingSanitizer.clean(result),
         }
 

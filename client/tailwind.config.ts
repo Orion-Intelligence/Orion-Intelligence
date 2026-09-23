@@ -54,8 +54,8 @@ export default {
                     },
                 },
                 'alert-card-stagger-in': {
-                    from: { opacity: '0%', transform: 'translateY(10px)' },
-                    to: { opacity: '100%', transform: 'translateY(0)' },
+                    from: { opacity: '0%' },
+                    to: { opacity: '100%' },
                 },
                 'consolidated-scan-pulse': {
                     '0%, 100%': {

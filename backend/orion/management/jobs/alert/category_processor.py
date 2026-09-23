@@ -80,6 +80,8 @@ class CategoryAlertProcessor:
         search_func = getattr(self._search_model, config.search_method)
 
         if config.search_method == "search_stealer_iocs":
+            if hasattr(search_param, "hide_dismissed"):
+                search_param.hide_dismissed = False
             return await search_func(search_param, tenant_id=tenant_id)
 
         return await search_func(

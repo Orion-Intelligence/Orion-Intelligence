@@ -25,6 +25,7 @@ import { SidebarHomepageService } from '../../../services/dashboard/sidebar.serv
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../shared/services/translation.service';
 import { isTenantIocPrivileged } from '../ioc-privilege.util';
+import { getOwnProperty } from '../../../shared/utils/type-guards.util';
 
 @Component({
   selector: 'app-sidebar-user-homepage',
@@ -79,7 +80,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
 
   initializeData() {
     const summary = this.appService.userSessionData().alert_summary;
-    const categories = this.convertCountsToCategories(summary?.counts_by_type ?? {});
+    const categories = this.convertCountsToCategories(summary?.counts_by_type ?? {}, summary?.dismissed_counts_by_type ?? {});
     queueMicrotask(() => {
       this.alertCategories = categories;
       this.countRiskFromSummary(summary?.counts_by_risk);
@@ -113,13 +114,13 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
     return this.licenseService.isMember();
   }
 
-  convertCountsToCategories(countsByType: Record<string, number>): AlertCategorySummary[] {
+  convertCountsToCategories(countsByType: Record<string, number>, dismissedByType: Record<string, number> = {}): AlertCategorySummary[] {
     const summaries: AlertCategorySummary[] = Object.entries(countsByType).map(([category, count]) => {
-      return createAlertCategorySummary(category, count, this.getRiskLevel.bind(this));
+      return createAlertCategorySummary(category, count, this.getRiskLevel.bind(this), getOwnProperty(dismissedByType, category) ?? 0);
     });
     for (const cat of ALERT_CATEGORY_NAMES) {
       if (!summaries.find(s => s.categoryName === cat)) {
-        summaries.push(createAlertCategorySummary(cat, 0, this.getRiskLevel.bind(this)));
+        summaries.push(createAlertCategorySummary(cat, 0, this.getRiskLevel.bind(this), getOwnProperty(dismissedByType, cat) ?? 0));
       }
     }
     return summaries;

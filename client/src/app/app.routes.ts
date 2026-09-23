@@ -162,6 +162,7 @@ export const routes: Routes = [
     path: 'backup-visibility/:id',
     loadComponent: loadBackupVisibilityComponent,
     canActivate: [AuthGuard],
+    resolve: { config: ConfigResolver },
     data: { animation: 'BackupVisibilityPage' }
   },
   {
@@ -834,7 +835,7 @@ export const routes: Routes = [
           {
             path: 'alerts/:type',
             loadComponent: loadCategoryAlertReportComponent,
-            data: { type: 'alert', animation: 'AlertPage' },
+            data: { type: 'alert', animation: 'AlertPage', noRouteFade: true },
           },
           {
             path: 'addcustomalert',
@@ -957,7 +958,7 @@ export const routes: Routes = [
               {
                 path: 'admin-alerts/:tenantId/:type',
                 loadComponent: loadCategoryAlertReportComponent,
-                data: { type: 'case-admin-alerts', animation: 'CategoryPage', adminTenantAlerts: true }
+                data: { type: 'case-admin-alerts', animation: 'CategoryPage', adminTenantAlerts: true, noRouteFade: true }
               }
             ]
           },

@@ -23,6 +23,7 @@ export interface AlertCategorySummary {
     categoryName: string;
     risk: string;
     iocCount: number;
+    dismissedCount: number;
     detectedDate: Date | null;
     tags: string[];
 }
@@ -58,11 +59,12 @@ export interface CategoryAlerts {
     password?: string;
 }
 
-export function createAlertCategorySummary(categoryName: string, iocCount: number, getRiskLevel: (categoryName: string) => string): AlertCategorySummary {
+export function createAlertCategorySummary(categoryName: string, iocCount: number, getRiskLevel: (categoryName: string) => string, dismissedCount = 0): AlertCategorySummary {
   return {
     categoryName,
     risk: getRiskLevel(categoryName),
     iocCount: Number(iocCount || 0),
+    dismissedCount: Number(dismissedCount || 0),
     detectedDate: null,
     tags: []
   };

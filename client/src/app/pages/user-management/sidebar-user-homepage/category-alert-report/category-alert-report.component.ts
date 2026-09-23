@@ -55,7 +55,6 @@ export class CategoryAlertReportComponent implements OnInit {
   filteredAlerts: CategoryAlerts[] = []
   visibleFilteredAlerts: CategoryAlerts[] = [];
   readonly serverPageSize: number = 20;
-  readonly incrementalDelayMs: number = 90;
   currentPage = 0;
   hasMoreAlerts = false;
   isLoadingMoreAlerts = false;
@@ -63,6 +62,7 @@ export class CategoryAlertReportComponent implements OnInit {
   activeDateRange: string | null = null;
   activeAlertFilters: Record<string, string | null> = {};
   searchText = '';
+  showDismissed = false;
   category = '';
   iocTypes: Record<string, string> = { ...search_filter_labels };
   showCustomAlertPopup = false;
@@ -72,9 +72,10 @@ export class CategoryAlertReportComponent implements OnInit {
   isFlushAllConfirmationOpen = signal(false);
   isDeleteAlertConfirmationOpen = signal(false);
   selectedDeleteAlertId = '';
+  isDismissAlertConfirmationOpen = signal(false);
+  selectedDismissAlertId = '';
   importedAlert: AlertModel | null = null;
   alertToShowReport: AlertModel | null = null;
-  activeDetailAlert: CategoryAlerts | null = null;
   alertExportScope: 'selected' | 'category' = 'selected';
   isExportChoiceOpen = false;
   isAdminTenantAlertReport = false;
@@ -105,6 +106,14 @@ export class CategoryAlertReportComponent implements OnInit {
     this.applyCurrentFilters();
   }
 
+  setDismissedView(showDismissed: boolean): void {
+    if (this.showDismissed === showDismissed) {
+      return;
+    }
+    this.showDismissed = showDismissed;
+    this.getLatestAlerts();
+  }
+
   ngOnInit(): void {
     this.isAdminTenantAlertReport = this.route.snapshot.data.adminTenantAlerts === true;
     this.route.url.pipe(map(segments => {
@@ -128,27 +137,8 @@ export class CategoryAlertReportComponent implements OnInit {
 
   private appendVisibleAlertsIncrementally(items: CategoryAlerts[], reset: boolean): void {
     this.clearAppendTimer();
-    this.visibleFilteredAlerts = reset ? [] : [...this.visibleFilteredAlerts];
-
-    if (items.length === 0) {
-      this.isLoadingMoreAlerts = false;
-      return;
-    }
-
-    let index = 0;
-    const appendNext = () => {
-      if (index >= items.length) {
-        this.isLoadingMoreAlerts = false;
-        this.appendTimer = null;
-        return;
-      }
-
-      this.visibleFilteredAlerts = [...this.visibleFilteredAlerts, getOwnProperty(items, index)];
-      index += 1;
-      this.appendTimer = setTimeout(appendNext, this.incrementalDelayMs);
-    };
-
-    appendNext();
+    this.visibleFilteredAlerts = reset ? [...items] : [...this.visibleFilteredAlerts, ...items];
+    this.isLoadingMoreAlerts = false;
   }
 
   private loadAlertsPage(reset: boolean): void {
@@ -219,7 +209,7 @@ export class CategoryAlertReportComponent implements OnInit {
       return `tenants/${encodeURIComponent(this.adminTenantId)}/alerts?paginate=true&page=${page}&limit=${this.serverPageSize}&alert_type=${encodeURIComponent(this.category)}`;
     }
 
-    return `profile/alerts?paginate=true&page=${page}&limit=${this.serverPageSize}&alert_type=${encodeURIComponent(this.category)}`;
+    return `profile/alerts?paginate=true&page=${page}&limit=${this.serverPageSize}&alert_type=${encodeURIComponent(this.category)}${this.showDismissed ? '&include_dismissed=true' : ''}`;
   }
 
   flushAll() {
@@ -326,6 +316,31 @@ export class CategoryAlertReportComponent implements OnInit {
   deleteAlertConfirmation(id: string) {
     this.selectedDeleteAlertId = id;
     this.isDeleteAlertConfirmationOpen.set(true);
+  }
+
+  dismissAlertConfirmation(id: string) {
+    this.selectedDismissAlertId = id;
+    this.isDismissAlertConfirmationOpen.set(true);
+  }
+
+  dismissAlert(confirmed: boolean, id: string) {
+    this.isDismissAlertConfirmationOpen.set(false);
+    this.selectedDismissAlertId = '';
+
+    if (!confirmed || !id) {
+      return;
+    }
+
+    this.apiService.post('alert/dismiss', id).subscribe({
+      next: () => {
+        this.messageNotificationService.show(this.translationService.translate('Alert dismissed successfully!'), 'success');
+        this.getLatestAlerts();
+      },
+      error: (err) => {
+        const mess = err?.error?.detail ?? this.translationService.translate('Failed to dismiss alert');
+        this.messageNotificationService.show(mess);
+      },
+    });
   }
 
   deleteCustomAlert(confirmed: boolean, id: string) {

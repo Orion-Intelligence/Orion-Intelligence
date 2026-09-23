@@ -8,6 +8,7 @@ export interface userSessionData {
 export interface AlertSummary {
     unseen_total: number;
     counts_by_type: Record<string, number>;
+    dismissed_counts_by_type?: Record<string, number>;
     counts_by_risk: {
         critical: number;
         high: number;

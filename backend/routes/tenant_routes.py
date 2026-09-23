@@ -386,6 +386,15 @@ async def delete_alert(alert_id: str = Body(..., description="Unique id identifi
 
 
 @tenant_routes.post(
+    "/api/alert/dismiss",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.MEMBER])), Depends(status_required([UserStatus.ACTIVE])), ], )
+async def dismiss_alert(alert_id: str = Body(..., description="Unique id identifier of the alert to dismiss."), current_user=Depends(get_current_user)):
+    return await AlertManager.getInstance().dismiss_alert(alert_id, current_user)
+
+
+@tenant_routes.post(
     "/api/alert/update",
     status_code=200,
     include_in_schema=False,
@@ -399,7 +408,7 @@ async def update_alert(data: AlertModel, current_user=Depends(get_current_user))
     status_code=200,
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.MEMBER])), Depends(status_required([UserStatus.ACTIVE])), ], )
-async def get_user_alerts(current_user=Depends(get_current_user), page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=20), alert_type: str | None = Query(None), paginate: bool = Query(False), compact: bool = Query(False), unseen_only: bool = Query(False), include_counts: bool = Query(False)):
+async def get_user_alerts(current_user=Depends(get_current_user), page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=20), alert_type: str | None = Query(None), paginate: bool = Query(False), compact: bool = Query(False), unseen_only: bool = Query(False), include_counts: bool = Query(False), include_dismissed: bool = Query(False)):
     return await AlertManager.getInstance().getAllAlerts(
         current_user,
         page=page,
@@ -409,6 +418,7 @@ async def get_user_alerts(current_user=Depends(get_current_user), page: int = Qu
         compact=compact,
         unseen_only=unseen_only,
         include_counts=include_counts,
+        include_dismissed=include_dismissed,
     )
 
 

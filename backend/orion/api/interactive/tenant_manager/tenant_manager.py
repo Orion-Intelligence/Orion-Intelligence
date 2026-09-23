@@ -907,6 +907,16 @@ class TenantManager:
             await self._engine.remove(model, model.tenant_id == tenant_id)
         await self._engine.delete(tenant)
 
+    async def _invalidate_alert_summaries(self, tenant_ids) -> None:
+        from orion.api.interactive.alert_manager.alert_manager import AlertManager
+        manager = AlertManager.getInstance()
+        for tid in tenant_ids:
+            await manager.invalidate_alert_summary(str(tid))
+
+    async def _all_tenant_ids(self) -> list:
+        collection = self._engine.get_collection(db_tenant_model)
+        return [str(doc["_id"]) async for doc in collection.find({}, {"_id": 1})]
+
     async def dismiss_stealer_log(self, tenant_id: str, stealer_log_hash: str, user_id: str, dismissed_ioc_type: DismissedIocType = DismissedIocType.STEALER_LOG, all_tenants: bool = False) -> dict:
         collection = self._engine.get_collection(db_tenant_model)
         not_dismissed = {"dismissed_iocs": {"$not": {"$elemMatch": {"hash": stealer_log_hash, "type": dismissed_ioc_type.value}}}}
@@ -914,6 +924,8 @@ class TenantManager:
 
         if all_tenants:
             result = await collection.update_many(not_dismissed, push)
+            if result.modified_count:
+                await self._invalidate_alert_summaries(await self._all_tenant_ids())
             return {"status": "dismissed" if result.modified_count else "already_dismissed"}
 
         if not ObjectId.is_valid(tenant_id):
@@ -921,6 +933,7 @@ class TenantManager:
         result = await collection.update_one({"_id": ObjectId(tenant_id), **not_dismissed}, push)
         if result.modified_count == 0:
             return {"status": "already_dismissed"}
+        await self._invalidate_alert_summaries([tenant_id])
         return {"status": "dismissed"}
 
     async def restore_stealer_log(self, tenant_id: str, stealer_log_hash: str, dismissed_ioc_type: DismissedIocType = DismissedIocType.STEALER_LOG, all_tenants: bool = False) -> dict:
@@ -929,6 +942,8 @@ class TenantManager:
 
         if all_tenants:
             result = await collection.update_many({}, pull)
+            if result.modified_count:
+                await self._invalidate_alert_summaries(await self._all_tenant_ids())
             return {"status": "restored" if result.modified_count else "not_dismissed"}
 
         if not ObjectId.is_valid(tenant_id):
@@ -936,6 +951,7 @@ class TenantManager:
         result = await collection.update_one({"_id": ObjectId(tenant_id)}, pull)
         if result.modified_count == 0:
             return {"status": "not_dismissed"}
+        await self._invalidate_alert_summaries([tenant_id])
         return {"status": "restored"}
 
     async def get_visible_tenant_alerts_summary(self, current_user) -> List[dict]:
@@ -973,6 +989,7 @@ class TenantManager:
             return []
 
         alerts = visible_alerts(alerts_data.alerts)
+        alerts = [alert for alert in alerts if not bool(getattr(alert, "dismissed", False))]
         if alert_type:
             normalized_type = alert_type.strip().lower()
             alerts = [alert for alert in alerts if (alert.type or "").strip().lower() == normalized_type]

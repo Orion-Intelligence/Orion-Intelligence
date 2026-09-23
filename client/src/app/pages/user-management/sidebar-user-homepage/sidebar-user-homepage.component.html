@@ -121,6 +121,12 @@
                       {{ (category.detectedDate || '2025-01-01') | date:'dd/MM/yyyy' }}
                     </span>
                   </div>
+                  @if (category.dismissedCount > 0) {
+                    <div class="flex justify-between text-[11px] font-normal text-[var(--color-text6)] opacity-70">
+                      <span>{{ 'Dismissed' | translate }}</span>
+                      <span class="font-medium">{{ category.dismissedCount }}</span>
+                    </div>
+                  }
                   <div class="mt-[6px] flex flex-wrap gap-[6px]">
                     @for (tag of category.tags; track tag) {
                       <span class="category-alert-tag rounded-[100px] bg-[var(--color-tags)] px-[10px] py-[4px] text-[12px] font-normal text-[var(--color-text1)] max-[640px]:text-[11px] [.light-theme_&]:!border [.light-theme_&]:!border-[#c7d5e6] [.light-theme_&]:!bg-[#eef4fb] [.light-theme_&]:!text-[#334155] [.light-theme_&]:!shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">{{ tag }}</span>

@@ -20,9 +20,16 @@ from orion.services.alert_webhook_manager.alert_webhook_manager import AlertWebh
 from orion.services.encryption_manager.key_manager import KeyManager
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account, user_role
 from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel, alert_all_ioc, alert_status, db_alert_model, visible_alerts
-from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
+from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, DismissedIocType
 from orion.services.redis_manager.redis_controller import redis_controller
 from configs.app_dependency import get_user_permissions
+
+ALERT_TYPE_TO_DISMISSED_TYPE = {
+    "stealerlogs": DismissedIocType.STEALER_LOG,
+    "breach": DismissedIocType.BREACH,
+    "exploit": DismissedIocType.EXPLOIT,
+    "social": DismissedIocType.SOCIAL,
+}
 
 
 class AlertManager:
@@ -59,6 +66,9 @@ class AlertManager:
 
     async def get_alert_summary(self, tenant_id: str):
         return await self._summary_helper.get_alert_summary(tenant_id)
+
+    async def invalidate_alert_summary(self, tenant_id: str):
+        await self._summary_helper.invalidate_alert_summary_cache(tenant_id)
 
     @staticmethod
     def _display_alert_label(value: str) -> str:
@@ -260,6 +270,8 @@ class AlertManager:
                         existing_alert.risk = payload.get("risk", "")
                     if payload.get("raw_findings"):
                         existing_alert.raw_findings = payload.get("raw_findings", {})
+                    existing_alert.dismissed = bool(payload.get("dismissed", False))
+                    existing_alert.is_deleted = False
                     existing_alert.last_seen = now
                     updated_count += 1
                     continue
@@ -270,6 +282,7 @@ class AlertManager:
                     ioc_type=ioc_type or "",
                     ioc_value=ioc_value or "",
                     data_hash=data_hash,
+                    dismissed=bool(payload.get("dismissed", False)),
                     title=payload.get("title") or "",
                     description=payload.get("description") or "",
                     url=payload.get("url") or "",
@@ -410,6 +423,35 @@ class AlertManager:
 
         return {"message": "Alerts updated successfully", "updated": updated_count}
 
+    async def dismiss_alert(self, alert_id: str, current_user):
+        tenant_id = str(current_user.tenant_id)
+
+        existing_doc = await self._engine.find_one(
+            db_alert_model, db_alert_model.tenant_id == tenant_id)
+        if not existing_doc or not existing_doc.alerts:
+            raise HTTPException(status_code=404, detail="No alerts found for this user")
+
+        target = None
+        for alert in visible_alerts(existing_doc.alerts):
+            if alert.alert_id == alert_id:
+                target = alert
+                break
+
+        if target is None:
+            raise HTTPException(status_code=404, detail="Alert not found")
+
+        target.dismissed = True
+        await self._engine.save(existing_doc)
+
+        dismiss_hash = str((target.raw_findings or {}).get("dismiss_id") or target.data_hash or "")
+        ioc_type = ALERT_TYPE_TO_DISMISSED_TYPE.get((target.type or "").strip().lower())
+        if dismiss_hash and ioc_type is not None:
+            from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
+            await TenantManager.get_instance().dismiss_stealer_log(tenant_id, dismiss_hash, str(current_user.id), ioc_type)
+
+        await self._summary_helper.invalidate_alert_summary_cache(tenant_id)
+        return {"status": "dismissed", "id": alert_id}
+
     async def delete_alert(self, alert_id: str, current_user):
         tenant_id = str(current_user.tenant_id)
 
@@ -491,7 +533,7 @@ class AlertManager:
             alerts = [alert for alert in alerts if (alert.type or "").strip().lower() == normalized_type]
         return {"values": self.filter_option_values(alerts, field, query, limit)}
 
-    async def getAllAlerts(self, current_user, page: int = 1, limit: int = 20, alert_type: str | None = None, paginate: bool = False, compact: bool = False, unseen_only: bool = False, include_counts: bool = False):
+    async def getAllAlerts(self, current_user, page: int = 1, limit: int = 20, alert_type: str | None = None, paginate: bool = False, compact: bool = False, unseen_only: bool = False, include_counts: bool = False, include_dismissed: bool = False):
         alerts_data = await self._engine.find_one(
             db_alert_model, db_alert_model.tenant_id == str(current_user.tenant_id))
 
@@ -515,6 +557,7 @@ class AlertManager:
             return []
 
         alerts = visible_alerts(alerts_data.alerts)
+        alerts = [alert for alert in alerts if bool(getattr(alert, "dismissed", False)) == include_dismissed]
         if not compact:
             alerts = await self.filter_alerts_by_license(alerts, current_user)
 
