@@ -1,0 +1,7 @@
+cd ~/Orion-Intelligence && git pull && ./run.sh build -p
+
+cd ~/Orion-mail && git pull && ./run.sh build -p
+
+certbot delete --cert-name mail-wildcard --non-interactive
+
+echo | openssl s_client -servername intelysyncmail.orionintelligence.org -connect intelysyncmail.orionintelligence.org:443 2>/dev/null | openssl x509 -noout -subject -issuer

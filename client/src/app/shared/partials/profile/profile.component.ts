@@ -210,7 +210,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
       if (intelHost !== parent && intelHost.endsWith(`.${parent}`)) {
         const slug = intelHost.slice(0, intelHost.length - parent.length - 1);
         if (slug && !slug.includes('.')) {
-          login.hostname = `${slug}.${mailHost}`;
+          login.hostname = `${slug}${mailHost}`;
         }
       }
     }
