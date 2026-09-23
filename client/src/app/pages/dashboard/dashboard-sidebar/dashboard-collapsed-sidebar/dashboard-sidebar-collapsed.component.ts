@@ -70,6 +70,8 @@ export class SidebarSectionComponent {
       'text-analysis': 'phishing',
       'crypto-scanner': 'cryptocurrency',
       feeder: 'account',
+      stealerlog: 'stolen',
+      breaches: 'leaks',
     };
     const mapped = getOwnProperty(iconAliases, normalized) ?? normalized;
     const icon = this.availableSubIcons.has(mapped) ? mapped : 'all';

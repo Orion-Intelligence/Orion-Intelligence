@@ -67,6 +67,18 @@
         [title]="('Social') | translate"></app-dashboard-sidebar-items>
         </div>
       }
+      @if (isAdmin() || licenseService.canUseModule('social')) {
+        <div id="sidebar-telegram">
+        <app-dashboard-sidebar-items
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.TELEGRAM"
+          [icon]="'assets/images/sidebar/social.svg'"
+          [items]="telegramCategories"
+          [routePrefix]="'telegram'"
+        [title]="('Telegram Check In Depth') | translate"></app-dashboard-sidebar-items>
+        </div>
+      }
       @if (isAdmin() || licenseService.canUseModule('exploit')) {
         <app-dashboard-sidebar-items
           (optionSelected)="onOptionSelected($event)"
@@ -284,6 +296,19 @@
           [routePrefix]="'social'"
           [selectionStore]="selectionStore"
           [title]="('Social') | translate">
+        </app-dashboard-sidebar-collapsed>
+      }
+      @if (isAdmin() || licenseService.canUseModule('social')) {
+        <app-dashboard-sidebar-collapsed
+          id="sidebar-telegram"
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.TELEGRAM"
+          [icon]="'assets/images/sidebar/social.svg'"
+          [items]="telegramCategories"
+          [routePrefix]="'telegram'"
+          [selectionStore]="selectionStore"
+          [title]="('Telegram Check In Depth') | translate">
         </app-dashboard-sidebar-collapsed>
       }
       @if (isAdmin() || licenseService.canUseModule('exploit')) {

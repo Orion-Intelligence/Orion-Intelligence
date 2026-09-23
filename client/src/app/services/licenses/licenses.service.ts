@@ -125,6 +125,9 @@ export class LicenseService {
     if (moduleName === 'Stealerlogs') {
       moduleName = 'stealer_logs';
     }
+    if (moduleName === 'Telegram') {
+      moduleName = 'social';
+    }
     if (moduleName === 'Strategic') {
       moduleName = 'general';
     }

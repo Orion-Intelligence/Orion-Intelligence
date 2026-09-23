@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
 import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
-import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, ExploitSubCategory, FeedSubCategory, SocialSubCategory, SocialIntelSubCategory, TenantSubCategory, ProfileSubCategory } from '../../../shared/constants/pages';
+import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, ExploitSubCategory, FeedSubCategory, SocialSubCategory, TelegramSubCategory, SocialIntelSubCategory, TenantSubCategory, ProfileSubCategory } from '../../../shared/constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
@@ -45,6 +45,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
   socialCategories = Object.values(SocialSubCategory);
+  telegramCategories = Object.values(TelegramSubCategory);
   socialIntelCategories = Object.values(SocialIntelSubCategory);
   tenantCategories = Object.values(TenantSubCategory);
   category = Category;
@@ -136,6 +137,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
           break;
         case Category.SOCIAL:
           firstSubcategory = this.socialCategories[0];
+          break;
+        case Category.TELEGRAM:
+          firstSubcategory = this.telegramCategories[0];
           break;
         case Category.APT_INTEL:
           firstSubcategory = this.aptIntelCategories[0];

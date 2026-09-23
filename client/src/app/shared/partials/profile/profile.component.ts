@@ -192,6 +192,11 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
     this.router.navigate(['/dashboard/profile/system-settings']).then();
   }
 
+  get mailLabel(): string {
+    const name = this.appService.getConfig().appSettings.app_name?.trim();
+    return name ? `${name} Mail` : 'Mail';
+  }
+
   openOrionMail(): void {
     const mailUrl = this.appService.getConfig().appSettings.orion_mail_url.trim();
     if (!mailUrl) {

@@ -97,8 +97,8 @@
         </li>
         @if (licenseService.canUseOrionMail()) {
           <li data-testid="open-orion-mail" (click)="openOrionMail()" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]">
-            <img src="assets/images/shared/email.svg" alt="Orion Mail" class="h-[18px] w-[18px]" />
-            <span class="text-[14px] font-medium text-[#172235]">{{ 'Orion Mail' | translate }}</span>
+            <img src="assets/images/shared/email.svg" [alt]="mailLabel" class="h-[18px] w-[18px]" />
+            <span class="text-[14px] font-medium text-[#172235]">{{ mailLabel }}</span>
           </li>
         }
         <li class="my-[6px] h-[1px] bg-[#e5e7eb]"></li>
