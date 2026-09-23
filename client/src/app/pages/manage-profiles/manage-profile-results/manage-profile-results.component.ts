@@ -240,4 +240,9 @@ export class ManageProfileResultsComponent implements OnInit {
       },
     });
   }
+  parseUtcDate(date: Date | string | null | undefined): Date | null {
+    if (!date) return null;
+    let d = typeof date === 'string' ? new Date(date.endsWith('Z') ? date : date + 'Z') : new Date(date);
+    return isNaN(d.getTime()) ? null : d;
+  }
 }
