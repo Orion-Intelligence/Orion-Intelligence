@@ -50,9 +50,11 @@ class sso_manager:
     def _validate_redirect_uri(redirect_uri: str) -> str:
         candidate = redirect_uri.strip()
         parsed = urlsplit(candidate)
-        if candidate not in SSO_CONSTANTS.S_ALLOWED_REDIRECT_URIS or parsed.scheme not in {"http", "https"} or not parsed.netloc or parsed.query or parsed.fragment:
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc or parsed.query or parsed.fragment:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Orion Mail redirect URI")
-        return next(allowed for allowed in SSO_CONSTANTS.S_ALLOWED_REDIRECT_URIS if allowed == candidate)
+        if candidate in SSO_CONSTANTS.S_ALLOWED_REDIRECT_URIS or SSO_CONSTANTS.S_ALLOWED_REDIRECT_URI_PATTERN.fullmatch(candidate):
+            return candidate
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Orion Mail redirect URI")
 
     @staticmethod
     def _validate_state(state: str) -> str:

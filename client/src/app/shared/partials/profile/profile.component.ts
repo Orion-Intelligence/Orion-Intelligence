@@ -203,6 +203,17 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
       return;
     }
     const login = new URL('/api/auth/login', mailUrl);
+    const mailHost = login.hostname;
+    if (mailHost.startsWith('mail.')) {
+      const parent = mailHost.slice('mail.'.length);
+      const intelHost = window.location.hostname;
+      if (intelHost !== parent && intelHost.endsWith(`.${parent}`)) {
+        const slug = intelHost.slice(0, intelHost.length - parent.length - 1);
+        if (slug && !slug.includes('.')) {
+          login.hostname = `${slug}.${mailHost}`;
+        }
+      }
+    }
     login.search = new URLSearchParams({ origin: login.origin, orion_origin: window.location.origin }).toString();
     window.open(login.toString(), '_blank', 'noopener,noreferrer');
     this.dropdownOpen.set(false);

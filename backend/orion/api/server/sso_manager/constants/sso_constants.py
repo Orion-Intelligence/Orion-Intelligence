@@ -18,3 +18,9 @@ class SSO_CONSTANTS:
         ).split(",")
         if value.strip()
     }
+    S_ALLOWED_REDIRECT_URI_PATTERN = re.compile(
+        env_handler.get_instance().env(
+            "ORION_MAIL_REDIRECT_URI_PATTERN",
+            r"^https://[a-z0-9-]+\.mail\.orionintelligence\.org/api/auth/callback$",
+        )
+    )
