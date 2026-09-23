@@ -911,11 +911,17 @@ class TenantManager:
         from orion.api.interactive.alert_manager.alert_manager import AlertManager
         manager = AlertManager.getInstance()
         for tid in tenant_ids:
-            await manager.invalidate_alert_summary(str(tid))
+            try:
+                await manager.invalidate_alert_summary(str(tid))
+            except Exception:
+                pass
 
     async def _all_tenant_ids(self) -> list:
-        collection = self._engine.get_collection(db_tenant_model)
-        return [str(doc["_id"]) async for doc in collection.find({}, {"_id": 1})]
+        try:
+            collection = self._engine.get_collection(db_tenant_model)
+            return [str(doc["_id"]) async for doc in collection.find({}, {"_id": 1})]
+        except Exception:
+            return []
 
     async def dismiss_stealer_log(self, tenant_id: str, stealer_log_hash: str, user_id: str, dismissed_ioc_type: DismissedIocType = DismissedIocType.STEALER_LOG, all_tenants: bool = False) -> dict:
         collection = self._engine.get_collection(db_tenant_model)

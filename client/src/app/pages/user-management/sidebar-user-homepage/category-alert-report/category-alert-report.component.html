@@ -229,7 +229,7 @@
           </thead>
           <tbody class="text-[14px] text-[var(--color-text3)]">
             @for (item of visibleFilteredAlerts; track item.id || item.hash || item.title || $index) {
-              <tr data-testid="tenant-alert-report-card" class="cursor-pointer" tabindex="0" role="button" [attr.aria-label]="item.title" (click)="alertDetailDrawer.openAlertDetails(item)" (keydown)="alertDetailDrawer.onAlertRowKeydown($event, item)">
+              <tr data-testid="tenant-alert-report-card" class="animate-alert-card-stagger-in cursor-pointer" tabindex="0" role="button" [attr.aria-label]="item.title" (click)="alertDetailDrawer.openAlertDetails(item)" (keydown)="alertDetailDrawer.onAlertRowKeydown($event, item)">
                 <td class="align-middle">
                   <span class="inline-flex min-w-0 items-center gap-2 text-[12px] font-semibold text-[var(--color-text2)]">
                     <span class="category_report_status-icon inline-flex h-3.5 w-3.5 items-center justify-center [&_i]:leading-none [&_i]:text-[#60a5fa] [&_i]:opacity-95" [ngClass]="getRiskIconColorClass(item.risk)">
@@ -275,7 +275,7 @@
 
       <div class="alert-card-stagger-list mt-3 overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)] divide-y divide-[var(--color-divider)] md:hidden">
         @for (item of visibleFilteredAlerts; track item.id || item.hash || item.title || $index) {
-          <button type="button" data-testid="tenant-alert-report-card" class="block w-full bg-[var(--color-blue-720)] px-3 py-3 text-left transition hover:bg-[var(--color-blue-710)]" (click)="alertDetailDrawer.openAlertDetails(item)">
+          <button type="button" data-testid="tenant-alert-report-card" class="animate-alert-card-stagger-in block w-full bg-[var(--color-blue-720)] px-3 py-3 text-left transition hover:bg-[var(--color-blue-710)]" (click)="alertDetailDrawer.openAlertDetails(item)">
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
                 <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]">{{ item.title }}</div>

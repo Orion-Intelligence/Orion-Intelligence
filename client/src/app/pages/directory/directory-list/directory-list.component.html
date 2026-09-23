@@ -15,10 +15,10 @@
         </thead>
       }
       @if ((data?.mDirectoryCallbackLinks?.length || 0) > 0) {
-        <tbody class="directory-list-item-fade-in">
+        <tbody>
           @for (item of data.mDirectoryCallbackLinks | slice:0:visibleCount; track item.url || $index; let i = $index) {
             @if (item.url?.trim()) {
-              <tr>
+              <tr class="directory-list-item-fade-in">
                 <td data-label="ID">
                   {{ (i + 1) + ((this.directoryService.currentPage$ | async)! - 1) * 1000 }}
                 </td>
