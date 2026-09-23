@@ -1,9 +1,7 @@
 import asyncio
-import time
 from asyncio import sleep
 from pathlib import Path
 from migrations.migration import migration_manager
-from orion.services.log_manager.log_controller import log
 from orion.api.interactive.backup_manager.backup_manager import BackupManager
 from orion.api.interactive.social_manager.social_scanner import social_scanner
 from orion.api.server.config_manager.config_controller import config_controller
@@ -40,47 +38,38 @@ class service_manager:
         build_dir = build_dir or self.default_build_dir()
         while not self._is_available:
             try:
-                overall_start = time.monotonic()
-
-                async def _step(name, coro):
-                    start = time.monotonic()
-                    result = await coro
-                    log.g().i(f"INIT {name}: {time.monotonic() - start:.1f}s (elapsed {time.monotonic() - overall_start:.1f}s)")
-                    return result
-
                 _, writer = await asyncio.open_connection("elasticsearch", 9400)
                 writer.close()
                 await writer.wait_closed()
 
-                await _step("elastic.initialize", elastic_controller.get_instance().initialize())
-                await _step("mongo.link_connection", mongo_controller.get_instance().link_connection())
+                await elastic_controller.get_instance().initialize()
+                await mongo_controller.get_instance().link_connection()
 
-                await _step("reset_test_mongo", test_manager.get_instance().reset_test_mongo_and_import_mocks())
+                await test_manager.get_instance().reset_test_mongo_and_import_mocks()
 
                 if run_migrations:
-                    await _step("migrations", migration_manager.get_instance().init_migration())
-                await _step("mongo.ensure_indexes", mongo_controller.get_instance().ensure_indexes())
-                await _step("mongo.initialize", mongo_controller.get_instance().initialize())
+                    await migration_manager.get_instance().init_migration()
+                await mongo_controller.get_instance().ensure_indexes()
+                await mongo_controller.get_instance().initialize()
 
-                await _step("reset_test_elastic", test_manager.get_instance().reset_test_elastic_and_import_mocks())
+                await test_manager.get_instance().reset_test_elastic_and_import_mocks()
 
-                await _step("redis.initialize", redis_controller.getInstance().initialize())
-                await _step("clear_test_insight_cache", self.clear_test_insight_cache())
-                await _step("build_map_assets", self.build_map_assets(build_dir))
-                await _step("load_config", config_controller.getInstance().load_config(force_db=True))
+                await redis_controller.getInstance().initialize()
+                await self.clear_test_insight_cache()
+                await self.build_map_assets(build_dir)
+                await config_controller.getInstance().load_config(force_db=True)
                 await asyncio.sleep(5)
 
                 async with redis_controller.getInstance().lock("backup:startup_recovery", timeout=3600, blocking_timeout=3600):
-                    await _step("backup.resolve_interrupted_restore", BackupManager.get_instance().resolve_interrupted_restore())
-                    await _step("backup.resolve_interrupted_tenant_restore", BackupManager.get_instance().resolve_interrupted_tenant_restore())
-                    await _step("backup.clear_stale_backup_maintenance", BackupManager.get_instance().clear_stale_backup_maintenance())
+                    await BackupManager.get_instance().resolve_interrupted_restore()
+                    await BackupManager.get_instance().resolve_interrupted_tenant_restore()
+                    await BackupManager.get_instance().clear_stale_backup_maintenance()
 
-                await _step("arango.link_connection", arango_controller.get_instance().link_connection())
-                await _step("arango.initialize", arango_controller.get_instance().initialize())
-                await _step("reset_test_arango", test_manager.get_instance().reset_test_arango_and_import_mocks())
+                await arango_controller.get_instance().link_connection()
+                await arango_controller.get_instance().initialize()
+                await test_manager.get_instance().reset_test_arango_and_import_mocks()
 
                 self._is_available = True
-                log.g().i(f"INIT complete: all services ready in {time.monotonic() - overall_start:.1f}s")
                 asyncio.create_task(social_scanner.get_instance().resume_pending())
                 return True
             except (OSError, ConnectionRefusedError):
