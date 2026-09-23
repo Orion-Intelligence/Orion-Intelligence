@@ -1,4 +1,5 @@
 import asyncio
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -14,7 +15,7 @@ from orion.helper_manager.env_handler import env_handler
 from orion.management.managers.service_manager import service_manager
 from orion.management.managers.test_manager import test_manager
 from orion.middleware.middleware_setup import setup_middlewares
-from orion.services.log_manager.log_controller import log_bridge
+from orion.services.log_manager.log_controller import log_bridge, log
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from routes.admin_routes import admin_routes
 from routes.alert_connector_routes import alert_connector_routes
@@ -44,9 +45,12 @@ SWAGGER_STATIC_DIR = BASE_DIR / "static"
 
 @asynccontextmanager
 async def lifespan(p_app: FastAPI):
+    lifespan_start = time.monotonic()
     await test_manager.get_instance().apply_test_overrides()
     service_manager_instance = service_manager.get_instance()
+    build_assets_start = time.monotonic()
     await service_manager_instance.build_assets(ANGULAR_BUILD_DIR)
+    log.g().i(f"LIFESPAN build_assets: {time.monotonic() - build_assets_start:.1f}s")
 
     if env_handler.get_instance().env("PRODUCTION", "0") != "1":
         async def start_services_in_background():
@@ -55,12 +59,14 @@ async def lifespan(p_app: FastAPI):
             p_app.include_router(interface)
 
         asyncio.create_task(start_services_in_background())
+        log.g().i(f"LIFESPAN yielding (worker now serving) after {time.monotonic() - lifespan_start:.1f}s; init running in background")
         yield
         return
 
     await service_manager_instance.init_services(ANGULAR_BUILD_DIR)
     setup_admin(mongo_controller.get_instance().get_engine()).mount_to(p_app)
     app.include_router(interface)
+    log.g().i(f"LIFESPAN yielding (worker now serving) after {time.monotonic() - lifespan_start:.1f}s")
     yield
 
 

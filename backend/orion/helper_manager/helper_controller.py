@@ -206,11 +206,7 @@ class helper_controller:
         url_rules_template = url_rules_env.get_template("url_rules.json")
         url_rules_json_str = url_rules_template.render()
         constant.url_rules = json.loads(url_rules_json_str)
-        map_entities_env = Environment(
-            loader=FileSystemLoader(build_dir / "assets" / "data" / "satellite"),
-            autoescape=True
-        )
-        satellite_asset = map_entities_env.get_template(CONSTANTS.S_SATELLITE_ASSET_FILE_NAME).render()
+        satellite_asset = (build_dir / "assets" / "data" / "satellite" / CONSTANTS.S_SATELLITE_ASSET_FILE_NAME).read_text(encoding="utf-8")
         _, data = helper_controller.parse_satellite_asset(satellite_asset)
         constant.map_entities_data = data
 
