@@ -204,7 +204,8 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
     }
     const login = new URL('/api/auth/login', mailUrl);
     const mailHost = login.hostname;
-    if (mailHost.startsWith('mail.')) {
+    const isDefaultTenant = this.appService.userSessionData()?.tenant?.isDefault;
+    if (!isDefaultTenant && mailHost.startsWith('mail.')) {
       const parent = mailHost.slice('mail.'.length);
       const intelHost = window.location.hostname;
       if (intelHost !== parent && intelHost.endsWith(`.${parent}`)) {
