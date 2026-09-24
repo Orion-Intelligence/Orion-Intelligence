@@ -315,7 +315,11 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     ].join('\n');
 
     loginTenant(tenant);
+    cy.intercept('POST', '**/api/get/tenant').as('loadTenantIocs');
     openManageIOCs();
+    cy.wait('@loadTenantIocs', {timeout: 60000})
+      .its('response.statusCode')
+      .should('be.oneOf', [200, 201]);
     cy.get('[data-testid="tenant-ioc-upload-csv-button"]').scrollIntoView().should('be.visible').and('not.be.disabled');
 
     cy.intercept('POST', '**/api/update/tenants').as('uploadTenantIocCsv');
