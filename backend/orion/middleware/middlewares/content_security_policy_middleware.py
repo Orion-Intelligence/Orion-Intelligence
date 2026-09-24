@@ -93,6 +93,25 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                                                            "form-action 'self'; "
                                                            "base-uri 'self'; "
                                                            "report-to csp-endpoint;")
+        elif request.url.path.startswith("/dashboard/manage-profiles"):
+            response.headers["Content-Security-Policy"] = ("default-src 'self' data: blob:; "
+                                                           "script-src 'self' 'wasm-unsafe-eval' https://js.arcgis.com; "
+                                                           "script-src-elem 'self' https://js.arcgis.com; "
+                                                           "script-src-attr 'none'; "
+                                                           "style-src 'self' 'unsafe-inline' https://js.arcgis.com; "
+                                                           "style-src-elem 'self' 'unsafe-inline' https://js.arcgis.com; "
+                                                           "style-src-attr 'unsafe-inline'; "
+                                                           "img-src 'self' data: blob: https:; "
+                                                           "font-src 'self' data: https://js.arcgis.com; "
+                                                           "connect-src 'self' https://tiles.openfreemap.org blob: https://js.arcgis.com https://*.arcgis.com https://*.arcgisonline.com; "
+                                                           "media-src 'self' data: blob:; "
+                                                           "worker-src 'self' blob:; "
+                                                           "child-src 'self' blob:; "
+                                                           "frame-ancestors 'self'; "
+                                                           "object-src 'none'; "
+                                                           "form-action 'self'; "
+                                                           "base-uri 'self'; "
+                                                           "report-to csp-endpoint;")
         else:
             docs_script = f" {DOCS_THEME_SCRIPT_HASH}" if request.url.path.startswith("/documentation") else ""
             response.headers["Content-Security-Policy"] = ("default-src 'self' data: blob:; "

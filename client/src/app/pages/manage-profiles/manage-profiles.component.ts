@@ -30,7 +30,6 @@ import { MANAGE_PROFILES_TABS, MAX_SESSIONS_PER_PLATFORM, PROFILE_PURPOSE_OPTION
   imports: [DatePipe, NgClass, TranslatePipe, SocialExtensionManagerComponent, SocialIconComponent, UiDropdownComponent, ConfirmationPopupComponent, ManageProfilePopupComponent, ManageHateProfilePopupComponent, ManageProfileResultsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './manage-profiles.component.html',
-  styleUrls: ['./manage-profiles.component.scss'],
 })
 
 export class ManageProfilesComponent {

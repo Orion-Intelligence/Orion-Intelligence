@@ -187,8 +187,6 @@ async def extension_socket(websocket: WebSocket):
         if ticket:
             redis_store = redis_controller.getInstance()
             token = await redis_store.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [f"ws_ticket:{ticket}", None, None])
-            if token:
-                await redis_store.invoke_trigger(REDIS_COMMANDS.S_DELETE_KEY, [f"ws_ticket:{ticket}"])
     user_key = await socket_user_key(token)
     if not user_key:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)

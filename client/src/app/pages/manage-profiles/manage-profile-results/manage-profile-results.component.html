@@ -133,7 +133,7 @@
           }
           <div class="grid items-center gap-3 px-3 py-3 pr-10 hover:bg-[var(--ui-table-row-hover)] sm:px-4 sm:pr-12" [ngClass]="post.imageUrl ? 'grid-cols-[auto_1fr]' : 'grid-cols-1'">
             @if (post.imageUrl) {
-              <a [href]="post.imageUrl" target="_blank" rel="noopener noreferrer" class="relative block h-[72px] w-24 shrink-0 self-start overflow-hidden rounded-md border border-[var(--color-border)]"><img [src]="post.imageUrl" alt="" class="absolute inset-0 h-full w-full object-cover" loading="lazy"></a>
+              <a [href]="post.imageUrl" target="_blank" rel="noopener noreferrer" class="relative block h-[72px] w-24 shrink-0 self-start overflow-hidden rounded-md border border-[var(--color-border)]"><img #thumb [src]="post.imageUrl" alt="" (error)="thumb.src.includes('placeholder.svg') || (thumb.src='assets/images/shared/placeholder.svg')" class="absolute inset-0 h-full w-full object-cover" loading="lazy"></a>
             }
             <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-2">
