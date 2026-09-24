@@ -38,6 +38,9 @@ export function createInstantBackup() {
   cy.get('[data-testid="confirmation-popup"]').should('be.visible');
   cy.get('[data-testid="confirmation-yes-button"]').click();
   cy.wait('@createInstantBackup', {timeout: 60000}).its('response.statusCode').should('be.oneOf', [200, 201]);
+  waitForMaintenanceStart();
+  waitForMaintenanceEnd();
+  openBackupRestore();
 }
 
 function deleteFirstBackupIfPresent(): Cypress.Chainable<void> {
@@ -63,7 +66,7 @@ function backupsApiStatus(): Cypress.Chainable<number> {
   return cy.request({url: '/api/admin/backups', failOnStatusCode: false, log: false}).its('status', {log: false});
 }
 
-function waitForMaintenanceStart(attempts = 0): Cypress.Chainable<void> {
+export function waitForMaintenanceStart(attempts = 0): Cypress.Chainable<void> {
   return backupsApiStatus().then((status) => {
     if (status === 503 || attempts >= 20) {
       return cy.wrap<void>(undefined, {log: false});
@@ -72,7 +75,7 @@ function waitForMaintenanceStart(attempts = 0): Cypress.Chainable<void> {
   });
 }
 
-function waitForMaintenanceEnd(attempts = 0): Cypress.Chainable<void> {
+export function waitForMaintenanceEnd(attempts = 0): Cypress.Chainable<void> {
   return backupsApiStatus().then((status) => {
     if (status === 200) {
       return cy.wrap<void>(undefined, {log: false});

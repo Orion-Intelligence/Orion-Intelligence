@@ -5,15 +5,15 @@ const CRAWL_PANEL = '[data-testid="social-tab-panel-crawl"]';
 export const GRAPH_ROOT = '[data-testid="social-user-graph-root"]';
 export const GRAPH_FIND = '[data-testid="social-user-graph-find"]';
 export const GRAPH_FIND_INPUT = '[data-testid="social-user-graph-find-input"]';
-export const SCAN_TIMEOUT = 180000;
-export const FETCH_TIMEOUT = 120000;
+export const SCAN_TIMEOUT = Cypress.config('defaultCommandTimeout') ?? 60000;
+export const FETCH_TIMEOUT = Cypress.config('defaultCommandTimeout') ?? 60000;
 const API_MOCKS = '../backend/tests/mock/api';
 const ELASTIC_MOCKS = '../backend/tests/mock/elastic';
 
 export const SOCIAL_USERNAME = 'superman0011';
 export const SOCIAL_PLATFORM = /twitter/i;
 export const SOCIAL_DOMAIN = 'twitter.com';
-const CRAWL_TYPES = ['details', 'posts', 'videos', 'images', 'followers', 'repositories'];
+const CRAWL_TYPES = ['details', 'posts', 'videos', 'images', 'followers', 'connections', 'repositories'];
 
 function asRecord(value: unknown): Record<string, unknown> {
   return (value ?? {}) as Record<string, unknown>;
@@ -112,6 +112,10 @@ let loadedMocks: Record<string, unknown> = {};
 
 function replyWithCrawlMock(request: { body?: Record<string, unknown>; reply(response: unknown): void }, type: string) {
   if (type === 'details') {
+    if (String(request.body?.platform ?? '').toLowerCase() === 'github') {
+      request.reply({ statusCode: 200, body: { status: 'idle' } });
+      return;
+    }
     const details = JSON.parse(JSON.stringify(asRecord(loadedMocks['profile'])['result'] ?? {})) as Record<string, unknown>;
     details['profile'] = { ...asRecord(details['profile']), crawl_type: CRAWL_TYPES };
     request.reply({ statusCode: 200, body: { status: 'done', result: details } });
@@ -121,7 +125,7 @@ function replyWithCrawlMock(request: { body?: Record<string, unknown>; reply(res
   request.reply({ statusCode: 200, body: items === null ? { status: 'idle' } : { status: 'done', result: { items, has_more: false } } });
 }
 
-export function stubSlowCrawlSection(slowType: string, delay = 30000) {
+export function stubSlowCrawlSection(slowType: string, delay = 12000) {
   void cy.intercept('POST', '**/api/social/profile', (request) => {
     const type = String(request.body?.type ?? '');
     if (request.body?.command === 'cancel') {
@@ -180,9 +184,6 @@ export function setupSocialStubs() {
   });
   loadMock(ELASTIC_MOCKS, 'social_online_presence.json').then((mock) => {
     void cy.intercept('POST', '**/api/social/metadata', { statusCode: 200, body: mock }).as('socialOnlinePresence');
-  });
-  loadMock(ELASTIC_MOCKS, 'social_stealer_logs.json').then((mock) => {
-    void cy.intercept('POST', '**/api/search/stealer/ioc', { statusCode: 200, body: mock }).as('socialStealerLogs');
   });
   loadMock(API_MOCKS, 'dynamic_wanted.json').then((mock) => {
     void cy.intercept('POST', '**/api/dynamic/wanted', { statusCode: 200, body: mock }).as('socialWanted');

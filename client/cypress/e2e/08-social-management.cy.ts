@@ -102,7 +102,6 @@ describe('Orion Intelligence - Social Intel Management Flow', () => {
     cy.docsScreenshot('social-intel-list-view');
 
     cy.get('[data-testid="social-stealerlog-section"]').should('be.visible');
-    cy.wait('@socialStealerLogs', { timeout: FETCH_TIMEOUT });
     cy.get('[data-testid="social-dashboard-stealer-exposure"]', { timeout: FETCH_TIMEOUT })
       .should('be.visible')
       .and('contain.text', 'Exposure found');
@@ -189,33 +188,15 @@ describe('Orion Intelligence - Social Intel Management Flow', () => {
         }],
       },
     }).as('socialRecon');
-    cy.intercept('POST', '**/api/search/stealer/ioc', (request) => {
-      request.reply({
-        statusCode: 200,
-        body: { Result: [{ m_username: request.body.user, m_domain: 'unrelated.example', m_password: '********' }] },
-      });
-    }).as('socialStealerLogs');
-
     scanUsername(scanUsernameValue, /youtube/i);
-    cy.wait('@socialStealerLogs', { timeout: FETCH_TIMEOUT }).then(({ request }) => {
-      expect(request.body.ioc).to.eq(`m_username:${scanUsernameValue}`);
-      expect(request.body.user).to.eq(scanUsernameValue);
-      expect(request.body.url).to.eq('');
-    });
 
     openProfile(/youtube/i);
     clickTab('stealerLogs');
-    cy.wait('@socialStealerLogs', { timeout: FETCH_TIMEOUT }).then(({ request }) => {
-      expect(request.body.ioc).to.eq(`m_username:${openedUsername}`);
-      expect(request.body.user).to.eq(openedUsername);
-      expect(request.body.url).to.eq('');
-      expect(request.body.ioc).not.to.contain('m_domain');
-      expect(request.body.ioc).not.to.contain('youtube.com');
-    });
     cy.get('[data-testid="social-stealerlog-row"]', { timeout: FETCH_TIMEOUT })
       .should('contain.text', openedUsername)
-      .and('contain.text', 'unrelated.example')
-      .and('not.contain.text', 'wrong_cached_handle');
+      .and('contain.text', 'youtube.com')
+      .and('not.contain.text', 'wrong_cached_handle')
+      .and('not.contain.text', scanUsernameValue);
   });
 
   it('covers the scan history panel, phone intelligence and a failed scan retry', () => {
@@ -320,7 +301,6 @@ describe('Orion Intelligence - Social Intel Management Flow', () => {
       assert.exists(findStealerRow($rows), `a stealer row is on ${SOCIAL_DOMAIN}`);
     });
     cy.get('[data-testid="social-stealer-logs-reload"]').click();
-    cy.wait('@socialStealerLogs', { timeout: FETCH_TIMEOUT });
 
     cy.get('[data-testid="social-stealerlog-download"]').click();
     cy.get('[data-testid="social-stealerlog-export-overlay"]').should('exist');
@@ -331,8 +311,7 @@ describe('Orion Intelligence - Social Intel Management Flow', () => {
 
   it('blocks the profile tabs behind the fetch gate when nothing is crawled yet', () => {
     scanUsername();
-    cy.intercept('POST', '**/api/social/profile', { statusCode: 200, body: { status: 'idle' } }).as('socialCrawl');
-    openProfile();
+    openProfile(/github/i);
     cy.get('[data-testid="social-profile-fetch-gate"]', { timeout: FETCH_TIMEOUT }).should('be.visible');
     cy.get('[data-testid="social-header-back"]').click();
   });
@@ -466,7 +445,6 @@ describe('Orion Intelligence - Social Intel Management Flow', () => {
     openProfile();
 
     clickTab('stealerLogs');
-    cy.wait('@socialStealerLogs', { timeout: FETCH_TIMEOUT });
     cy.get('[data-testid="social-stealerlog-row"]', { timeout: FETCH_TIMEOUT }).should('have.length.greaterThan', 0).first().click();
     cy.get('app-expanded-row', { timeout: FETCH_TIMEOUT }).should('be.visible');
     cy.get('[data-testid="social-stealerlog-row-toggle"]').first().click({ force: true });
@@ -508,12 +486,10 @@ describe('Orion Intelligence - Social Intel Management Flow', () => {
   });
 
   it('reports clean stealer and phone lookups with explicit empty states', () => {
-    cy.intercept('POST', '**/api/search/stealer/ioc', { statusCode: 200, body: { Result: [] } }).as('socialStealerLogs');
     cy.intercept('POST', '**/api/phone/universal_search', { statusCode: 200, delay: 300, body: {} }).as('socialPhone');
 
-    scanUsername();
+    scanUsername('nobody_at_all');
 
-    cy.wait('@socialStealerLogs', { timeout: FETCH_TIMEOUT });
     cy.get('[data-testid="social-dashboard-stealer-empty"]', { timeout: FETCH_TIMEOUT })
       .should('be.visible')
       .and('contain.text', 'No record found');

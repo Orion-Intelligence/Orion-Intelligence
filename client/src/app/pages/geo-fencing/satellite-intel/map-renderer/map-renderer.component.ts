@@ -202,11 +202,14 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
       return;
     }
     try {
-      const [L, maplibreLeaflet] = await Promise.all([
+      const [L, maplibre, maplibreLeaflet] = await Promise.all([
         import('leaflet'),
+        import('maplibre-gl'),
         import('@maplibre/maplibre-gl-leaflet'),
       ]);
       this.L = (L as unknown as { default?: typeof Leaflet }).default ?? L;
+      const maplibregl = (maplibre as unknown as { default?: unknown }).default ?? maplibre;
+      (maplibregl as { setWorkerUrl?: (url: string) => void }).setWorkerUrl?.('maplibre/maplibre-gl-worker.mjs');
       if (!this.mapContainer?.nativeElement) {
         return;
       }

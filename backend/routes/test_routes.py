@@ -459,6 +459,14 @@ async def test_social_profile(_payload: dict = Body(...)):
 
 
 @test_routes.post(
+    "/api/search/stealer/ioc",
+    dependencies=SCAN_DEPS,
+)
+async def test_search_stealer_iocs(payload: dict = Body(...)):
+    return TestRouteHelper.stealer_ioc_result(payload)
+
+
+@test_routes.post(
     "/api/social/online/images",
     dependencies=SCAN_DEPS,
 )

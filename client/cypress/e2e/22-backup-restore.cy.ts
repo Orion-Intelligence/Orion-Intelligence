@@ -9,6 +9,8 @@ import {
   openScheduledBackupSettings,
   restoreBackupViaTestApi,
   setScheduledBackupToggle,
+  waitForMaintenanceEnd,
+  waitForMaintenanceStart,
 } from './controllers/22-backup-restore.controller';
 
 const MAX_BACKUPS = 2;
@@ -56,6 +58,9 @@ describe('Backup & Restore - Admin Management Flow', () => {
     cy.docsScreenshot('backup-restore-limit-warning-popup');
     cy.get('[data-testid="confirmation-yes-button"]').click();
     cy.wait('@createBackupAtLimit', {timeout: 60000}).its('response.statusCode').should('be.oneOf', [200, 201]);
+    waitForMaintenanceStart();
+    waitForMaintenanceEnd();
+    openBackupRestore();
     getBackupRows().should('have.length', MAX_BACKUPS);
 
     cy.logout();

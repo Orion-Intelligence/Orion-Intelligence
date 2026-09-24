@@ -592,11 +592,14 @@ export class SocialUserGraphComponent {
     if (initial) {
       this.layoutProgress.set(0);
     }
-    this.network.once('stabilized', () => {
+    const markReady = () => {
       this.layoutProgress.set(100);
       this.applyPendingFocus();
       this.layoutReady.set(true);
-    });
+    };
+    this.network.once('stabilized', markReady);
+    this.network.once('stabilizationIterationsDone', markReady);
+    window.setTimeout(markReady, 4000);
   }
 
   private applyPendingFocus(): void {

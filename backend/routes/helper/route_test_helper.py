@@ -70,6 +70,32 @@ class TestRouteHelper:
             return step
         return cls.load_elastic_mock(filename)
 
+    STEALER_CLEAN_USERS = {"clean_identity", "nobody_at_all"}
+    STEALER_DOMAINS = ["twitter.com", "youtube.com", "tiktok.com", "instagram.com", "facebook.com"]
+
+    @classmethod
+    def stealer_ioc_result(cls, payload: dict):
+        payload = payload or {}
+        user = str(payload.get("user") or "").strip()
+        if not user:
+            ioc = str(payload.get("ioc") or "")
+            user = ioc.split(":", 1)[1].strip() if ":" in ioc else ioc.strip()
+        if not user or user.lower() in cls.STEALER_CLEAN_USERS:
+            return {"Result": [], "total": 0, "page": 1, "status": "done"}
+        records = [{
+            "m_index": "stealer_model",
+            "m_username": user,
+            "m_email": f"{user}@example.test",
+            "m_password": "********",
+            "m_domain": domain,
+            "m_url": "https://x.com" if domain == "twitter.com" else f"https://{domain}",
+            "m_source": "mock-stealer-feed",
+            "m_date": "2026-06-18T10:00:00Z",
+            "m_hash": f"mock-stealer-{user}-{domain}",
+            "type": "credential",
+        } for domain in cls.STEALER_DOMAINS]
+        return {"Result": records, "total": len(records), "page": 1, "status": "done"}
+
     @classmethod
     def pending_or_dynamic_scan(cls, scan_type: str | None):
         scan_type = scan_type or "basic"
