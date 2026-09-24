@@ -185,6 +185,20 @@ export function setupSocialStubs() {
   loadMock(ELASTIC_MOCKS, 'social_online_presence.json').then((mock) => {
     void cy.intercept('POST', '**/api/social/metadata', { statusCode: 200, body: mock }).as('socialOnlinePresence');
   });
+  void cy.intercept('POST', '**/api/search/stealer/ioc', (request) => {
+    const user = String(request.body?.user ?? '').trim();
+    const clean = new Set(['nobody_at_all', 'clean_identity']);
+    if (!user || clean.has(user)) {
+      request.reply({ statusCode: 200, body: { Result: [] } });
+      return;
+    }
+    const domains = ['twitter.com', 'youtube.com', 'tiktok.com', 'instagram.com', 'facebook.com'];
+    request.reply({ statusCode: 200, body: { Result: domains.map((domain) => ({
+      m_index: 'stealer_model', m_username: user, m_email: `${user}@example.test`, m_password: '********',
+      m_domain: domain, m_url: domain === 'twitter.com' ? 'https://x.com' : `https://${domain}`,
+      m_source: 'mock-stealer-feed', m_date: '2026-06-18T10:00:00Z', m_hash: `stealer-${user}-${domain}`, type: 'credential',
+    })) } });
+  }).as('socialStealerLogs');
   loadMock(API_MOCKS, 'dynamic_wanted.json').then((mock) => {
     void cy.intercept('POST', '**/api/dynamic/wanted', { statusCode: 200, body: mock }).as('socialWanted');
   });

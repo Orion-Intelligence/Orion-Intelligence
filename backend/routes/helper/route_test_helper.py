@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime, timezone
 import json
 from pathlib import Path
@@ -13,6 +14,8 @@ from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
 
 from orion.helper_manager.env_handler import env_handler
+from orion.api.interactive.alert_manager.alert_manager import AlertManager
+from orion.management.jobs.alert.alert_job import alert_job
 from orion.api.interactive.takedown_manager.takedown_manager import TakedownManager
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, db_user_account, user_role
@@ -69,32 +72,6 @@ class TestRouteHelper:
         if step:
             return step
         return cls.load_elastic_mock(filename)
-
-    STEALER_CLEAN_USERS = {"clean_identity", "nobody_at_all"}
-    STEALER_DOMAINS = ["twitter.com", "youtube.com", "tiktok.com", "instagram.com", "facebook.com"]
-
-    @classmethod
-    def stealer_ioc_result(cls, payload: dict):
-        payload = payload or {}
-        user = str(payload.get("user") or "").strip()
-        if not user:
-            ioc = str(payload.get("ioc") or "")
-            user = ioc.split(":", 1)[1].strip() if ":" in ioc else ioc.strip()
-        if not user or user.lower() in cls.STEALER_CLEAN_USERS:
-            return {"Result": [], "total": 0, "page": 1, "status": "done"}
-        records = [{
-            "m_index": "stealer_model",
-            "m_username": user,
-            "m_email": f"{user}@example.test",
-            "m_password": "********",
-            "m_domain": domain,
-            "m_url": "https://x.com" if domain == "twitter.com" else f"https://{domain}",
-            "m_source": "mock-stealer-feed",
-            "m_date": "2026-06-18T10:00:00Z",
-            "m_hash": f"mock-stealer-{user}-{domain}",
-            "type": "credential",
-        } for domain in cls.STEALER_DOMAINS]
-        return {"Result": records, "total": len(records), "page": 1, "status": "done"}
 
     @classmethod
     def pending_or_dynamic_scan(cls, scan_type: str | None):
@@ -378,3 +355,30 @@ class TestRouteHelper:
         if env_handler.get_instance().env("TESTING_ENABLED", "0") != "1":
             raise HTTPException(status_code=403, detail="Test routes are disabled")
         return True
+
+
+class TestAlertScanner:
+    async def scan_domain(self, model, user_id: str = "system"):
+        return TestRouteHelper.scan_job_mock_response("urlscan/domain", model.model_dump())
+
+    async def network_intel(self, payload, route_name: str, user_id: str = "system", force_new: bool = False):
+        return TestRouteHelper.scan_job_mock_response(f"netintel/{route_name}", payload.model_dump())
+
+    async def dynamic_search(self, model, api, user_id: str = "system"):
+        return TestRouteHelper.scan_job_mock_response(f"dynamic/{api}", model.model_dump())
+
+    @staticmethod
+    async def run_alert_scan(current_user):
+        scan_status = await AlertManager.getInstance().get_scan_status(current_user)
+        if scan_status.get("scan_running", False):
+            raise HTTPException(status_code=202, detail="Scan is still processing")
+
+        job = alert_job.get_instance()
+        scanner = TestAlertScanner()
+        job._scanning_processor._crawl_model = scanner
+        job._scanning_processor._search_model = scanner
+        job._dynamic_scanning_processor._search_model = scanner
+
+        await AlertManager.getInstance().set_scan_running(current_user.tenant_id, True)
+        asyncio.create_task(job.run_all_categories_for_api(current_user))
+        return {"started": True}

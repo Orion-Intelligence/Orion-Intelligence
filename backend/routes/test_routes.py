@@ -15,7 +15,7 @@ from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 from orion.services.mongo_manager.shared_model.db_backup_model import BackupType, db_backup_model
 from orion.services.mongo_manager.shared_model.db_takedown_request_model import TakedownCreateRequest
-from routes.helper.route_test_helper import TestRouteHelper
+from routes.helper.route_test_helper import TestAlertScanner, TestRouteHelper
 
 
 SCAN_ROLES = [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]
@@ -459,14 +459,6 @@ async def test_social_profile(_payload: dict = Body(...)):
 
 
 @test_routes.post(
-    "/api/search/stealer/ioc",
-    dependencies=SCAN_DEPS,
-)
-async def test_search_stealer_iocs(payload: dict = Body(...)):
-    return TestRouteHelper.stealer_ioc_result(payload)
-
-
-@test_routes.post(
     "/api/social/online/images",
     dependencies=SCAN_DEPS,
 )
@@ -658,3 +650,7 @@ async def test_manage_profiles_trigger_post_monitoring(profile_id: str):
 @test_routes.post("/api/manage-profiles/profiles/{profile_id}/trigger-ad-monitoring", dependencies=SCAN_DEPS)
 async def test_manage_profiles_trigger_ad_monitoring(profile_id: str):
     return {"status": "triggered"}
+
+@test_routes.post("/api/profile/alert/scan", status_code=202, include_in_schema=False, dependencies=[Depends(role_required([user_role.MEMBER])), Depends(license_required("maintainer"))])
+async def test_run_user_ioc_alerts(current_user=Depends(get_current_user)):
+    return await TestAlertScanner.run_alert_scan(current_user)
