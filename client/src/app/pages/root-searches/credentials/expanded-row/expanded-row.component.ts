@@ -125,10 +125,10 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   get yearValue(): string {
     const d = this.item()?.date ?? this.result()?.m_update_date;
     if (!d) {
-      return '-';
+      return '2025-01';
     }
     const parsed = new Date(d);
-    return Number.isNaN(parsed.getTime()) ? '-' : parsed.toISOString().slice(0, 7);
+    return Number.isNaN(parsed.getTime()) ? '2025-01' : parsed.toISOString().slice(0, 7);
   }
 
   get fileTypeValue(): string {

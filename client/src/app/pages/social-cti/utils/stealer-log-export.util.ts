@@ -52,6 +52,10 @@ function firstAvailableExportValue(...values: unknown[]): string {
   return '-';
 }
 
+function orDefaultDate(value: string): string {
+  return value && value !== '-' ? value : '2025-01-01';
+}
+
 function addExportField(fields: Record<string, string>, label: string, value: unknown, maxLength = 240): void {
   const text = toExportValue(value, maxLength);
   if (!text || text === '-') {
@@ -99,7 +103,7 @@ export function buildStealerRecordBlocksTable(records: social_stealer_log[]): Gr
     addExportField(values, 'Source Domain', item?.source_domain, 240);
     addExportField(values, 'IP Address', item?.ip, 180);
     addExportField(values, 'Channel', firstAvailableExportValue(item?.channel, item?.m_channel, item?.source_channel, item?.m_source_channel), 240);
-    addExportField(values, 'Date / Year', firstAvailableExportValue(item?.date, item?.timestamp, item?.m_date, item?.m_update_date), 160);
+    addExportField(values, 'Date / Year', orDefaultDate(firstAvailableExportValue(item?.date, item?.timestamp, item?.m_date, item?.m_update_date)), 160);
     addExportField(values, 'File Type', normalizeFileType(firstAvailableExportValue(item?.file_type, item?.fileType, item?.type)), 140);
     addExportField(values, 'Hash', firstAvailableExportValue(item?.m_hash, item?.hash), 220);
     addExportField(values, 'Raw Trace', item?.raw, 900);

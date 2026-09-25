@@ -238,6 +238,20 @@ class elastic_controller:
                     body={"index.blocks.read_only_allow_delete": False},
                     request_timeout=220)
 
+            try:
+                await self.__m_dump_connection.indices.put_settings(
+                    index="stealer_model-*",
+                    body={"index": {"refresh_interval": "15m"}},
+                    allow_no_indices=True,
+                    request_timeout=220)
+                if await self.__m_dump_connection.indices.exists_index_template(name="stealer_template"):
+                    template = (await self.__m_dump_connection.indices.get_index_template(
+                        name="stealer_template"))["index_templates"][0]["index_template"]
+                    template.setdefault("template", {}).setdefault("settings", {}).setdefault("index", {})["refresh_interval"] = "15m"
+                    await self.__m_dump_connection.indices.put_index_template(name="stealer_template", body=template)
+            except Exception as ex:
+                log.g().w(f"Skipping stealer refresh_interval update: {str(ex)}")
+
             if not await self.__m_core_connection.indices.exists(
                     index=ELASTIC_INDEX.S_SOCIAL_INDEX,
                     request_timeout=220):
