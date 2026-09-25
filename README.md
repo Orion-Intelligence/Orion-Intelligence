@@ -92,12 +92,12 @@ For additional build modes, testing workflows, production deployment, and config
 
 ## Platform Preview
 
-The Orion homepage provides a search-first investigation workspace with summary panels, recent findings, and
-visual pivots that help analysts move quickly from overview to deeper investigation.
+Consolidated search runs a single IOC query across every index, splitting matches into stealer credentials and
+threat records with timing, result, and asset counts, while the domain index surfaces every unique domain found.
 
 <p align="center">
-  <a href="docs/_static/readme-consolidated.png">
-    <img src="docs/_static/readme-consolidated.png" alt="Orion consolidated IOC results" width="1200">
+  <a href="docs/_static/readme-consolidated-20260925.png">
+    <img src="docs/_static/readme-consolidated-20260925.png" alt="Orion consolidated IOC results" width="1200">
   </a>
   <br>
   <sub><strong>Consolidated Results</strong> · IOC search across stealers and threats with domain insights</sub>
