@@ -187,7 +187,6 @@ export function setCaseAlertTenantQuota(value: string) {
 export function configureTenantForCaseAlerts(tenant: CaseAlertTenant) {
   openTenantEditor(tenant);
   setCaseAlertTenantEditorToggle('tenant-verified-toggle', true);
-  setCaseAlertTenantEditorToggle('tenant-status-toggle', true);
   setCaseAlertTenantLicense('free', false);
   setCaseAlertTenantLicense('maintainer', true);
   setCaseAlertTenantLicense('enterprise', true);

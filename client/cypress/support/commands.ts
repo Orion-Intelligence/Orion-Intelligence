@@ -11,6 +11,82 @@ type CypressAutomation = typeof Cypress & {
     automation(eventName: string, options: Record<string, unknown>): Promise<unknown>;
 };
 
+const NAV_DEBUG_DIR = "/tmp/orion-geo-navlog";
+const navDebugLog: string[] = [];
+const navDebugPush = (entry: string) => {
+    navDebugLog.push(`${new Date().toISOString()} [${Cypress.currentTest?.title ?? "hook"}] ${entry}`);
+    if (navDebugLog.length > 400) {
+        navDebugLog.splice(0, navDebugLog.length - 400);
+    }
+};
+
+Cypress.on("window:before:load", (win) => {
+    navDebugPush(`PAGE LOAD ${win.location.href}`);
+    (["pushState", "replaceState"] as const).forEach((name) => {
+        const original = win.history[name].bind(win.history);
+        win.history[name] = (data: unknown, unused: string, url?: string | URL | null) => {
+            navDebugPush(`${name} ${String(url)}\n${new Error().stack}`);
+            return original(data, unused, url);
+        };
+    });
+    win.addEventListener("popstate", () => navDebugPush(`popstate ${win.location.href}\n${new Error().stack}`));
+    win.addEventListener("error", (event) => navDebugPush(`window error ${event.message}\n${(event.error as Error | undefined)?.stack ?? ""}`));
+    win.addEventListener("unhandledrejection", (event) => navDebugPush(`unhandledrejection ${String((event.reason as Error | undefined)?.stack ?? event.reason)}`));
+    const watched = /\/api\/(token|logout|get\/tenant\/node|admin\/backups)/;
+    const originalFetch = win.fetch.bind(win);
+    win.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+        const method = init?.method ?? (input instanceof Request ? input.method : "GET");
+        const promise = originalFetch(input, init);
+        if (watched.test(url)) {
+            navDebugPush(`fetch start ${method} ${url}`);
+            promise.then((res) => {
+                res.clone().text().then((text) => navDebugPush(`fetch done ${res.status} ${method} ${url} body=${text.slice(0, 600)}`), () => navDebugPush(`fetch done ${res.status} ${method} ${url}`));
+            }, (err) => navDebugPush(`fetch error ${method} ${url} ${String(err)}`));
+        }
+        return promise;
+    };
+    const originalOpen = win.XMLHttpRequest.prototype.open;
+    win.XMLHttpRequest.prototype.open = function (this: XMLHttpRequest, method: string, url: string | URL, ...rest: unknown[]) {
+        const target = String(url);
+        if (watched.test(target)) {
+            navDebugPush(`xhr start ${method} ${target}`);
+            this.addEventListener("loadend", () => navDebugPush(`xhr done ${this.status} ${method} ${target} body=${String(this.responseText ?? "").slice(0, 600)}`));
+        }
+        return (originalOpen as (...args: unknown[]) => void).call(this, method, url, ...rest);
+    } as typeof win.XMLHttpRequest.prototype.open;
+    const originalConsoleError = win.console.error.bind(win.console);
+    win.console.error = (...args: unknown[]) => {
+        navDebugPush(`console.error ${args.map((arg) => (arg instanceof Error ? arg.stack ?? arg.message : String(arg))).join(" ")}`);
+        originalConsoleError(...args);
+    };
+});
+
+afterEach(function () {
+    if (this.currentTest?.state !== "failed") {
+        return;
+    }
+    const file = `${NAV_DEBUG_DIR}/${Cypress.spec.name}-test-failed-${Date.now()}.txt`;
+    void cy.location("href", { log: false }).then((href) => cy.writeFile(file, `FAILED TEST ${this.currentTest?.title}\nFINAL ${href}\n\n${navDebugLog.join("\n\n----\n\n")}`));
+});
+
+const waitForLogoutLanding = (attempts = 0): Cypress.Chainable<void> => {
+    return cy.document({ log: false }).then((doc) => {
+        if (doc.querySelector('[data-testid="login-user"]')) {
+            return cy.wrap<void>(undefined, { log: false });
+        }
+        if (attempts < 120) {
+            return cy.wait(500, { log: false }).then(() => waitForLogoutLanding(attempts + 1));
+        }
+        return cy.location("href", { log: false }).then((href) => {
+            const file = `${NAV_DEBUG_DIR}/${Cypress.spec.name}-${Date.now()}.txt`;
+            return cy.writeFile(file, `FINAL ${href}\n\n${navDebugLog.join("\n\n----\n\n")}`).then(() => {
+                throw new Error(`Logout did not reach the login page (final ${href}); navigation log written to ${file}`);
+            });
+        });
+    });
+};
+
 type MailSummary = {
     ID?: string;
 };
@@ -280,8 +356,9 @@ Cypress.Commands.add("logout", () => {
             });
             void cy.scrollTo("top", { ensureScrollable: false });
             void cy.wrap(profileMenu).scrollIntoView().click({ force: true });
+            void cy.then(() => navDebugPush("LOGOUT CLICK"));
             void cy.get('[data-testid="signout-btn"]').first().scrollIntoView().click({ force: true });
-            void cy.get('[data-testid="login-user"]').should('exist');
+            void waitForLogoutLanding();
             void cy.clearCookies({ log: false });
             void cy.clearLocalStorage();
             cy.window({ log: false }).then((win) => {

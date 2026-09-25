@@ -78,6 +78,16 @@ class sso_manager:
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == tenant_object_id)
         return str(getattr(tenant, "slug", "") or "") if tenant else ""
 
+    async def _trusted_redirect_uri(self, user: db_user_account, redirect_uri: str) -> str:
+        trusted = set(SSO_CONSTANTS.S_ALLOWED_REDIRECT_URIS)
+        slug = await self._tenant_slug(user.tenant_id)
+        if slug:
+            trusted.add(SSO_CONSTANTS.S_TENANT_REDIRECT_URI_TEMPLATE.format(slug=slug))
+        for uri in trusted:
+            if secrets.compare_digest(uri, redirect_uri):
+                return uri
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Orion Mail redirect URI")
+
     async def _identity_for_user(self, user: db_user_account) -> dict[str, str]:
         return {
             "user_id": str(user.id),
@@ -139,6 +149,7 @@ class sso_manager:
         session_id = str(user.current_session_id or "")
         if not session_id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Orion Intelligence session is unavailable")
+        redirect_uri = await self._trusted_redirect_uri(user, redirect_uri)
         code = secrets.token_urlsafe(48)
         record = {**(await self._identity_for_user(user)), "session_id": session_id, "redirect_uri": redirect_uri}
         await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [self._code_key(code), json.dumps(record), SSO_CONSTANTS.S_CODE_TTL_SECONDS])

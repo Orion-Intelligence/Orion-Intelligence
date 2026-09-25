@@ -45,15 +45,16 @@ export function createInstantBackup() {
 
 function deleteFirstBackupIfPresent(): Cypress.Chainable<void> {
   return cy.get('body').then(($body) => {
-    const $row = $body.find('[data-testid="backup-row"]:visible').first();
-    if (!$row.length) {
+    const $rows = $body.find('[data-testid="backup-row"]:visible');
+    if (!$rows.length) {
       return cy.wrap<void>(undefined, {log: false});
     }
 
     cy.intercept('DELETE', '**/api/admin/backups/*').as('deleteBackup');
-    cy.wrap($row).find('button').contains('Delete').click({force: true});
+    cy.wrap($rows.first()).find('button').contains('Delete').click({force: true});
     cy.get('[data-testid="confirmation-yes-button"]').click();
     cy.wait('@deleteBackup', {timeout: 60000}).its('response.statusCode').should('be.oneOf', [200, 201]);
+    cy.get('[data-testid="backup-row"]:visible').should('have.length', $rows.length - 1);
     return deleteFirstBackupIfPresent();
   });
 }

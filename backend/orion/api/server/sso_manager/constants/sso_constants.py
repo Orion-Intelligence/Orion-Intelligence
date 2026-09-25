@@ -24,3 +24,7 @@ class SSO_CONSTANTS:
             r"^https://[a-z0-9-]+mail\.orionintelligence\.org/api/auth/callback$",
         )
     )
+    S_TENANT_REDIRECT_URI_TEMPLATE = env_handler.get_instance().env(
+        "ORION_MAIL_TENANT_REDIRECT_URI_TEMPLATE",
+        "https://{slug}mail.orionintelligence.org/api/auth/callback",
+    )

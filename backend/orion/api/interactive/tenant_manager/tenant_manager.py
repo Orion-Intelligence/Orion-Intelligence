@@ -29,6 +29,7 @@ from orion.services.mongo_manager.shared_model.db_tenant_model import (IocCatego
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account, LicenseName, user_role
 from orion.services.permission_manager.permission_models import UserPermission
 from orion.services.encryption_manager.key_manager import KeyManager
+from orion.services.log_manager.log_controller import log
 from orion.services.mail_manager.mail_enums import MailSubject, MailUrlHeading
 from orion.helper_manager.env_handler import env_handler
 from orion.services.mail_manager.mail_manager import mail_manager
@@ -913,8 +914,8 @@ class TenantManager:
         for tid in tenant_ids:
             try:
                 await manager.invalidate_alert_summary(str(tid))
-            except Exception:
-                pass
+            except Exception as exc:
+                log.g().w(f"Alert summary invalidation failed for tenant={tid}: {exc}")
 
     async def _all_tenant_ids(self) -> list:
         try:
