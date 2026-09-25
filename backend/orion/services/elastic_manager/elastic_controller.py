@@ -572,7 +572,7 @@ class elastic_controller:
                                 target_indices.add(idx)
             response = await _with_timeout(self.__m_dump_connection, ELASTIC_WRITE_REQUEST_TIMEOUT).bulk(
                 body=p_data,
-                refresh="wait_for",
+                refresh=False,
             )
             return response
         except Exception as ex:
