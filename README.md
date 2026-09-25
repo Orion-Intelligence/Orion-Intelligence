@@ -96,11 +96,11 @@ The Orion homepage provides a search-first investigation workspace with summary 
 visual pivots that help analysts move quickly from overview to deeper investigation.
 
 <p align="center">
-  <a href="docs/screenshots/homepage-overview-20260326.png">
-    <img src="docs/screenshots/homepage-overview-20260326.png" alt="Orion homepage overview" width="1200">
+  <a href="docs/_static/readme-consolidated.png">
+    <img src="docs/_static/readme-consolidated.png" alt="Orion consolidated IOC results" width="1200">
   </a>
   <br>
-  <sub><strong>Homepage Overview</strong> · Search, intelligence summaries, activity, and geographic context</sub>
+  <sub><strong>Consolidated Results</strong> · IOC search across stealers and threats with domain insights</sub>
 </p>
 
 <details>
