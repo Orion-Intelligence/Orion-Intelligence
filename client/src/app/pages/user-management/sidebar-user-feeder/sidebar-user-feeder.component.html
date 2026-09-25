@@ -42,6 +42,20 @@
           (valueChange)="onSocialRuleSelect($event)"></app-ui-dropdown>
       </div>
     }
+    @if (!isCatalogLoading && isDarkLogsRuleSelected) {
+      <div class="mt-3">
+        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Dark Logs' | translate }}</label>
+        <app-ui-dropdown
+          menuId="feeder-dark-logs-rule-menu"
+          testId="feeder-dark-logs-rule-select"
+          optionTestIdPrefix="feeder-dark-logs-rule-option-"
+          size="large"
+          [options]="darkLogsRuleDropdownOptions"
+          [selected]="selectedDarkLogsRuleKey"
+          [disabled]="!darkLogsRuleDropdownOptions.length"
+          (valueChange)="onDarkLogsRuleSelect($event)"></app-ui-dropdown>
+      </div>
+    }
   </div>
 
   <div class="mt-6 flex max-w-full flex-nowrap gap-2 overflow-x-auto whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_0%,black_90%,transparent_100%)]">

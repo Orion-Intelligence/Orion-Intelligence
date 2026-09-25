@@ -21,6 +21,11 @@
     "path": null,
     "value_regex": "^https?://(?:[^/]+\\.)?(?:t\\.me|telegram\\.me|telegram\\.org)(?:/.*)?$"
   },
+  "chats": {
+    "rule_type": "generic",
+    "path": null,
+    "value_regex": "^https?://(?:[^/]+\\.)?(?:t\\.me|telegram\\.me|telegram\\.org)(?:/.*)?$"
+  },
   "leak": {
     "rule_type": "unique",
     "path": "leak_collector/leak"

@@ -21,12 +21,15 @@ import { UiDropdownComponent, UiDropdownOption } from '../../../shared/partials/
 })
 export class SidebarUserFeederComponent implements OnInit {
   private readonly socialRuleGroupKey = '__social_media__';
+  private readonly darkLogsRuleGroupKey = '__dark_logs__';
+  private readonly darkLogsRuleKeys = ['stealerlog', 'chats'];
 
   activeTab: 'add' | 'view' | 'values' = 'add';
   highlightedScript: FeederScriptItem | null = null;
   rules: FeederRuleOption[] = [];
   selectedRuleKey = '';
   selectedSocialRuleKey = '';
+  selectedDarkLogsRuleKey = '';
   isCatalogLoading = true;
   formError = '';
 
@@ -49,22 +52,39 @@ export class SidebarUserFeederComponent implements OnInit {
     return this.selectedRuleKey === this.socialRuleGroupKey;
   }
 
+  get isDarkLogsRuleSelected(): boolean {
+    return this.selectedRuleKey === this.darkLogsRuleGroupKey;
+  }
+
   get effectiveSelectedRuleKey(): string {
-    return this.isSocialRuleSelected ? (this.selectedSocialRuleKey || this.socialRules[0]?.key || '') : this.selectedRuleKey;
+    if (this.isSocialRuleSelected) {
+      return this.selectedSocialRuleKey || this.socialRules[0]?.key || '';
+    }
+    if (this.isDarkLogsRuleSelected) {
+      return this.selectedDarkLogsRuleKey || this.darkLogsRules[0]?.key || '';
+    }
+    return this.selectedRuleKey;
   }
 
   get socialRules(): FeederRuleOption[] {
     return this.rules.filter(rule => this.isSocialRule(rule));
   }
 
+  get darkLogsRules(): FeederRuleOption[] {
+    return this.rules.filter(rule => this.isDarkLogsRule(rule));
+  }
+
   get ruleDropdownOptions(): UiDropdownOption[] {
     this.translationService.version();
-    const options = this.rules.filter(rule => !this.isSocialRule(rule)).map(rule => ({
+    const options = this.rules.filter(rule => !this.isSocialRule(rule) && !this.isDarkLogsRule(rule)).map(rule => ({
       key: rule.key,
       label: this.getRuleLabel(rule.key),
     }));
     if (this.socialRules.length) {
       options.push({ key: this.socialRuleGroupKey, label: this.translationService.translate('Social Media') });
+    }
+    if (this.darkLogsRules.length) {
+      options.push({ key: this.darkLogsRuleGroupKey, label: this.translationService.translate('Dark Logs') });
     }
     return options;
   }
@@ -72,6 +92,14 @@ export class SidebarUserFeederComponent implements OnInit {
   get socialRuleDropdownOptions(): UiDropdownOption[] {
     this.translationService.version();
     return this.socialRules.map(rule => ({
+      key: rule.key,
+      label: this.getRuleLabel(rule.key),
+    }));
+  }
+
+  get darkLogsRuleDropdownOptions(): UiDropdownOption[] {
+    this.translationService.version();
+    return this.darkLogsRules.map(rule => ({
       key: rule.key,
       label: this.getRuleLabel(rule.key),
     }));
@@ -109,12 +137,22 @@ export class SidebarUserFeederComponent implements OnInit {
     if (ruleKey === this.socialRuleGroupKey) {
       this.selectedRuleKey = ruleKey;
       this.selectedSocialRuleKey = this.selectedSocialRuleKey || this.socialRules[0]?.key || '';
+      this.selectedDarkLogsRuleKey = '';
+      this.activeTab = this.hasScriptTab() ? 'view' : this.hasValuesTab() ? 'values' : 'add';
+      this.onRuleChange();
+      return;
+    }
+    if (ruleKey === this.darkLogsRuleGroupKey) {
+      this.selectedRuleKey = ruleKey;
+      this.selectedDarkLogsRuleKey = this.selectedDarkLogsRuleKey || this.darkLogsRules[0]?.key || '';
+      this.selectedSocialRuleKey = '';
       this.activeTab = this.hasScriptTab() ? 'view' : this.hasValuesTab() ? 'values' : 'add';
       this.onRuleChange();
       return;
     }
     this.selectedRuleKey = ruleKey;
     this.selectedSocialRuleKey = '';
+    this.selectedDarkLogsRuleKey = '';
     this.onRuleChange();
   }
 
@@ -124,6 +162,16 @@ export class SidebarUserFeederComponent implements OnInit {
     }
     this.highlightedScript = null;
     this.selectedSocialRuleKey = ruleKey;
+    this.ensureValidActiveTab();
+    this.syncRuleQueryParam();
+  }
+
+  onDarkLogsRuleSelect(ruleKey: string | null): void {
+    if (!ruleKey || this.selectedDarkLogsRuleKey === ruleKey) {
+      return;
+    }
+    this.highlightedScript = null;
+    this.selectedDarkLogsRuleKey = ruleKey;
     this.ensureValidActiveTab();
     this.syncRuleQueryParam();
   }
@@ -142,13 +190,15 @@ export class SidebarUserFeederComponent implements OnInit {
         next: (response) => {
           this.rules = response?.rules ?? [];
           this.syncSocialRuleSelectionFromSelectedRule();
+          this.syncDarkLogsRuleSelectionFromSelectedRule();
           if (!this.selectedRuleKey && this.rules.length > 0) {
-            this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule))?.key ?? this.socialRuleGroupKey;
+            this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule) && !this.isDarkLogsRule(rule))?.key ?? this.socialRuleGroupKey;
           }
-          if (this.selectedRuleKey && this.selectedRuleKey !== this.socialRuleGroupKey && !this.rules.some((rule) => rule.key === this.selectedRuleKey)) {
-            this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule))?.key ?? '';
+          if (this.selectedRuleKey && this.selectedRuleKey !== this.socialRuleGroupKey && this.selectedRuleKey !== this.darkLogsRuleGroupKey && !this.rules.some((rule) => rule.key === this.selectedRuleKey)) {
+            this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule) && !this.isDarkLogsRule(rule))?.key ?? '';
           }
           this.ensureSocialRuleSelection();
+          this.ensureDarkLogsRuleSelection();
           this.ensureValidActiveTab();
           this.syncRuleQueryParam();
           this.formError = '';
@@ -190,6 +240,10 @@ export class SidebarUserFeederComponent implements OnInit {
     return (rule.path ?? '').toLowerCase() === 'social/platform';
   }
 
+  private isDarkLogsRule(rule: FeederRuleOption): boolean {
+    return this.darkLogsRuleKeys.includes(rule.key);
+  }
+
   private syncSocialRuleSelectionFromSelectedRule(): void {
     const selectedSocialRule = this.rules.find(rule => rule.key === this.selectedRuleKey && this.isSocialRule(rule));
     if (!selectedSocialRule) {
@@ -199,17 +253,40 @@ export class SidebarUserFeederComponent implements OnInit {
     this.selectedRuleKey = this.socialRuleGroupKey;
   }
 
+  private syncDarkLogsRuleSelectionFromSelectedRule(): void {
+    const selectedDarkLogsRule = this.rules.find(rule => rule.key === this.selectedRuleKey && this.isDarkLogsRule(rule));
+    if (!selectedDarkLogsRule) {
+      return;
+    }
+    this.selectedDarkLogsRuleKey = selectedDarkLogsRule.key;
+    this.selectedRuleKey = this.darkLogsRuleGroupKey;
+  }
+
   private ensureSocialRuleSelection(): void {
     if (!this.isSocialRuleSelected) {
       return;
     }
     if (!this.socialRules.length) {
-      this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule))?.key ?? '';
+      this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule) && !this.isDarkLogsRule(rule))?.key ?? '';
       this.selectedSocialRuleKey = '';
       return;
     }
     if (!this.socialRules.some(rule => rule.key === this.selectedSocialRuleKey)) {
       this.selectedSocialRuleKey = this.socialRules[0].key;
+    }
+  }
+
+  private ensureDarkLogsRuleSelection(): void {
+    if (!this.isDarkLogsRuleSelected) {
+      return;
+    }
+    if (!this.darkLogsRules.length) {
+      this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule) && !this.isDarkLogsRule(rule))?.key ?? '';
+      this.selectedDarkLogsRuleKey = '';
+      return;
+    }
+    if (!this.darkLogsRules.some(rule => rule.key === this.selectedDarkLogsRuleKey)) {
+      this.selectedDarkLogsRuleKey = this.darkLogsRules[0].key;
     }
   }
 }
