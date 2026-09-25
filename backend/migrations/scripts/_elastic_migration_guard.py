@@ -60,6 +60,7 @@ async def run_update_by_query_with_progress(es, index, body, label, poll_interva
                 return submit
 
             _report(f"MIGRATION {label}: started update_by_query on '{index}' (task {task_id})")
+            status = None
             while True:
                 try:
                     status = await es.tasks.get(task_id=task_id)

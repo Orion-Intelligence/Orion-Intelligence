@@ -38,7 +38,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 300s
+      start_period: ${TEST_SERVICE_READY_TIMEOUT:-300}s
     command: >
       sh -c "exec gunicorn --preload -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070 --timeout 900"
 

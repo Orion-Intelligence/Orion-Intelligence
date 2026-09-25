@@ -103,6 +103,8 @@ jobs:
           docker network inspect orion_nexus_backend >/dev/null 2>&1 || docker network create orion_nexus_backend
 
       - name: Start the same testing stack used by run.sh -docs
+        env:
+          TEST_SERVICE_READY_TIMEOUT: "900"
         run: |
           set -euo pipefail
           export BACKEND_COVERAGE_RC=/app/.coveragerc
@@ -184,7 +186,7 @@ jobs:
             echo "no backend e2e coverage data captured"; exit 0
           fi
           docker compose -p trusted-search -f docker-compose-testing.yml run --rm --no-deps \
-            -v /tmp/ecov:/ecov --entrypoint sh web -c '
+            --user "$(id -u):$(id -g)" -v /tmp/ecov:/ecov --entrypoint sh web -c '
               cp /ecov/.coverage.e2e* /tmp/ 2>/dev/null || true
               cd /app
               COVERAGE_FILE=/tmp/.coverage.e2e.all coverage combine /tmp/.coverage.e2e* || true
