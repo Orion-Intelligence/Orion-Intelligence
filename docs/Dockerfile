@@ -6,6 +6,9 @@ RUN pip install --no-cache-dir --require-hashes -r requirements.txt
 COPY . .
 RUN if [ -d screenshots-neutral ] && ls screenshots-neutral/*.png >/dev/null 2>&1; then \
         cp -f screenshots-neutral/*.png screenshots/; \
+        if [ -d screenshots-neutral/static ] && ls screenshots-neutral/static/*.png >/dev/null 2>&1; then \
+            mkdir -p screenshots/static && cp -f screenshots-neutral/static/*.png screenshots/static/; \
+        fi; \
     else \
         echo "WARNING: docs/screenshots-neutral missing/empty - self-hosted /documentation will ship REAL branded screenshots. Run docs/scripts/generate_docs.sh and commit docs/screenshots-neutral/." >&2; \
     fi

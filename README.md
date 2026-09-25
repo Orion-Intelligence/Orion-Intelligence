@@ -22,7 +22,7 @@
 Orion Platform is a comprehensive, web-based solution that combines the functionality of a browser, search engine, crawler, and data aggregation tools to empower OSINT (Open Source Intelligence) experts. Built on top of Docker, Orion provides a user-friendly interface to explore, search, and visualize data extracted by its powerful Orion Crawler.
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/4266afc8-1d52-41ac-a2fe-b445e1b6b848" alt="CYBERATTACK HITS FRENCH INTERIOR(3)" width="1200">
+  <img src="docs/_static/readme-homepage.png" alt="CYBERATTACK HITS FRENCH INTERIOR(3)" width="1200">
 </p>
 
 The platform integrates seamlessly with machine learning models, enhancing search relevance and enabling advanced

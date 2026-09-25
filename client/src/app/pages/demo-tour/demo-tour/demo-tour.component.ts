@@ -25,9 +25,9 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly minimumLoadingMs = 350;
   private readonly geometryTolerancePx = 1.5;
   private readonly geometryTrackingWindowMs = 100;
-  private readonly cutoutTransitionMs = 220;
+  private readonly cutoutTransitionMs = 320;
   private readonly sidebarSpotlightPadding = 6;
-  private readonly tooltipGap = 14;
+  private readonly tooltipGap = 18;
   private activeElement: HTMLElement | null = null;
   private activeElementAddedRelativeClass = false;
   private activeElementAddedPointerClass: string | null = null;
@@ -54,7 +54,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   private initialSidebarExpanded: boolean | null = null;
   private initialSidebarScrollTop: number | null = null;
   private focusBeforeTour: HTMLElement | null = null;
-  private readonly spotlightCornerRadius = 12;
+  private readonly spotlightCornerRadius = 14;
   private runtimeStyleSheet: CSSStyleSheet | null = null;
   private stepIndexTimerId: number | null = null;
   private startTourTimerId: number | null = null;
@@ -73,7 +73,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   tooltipTop = '0px';
   tooltipLeft = '0px';
   tooltipBottom = 'auto';
-  tooltipWidth = '360px';
+  tooltipWidth = '400px';
   progressWidth = '0%';
   @HostBinding('class.demo-tour-runtime') readonly runtimeClass = true;
 
@@ -650,9 +650,9 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
         ? targetCenter >= window.innerHeight / 2
         : isDashboardStep || isFinalSidebarStep;
       return {
-        top: dockAtTop ? '10px' : 'auto',
-        left: '10px',
-        bottom: dockAtTop ? 'auto' : '10px'
+        top: `${dockAtTop ? margin : Math.max(window.innerHeight - tooltipHeight - margin, margin)}px`,
+        left: `${Math.max((window.innerWidth - tooltipWidth) / 2, margin)}px`,
+        bottom: 'auto'
       };
     }
 
@@ -743,8 +743,8 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     const compact = viewportWidth <= 900;
     const margin = compact ? 10 : 12;
     const width = compact
-      ? Math.min(Math.max(viewportWidth - 20, 240), 360)
-      : 360;
+      ? Math.min(Math.max(viewportWidth - 20, 240), 400)
+      : 400;
     const tooltipElement = document.querySelector('[data-testid="demo-tour-tooltip"]');
     const fallbackHeight = compact ? 270 : 240;
     const measuredHeight = tooltipElement instanceof HTMLElement && tooltipElement.offsetHeight > 0
@@ -1435,7 +1435,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    if (!this.cutoutRects.length || this.cutoutRects.length !== nextCutoutRects.length) {
+    if (!this.cutoutRects.length) {
       this.cutoutRects = nextCutoutRects;
       return;
     }
@@ -1446,10 +1446,10 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     const tick = () => {
       const elapsed = performance.now() - startedAt;
       const progress = Math.min(elapsed / this.cutoutTransitionMs, 1);
-      const easedProgress = 1 - Math.pow(1 - progress, 2);
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
 
       this.cutoutRects = nextCutoutRects.map((targetRect, index) => {
-        const startRect = getOwnProperty(startRects, index);
+        const startRect = getOwnProperty(startRects, index) ?? targetRect;
         return {
           top: this.interpolateNumber(startRect.top, targetRect.top, easedProgress),
           left: this.interpolateNumber(startRect.left, targetRect.left, easedProgress),
