@@ -21,15 +21,12 @@ import { UiDropdownComponent, UiDropdownOption } from '../../../shared/partials/
 })
 export class SidebarUserFeederComponent implements OnInit {
   private readonly socialRuleGroupKey = '__social_media__';
-  private readonly darkChatsRuleGroupKey = '__dark_chats__';
-  private readonly darkChatsRuleKeys = ['general', 'breach', 'stealer'];
 
   activeTab: 'add' | 'view' | 'values' = 'add';
   highlightedScript: FeederScriptItem | null = null;
   rules: FeederRuleOption[] = [];
   selectedRuleKey = '';
   selectedSocialRuleKey = '';
-  selectedDarkChatsRuleKey = '';
   isCatalogLoading = true;
   formError = '';
 
@@ -52,39 +49,22 @@ export class SidebarUserFeederComponent implements OnInit {
     return this.selectedRuleKey === this.socialRuleGroupKey;
   }
 
-  get isDarkChatsRuleSelected(): boolean {
-    return this.selectedRuleKey === this.darkChatsRuleGroupKey;
-  }
-
   get effectiveSelectedRuleKey(): string {
-    if (this.isSocialRuleSelected) {
-      return this.selectedSocialRuleKey || this.socialRules[0]?.key || '';
-    }
-    if (this.isDarkChatsRuleSelected) {
-      return this.selectedDarkChatsRuleKey || this.darkChatsRules[0]?.key || '';
-    }
-    return this.selectedRuleKey;
+    return this.isSocialRuleSelected ? (this.selectedSocialRuleKey || this.socialRules[0]?.key || '') : this.selectedRuleKey;
   }
 
   get socialRules(): FeederRuleOption[] {
     return this.rules.filter(rule => this.isSocialRule(rule));
   }
 
-  get darkChatsRules(): FeederRuleOption[] {
-    return this.rules.filter(rule => this.isDarkChatsRule(rule));
-  }
-
   get ruleDropdownOptions(): UiDropdownOption[] {
     this.translationService.version();
-    const options = this.rules.filter(rule => !this.isSocialRule(rule) && !this.isDarkChatsRule(rule)).map(rule => ({
+    const options = this.rules.filter(rule => !this.isSocialRule(rule)).map(rule => ({
       key: rule.key,
       label: this.getRuleLabel(rule.key),
     }));
     if (this.socialRules.length) {
       options.push({ key: this.socialRuleGroupKey, label: this.translationService.translate('Social Media') });
-    }
-    if (this.darkChatsRules.length) {
-      options.push({ key: this.darkChatsRuleGroupKey, label: this.translationService.translate('Dark Chats') });
     }
     return options;
   }
@@ -92,14 +72,6 @@ export class SidebarUserFeederComponent implements OnInit {
   get socialRuleDropdownOptions(): UiDropdownOption[] {
     this.translationService.version();
     return this.socialRules.map(rule => ({
-      key: rule.key,
-      label: this.getRuleLabel(rule.key),
-    }));
-  }
-
-  get darkChatsRuleDropdownOptions(): UiDropdownOption[] {
-    this.translationService.version();
-    return this.darkChatsRules.map(rule => ({
       key: rule.key,
       label: this.getRuleLabel(rule.key),
     }));
@@ -137,22 +109,12 @@ export class SidebarUserFeederComponent implements OnInit {
     if (ruleKey === this.socialRuleGroupKey) {
       this.selectedRuleKey = ruleKey;
       this.selectedSocialRuleKey = this.selectedSocialRuleKey || this.socialRules[0]?.key || '';
-      this.selectedDarkChatsRuleKey = '';
-      this.activeTab = this.hasScriptTab() ? 'view' : this.hasValuesTab() ? 'values' : 'add';
-      this.onRuleChange();
-      return;
-    }
-    if (ruleKey === this.darkChatsRuleGroupKey) {
-      this.selectedRuleKey = ruleKey;
-      this.selectedDarkChatsRuleKey = this.selectedDarkChatsRuleKey || this.darkChatsRules[0]?.key || '';
-      this.selectedSocialRuleKey = '';
       this.activeTab = this.hasScriptTab() ? 'view' : this.hasValuesTab() ? 'values' : 'add';
       this.onRuleChange();
       return;
     }
     this.selectedRuleKey = ruleKey;
     this.selectedSocialRuleKey = '';
-    this.selectedDarkChatsRuleKey = '';
     this.onRuleChange();
   }
 
@@ -162,16 +124,6 @@ export class SidebarUserFeederComponent implements OnInit {
     }
     this.highlightedScript = null;
     this.selectedSocialRuleKey = ruleKey;
-    this.ensureValidActiveTab();
-    this.syncRuleQueryParam();
-  }
-
-  onDarkChatsRuleSelect(ruleKey: string | null): void {
-    if (!ruleKey || this.selectedDarkChatsRuleKey === ruleKey) {
-      return;
-    }
-    this.highlightedScript = null;
-    this.selectedDarkChatsRuleKey = ruleKey;
     this.ensureValidActiveTab();
     this.syncRuleQueryParam();
   }
@@ -190,15 +142,13 @@ export class SidebarUserFeederComponent implements OnInit {
         next: (response) => {
           this.rules = response?.rules ?? [];
           this.syncSocialRuleSelectionFromSelectedRule();
-          this.syncDarkChatsRuleSelectionFromSelectedRule();
           if (!this.selectedRuleKey && this.rules.length > 0) {
-            this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule) && !this.isDarkChatsRule(rule))?.key ?? this.socialRuleGroupKey;
+            this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule))?.key ?? this.socialRuleGroupKey;
           }
-          if (this.selectedRuleKey && this.selectedRuleKey !== this.socialRuleGroupKey && this.selectedRuleKey !== this.darkChatsRuleGroupKey && !this.rules.some((rule) => rule.key === this.selectedRuleKey)) {
-            this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule) && !this.isDarkChatsRule(rule))?.key ?? '';
+          if (this.selectedRuleKey && this.selectedRuleKey !== this.socialRuleGroupKey && !this.rules.some((rule) => rule.key === this.selectedRuleKey)) {
+            this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule))?.key ?? '';
           }
           this.ensureSocialRuleSelection();
-          this.ensureDarkChatsRuleSelection();
           this.ensureValidActiveTab();
           this.syncRuleQueryParam();
           this.formError = '';
@@ -240,10 +190,6 @@ export class SidebarUserFeederComponent implements OnInit {
     return (rule.path ?? '').toLowerCase() === 'social/platform';
   }
 
-  private isDarkChatsRule(rule: FeederRuleOption): boolean {
-    return this.darkChatsRuleKeys.includes(rule.key);
-  }
-
   private syncSocialRuleSelectionFromSelectedRule(): void {
     const selectedSocialRule = this.rules.find(rule => rule.key === this.selectedRuleKey && this.isSocialRule(rule));
     if (!selectedSocialRule) {
@@ -253,40 +199,17 @@ export class SidebarUserFeederComponent implements OnInit {
     this.selectedRuleKey = this.socialRuleGroupKey;
   }
 
-  private syncDarkChatsRuleSelectionFromSelectedRule(): void {
-    const selectedDarkChatsRule = this.rules.find(rule => rule.key === this.selectedRuleKey && this.isDarkChatsRule(rule));
-    if (!selectedDarkChatsRule) {
-      return;
-    }
-    this.selectedDarkChatsRuleKey = selectedDarkChatsRule.key;
-    this.selectedRuleKey = this.darkChatsRuleGroupKey;
-  }
-
   private ensureSocialRuleSelection(): void {
     if (!this.isSocialRuleSelected) {
       return;
     }
     if (!this.socialRules.length) {
-      this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule) && !this.isDarkChatsRule(rule))?.key ?? '';
+      this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule))?.key ?? '';
       this.selectedSocialRuleKey = '';
       return;
     }
     if (!this.socialRules.some(rule => rule.key === this.selectedSocialRuleKey)) {
       this.selectedSocialRuleKey = this.socialRules[0].key;
-    }
-  }
-
-  private ensureDarkChatsRuleSelection(): void {
-    if (!this.isDarkChatsRuleSelected) {
-      return;
-    }
-    if (!this.darkChatsRules.length) {
-      this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule) && !this.isDarkChatsRule(rule))?.key ?? '';
-      this.selectedDarkChatsRuleKey = '';
-      return;
-    }
-    if (!this.darkChatsRules.some(rule => rule.key === this.selectedDarkChatsRuleKey)) {
-      this.selectedDarkChatsRuleKey = this.darkChatsRules[0].key;
     }
   }
 }

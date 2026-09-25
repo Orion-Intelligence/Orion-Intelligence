@@ -16,17 +16,7 @@
     "path": null,
     "value_regex": "^(?:https?://)?(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+(?:[a-z]{2,63}|onion|i2p)/?$"
   },
-  "stealer": {
-    "rule_type": "generic",
-    "path": null,
-    "value_regex": "^https?://(?:[^/]+\\.)?(?:t\\.me|telegram\\.me|telegram\\.org)(?:/.*)?$"
-  },
-  "breach": {
-    "rule_type": "generic",
-    "path": null,
-    "value_regex": "^https?://(?:[^/]+\\.)?(?:t\\.me|telegram\\.me|telegram\\.org)(?:/.*)?$"
-  },
-  "general": {
+  "stealerlog": {
     "rule_type": "generic",
     "path": null,
     "value_regex": "^https?://(?:[^/]+\\.)?(?:t\\.me|telegram\\.me|telegram\\.org)(?:/.*)?$"
