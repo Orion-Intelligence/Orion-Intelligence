@@ -1,4 +1,5 @@
 import asyncio
+import traceback
 from asyncio import sleep
 from pathlib import Path
 from migrations.migration import migration_manager
@@ -11,6 +12,7 @@ from orion.management.managers.cronjob_manager import cronjob_manager
 from orion.management.managers.test_manager import test_manager
 from orion.services.arango_manager.arango_controller import arango_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
+from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
@@ -72,7 +74,8 @@ class service_manager:
                 self._is_available = True
                 asyncio.create_task(social_scanner.get_instance().resume_pending())
                 return True
-            except (OSError, ConnectionRefusedError):
+            except (OSError, ConnectionRefusedError) as ex:
+                log.g().e(f"init_services retry after error: {type(ex).__name__}: {ex}\n{traceback.format_exc()}")
                 await asyncio.sleep(5)
 
         return False
