@@ -61,7 +61,13 @@ async def run_update_by_query_with_progress(es, index, body, label, poll_interva
 
             _report(f"MIGRATION {label}: started update_by_query on '{index}' (task {task_id})")
             while True:
-                status = await es.tasks.get(task_id=task_id)
+                try:
+                    status = await es.tasks.get(task_id=task_id)
+                except ApiError as ex:
+                    if elastic_status_code(ex) == 404:
+                        _report(f"MIGRATION {label}: task {task_id} already completed and reaped on '{index}'")
+                        break
+                    raise
                 task_status = (status.get("task") or {}).get("status") or {}
                 total = task_status.get("total", 0) or 0
                 processed = sum(task_status.get(key, 0) or 0 for key in ("updated", "created", "deleted", "noops"))
