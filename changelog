@@ -1,3 +1,1438 @@
+Changelog [1.0.3.9] – 2026-09-26
+*Release date: September 26, 2026*
+
+### Overview
+This update captures the development completed after the previous **1.0.3.8** changelog on **July 4, 2026** across the Orion ecosystem.
+
+The release introduces and tracks major progress across **backup, restore and disaster recovery**, **multi-tenant subdomain hierarchy and white-labelling**, **Slack and Jira alert integrations**, **a browser-extension bridge and the Orion Social extension**, **social automation and server-owned social recon**, **the new Orion Mail product**, **the new Orion Uptime product**, **the new Orion Package deployment toolkit**, **the new Orion Sandbox isolated execution service**, **the rebuilt Dark Nexus MCP2 intelligence gateway with agentic chat and authorized pentesting**, **new phone/domain and DKIM entity lookups**, **the stealer-log and Telegram crawling pipeline rewrite**, **the collector control console**, **the Tor2Web gateway overhaul**, **alert-engine rework and dismissal**, **takedown request workflows**, **self-hosted white-labelled documentation**, and broad **security hardening** across every repository.
+
+### Featured
+- **Backup, restore and disaster recovery:** Full-platform and per-tenant backups were added with encrypted tenant exports, automatic pre-restore rollback, scheduled 72-hour auto-backups, a live maintenance/progress page, and an offline restore command.
+- **Multi-tenant subdomain hierarchy:** Primary and sub-tenants were added with slugs, host-based tenant resolution, pooled quotas, access blocking, cross-tenant alert visibility, per-tenant system settings, and full tenant branding/white-labelling.
+- **Slack and Jira alert integrations:** Alert connectors were added over OAuth, delivering every scan-completed and alert-change notification to all connected providers at once.
+- **Browser-extension bridge and Orion Social extension:** A separate 30-day extension session, one-time WebSocket tickets, a Redis-backed cross-worker socket bus, extension package distribution, and a new MV3 Chrome/Firefox extension with 1,097 per-site crawlers, session capture/verify, posting, and ad detection were added.
+- **Social automation and server-owned recon:** Manage Profiles added an encrypted session vault, personas, managed profiles, and scheduled posting/ad-monitoring/hate-speech runs; social recon became background scans with status, cancel, restart-resume, graph data and pruning, and connection search.
+- **Orion Mail (new product):** Secure per-tenant webmail was added with single sign-on from Orion Intelligence, a Postfix/rspamd/ClamAV stack, encryption at rest, optional OpenPGP end-to-end encryption, disposable addresses, an encrypted Messenger, labels, search, threading and translation.
+- **Orion Uptime (new product):** Self-hosted availability monitoring was added with HTTP/API/Ping/Heartbeat/Orion-feeder monitors, a JSON assertion engine, incidents, Slack and email alerts, a live dashboard, and public 90-day status pages.
+- **Orion Package and Orion Sandbox (new):** An interactive build-and-deploy toolkit that produces hardened, Cython-compiled, obfuscated images with Cloudflare DNS and Let's Encrypt automation was added, alongside an isolated Kata-based code-execution sandbox with default-deny egress and ClamAV scanning.
+- **Dark Nexus MCP2 rebuild:** The legacy in-process MCP subsystem was replaced by a streamable-HTTP MCP2 gateway exposing typed `open_chat`, `api_payload`, `documentation` and `pentest` tools, an agentic LangGraph orchestrator, an 18-route Orion API payload builder, and a 50-tool authorized penetration-testing suite.
+- **New entity lookups:** Phone & Domain Lookup and a DKIM/SPF/DMARC checker with raw-email forensics were added as async Micros-backed lookups in the API sidebar.
+- **Alert engine rework:** Buffered bulk writes, vulnerability-scanning alerts, per-tenant run times and category allow-lists, soft delete, alert dismissal with an Active/Dismissed toggle, an alert detail drawer, and an admin scan-summary mail were added.
+- **Takedown request workflow:** Evidence capture, a tenant-routed review queue, abuse-contact mail, and takedown status written back to defacement records were added.
+- **Security hardening:** Login throttling, a separate JWT signing key, hashed reset and heartbeat tokens, encrypted 2FA secrets, recovery keys, cookie-only authentication, read-only non-root production containers, Elasticsearch security, and SSRF/path-traversal guards were added across the ecosystem.
+- **Self-hosted white-labelled documentation:** A Sphinx documentation container that rebrands pages per tenant, with brand-neutral screenshots and new help, security and policy manuals, was added.
+
+---
+
+## Added
+
+### Backup, Restore & Disaster Recovery
+- **Full-platform backup manager:** Added `BackupManager` producing timestamped backups of MongoDB, ArangoDB, Elasticsearch (scroll-based), logs, static resources, social sessions and per-tenant folders, with a versioned `manifest.json` and an HTML report.
+- **Admin and root-tenant backup APIs:** Added admin backup list/instant/status/delete/restore/visibility/download endpoints and root-tenant per-tenant restore and import endpoints behind a `root_admin_required` dependency.
+- **Tenant backup and export:** Added `TenantBackupManager` with maintainer-gated tenant backup, restore, import, visibility, download and tenant export endpoints, blocked for sub-tenants.
+- **Tenant data partitioning:** Added `TenantPartitionRegistry` classifying every collection as DIRECT, TRANSITIVE, GLOBAL or PRESERVED and nesting sub-tenants under their primary.
+- **Encrypted tenant exports:** Added `ExportCipher` streaming AES-256-GCM chunked exports with a magic header, rejecting tampered, truncated or foreign-server files on import.
+- **Backup retention and distributed jobs:** Added `BackupRetention` (at most two backups, stale-directory sweeping, disk-space HTTP 507), `BackupJobStore` with a unique `job_key` and heartbeat, and a `db_backup_model` AUTO/INSTANT registry.
+- **Offline restore tool:** Added `backend/restore_backup.py` and `./run.sh restore <backup_name>` for command-line restore inside the container.
+- **Backup & Restore UI:** Added admin and tenant Backup & Restore pages, a Backup Visibility dashboard with per-store breakdowns, ZIP import/export, and a backup-age warning.
+
+### Maintenance Mode & Scheduling
+- **Maintenance middleware:** Added a middleware returning 503 for HTTP and 1013 for WebSockets while a backup or restore runs, with per-tenant fencing so only the tenant being restored is blocked.
+- **Live maintenance page:** Added a rebuilt `maintenance.html` that polls backup status every 5 seconds, shows progress, and redirects home on completion.
+- **Scheduler manager:** Added `SchedulerManager` with timezone-aware, once-per-slot daily jobs, heartbeat-based recovery, and missed-run execution on startup.
+- **Scheduled jobs:** Added per-tenant IOC alert schedules (`auto_alert_scan`), a daily social profile job, 72-hour automatic backups, and a `cronjob_status` collection tracking alert, social and backup jobs.
+
+### Multi-Tenant Hierarchy, Subdomains & Quotas
+- **Primary and sub-tenant model:** Added `db_tenant_model` fields for slug, primary/parent relationship, quota, alert visibility, privileged IOC, dismissed IOCs, allowed alert categories, alert run time and status board.
+- **Tenant resolution middleware:** Added host-based tenant resolution (`<slug>.<base>`, `<slug>.localhost`, internal host by token) with 404/503/403 handling for unknown, fenced and blocked tenants.
+- **Tenant slugs, self-signup and quotas:** Added slug generation from the signup domain, sub-tenant self-signup on a primary's host, and Redis-locked tenant and pooled-user quota enforcement.
+- **Access blocking:** Added tenant blocking (admin-disabled, inactive primary, or over-quota) enforced on every `/api/` request, with a full-screen "account temporarily disabled" page.
+- **Cross-tenant alert visibility:** Added tenant alert summary, allowed-options, per-tenant alert and admin alert endpoints governed by per-user `alerts_allowed_all`/`alerts_allowed_tenant_ids`, and a Tenant Alerts view in Case Management.
+- **Per-tenant system configuration and branding:** Added per-tenant `SYSTEM_SETTINGS` records with inherited admin-only keys, seeded defaults, a per-tenant AI-endpoint toggle, per-tenant logos/favicons with cache-busting, and branding editor endpoints.
+- **Privileged IOC:** Added automatic domain/email IOC generation and an admin-only `privileged_ioc` toggle.
+
+### Alert Integrations & Alert Engine
+- **Alert connector framework:** Added `AlertConnectorManager`, `AlertWebhookManager`, a provider registry, base payload builders, an `alert_connectors` collection, and connector settings/connect/callback endpoints.
+- **Slack and Jira connectors:** Added Slack OAuth v2 with Block Kit delivery and Jira Atlassian 3LO OAuth with automatic token refresh and one issue per alert, plus fan-out to all connected providers.
+- **Alert scan buffer:** Added `AlertScanBuffer` for per-tenant buffered, chunked bulk upserts discarded on cancel or failure.
+- **New alert categories and models:** Added vulnerability-scanning alerts, stealer-index email-breach alerts, and alert fields for soft delete, dismissal, risk, licenses and sanitized raw findings.
+- **Alert dismissal and UI:** Added `POST /api/alert/dismiss`, `include_dismissed` listings, dismissed counts, an Active/Dismissed toggle, an alert detail drawer, and per-category alert-scanner settings.
+- **IOC upload and shared selector:** Added CSV IOC upload with row validation and a shared IOC selector that rejects sub-domains already covered by a parent.
+- **Admin scan summary mail:** Added a post-batch admin mail listing compromised tenants.
+
+### Takedown Requests
+- **Takedown manager and endpoints:** Added `TakedownManager`, a `takedown_requests` collection, create/list/accept/reject endpoints, and routing to the owning primary or root tenant, with a 424 when no abuse contact is found.
+- **Evidence and mail:** Added Micros-backed evidence capture, an urgent abuse/takedown mail with attached evidence, a takedown email template, and takedown status written back to the defacement index and reports.
+- **Takedown UI:** Added a Take-Down review page and a report takedown action with an evidence-review step and abuse-contact display.
+
+### Browser Extension Backend & Orion Social Extension
+- **Extension auth and session:** Added extension login/session/refresh/logout endpoints, a 30-day `client="extension"` token, an HttpOnly cookie scoped to `/api/extension`, and a `get_extension_user` dependency.
+- **WebSocket tickets and socket bus:** Added one-time WS tickets, a ticket/bearer/cookie-authenticated socket endpoint, and a Redis pub/sub socket manager and store reaching any worker with a response watchdog.
+- **Extension distribution:** Added `/ext/{artifact}` serving allow-listed Chrome/Firefox packages, update manifests and enterprise policy files, and an extension version endpoint.
+- **Orion Social extension:** Added a new MV3 Chrome/Firefox extension (v0.6.5) with a task socket, a command router (platforms/session/verify/post/crawl/crawl-all), 1,097 per-site crawlers, content crawling for 14 platforms, posting and ad detection, session capture/seed/export, verification for 16 platforms, a `ChallengeGuard` anti-bot detector, tab management, an in-page bridge, and packaging scripts.
+- **Extension manager UI:** Added client detection of install/sign-in/version state with setup-card states and an update banner.
+
+### Social Automation (Manage Profiles)
+- **Session vault:** Added Manage Profiles session endpoints for capture, verify, download, upload and delete, with tenant-Fernet-encrypted `.enc` files and up to 10 sessions per platform.
+- **Personas and managed profiles:** Added persona and managed-profile CRUD, assignments, and posting/ad-monitoring/hate-speech purposes stored in new Mongo collections.
+- **Automation results and triggers:** Added result list/detail/delete endpoints, run-stop, manual triggers, a persona post library seeded from `posts.json`, and a daily `social_profile_job` with a Redis active-run registry and cooperative stop.
+- **Social Monitoring UI:** Added a Manage Profiles page covering sessions, personas, persona monitoring, hate-speech Profile Monitoring, and a live Results view refreshed every 5 seconds.
+- **Social Automation engine (Orion-Social):** Added a TypeScript/Playwright `social-automation` package running posting, ad detection and hate-speech monitoring across 15 platforms from a captured session, with a publisher pipeline, media validation, per-platform adapters, and per-platform login checks.
+- **Classifier service (Orion-Social):** Added a `unitary/toxic-bert` hate-speech classifier and a zero-shot DeBERTa ad-topic classifier, each with its own endpoint, background loading, and a health endpoint.
+
+### Social Recon & Profile Intelligence
+- **Background recon scanner:** Added server-owned background recon scans with status/cancel endpoints, claim-based ownership, heartbeat, timeout and startup resume.
+- **Extension-driven profile crawling:** Added `POST /api/social/profile` crawl/poll/cancel handling with per-scope caching and cursor paging, live section sync, section-status reload-resume, and login-required handling.
+- **Connections and graph:** Added post-commenter connection collection, a connections search endpoint, graph data and prune endpoints, and a relationship graph UI with colour-coded edges and per-user persistence.
+- **Custom recon engine (Orion-Social):** Added a rebuilt custom recon registry of 1,681 per-platform probe modules with grammar checks, four fetch strategies, URL routing, verdicts, a Playwright browser pool, and maigret/holehe username and email extractors.
+- **Phone lookup panel and typed schema:** Added a per-profile phone lookup panel and a rewritten Pydantic `db_social_model` covering profile, resources, hate speech, online presence, stealer logs, wanted entries, phone lookup and per-section status.
+
+### Entity Lookups (Phone & DKIM)
+- **Phone & Domain Lookup (Orion-Micros):** Added `POST /api/phone/universal_search/{user_id}` combining Google Places, DuckDuckGo over Tor, contact scraping and the Google Knowledge Graph, with number normalization and command routing.
+- **DKIM / SPF / DMARC lookup (Orion-Micros):** Added `POST /dkim/check/{user_id}` with ZK-Email selector discovery, common-selector probing, key-strength checks, DMARC/SPF checks and raw email header analysis.
+- **Entity lookup UI and proxies:** Added Phone & Domain Lookup and DKIM Checker pages, poll-based async flows, PDF/JSON/CSV export, and Intelligence proxy endpoints to Micros.
+
+### Network Intelligence & Vulnerability Scanning
+- **Full-depth URL scanning (Orion-Micros):** Added a modular ZAP pipeline on a dedicated `zap-full` container with browser crawl, spider, active scan, browser telemetry, ClamAV scanning, attack-evidence capture, and Redis scan history.
+- **Evidence capture and takedown routing (Orion-Micros):** Added `POST /evidence/capture/{user_id}` producing a full-page screenshot and HTML with abuse-form, abuse-email or WHOIS routing for 37 sites.
+- **Camera/IoT and history endpoints (Orion-Micros):** Added IP-range camera/IoT detection and a per-user URL vulnerability history endpoint.
+- **Network recon upgrades (Orion-Micros):** Added depth-based port profiles, nmap service detection, NVD CPE CVE matching, TLS/SSH weakness scoring, expanded DNS records with SPF/DMARC, and misconfiguration probes.
+- **Vulnerability result view (client):** Added severity tiles, response details, a technology stack with CPE, a CVE list with CVSS scores, expandable evidence findings, and Host Recon DNS records.
+
+### AI Workspace (Nexus) & Dark Nexus Gateway
+- **Nexus chat gateway (Intelligence):** Added chat session CRUD, persistent/temporary sessions keyed by `request_id`, GitHub workspace import, status/tree/file-read, and downloads.
+- **AI Workspace UI:** Added a dedicated `/dashboard/ai` route, multiple saved chats, Chat/Directory/Split views, GitHub import with a malware check, resumable streaming, downloadable bot files, and per-page chat widgets.
+- **MCP2 gateway (Dark Nexus):** Added a streamable-HTTP MCP server exposing annotated `open_chat`, `api_payload`, `documentation` and `pentest` tools with transport-security allow-listing and authenticated downloads.
+- **Agentic Open Chat (Dark Nexus):** Added a LangGraph orchestrator (`step_decision → tool_selection → tool_execution → final_response`) with a five-category routing taxonomy, evidence accumulation, loop-guards and live progress streaming.
+- **Orion API payload tool (Dark Nexus):** Added a natural-language-to-API builder over 18 Orion routes with Chroma/Ollama RAG route selection, documented filter-key allowlists, and WebBridge entity resolution.
+- **Documentation and pentest tools (Dark Nexus):** Added a RAG documentation tool and a 50-tool authorized penetration-testing registry driven by a typed planner and a trusted fixed-argv runner on a pinned Kali toolchain.
+- **Sandbox and code agent (Dark Nexus):** Added a `sandbox_manager` service over OpenSandbox/Kata with TLS 1.3 + mTLS, container profiles, ClamAV import scanning, egress firewalling, and an AST-validated transform-synthesis code agent.
+- **Message-reference and web-requirement classifiers (Dark Nexus):** Added two integrity-validated transformer classifiers for history-reference and web-requirement routing.
+
+### Orion Mail (new product)
+- **Mail stack and SSO:** Added a FastAPI + Angular 22 webmail with a Postfix/rspamd/ClamAV/Redis pipeline, Orion Intelligence single sign-on, tenant-aware origins, lazy mailbox provisioning, and tenant branding.
+- **Mailboxes and compose:** Added standard folders with unread counts, a floating/inline composer with address-book autocomplete, attachments, autosaved drafts, threaded reading, `.eml`/print, and SPF/DKIM/DMARC display.
+- **Mail actions, labels and search:** Added bulk/single archive/trash/restore/read/star/label actions, up to 100 labels, scoped search with live suggestions, and sender report/block with filter training.
+- **Encryption and Messenger:** Added encryption at rest, OpenPGP.js end-to-end encryption (compose, drafts, attachments, key management), disposable sender addresses with their own PGP keys, outgoing identity proofs, and an encrypted 1:1 Messenger.
+- **Settings, limits and notifications:** Added an encryption/disposable-address/signature settings panel, send and quota limits, retention cleanup crons, snooze/scheduled-send APIs, unread-count notifications, keyboard shortcuts and theming.
+- **Mail entry point (Intelligence):** Added a profile-menu "<App> Mail" item opening SSO to Orion Mail on the tenant host, gated by admin/maintainer/`orion_mail`.
+
+### Orion Uptime (new product)
+- **Monitor types:** Added HTTP, API (with a JSON assertion engine of 30+ operators), Ping (with TCP fallback), Heartbeat/push, and Orion Intelligence feeder-script monitors.
+- **Auth profiles and incidents:** Added Fernet-encrypted form-login auth profiles with test-before-save, incidents opened after N consecutive failures with readable reasons, and a Log Manager for Orion system logs.
+- **Dashboards and status pages:** Added an SSE live dashboard, monitor detail with week/month/year charts, public 90-day status pages, public monitor detail, and import/export of monitor configs.
+- **Alerts, users and retention:** Added Slack and SMTP email alerting with per-integration monitor mapping, admin/viewer roles, and automatic result retention.
+
+### Orion Package, Orion Sandbox & Tor2Web
+- **Orion Package (new):** Added an interactive push/pull toolkit that builds hardened, Cython-compiled, obfuscated, digest-pinned images for Intelligence, Micros, Social, Dark Nexus and Mail, and deploys them with generated secrets, cross-module secret sync, Cloudflare DNS automation, Let's Encrypt DNS-01 certificates, per-image deploy manifests, and pre-flight validation.
+- **Orion Sandbox (new):** Added an OpenSandbox/Kata code-execution control plane with development and production (TLS 1.3 + mTLS + API key) modes, default-deny egress, a Kata tap guard, a ClamAV runtime, managed workspace volumes, a production disk guard, a security self-test, and a lifecycle CLI.
+- **Tor2Web 3.3.0 overhaul:** Added a context-aware HTML/CSS/JS/JSON/XML rewriting engine, subdomain/port and clearnet sub-resource routing, a browser-compatibility script, multi-Tor-client support, a headless-Chromium render-check harness, and rewriter unit tests.
+
+### Collector Control Console & Crawler Pipeline
+- **Collector control console (Orion-Crawler):** Added a FastAPI + Angular 21 console that scans every collector script as a Celery probe, with archive/unarchive, zip download, push-to-feeder, per-script sessions, a Celery metrics view, a log viewer, a Tor status check, and a TLS interface stack.
+- **Stealer-log parsers (Orion-Crawler):** Added card, session-cookie, DB-dump (JSON/.eml/vCard) and phone parsers, RAR/7z/tar archive support, streamed SQL parsing, and authenticated indexing.
+- **Feeder-driven Telegram crawling (Orion-Crawler):** Added feeder-supplied channel lists, per-channel feeder status reporting, linked t.me post following, private-channel identifier resolution, chat translation to English, and extended message metadata.
+- **FlareSolverr and session-aware parsers (Orion-Crawler):** Added a `FetchConfig.FLARESOLVERR` fetch mode with a bundled service, inline session loading into Playwright and requests, an RSS fetch profile, new Gettr/Pinterest/Plurk crawlers, a scan-probe Celery queue, periodic parser refresh with atomic staging, and a probe-manager test harness.
+- **Collector framework (Orion-Crawler):** Added per-family collector rules docs, a forum promotion gate with quarantine, and per-family `main.py`/`_example.py` templates; new leak and defacement collector scripts were added.
+- **Feeder statistics and Dark Logs (client):** Added a Feeder Statistics view and a "Dark Logs" feeder group combining the stealer-log and Telegram chat rules, with bulk value deletion.
+
+### System, Search, Case Management & Documentation
+- **Stealer-log triage (client + backend):** Added result dismiss/restore, Stealers/Threats tabs, a Domain Index sidebar, Credit-Card and Session Intelligence panels, BIN enrichment, and PDF/JSON/CSV export.
+- **Batch CTI graph and feeder stats (backend):** Added a multi-criteria batch CTI graph query, cluster-scoped queries, a system-statistics endpoint across 11 Elastic indices, and a feeder value bulk-delete endpoint.
+- **Case management extensions:** Added a `CaseCommunicationManager` with external communication links opened through the extension and captured sessions, and a configurable status-board settings page.
+- **Cookie-only authentication and recovery:** Added cookie-only login/2FA/refresh, a `session_present` marker cookie, account recovery keys, password re-confirmation for sensitive actions, and login-throttling countdowns.
+- **New permissions:** Added ORION_MAIL, DISMISS_RESULT and MONITORING permissions with a consolidated Monitoring page (Log Manager, Auditlog, Event Management).
+- **Self-hosted documentation:** Added a `documentation` container, a per-tenant rebranding `/documentation` proxy, new help/security/policy manuals, brand-neutral screenshots, and new extension/social/search API docs.
+- **Platform modernisation and tests:** Added the Angular 22 esbuild builder and TypeScript 6, about 1,140 new translation keys across 18 languages, new Cypress specs (takedown, AI chat, backup, manage profiles, DKIM, geo-fencing, network intel), and a large backend test suite expansion.
+- **Data migrations (target 1.0.3.18):** Added migrations for case status reasons and communications, embedded alert normalization and regeneration, per-tenant system settings and slugs, `tenant_id` field renames, and per-tenant takedown uniqueness.
+
+---
+
+## Improved
+
+### Backup, Restore & Startup
+- Improved restore safety with pre-restore rollback snapshots, manifest count verification, automatic rollback on failure, interrupted-restore detection at startup, extension-socket and social-scan quiescing, and per-tenant configuration cache reloads.
+- Improved startup recovery under a Redis lock, runtime-directory creation, configuration reload, pending social-scan resume, and persona-post preloading, with cron loops paused during maintenance.
+
+### Datastores, Migrations & Search
+- Improved the migration runner with `pkgutil` discovery and an async update-by-query progress helper, and the Elasticsearch controller with tuned timeouts, strict results, conflict retries, targeted refresh, keyword clipping and periodic stealer refresh.
+- Improved ArangoDB with a pooled client and composite indexes, CTI graph writes with lock-retry and Redis serialization, the Redis controller with a distributed-lock context manager, and added MongoDB indexes across the new collections.
+- Improved query generation (subdomain wildcards, `exists` queries, shared date parsing), a shared ranked-hit result parser, exploit filter suggestions, APT pagination, and centralized scan-job ownership.
+
+### Alerts, Tenants & Cases
+- Improved alert licensing by user, tenant and per-alert licenses, soft delete with restore-on-upsert, alert mail delivery status and case-view links, per-tenant SMTP resolution, and case loading/persistence consolidation.
+- Improved the client alert export (PDF/JSON/CSV and whole-category), the Log Manager (date range, SUCCESS/CRITICAL, expandable tracebacks), settings forms, custom-alert license gating, and the users page.
+
+### Social Integration & Automation
+- Improved the social service configuration (base URL, internal token and identity headers, 502 on unreachable), recon normalization to the typed shape, and extension socket re-delivery and keep-alive.
+- Improved the social automation flow to polled jobs through the progress controller, per-request session state, recon probe quality with markers and retries, and the social container build (Node/Playwright, CPU torch, entrypoint relock).
+- Improved the Micros job controller (clean cancellation, single-flight full scans with a 429 queue, `force_new`, partial results, forward-only progress), command executor split, deep-scan limits, active-scan scope, code layout, startup model setup, and ClamAV health checks.
+
+### Crawler, Collector & Tor2Web Operations
+- Improved custom parsers to run entirely through the Celery browser pool with backoff retries and cache invalidation, Celery runtime (12-hour visibility, 36,000-second limits, supervised workers, per-file locks), Tor (random proxy selection, new subnet, SOCKS healthcheck), and backend requests (re-auth, retries, response-body error context).
+- Improved collector scripts with a "release latest record, then stop" rule, 24 Playwright-to-requests moves, and forum tuning; expanded archive handling, Telegram limits, stealer detection, and SQL/infostealer extraction.
+- Improved Tor2Web resilience (Tor ExtendedErrors classification, retry budgets, new timeouts), throughput (multi-worker supervisor, gzip, pass-through), Tor client tuning, and edge nginx; and the Orion Sandbox operations with ClamAV/disk-guard timers and workspace cleanup.
+
+### Client Shell, UX & Modernisation
+- Improved Social Intelligence scanning (submit-then-poll, reload resume, retry history), the assistant widget routing across 20+ sections, the markdown table pipe, the consolidated threat scan across every entity value, advanced query builders, and the scan notification panel.
+- Improved the satellite map (native-zoom imagery, MapLibre vector tiles, cursor lat/lon), Threat Lens (ArcGIS 4.34 loader), the world heatmap warm-up, and homepage insights retries.
+- Improved the shell with new shared UI components, a large Tailwind and light-theme pass, CSS route fades, accessibility labelling, a rewritten demo tour, a redesigned login page, and about 1,140 new translation keys across all 18 languages.
+
+### Documentation, Build & CI
+- Improved the in-app docs to load markdown directly, social route OpenAPI metadata, logging (standard-library bridge into the System Log Manager, date-range filter, merged multi-line entries), and `/api/*` JSON error responses.
+- Improved `run.sh` (production maintenance mode, dev/test nginx validation and hot-reload, readiness waits, merged `-doc`/`-docs`), the workspace layout, compose (Elastic health gating, workspace/backup mounts, Nexus network), and CI (test stack on 8443, coverage artifact, pinned actions).
+- Improved dependencies (cryptography, starlette-admin, elasticsearch[async], websockets, smartbindb) and code organization (model modules renamed to managers), and moved the topic-classifier provisioning to a manifest-verified `ModelManager`.
+
+---
+
+## Fixed
+
+### Security Fixes & Hardening
+- **Separate JWT signing key:** `S_AUTH_SECRET_KEY` now comes from `JWT_SECRET_KEY`, the stealer-log key from `STEALER_KEY`, and the `AUTH=0` DEMO bypass was removed.
+- **Credential and token hardening:** Password-reset and heartbeat tokens are stored as SHA-256 hashes, account enumeration is prevented, 2FA secrets are encrypted per tenant, and changing a password or 2FA requires the current password.
+- **Cookie-only auth:** The bearer token is no longer stored in `localStorage` or sent as an `Authorization` header; a session marker cookie gates loading and 401s clear client state.
+- **Cross-tenant isolation:** Tokens are rejected on another tenant's host, `X-Forwarded-Host` is trusted only outside production, tenant update boundaries and per-tenant data scoping were enforced, and connector OAuth state is HMAC-signed.
+- **Backup, feeder and resource hardening:** Backup imports reject zip traversal and zip bombs, feeder routes are root-tenant/admin-limited with path checks, and only whitelisted validated resource files are served.
+- **Extension and API gating:** The extension session and cookie are isolated, WS auth uses one-time tickets, captured sessions are encrypted, `/ext/` serves allow-listed files, and every Social route requires a constant-time internal token with per-user job isolation.
+- **SSRF and target validation:** Deep scans, evidence replay, web search, pentest targets, Uptime monitors and the Tor2Web clearnet proxy reject private/loopback/link-local/reserved addresses and credentialed URLs, with secret redaction and bounded caches.
+- **Production container and datastore lockdown:** `web`/`nginx`/Dark-Nexus/Mail/Uptime/Sandbox containers run read-only, non-root, with dropped capabilities and `no-new-privileges`; Elasticsearch security is enabled, images are digest-pinned, and host port bindings were removed.
+- **Client output hardening:** Added prototype-pollution helpers with ESLint enforcement, ReDoS-safe validators, `noopener`/`noreferrer` and `no-referrer` on external links and images, and role/ownership gates on takedown, backups, alerts and IOC editing.
+- **Supply-chain and secret hygiene:** The Dark Nexus Kali base image and Go tools are digest/version-pinned with verified templates, the pentest planner emits only typed tool calls compiled to fixed argv, and I2P keys, Telegram sessions and committed collector/social sessions were removed from git.
+
+### Bug Fixes & Stability
+- **Session eviction and stream resume:** Web and extension sessions have separate Redis keys so they no longer evict each other, logout disconnects sockets first, and Nexus streams rejoin per `(user, request_id)` instead of cancelling.
+- **Datastore and logging fixes:** Elasticsearch deep paging is clamped, a duplicate `source_domain` tag was fixed, log retention and flush were repaired, and `/api/*` errors no longer redirect to `/500`.
+- **Stale-state recovery:** Stale maintenance flags, abandoned backup jobs, scheduler runs and social scans are cleared or reclaimed via heartbeat staleness, and orphaned social session records are pruned on read.
+- **Alerts, tenants and cases:** Maintainer lookups use `tenant_id`, `None` payloads are coerced, failed tenant creation removes the stray data key, tenant deletion cascades, and artifact storage is created lazily.
+- **Social automation and ad detection:** Facebook/Reddit/YouTube/Quora/OK.ru/Hashnode/LinkedIn ad detection was fixed (U+2060 labels, tracker-URL dedupe, false ads), Threads scanning was bounded, missing post URLs were backstopped, and TikTok/OK.ru/Patreon/Threads/Instagram/Facebook posting was corrected.
+- **Micros scanning fixes:** `/nlp/parse` credential detection no longer relies on the failing tokenizer, Presidio failures degrade gracefully, false credit-card findings and duplicates were removed, partial/cancelled scans end correctly, and geofencing works from the GeoLite2 CSV.
+- **Crawler and Telegram fixes:** The Redis port, a broken `requests` import, URL-lock leaks, `lstrip`-based URL mangling, per-instance shared state, the flush callback, per-card dedupe, and last-SQL-batch drops were fixed, and each archive file is now parsed in isolation.
+- **Tor2Web and sandbox fixes:** Rewriting no longer corrupts XML/JS/SVG, SOCKS failures return errors instead of hanging, health checks test real behaviour with autoheal, and the Kata tap-guard race was fixed to fail closed.
+- **Client fixes:** Category-result sorting, result-insight plural fields, consolidated report links, out-of-order stealer responses, the black/white Geo-Fencing map, router `NoMatch` rejections, entity-lookup repaint stalls, and unused social routes were fixed.
+- **Migration and deploy fixes:** The migration guard handles already-reaped tasks, migration 1.0.3.1 uses the renamed tenant field, the 1.0.3.9 CVSS migration was deleted, and Orion Package recovers unhealthy ClamAV and checks for credential/volume drift.
+
+---
+
+## Platform Enhancements (Integrated)
+
+### Orion Intelligence Platform
+- **Backup and restore** integrated across admin and tenant routes, the maintenance and tenant-fence middlewares, the live maintenance page, 72-hour auto-backups, startup recovery, `restore_backup.py`, `./run.sh restore`, nginx import locations and the Backup UI.
+- **Multi-tenant subdomain hierarchy** integrated across `db_tenant_model`, tenant resolution middleware, wildcard hosts and nginx server blocks, signup, quota pooling, access blocking, per-tenant settings and branding, tenant-branded exports, and migrations 1.0.3.15/1.0.3.17/1.0.3.18.
+- **Slack and Jira alert delivery** integrated across `alert_connectors` storage, OAuth routes, tenant settings, token refresh and alert mail fan-out.
+- **Buffered, schedulable alert scanning** integrated across `AlertScanBuffer`, the category/scanning/dynamic/vulnerability processors, `SchedulerManager`, per-tenant run times and allow-lists, dismissal, and the admin summary mail.
+- **Browser extension bridge** integrated across the extension routes, the Redis socket bus and store, the extension session and cookie, nginx WebSocket and `/ext/` locations, logout cleanup, and case communication capture.
+- **Social automation and recon** integrated across Manage Profiles routes, `ProfileManager`, `social_profile_job`, the Redis run registry, new Mongo collections, Orion-Social `automation/*`, `social_scanner` and startup resume.
+- **Orion Mail** integrated across nginx mail server blocks, the SSO manager and routes, the `orion_mail` permission, account-deletion sync and `template-env`.
+- **Takedown workflow** integrated across Micros evidence capture, the `takedown_requests` queue, reviewer routing, evidence mail and defacement index status.
+- **Nexus AI** integrated across the chat gateway, the external `orion_nexus_backend` network and the download proxy.
+- **Self-hosted documentation** integrated across the `documentation` compose service, nginx `/documentation` routing, the per-tenant rebranding proxy, CSP allowances and the neutral screenshot pipeline.
+- **Cookie-only authentication and security baseline** integrated across login/2FA/refresh, recovery keys, password re-confirmation, own-property helpers, bounded validation and origin-restricted messaging.
+- **Client modernisation and tests** integrated across the Angular 22 esbuild builder, MapLibre worker assets, dual build output, 18-language translations, 7 new e2e specs and 9 new controllers, and a backend test suite grown to about 1,286 functions.
+
+### Orion-Micros
+- **Phone and domain OSINT** integrated (Google Places, DuckDuckGo over Tor, contact scraping, Knowledge Graph).
+- **DKIM/SPF/DMARC lookup** integrated (ZK-Email archive, selector probing, key-strength checks, raw header parsing).
+- **Evidence capture and takedown routing** integrated (Playwright screenshot/HTML, abuse forms/emails, WHOIS).
+- **Full-depth URL vulnerability scanning** integrated on a dedicated `zap-full` container with telemetry, ClamAV, attack evidence and Redis history.
+- **Camera/IoT detection and URL vulnerability history** integrated, along with depth-based ports, nmap detection, NVD CVE matching, and TLS/SSH scoring.
+- **Job orchestration** integrated (clean cancellation, full-scan 429 queue, `force_new`, partial results, configurable TTL), and model downloads moved to startup.
+
+### Orion-Crawler
+- **Orion Social browser extension** integrated (1,097 crawlers, capture/verify/export, posting, ad detection, `ChallengeGuard`, Chrome/Firefox packaging).
+- **Collector control console** integrated (FastAPI backend, Angular 21 dashboard, nginx TLS front, dev-profile compose services).
+- **Stealer-log parsers** integrated (card, session-cookie, DB-dump, phone, RAR/7z/tar, authenticated indexing).
+- **Feeder-driven Telegram crawling** integrated (channel feed, status reporting, linked-post following, translation, extended metadata).
+- **FlareSolverr and session-aware custom parsers** integrated across Playwright, requests and FlareSolverr.
+- **Gettr, Pinterest and Plurk crawlers, the scan-probe queue and probe manager** integrated, along with parser auto-refresh and Celery/Tor/Redis runtime updates.
+
+### Orion-Collector
+- **Merged into Orion-Crawler** at `interface/collector`, replacing the in-process runner with Celery probes over containerized Tor.
+- **Collector family rules docs** integrated with a rules header in 282 of 284 scripts.
+- **"Release latest record, then stop" behaviour** standardised across families, with 24 Playwright-to-requests moves.
+- **Forum quarantine and family templates** integrated, and console-driven archive/session/push-to-feeder/download workflows added.
+- **Leak coverage expanded** with new leak scripts and defacement mirrors; obsolete profile and forum scripts were removed.
+
+### Orion-Social
+- **Social Automation (posting)** integrated across X, Facebook, Instagram, LinkedIn, Threads, Pinterest, YouTube, TikTok, Quora, OK.ru and Patreon.
+- **Ad detection and hate-speech monitoring** integrated across all 15 captured platforms, with per-run caps and topic/label classification.
+- **Per-platform session checks** integrated with full state restore and Chromium/Firefox selection.
+- **Custom recon** integrated with 1,681 platform probes, URL routing, a Playwright browser pool and top-platform retries.
+- **maigret/holehe recon and a classifier service** integrated, along with an internal-token API gate and per-user job scoping.
+
+### Orion-Dark-Nexus
+- **MCP2 official server** integrated as the single gateway exposing `open_chat`, `api_payload`, `documentation` and `pentest`.
+- **Agentic LangGraph Open Chat and the five-category intent router** integrated with loop-guards and live progress.
+- **18-route Orion API payload builder** integrated with RAG route selection and web entity resolution.
+- **50-tool authorized penetration-testing suite** integrated behind a typed planner and a trusted fixed-argv runner.
+- **Isolated sandbox service and transform-synthesis code agent** integrated over mTLS with egress firewalling.
+- **RAG stack, PDF export, Mongo chat sessions and probe/conformance harnesses** integrated, with hardened production topology and a pinned supply chain.
+
+### Orion-mail
+- **Orion Intelligence SSO and tenant white-labelling** integrated from `/api/public`.
+- **Postfix + rspamd + ClamAV + Redis** mail pipeline integrated with DKIM signing, spam scoring and filter training.
+- **OpenPGP.js end-to-end encryption** integrated across compose, drafts, attachments, Messenger and settings.
+- **Production deployment** integrated via `run.sh`, with health checks and the external `shared_bridge` network.
+
+### Orion-Uptime
+- **Orion Intelligence** integrated through form-login auth profiles, feeder-script monitoring and the Log Manager over `shared_bridge`.
+- **Realtime SSE broker, Slack and SMTP alerting** integrated with per-integration monitor mapping.
+- **Production deployment** integrated with an isolated network, automatic Let's Encrypt and a Mongo/admin seeder.
+
+### Orion-Package
+- **Orion-Intelligence, Orion-Micros, Orion-Social, Orion-Dark-Nexus and Orion-mail** integrated as buildable, deployable modules with per-module Compose projects.
+- **Cython, obfuscation and encoded-launcher toolchain** integrated with release and image audits.
+- **Cloudflare DNS and certbot DNS-01** integrated for app, wildcard, webmail and SMTP hostnames, with cross-module secret sync.
+
+### Orion Sandbox
+- **Kata Containers and digest-pinned OpenSandbox images** integrated via `versions.lock`.
+- **Orion-Dark-Nexus** integrated through automatic `SANDBOX_IMAGE` sync and safe sandbox-manager recreation.
+- **Systemd units** integrated for the service, firewall, ClamAV refresh and disk-guard timers.
+
+### Orion-Tor2Web
+- **Python 3.13 / Twisted 26 packaging** integrated with an environment-rendered config and a foreground entrypoint.
+- **Tor 0.4.9 with ExtendedErrors, autoheal and log rotation** integrated across the tor, gateway and nginx services.
+- **Render-check harness and rewriter unit tests** integrated into `run.sh check`/`test`.
+
+### Orion-Storage
+- **Stealer-log Elasticsearch index** integrated with a 15-minute refresh interval in the compose template and `run.sh` bootstrap.
+
+### Landing Projects
+- **Orion Intelligence Landing** integrated the rebuilt two-tab collaboration deck, 11 refreshed screenshots, class-based dark mode and light-mode background detail.
+
+---
+
+## Notes
+- The largest completed gains are in **backup/restore and disaster recovery**, **multi-tenant hierarchy and white-labelling**, **the browser-extension bridge and Orion Social extension**, **social automation and recon**, **the Dark Nexus MCP2 rebuild**, **the stealer-log and Telegram crawling pipeline**, **alert integrations and the alert engine**, and **security hardening across every repository**.
+- The biggest additions are the new standalone products: **Orion Mail**, **Orion Uptime**, **Orion Package**, and **Orion Sandbox**, along with the **collector control console** and the **Tor2Web 3.3.0 gateway overhaul**.
+
+Added Scripts defacement
+
+    _attrition_mirror.py
+    _hack_mirror.py
+
+Added Scripts leak
+
+    _cmdnkiqjije2tllr3biee2sjgj3i4robg2cbtilbnytdhh2wy3syrlyd.py
+    _cryoblogedawivdcknyd4jsjxkrx3xrqqltxla6wwjjnzm3f3jaxjzqd.py
+    _ejzl7cjxmkx7lzhiqwidmrwtfjv45pkczbc4fnyaut3t7gll3yaiq5id.py
+    _everestndkvzcibcje2cqxhre2hmmybl3rn2gwzwsblz7gx6uryn5rad.py
+    _ipi4tiumgzjsym6pyuzrfqrtwskokxokqannmd6sa24shvr7x5kxdvqd.py
+    _krybieodq754vlwufrsuxaswxb5zpxyibaawmed2jaduoz2e5m56hmid.py
+    _lamashtux5j74mcm7lwwgn5yrvuwtrpxjoyendif3v3hrztjesfoyayd.py
+    _lynxblogijy4jfoblgix2klxmkbgee4leoeuge7qt4fpfkj4zbi2sjyd.py
+    _m3ksukzn2glzfdvlusohril7n3iyk4z4fudf6mm22lwhpbpt5aiee5qd.py
+    _mozilla.py
+    _netrunrsb3bivj5gnwajzxlig5qkteb6edgthxj7fmsvhkzxtwfxwaad.py
+    _odaygplp3zhyx7zl45egetl6dzc4reduisnoyym34rjdmaryfaz5doqd.py
+    _ojcmpbdncjo5dhaxxll44bq6to3kwqtoeraevgsjquhdtt4uv5l4igid.py
+    _ransom_db.py
+    _ransomnews.py
+    _ransomware.py
+    _rzzfiwoop67jrxadngcy7nvjm7suwtrjznview63ooowqfsm5sq7gmqd.py
+    _spycorp.py
+    _u6lieui2dakbctcjea2bz4r4q32r7t36nwljovqbv7mxs6o2smgxixid.py
+    _x4bccxlsmjsxlnnf3ocvndlshgfkagzytpqmsjnlfykceumnw6i4hkqd.py
+
+Added Scripts extension
+
+    abcaccountingucoznet.ts
+    aboutme.ts
+    academiaedu.ts
+    actikomucozru.ts
+    adminsoftucozru.ts
+    aetherhub.ts
+    afsocucozru.ts
+    aheraru.ts
+    aiidadiscoursegroup.ts
+    aikidomariupolucozru.ts
+    akniga.ts
+    aliliangardendiscoursegroup.ts
+    alisaclubru.ts
+    allhockey.ts
+    allmusucozru.ts
+    allthelyrics.ts
+    ameba.ts
+    ameblo.ts
+    americanthinker.ts
+    aminus3.ts
+    analitikaforexru.ts
+    anchorecommunitydiscoursegroup.ts
+    androidforums.ts
+    angara.ts
+    angelgothics.ts
+    anilist.ts
+    animebase.ts
+    animegrandmoysu.ts
+    animelendmy1ru.ts
+    animeuknews.ts
+    aniworld.ts
+    ankorducozru.ts
+    antalyaucozru.ts
+    antihackucoznet.ts
+    antiquebottles.ts
+    antivirusmoysu.ts
+    antizombieucozru.ts
+    apelmonodua.ts
+    appairnftscom.ts
+    appleinsiderru.ts
+    archiveofourown.ts
+    arduinoforum.ts
+    arena.ts
+    argoscommunitydiscoursegroup.ts
+    aributru.ts
+    artinvestment.ts
+    artnatamy1ru.ts
+    artstation.ts
+    artsy.ts
+    asciinema.ts
+    asecuritydoam.ts
+    askbioexceleu.ts
+    askmrrobotdiscoursehostingnet.ts
+    askvrchatcom.ts
+    atcoder.ts
+    atlasdiscoursegroup.ts
+    atmclubmoysu.ts
+    au.ts
+    audiojungle.ts
+    audiomack.ts
+    authortoday.ts
+    autolada.ts
+    av3dnru.ts
+    aviaforumucozru.ts
+    awfulsystems.ts
+    awgosdrspace.ts
+    awsskillsprofile.ts
+    azhackucoznet.ts
+    backstagepolyendcom.ts
+    baggiucozru.ts
+    bambulabforum.ts
+    bandcamp.ts
+    bandlab.ts
+    bashteploventucozru.ts
+    bayoushooter.ts
+    bbclubucozru.ts
+    bbseeclubtop.ts
+    bbsfit2cloudcom.ts
+    bcetytru.ts
+    bchartscombr.ts
+    beatlucozru.ts
+    behance.ts
+    belgaesocial.ts
+    bereal.ts
+    bereaucozru.ts
+    bestfriendschat.ts
+    bezuzyteczna.ts
+    bgforum.ts
+    bgindiscoursegroup.ts
+    biggerpockets.ts
+    bigo.ts
+    bilibili.ts
+    binhot3dnru.ts
+    biohackingforum.ts
+    bitchute.ts
+    blast.ts
+    bldgsimonebuildingorg.ts
+    blenderartistsorg.ts
+    blipfoto.ts
+    blitztactics.ts
+    blizzhackersdiscoursegroup.ts
+    blocsforumdiscoursehostingnet.ts
+    blogger.ts
+    bloggerbloggercom.ts
+    blogzzaclyscom.ts
+    bluesky.ts
+    bnddiscoursegroup.ts
+    boardmddcdev.ts
+    boardphpbuildercom.ts
+    boardscore77com.ts
+    boardttvchannelcom.ts
+    bookandreader.ts
+    boosty.ts
+    breakerstv.ts
+    broadbandgeniediscoursegroup.ts
+    brusheezy.ts
+    budo52ru.ts
+    buildermetamaskio.ts
+    bunpro.ts
+    buyforexucozru.ts
+    buymeacoffee.ts
+    buzznet.ts
+    cadaverzianucozru.ts
+    caddycommunity.ts
+    cajunthredsdiscoursegroup.ts
+    calculixdiscoursegroup.ts
+    canadianfootballforum.ts
+    castingcallclub.ts
+    catinbootsucozru.ts
+    caves.ts
+    ccmixter.ts
+    centrspektrru.ts
+    cfdonline.ts
+    chaosfurssocial.ts
+    chapeldiscoursegroup.ts
+    chastyscucozru.ts
+    chatujmecz.ts
+    chelentanoucozru.ts
+    chemistlab.ts
+    chess.ts
+    chesscom.ts
+    chiefdelphicom.ts
+    christianvideo3dnru.ts
+    clarityfm.ts
+    clashlangdiscoursegroup.ts
+    cldesmoscom.ts
+    clozemaster.ts
+    clubcomedyclansu.ts
+    clubministryoftestingcom.ts
+    clubmodevolcom.ts
+    cmet4uk.ts
+    cnet.ts
+    cnodejs.ts
+    cocoscommunity.ts
+    codebynet.ts
+    codecanyon.ts
+    codedex.ts
+    codeforces.ts
+    coderwall.ts
+    codesellerru.ts
+    codewars.ts
+    coffeeworlducozru.ts
+    collectorscom.ts
+    collegyucozru.ts
+    colorlibsupportcom.ts
+    comedy.ts
+    commonscommondreamsorg.ts
+    commonsishtarcollectivenet.ts
+    communityabbyfr.ts
+    communityadminforgede.ts
+    communityaliceblueonlinecom.ts
+    communityamazondevelopercom.ts
+    communityamperecomputingcom.ts
+    communityankihubnet.ts
+    communityanovaculinarycom.ts
+    communityanvizcom.ts
+    communityaphhiveorg.ts
+    communityapollographqlcom.ts
+    communityappfarmio.ts
+    communityappinesfr.ts
+    communityappinventormitedu.ts
+    communityarduboycom.ts
+    communityaristotlemetadatacom.ts
+    communityasepriteorg.ts
+    communityasteriskorg.ts
+    communityauth0com.ts
+    communityautomationedgecom.ts
+    communityavgcom.ts
+    communityawebercom.ts
+    communitybaserowio.ts
+    communitybearapp.ts
+    communitybitmovincom.ts
+    communityblokadaorg.ts
+    communitybloomreachcom.ts
+    communityblynkcc.ts
+    communitybrainmaporg.ts
+    communitybrevocom.ts
+    communitybrewwcom.ts
+    communitybrightpatterncom.ts
+    communitycambiumnetworkscom.ts
+    communitycarbide3dcom.ts
+    communitycartalkcom.ts
+    communitycertifythewebcom.ts
+    communitycesiumcom.ts
+    communityclarkcom.ts
+    communitycoopstech.ts
+    communitycrewaicom.ts
+    communitycrossreforg.ts
+    communitycybozudev.ts
+    communitydataquestio.ts
+    communitydatocmscom.ts
+    communitydeltaexchange.ts
+    communityderivcom.ts
+    communitydeveloperatlassiancom.ts
+    communitydirectuscom.ts
+    communitydremiocom.ts
+    communityefoundation.ts
+    communityelfsightcom.ts
+    communityemmaappcom.ts
+    communityendlessoscom.ts
+    communityepinowcastorg.ts
+    communityespboycom.ts
+    communityeufycom.ts
+    communityevolveauthoringcom.ts
+    communityfastlycom.ts
+    communityfiberyio.ts
+    communityfirebasestudiodev.ts
+    communityfireblockscom.ts
+    communityfirecorecom.ts
+    communityforestadmincom.ts
+    communityframework.ts
+    communityfreepbxorg.ts
+    communityfunnelishcom.ts
+    communityfutureaudioworkshopcom.ts
+    communitygainiumio.ts
+    communitygamedevtv.ts
+    communitygemsofwarcom.ts
+    communitygeodynamicsorg.ts
+    communitygetmailspringcom.ts
+    communitygetswipein.ts
+    communitygigperformercom.ts
+    communitygladysassistantcom.ts
+    communityglideappscom.ts
+    communitygrafanacom.ts
+    communitygraylogorg.ts
+    communityhedgedocorg.ts
+    communityhitpawcom.ts
+    communityhomeyapp.ts
+    communityicingacom.ts
+    communityicons8com.ts
+    communityinfiniteflightcom.ts
+    communityinfluxdatacom.ts
+    communityinkbirdcom.ts
+    communityinvvestco.ts
+    communityiotawattcom.ts
+    communityipfireorg.ts
+    communityipinfoio.ts
+    communityjenkinsio.ts
+    communityjitsiorg.ts
+    communityjoinmastodonorg.ts
+    communityjupitermoney.ts
+    communitykodulario.ts
+    communitylatromicombr.ts
+    communitylivekitio.ts
+    communitylocalwpcom.ts
+    communitylsstorg.ts
+    communitymailpileis.ts
+    communitymappedincom.ts
+    communitymemfaultcom.ts
+    communitymilkvio.ts
+    communitymindstudioai.ts
+    communitymonzocom.ts
+    communitymorphmarketcom.ts
+    communitymorsemicrocom.ts
+    communitymrtrixorg.ts
+    communitymycroftai.ts
+    communitynabaicellscom.ts
+    communitynaturephotographersnetwork.ts
+    communityneo4jcom.ts
+    communitynetdatacloud.ts
+    communitynethserverorg.ts
+    communitynetwrixcom.ts
+    communitynextwcom.ts
+    communitynianticspatialcom.ts
+    communitynlnetlabsnl.ts
+    communitynocodbcom.ts
+    communitynolocoio.ts
+    communitynortoncom.ts
+    communityntppoolorg.ts
+    communityomniavisit.ts
+    communityonixcom.ts
+    communityopenaicom.ts
+    communityopenastronomyorg.ts
+    communityopenbisch.ts
+    communityopenconversationalai.ts
+    communityopendronemaporg.ts
+    communityopenemsio.ts
+    communityopenflorg.ts
+    communityopenfoodnetworkorg.ts
+    communityopenhaborg.ts
+    communityopenpbsorg.ts
+    communityopenrentcouk.ts
+    communityopentargetsorg.ts
+    communityovhcloudcom.ts
+    communityp2puorg.ts
+    communityparticleio.ts
+    communitypenpotapp.ts
+    communityperplexityai.ts
+    communitypickaxeco.ts
+    communitypinterestbiz.ts
+    communitypix4dcom.ts
+    communityplotlycom.ts
+    communitypodloveorg.ts
+    communitypostmancom.ts
+    communityprivacyideaorg.ts
+    communitypuzzlequest3com.ts
+    communityquickfilecouk.ts
+    communityrachiocom.ts
+    communityrampcom.ts
+    communityrapydnet.ts
+    communityretoolcom.ts
+    communityrevolutionarygamesstudiocom.ts
+    communityrobotimecom.ts
+    communityroonlabscom.ts
+    communityrootsmagiccom.ts
+    communityrstudiocom.ts
+    communitysat4allcom.ts
+    communityshipherocom.ts
+    communityshopifycom.ts
+    communityshopifydev.ts
+    communitysigmacomputingcom.ts
+    communitysimplefoccom.ts
+    communitysmarthomecom.ts
+    communitysmartthingscom.ts
+    communitysolderedcom.ts
+    communitysparkpntcom.ts
+    communityspritelyinstitute.ts
+    communitystapeio.ts
+    communitystardogcom.ts
+    communitystarknetio.ts
+    communitystepsmashcom.ts
+    communitystereolabscom.ts
+    communitysuitecrmcom.ts
+    communitysunnypilotai.ts
+    communitytagoio.ts
+    communitytawkto.ts
+    communityteableai.ts
+    communitytempestearth.ts
+    communitytheboxingmanagergamecom.ts
+    communitytheta360guide.ts
+    communitythevirtualinstructorcom.ts
+    communitythunkablecom.ts
+    communitytogglcom.ts
+    communitytourradarcom.ts
+    communitytrading212com.ts
+    communitytraefikio.ts
+    communitytransifexcom.ts
+    communitytransloaditcom.ts
+    communitytulipco.ts
+    communityultralyticscom.ts
+    communityumbrelcom.ts
+    communityunixcom.ts
+    communityupstoxcom.ts
+    communityusconcealedcarrycom.ts
+    communityvercelcom.ts
+    communityvtexcom.ts
+    communitywayfarerscopelycom.ts
+    complineucozru.ts
+    coub.ts
+    cplusplus.ts
+    cpuucozru.ts
+    crates.ts
+    crevado.ts
+    crossfaernetmy1ru.ts
+    cryptohack.ts
+    cryptomatorforum.ts
+    csruucozorg.ts
+    cssbattle.ts
+    cssnn52rusucozru.ts
+    csstrikezorg.ts
+    ctftime.ts
+    cubecraftnet.ts
+    curseforge.ts
+    cyberharvardedu.ts
+    cybersclansu.ts
+    cytoidio.ts
+    dailymotion.ts
+    dangerousthingscom.ts
+    dasauge.ts
+    dcinside.ts
+    deathlegionucozru.ts
+    deathnoteucozru.ts
+    deepdreamgenerator.ts
+    demotywatory.ts
+    deutschauto68ucozru.ts
+    devto.ts
+    devtribe.ts
+    dhelpucozru.ts
+    diablocoolucozru.ts
+    digitalocean.ts
+    diigo.ts
+    dimensionalme.ts
+    dioramaru.ts
+    discogs.ts
+    discoursehaskellorg.ts
+    discoursejulialangorg.ts
+    discoursejupyterorg.ts
+    discoursemcstanorg.ts
+    discoursemozillaorg.ts
+    discoursenoderedorg.ts
+    discoursepihole.ts
+    discusscirclecicom.ts
+    discusselasticco.ts
+    discussfastpitch.ts
+    discussflarumorg.ts
+    discusshashicorpcom.ts
+    discusshuelcom.ts
+    discusskotlinlangorg.ts
+    discusskubernetesio.ts
+    discusspixlsus.ts
+    discussprosemirrornet.ts
+    discusspython.ts
+    discusspytorchorg.ts
+    disqus.ts
+    djagi.ts
+    djfintucozru.ts
+    dockerhub.ts
+    donationsalerts.ts
+    douban.ts
+    doytruntucozru.ts
+    drawingsbaseucozru.ts
+    drdenisovru.ts
+    dremeldoam.ts
+    dribbble.ts
+    dushschoolmoysu.ts
+    dvkstyle3dnru.ts
+    dzhida2000ucozru.ts
+    easyjobucozru.ts
+    edumonchru.ts
+    eintracht.ts
+    ekzoticsad3dnru.ts
+    elibrarytips.ts
+    elpizzaucozru.ts
+    empowher.ts
+    englishinforu.ts
+    enillogicopediaorg.ts
+    enuncyclopediaco.ts
+    ercevoru.ts
+    ethereummagicians.ts
+    ethresear.ts
+    excelworldru.ts
+    exophase.ts
+    exploretalentcom.ts
+    fableroucozru.ts
+    facebook.ts
+    facultyofmedicine.ts
+    faillyuboiucozru.ts
+    fandom.ts
+    fareastclansu.ts
+    fatucozru.ts
+    fclmnews.ts
+    fcrubin.ts
+    ffmbio.ts
+    firesofheavenorg.ts
+    fireteamclansu.ts
+    fishingsib.ts
+    flarumes.ts
+    flashflashrevolution.ts
+    flickr.ts
+    flickrgroups.ts
+    flightradar24.ts
+    flirticee.ts
+    flru.ts
+    flutterforumorg.ts
+    flymy1ru.ts
+    focuspocus3dnru.ts
+    fordatingru.ts
+    forest.ts
+    forextraderdoam.ts
+    forumbananapiorg.ts
+    forumbonsaimiraicom.ts
+    forumcockroachlabscom.ts
+    forumcscartru.ts
+    forumendeavouroscom.ts
+    forumfreecodecamporg.ts
+    forumgarudalinuxorg.ts
+    forumghostorg.ts
+    forumgitlabcom.ts
+    forumgolangbridgeorg.ts
+    forumhistoryru.ts
+    foruminaturalistorg.ts
+    forumjucecom.ts
+    forumleasehackrcom.ts
+    forumobsidianmd.ts
+    forumodua.ts
+    forumsbalenaio.ts
+    forumsdockercom.ts
+    forumsdromru.ts
+    forumseeedstudiocom.ts
+    forumshotcutorg.ts
+    forumsimmigrationcom.ts
+    forumsindiegalacom.ts
+    forumslawrencesystemscom.ts
+    forumsnapcraftio.ts
+    forumsoperacom.ts
+    forumspimoronicom.ts
+    forumssketchupcom.ts
+    forumssonicretroorg.ts
+    forumssteinbergnet.ts
+    forumstnationcom.ts
+    forumsublimetextcom.ts
+    forumsvisualparadigmcom.ts
+    forumswyzecamcom.ts
+    forumtauck.ts
+    forumtradeprintru.ts
+    forumuipathcom.ts
+    forumwordreferencecom.ts
+    forumyuristov.ts
+    forumzorincom.ts
+    foxrecorducozru.ts
+    fragment.ts
+    framapiaf.ts
+    freeproxyucozru.ts
+    freesound.ts
+    fsmodsrusucozru.ts
+    fstkolosdoam.ts
+    futajiststudiomoysu.ts
+    g2gcom.ts
+    gadjetmoysu.ts
+    galactictalkorg.ts
+    gamejolt.ts
+    gamemobiucozcom.ts
+    gcupru.ts
+    gebirgsucozru.ts
+    geeksforgeeks.ts
+    gentlemint.ts
+    geocaching.ts
+    gettr.ts
+    giantbomb.ts
+    giphy.ts
+    gitea.ts
+    github.ts
+    gitlab.ts
+    glbyh.ts
+    globalvoices.ts
+    goddamnucozru.ts
+    golangbridge.ts
+    golasavkfree3dnru.ts
+    goldderby.ts
+    goodgameru.ts
+    goodreads.ts
+    gorposmosru.ts
+    gotovimdoma.ts
+    gravatar.ts
+    grigorovoclansu.ts
+    grodnofish3dnru.ts
+    gsmstandartclansu.ts
+    gtgarazh3dnru.ts
+    gulfcoastgunforum.ts
+    guru.ts
+    gym5net.ts
+    habr.ts
+    hackaday.ts
+    hackappucozru.ts
+    hackernews.ts
+    hackerrank.ts
+    hackersploit.ts
+    hackingwithswift.ts
+    halolucozcom.ts
+    haogan3dnru.ts
+    hardforum.ts
+    hashnode.ts
+    hokagetv.ts
+    holodilshchikucozru.ts
+    honda.ts
+    housemixescom.ts
+    hubpages.ts
+    huggingface.ts
+    hulyagankaucozru.ts
+    hunting.ts
+    ibmt3dnru.ts
+    iceberg116ru.ts
+    icqbotmoysu.ts
+    icuucozcom.ts
+    ifunny.ts
+    igraonlineucozcom.ts
+    igrarena.ts
+    illustrators.ts
+    imageshack.ts
+    imgflip.ts
+    imgur.ts
+    imood.ts
+    inetjobucozru.ts
+    infourok.ts
+    insanejournal.ts
+    instagram.ts
+    instructables.ts
+    interpals.ts
+    intigriti.ts
+    ionicframework.ts
+    iphonesru.ts
+    irteamru.ts
+    israelrentinfo.ts
+    issuehunt.ts
+    itch.ts
+    itemfix.ts
+    itvdnforum.ts
+    jbzd.ts
+    jigidi.ts
+    jigsawplanet.ts
+    joplinapp.ts
+    juce.ts
+    jump3dnru.ts
+    juventuz.ts
+    kaggle.ts
+    kakvkontakteucozcom.ts
+    kapustadoam.ts
+    kashalot.ts
+    keybase.ts
+    kfirzahavucozru.ts
+    kick.ts
+    kidicaruswikiorg.ts
+    killerucozua.ts
+    kinohitclansu.ts
+    kinotv.ts
+    kitsu.ts
+    kloombacom.ts
+    klubskidokru.ts
+    komarovoclansu.ts
+    konibodomucozru.ts
+    kosmetista.ts
+    kotikmy1ru.ts
+    kraskiprazdnikaucozru.ts
+    kristallovnet.ts
+    krumucozru.ts
+    kursk46ucozru.ts
+    kuziniucozru.ts
+    l2bestclansu.ts
+    laiucozru.ts
+    lakshmifmucozru.ts
+    laracast.ts
+    laserwar48ru.ts
+    lastfm.ts
+    leasehackr.ts
+    ledvectorru.ts
+    leetcode.ts
+    legendarusveoucozru.ts
+    lesbeyankaucozcom.ts
+    letterboxd.ts
+    lichess.ts
+    liderdzrmy1ru.ts
+    lifewayucozru.ts
+    lightstalkingcom.ts
+    linkedin.ts
+    linktree.ts
+    linuxfoundation.ts
+    listedto.ts
+    listography.ts
+    litgeroyucoznet.ts
+    livejournal.ts
+    lizamy1ru.ts
+    lnameucozru.ts
+    lnkbio.ts
+    lock3dnru.ts
+    lovemagicclansu.ts
+    machelp.ts
+    macosx.ts
+    magicsquareucozru.ts
+    magictarotru.ts
+    mamasuperru.ts
+    mamuli.ts
+    manifoldmarkets.ts
+    manualsclansu.ts
+    manylink.ts
+    mapillaryforum.ts
+    marchenkovdoam.ts
+    margaritasclansu.ts
+    mariupol4x4clansu.ts
+    martech.ts
+    marymucozru.ts
+    mastodon.ts
+    max.ts
+    medium.ts
+    mednolitru.ts
+    medvestnicru.ts
+    memory57ucozru.ts
+    metadiscourse.ts
+    metadiscourseorg.ts
+    metroidwikiorg.ts
+    metroman3dnru.ts
+    mewe.ts
+    microblog.ts
+    mikeleloconteru.ts
+    milnerelenaucozru.ts
+    mineplexcom.ts
+    minfincomua.ts
+    minnacucozru.ts
+    mintmecom.ts
+    mircasovru.ts
+    misskey.ts
+    mix.ts
+    mixcloud.ts
+    modxpro.ts
+    moedeloucozcom.ts
+    momentsucozru.ts
+    moneysfirstru.ts
+    monkeytype.ts
+    morozovkamy1ru.ts
+    morshanskucozru.ts
+    moskoviamoysu.ts
+    motorka.ts
+    mouthshut.ts
+    movimy1ru.ts
+    moxvouz.ts
+    mozganetucozru.ts
+    mql5com.ts
+    mstdnio.ts
+    muffingroup.ts
+    music2djclansu.ts
+    musicbunkerru.ts
+    musiconemy1ru.ts
+    muzika3dnru.ts
+    myanimelist.ts
+    mydramalist.ts
+    myinstants.ts
+    mylot.ts
+    mymailrubkru.ts
+    mymailrugmailcom.ts
+    mymailrulistru.ts
+    mymailrumailru.ts
+    mymailruok.ts
+    mymailruvk.ts
+    mymailruyandexru.ts
+    myminifactory.ts
+    mynicknamecom.ts
+    mytechbookucozru.ts
+    mytrans3dnru.ts
+    mytucsonucozru.ts
+    mywed.ts
+    n1001tracklists.ts
+    n2ndcareerscommunitydiscoursegroup.ts
+    n3dtoday.ts
+    n4401013dnru.ts
+    n4948ru.ts
+    n4g.ts
+    n5levelucoznet.ts
+    n655iapucozru.ts
+    n74507ucozru.ts
+    n783doam.ts
+    n7dach.ts
+    n8ncommunity.ts
+    n8wayruncom.ts
+    n96moysu.ts
+    n999md.ts
+    n9interi3dnru.ts
+    narutofanucoznet.ts
+    narutorolegameucozru.ts
+    nesiditsa.ts
+    newreporter.ts
+    nfclubru.ts
+    ngllink.ts
+    nhl.ts
+    nicefriendcatsucozru.ts
+    niflheimtop.ts
+    niketalk.ts
+    nojayurtru.ts
+    nokia6233ucozru.ts
+    nookipediacom.ts
+    nostr.ts
+    not606com.ts
+    novomoskovskmy1ru.ts
+    npm.ts
+    npmpackage.ts
+    nucastlecouk.ts
+    nygunforum.ts
+    oakleyforumcom.ts
+    obkonucozcom.ts
+    obmanunetclansu.ts
+    observable.ts
+    odonvvru.ts
+    odysee.ts
+    ofc65ru.ts
+    officeforums.ts
+    ok.ts
+    okmorgru.ts
+    okru.ts
+    omoimot.ts
+    onlinemovies3dnru.ts
+    onlyfans.ts
+    oopkmoskvaucozru.ts
+    opencollective.ts
+    openframeworks.ts
+    opengameart.ts
+    opensea.ts
+    opensource.ts
+    openstreetmap.ts
+    opinionucozru.ts
+    oskolfishingucozru.ts
+    ostaucozcom.ts
+    osu.ts
+    overclockers.ts
+    ovoucozru.ts
+    p1ratucozru.ts
+    paltalk.ts
+    panzer35ru.ts
+    paragraph.ts
+    partner3dnru.ts
+    partnerkincom.ts
+    partyvibe.ts
+    patchcom.ts
+    patreon.ts
+    pbase.ts
+    pentesterlab.ts
+    periscope.ts
+    periscopemain.ts
+    physicsforums.ts
+    picarto.ts
+    pik100ucozru.ts
+    pikabu.ts
+    pinterest.ts
+    piobetsucozru.ts
+    pirohimicucozru.ts
+    pixelfedsocial.ts
+    planetminecraft.ts
+    playstrategy.ts
+    plurk.ts
+    pogz5615ucozru.ts
+    pokemonshowdown.ts
+    polygon.ts
+    polymarket.ts
+    popugiucozru.ts
+    portalcs163dnru.ts
+    poshtovikucozru.ts
+    potystoronyucozru.ts
+    prenatalclubucozcom.ts
+    procssteamucozru.ts
+    prodigymoysu.ts
+    profiru.ts
+    profsouzauru.ts
+    promodj.ts
+    promptbase.ts
+    pronounspage.ts
+    prosmart3dnru.ts
+    prosvetucozru.ts
+    provincialynewsru.ts
+    prozaru.ts
+    prvpl.ts
+    psyera.ts
+    pttwebcc.ts
+    punxucozru.ts
+    qbn.ts
+    quartertothree.ts
+    questionablequesting.ts
+    quora.ts
+    rabotenkaucoznet.ts
+    rapbeatucoznet.ts
+    rappad.ts
+    rasslabyxa.ts
+    rawgio.ts
+    razborkajapan3dnru.ts
+    rcloneforum.ts
+    realspucozcom.ts
+    redbubble.ts
+    redcafe.ts
+    reddit.ts
+    reincarnationforum.ts
+    relaskoru.ts
+    remont56ucozru.ts
+    replit.ts
+    residentadvisor.ts
+    rielt55ucozru.ts
+    rigczclub.ts
+    rmmedia.ts
+    roblox.ts
+    rollitup.ts
+    rotarusofiucozru.ts
+    rottentomatoes.ts
+    ruanekdotru.ts
+    rubygems.ts
+    rudtp.ts
+    rusmmmucozru.ts
+    russemyadoam.ts
+    rustlang.ts
+    salavat3dnru.ts
+    salutmru.ts
+    samlib.ts
+    sampucozde.ts
+    satelectronicsucozru.ts
+    savingadvicecom.ts
+    sayty3dnru.ts
+    scalalang.ts
+    scbucozru.ts
+    schlock.ts
+    schoninucozru.ts
+    school1065moysu.ts
+    scooterhelperucozru.ts
+    scoutwiki.ts
+    scratch.ts
+    sebastopolucozru.ts
+    secretkompas3dsu.ts
+    sefirutru.ts
+    semenovaklassmoysu.ts
+    senseucozcom.ts
+    seoforum.ts
+    serwisucozru.ts
+    sessionizecom.ts
+    sfinxcatsucozru.ts
+    sharzhportretru.ts
+    shazoo.ts
+    sherwood3dnru.ts
+    shikimori.ts
+    shitpostbot5000.ts
+    shorby.ts
+    showme.ts
+    shporgalkiucoznet.ts
+    sibcoinsucozru.ts
+    signal.ts
+    sisvcom.ts
+    sketchfabcom.ts
+    skyblock.ts
+    slashdot.ts
+    slides.ts
+    smartlabru.ts
+    smartplayucozru.ts
+    snapchat.ts
+    so4ineniyaucozru.ts
+    socforum3dnru.ts
+    softwm3dnru.ts
+    sokalucozlv.ts
+    somersoftcom.ts
+    sony1273dnru.ts
+    soundcloud.ts
+    soup.ts
+    sourceruns.ts
+    soylentnews.ts
+    spaces.ts
+    spells8.ts
+    splatoonwikiorg.ts
+    spotify.ts
+    ssbwikicom.ts
+    sstalkersru.ts
+    stackexchange.ts
+    stackoverflow.ts
+    starcitizen.ts
+    staroverovkaucozua.ts
+    statuscafe.ts
+    steam.ts
+    steamgroup.ts
+    stellerco.ts
+    stereo.ts
+    stihiru.ts
+    stratege.ts
+    strategywikiorg.ts
+    strava.ts
+    strupravlenieucozru.ts
+    studfile.ts
+    sublimeforum.ts
+    sufficitucozru.ts
+    sugoidesu.ts
+    suomi24.ts
+    supportbluesystemscom.ts
+    supportwirenboardcom.ts
+    swapd.ts
+    symbian9clansu.ts
+    szmerinfo.ts
+    tachographucozru.ts
+    talkmacpoweruserscom.ts
+    tamtam.ts
+    tanukipl.ts
+    tarjaturunenucozru.ts
+    tatyanaartucozcom.ts
+    taxibelgoroducozru.ts
+    teampros3dnru.ts
+    telescopeac.ts
+    teletype.ts
+    texasguntalk.ts
+    thaicatru.ts
+    theatremy1ru.ts
+    themeforest.ts
+    theodysseyonline.ts
+    threads.ts
+    tiktok.ts
+    tinkoffinvest.ts
+    tks.ts
+    tomdoam.ts
+    tonetoucozru.ts
+    tonometerbot.ts
+    topcheatsucozcom.ts
+    topmate.ts
+    topreklamaucozcom.ts
+    torrentsigraucozru.ts
+    torrentsoft.ts
+    toster.ts
+    touristlink.ts
+    tradingview.ts
+    trainzvlucozru.ts
+    trakt.ts
+    trashboxru.ts
+    travellerspoint.ts
+    travis.ts
+    trepupcom.ts
+    tripline.ts
+    truckersmpru.ts
+    truelancer.ts
+    turpravda.ts
+    tvigraclansu.ts
+    tvtropes.ts
+    twitch.ts
+    twitter.ts
+    ubuntumatecommunity.ts
+    ucoz.ts
+    ugriucozru.ts
+    umhoops.ts
+    uralslobodaucozru.ts
+    urmaiurmaevoucozru.ts
+    usalife.ts
+    usersrustlangorg.ts
+    v3deru.ts
+    vadyaucozru.ts
+    valinorcombr.ts
+    vch34693dnru.ts
+    vdvbelarusucozcom.ts
+    velog.ts
+    vero.ts
+    vgorahucozru.ts
+    vgtimes.ts
+    vgtimesgames.ts
+    videhelpcompmy1ru.ts
+    videoforumsru.ts
+    videohive.ts
+    videomuzonucozru.ts
+    vimeo.ts
+    vipcccpclansu.ts
+    vipicqucoznet.ts
+    virgool.ts
+    vitalfootball.ts
+    viupetra3dnru.ts
+    vlr.ts
+    voices.ts
+    volkswagenlvivua.ts
+    vracing3dnru.ts
+    vsco.ts
+    vse1ucozcom.ts
+    vsemobilemy1ru.ts
+    w3challs.ts
+    w7forums.ts
+    wakeupucozcom.ts
+    warframe3dnru.ts
+    warframemarket.ts
+    warpcast.ts
+    wasmin.ts
+    weaponsasucozru.ts
+    weasyl.ts
+    webdom3dnru.ts
+    webmediaucozru.ts
+    weddingimageru.ts
+    weforum.ts
+    wewinru.ts
+    wikipedia.ts
+    wikithemanaworldorg.ts
+    wimkinpublicprofile.ts
+    windows10forums.ts
+    wmmailwmmail3dnru.ts
+    wmucozcom.ts
+    wolframalphaforum.ts
+    wolpy.ts
+    wordnik.ts
+    wordpressorg.ts
+    wordpresssupport.ts
+    wowcircle.ts
+    wowgameru.ts
+    wowhead.ts
+    writeas.ts
+    writercenter.ts
+    wworkmy1ru.ts
+    wwwkinokopilkapro.ts
+    wykop.ts
+    x.ts
+    xakerminusucozru.ts
+    xgmguru.ts
+    xiaohongshu.ts
+    xing.ts
+    xitlarucoznet.ts
+    xn246kcaal6ajt1cpibnu7d5dtcxnp1ai.ts
+    xn80aqkf5cbxnp1ai.ts
+    xorazmviloyatiucozcom.ts
+    xristosvouz.ts
+    youpic.ts
+    youtube.ts
+    yrasucozru.ts
+    zabseloucozru.ts
+    zareshetkoimy1ru.ts
+    zdorov10ucozru.ts
+    zebestucozru.ts
+    zennenhunducozru.ts
+    zerkalasteklaru.ts
+    zidmoysu.ts
+
 Changelog [1.0.3.8] – 2026-07-04
 *Release date: July 4, 2026*
 
