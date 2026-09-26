@@ -1,105 +1,146 @@
-CYBERSAGE TECHNOLOGIES – COMMERCIAL END‑USER LICENSE AGREEMENT
-Version 1.0  (Effective 1 August 2025)
+ORION INTELLIGENCE — PROPRIETARY SOFTWARE NOTICE AND LICENSE TERMS
+Version 2.0 — 26 September 2026
 
-PLEASE READ THIS AGREEMENT CAREFULLY. BY DOWNLOADING, INSTALLING, OR USING
-ANY PART OF THE CYBERSAGE PLATFORM (THE “SOFTWARE”), YOU (“CUSTOMER”)
-ACKNOWLEDGE THAT YOU HAVE AGREED TO BE BOUND BY ALL TERMS AND CONDITIONS OF
-THIS END‑USER LICENSE AGREEMENT (“AGREEMENT”) WITH CYBERSAGE TECHNOLOGIES
-(“CYBERSAGE”). IF YOU DO NOT AGREE, DO NOT INSTALL OR USE THE SOFTWARE.
+Copyright (c) 2026 Cybersage Technologies and its licensors.
+All rights reserved.
 
-────────────────────────────────────────────────────────────────────────────
-1. DEFINITIONS
-   1.1 “Software” means the object‑code version of the Cybersage Platform
-        module hosted in the repository `github.com/Orion-Intelligence/
-        Orion-Intelligence`, together with all Updates supplied under this
-        Agreement.
-   1.2 “Authorized User” means an employee or contractor of Customer who
-        has been granted access credentials and is bound by obligations
-        no less restrictive than those herein.
-   1.3 “License Key” means the technical means—file, token, or SaaS
-        entitlement—furnished by Cybersage to enable the Software.
-   1.4 “Updates” means bug fixes, patches, or enhancements Cybersage
-        elects to provide under an active Support Subscription.
+PUBLICLY VISIBLE SOURCE CODE. NO GENERAL RIGHT TO USE OR REDISTRIBUTE.
+THIS IS PROPRIETARY SOFTWARE, NOT AN OPEN-SOURCE LICENSE.
 
-2. GRANT OF LICENSE
-   2.1 Scope. Subject to full payment of applicable fees and Customer’s
-        continued compliance, Cybersage grants Customer a limited,
-        non‑exclusive, non‑transferable, non‑sublicensable license to
-        install and use the Software solely:
-        a) within Customer’s own internal production environment; and
-        b) up to the quantity of License Keys purchased.
-   2.2 Reservation of Rights. The Software is licensed, not sold. All
-        rights not expressly granted are reserved by Cybersage.
+1. OWNER AND COVERED MATERIALS
 
-3. RESTRICTIONS
-   Customer shall not, and shall not permit any third‑party to:
-   a) copy, modify, translate, or create derivative works of the Software;
-   b) reverse‑engineer, decompile, or disassemble any part of the Software
-      except to the limited extent such activity is expressly permitted by
-      applicable law notwithstanding this restriction;
-   c) remove or obscure any proprietary notices;
-   d) disclose, sublicense, rent, lease, lend, supply as a service bureau,
-      publish, or otherwise make the Software available to any third party.
+Cybersage Technologies (the "Rights Holder") reserves all rights it owns or
+is authorized to license in the Orion Intelligence software in this
+repository, including source code, object code, binaries, scripts, original
+documentation, designs, and other original assets (the "Software"). These
+terms cover those materials in whole or in part and in any medium. They do
+not claim ownership of third-party materials or rights the Rights Holder
+does not control. Section 6 governs third-party and previously granted rights.
 
-4. CONFIDENTIALITY
-   The Software, License Key, pricing, and non‑public documentation are
-   “Confidential Information.” Customer shall maintain them in strict
-   confidence, using at least the same degree of care as for its own
-   confidential data, and in no event less than reasonable care.
+2. ONE MODULE OF A LARGER PLATFORM
 
-5. OWNERSHIP
-   Cybersage and its licensors retain all intellectual‑property rights
-   in and to the Software and any copies thereof. No title passes to
-   Customer under this Agreement.
+This repository publicly exposes one module of the Orion platform. It is
+not a distribution of the complete platform. Full platform operation requires
+all other necessary Orion modules, supporting services, data sources,
+configuration, credentials, and applicable authorizations, supplied or
+obtained separately. Availability of this repository does not provide access
+to, or a license for, those components. Some features may remain unavailable
+without them. No standalone or complete-platform functionality is promised.
 
-6. LIMITED WARRANTY; DISCLAIMER
-   6.1 Limited Warranty. Cybersage warrants that for ninety (90) days from
-        first delivery the unmodified Software will substantially conform
-        to its published documentation.
-   6.2 Remedy. Cybersage’s sole liability and Customer’s exclusive remedy
-        for breach of the foregoing warranty shall be, at Cybersage’s
-        option, (a) repair or replacement of the non‑conforming Software
-        or (b) refund of fees paid for the affected License Key.
-   6.3 Disclaimer. EXCEPT AS EXPRESSLY PROVIDED, THE SOFTWARE IS PROVIDED
-        “AS IS” AND CYBERSAGE DISCLAIMS ALL OTHER WARRANTIES, EXPRESS OR
-        IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-        PARTICULAR PURPOSE, AND NON‑INFRINGEMENT.
+3. NO GENERAL LICENSE GRANT
 
-7. LIMITATION OF LIABILITY
-   IN NO EVENT SHALL CYBERSAGE BE LIABLE FOR ANY INDIRECT, INCIDENTAL,
-   SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR FOR ANY LOSS OF
-   PROFITS, REVENUE, DATA, OR BUSINESS, ARISING OUT OF OR RELATED TO THIS
-   AGREEMENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. CYBERSAGE’S
-   AGGREGATE LIABILITY SHALL NOT EXCEED FEES PAID BY CUSTOMER FOR THE
-   LICENSE KEY GIVING RISE TO THE CLAIM.
+Except for the limited rights described in Section 5, rights preserved by
+Section 6, or a separate written agreement signed by an authorized
+representative of the Rights Holder, no permission is granted to use,
+install, execute, deploy, host, copy, modify, adapt, or redistribute the
+Software for any purpose.
 
-8. COMPLIANCE & AUDIT
-   Upon thirty (30) days’ written notice, Cybersage may audit Customer’s
-   deployment to verify compliance. Customer shall cooperate and, if an
-   audit reveals non‑compliance, promptly pay additional fees plus
-   reasonable audit costs.
+This restriction applies to private, personal, internal-business, commercial,
+noncommercial, educational, academic, research, evaluation, testing,
+charitable, and governmental purposes, whether or not money is charged.
+Public visibility, possession of a copy, attribution, a license key, payment,
+installation instructions, examples, or technical access do not by themselves
+grant a license. Technical ability to run the Software is not authorization.
 
-9. EXPORT CONTROL
-   Customer shall not export or re‑export the Software except in
-   compliance with U.S. export control laws and regulations and those of
-   any other relevant jurisdiction.
+4. RESTRICTED ACTS
 
-10. GOVERNING LAW; VENUE
-    This Agreement is governed by the laws of the State of Delaware,
-    USA, without regard to conflict‑of‑laws principles. Any litigation
-    shall be brought exclusively in the state or federal courts located
-    in Wilmington, Delaware, and the parties expressly consent to such
-    jurisdiction.
+Subject to Sections 5 and 6, without the separate written authorization
+specified in Section 3, you may not:
 
-11. TERM & TERMINATION
-    11.1 Term. This Agreement remains in effect until terminated.
-    11.2 Termination for Cause. Either party may terminate for material
-         breach not cured within thirty (30) days after written notice.
-    11.3 Effect. Upon termination, Customer shall cease all use of the
-         Software and destroy all copies. Sections 4–10 shall survive.
+(a) install, build, compile, execute, deploy, self-host, or otherwise use the
+    Software, including in a private environment or for internal operations;
+(b) copy, modify, translate, adapt, merge, port, extract, or create derivative
+    works of the Software, or incorporate any protected portion into another
+    project, product, dataset, or service;
+(c) distribute, redistribute, publish, upload, mirror, share, transfer, sell,
+    resell, sublicense, rent, lease, lend, or otherwise supply the Software
+    or copies or derivatives to any person, whether free of charge or for
+    payment, in source, binary, container, package, archive, or other form;
+(d) offer the Software or its functionality as a hosted service, SaaS,
+    managed service, service bureau, customer deployment, or white-label
+    offering, or otherwise commercially exploit it;
+(e) bypass license checks, authentication, access controls, or entitlement
+    restrictions, or use unauthorized credentials or license keys;
+(f) remove, alter, conceal, or misrepresent copyright, license, attribution,
+    ownership, or trademark notices, or claim the Software as your own; or
+(g) authorize, assist, or enable another person to perform an act restricted
+    by these terms where doing so infringes rights reserved here.
 
-12. ENTIRE AGREEMENT
-    This Agreement, together with any fully‑executed Order Form, is the
-    entire agreement between the parties and supersedes all prior or
-    contemporaneous proposals, representations, and understandings.
-────────────────────────────────────────────────────────────────────────────
+These restrictions apply regardless of whether the activity is private or
+public, online or offline, commercial or noncommercial, or involves the
+whole Software or a protected portion of it.
+
+5. PUBLIC GITHUB HOSTING AND NON-WAIVABLE RIGHTS
+
+The Rights Holder acknowledges the permissions arising from publishing a
+public repository under the applicable GitHub Terms of Service, including
+GitHub's rights to operate its service and users' rights to view and fork
+public content, and to use, display, perform, and reproduce that content
+through GitHub's service as permitted by those terms and its functionality.
+Nothing in this notice withdraws or narrows those permissions.
+
+Those platform permissions do not, by themselves, authorize independent
+execution, deployment, off-platform redistribution, or commercial use of
+the Software. No additional permission is granted by this notice.
+
+Nothing in these terms restricts an activity to the extent it is permitted
+by applicable law and cannot lawfully be restricted, including applicable
+copyright exceptions. These terms apply only to the extent enforceable.
+
+6. THIRD-PARTY MATERIALS AND EXISTING RIGHTS
+
+Third-party software, dependencies, components, data, and assets remain
+subject to their own licenses and notices. These terms do not relicense
+those materials or remove permissions granted by their owners. Required
+third-party notices and license obligations must be preserved.
+
+These terms apply to revisions first made available under this notice.
+They do not retroactively revoke rights validly granted for earlier copies
+under another license, or supersede an existing signed agreement except as
+that agreement permits. A separately signed agreement governs only the
+materials, activities, users, duration, and other scope it expressly covers.
+Receiving an earlier version does not grant rights to later proprietary
+revisions beyond the scope of the earlier grant.
+
+7. OWNERSHIP AND SEPARATE AUTHORIZATION
+
+Ownership remains with the Rights Holder and the respective licensors.
+No patent, trademark, endorsement, sublicensing, or other intellectual-
+property license is granted by implication, estoppel, or otherwise. Public
+disclosure does not dedicate the Software to the public domain.
+
+Any permission beyond Sections 5 and 6 requires a separate written agreement
+signed by an authorized representative of the Rights Holder. Silence,
+acceptance of a bug report, or a general invitation to collaborate is not
+such an agreement. Contributions require prior written arrangements covering
+the permitted work and the rights in the contribution; no automatic copyright
+assignment is asserted by these terms.
+
+8. NO WARRANTY OR SUPPORT COMMITMENT
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE SOFTWARE IS PROVIDED
+"AS IS" AND "AS AVAILABLE", WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
+NONINFRINGEMENT, ACCURACY, SECURITY, AVAILABILITY, OR COMPLETENESS.
+NO SUPPORT, MAINTENANCE, UPDATES, HOSTING, DATA, CREDENTIALS, OR ACCESS TO
+OTHER MODULES IS PROMISED EXCEPT UNDER A SEPARATE SIGNED AGREEMENT.
+
+9. LIMITATION OF LIABILITY
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE RIGHTS HOLDER AND
+ITS LICENSORS SHALL NOT BE LIABLE FOR DAMAGES OR OTHER LIABILITY ARISING
+FROM THE SOFTWARE OR ITS AVAILABILITY, INCLUDING LOSS OF DATA, PROFITS,
+REVENUE, BUSINESS, OR OPPORTUNITY, WHETHER IN CONTRACT, TORT, OR OTHERWISE.
+THIS EXCLUSION DOES NOT APPLY WHERE LIABILITY CANNOT LAWFULLY BE EXCLUDED.
+A SEPARATE SIGNED AGREEMENT MAY PROVIDE DIFFERENT LIABILITY TERMS.
+
+10. ENFORCEMENT AND RESERVATION
+
+Unauthorized acts may infringe the Rights Holder's or its licensors' rights.
+They reserve the right to seek remedies available under applicable law.
+Failure to enforce a right on one occasion does not waive that right.
+If a provision is unenforceable, the remaining provisions continue to apply
+to the extent permitted by law. No remedy, penalty, or legal outcome is
+guaranteed by this notice.
+
+ALL RIGHTS NOT EXPRESSLY GRANTED OR OTHERWISE PRESERVED ABOVE ARE RESERVED.

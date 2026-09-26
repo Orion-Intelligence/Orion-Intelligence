@@ -38,6 +38,8 @@ actionable insights.<br>
 
 ## Quick Start
 
+**For separately authorized deployments only.** These instructions do not grant a license. This module alone does not provide the complete Orion platform; see the [license and module scope](#license).
+
 ### Prerequisites
 
 - Git and a Bash-compatible shell.
@@ -350,24 +352,25 @@ Orion follows a clear path from source collection to analyst action:
 
 ## Contribution
 
-We welcome contributions to improve Orion Platform. If you'd like to contribute, please fork the repository and submit a
-pull request.
+Contributions require prior written authorization and agreed contribution terms. Contact the project maintainers through the [collaboration page](https://www.orionintelligence.org/collaboration) before starting work. Public visibility or submitting a proposal does not grant permission to use, modify, or distribute the software beyond the rights preserved in the license.
 
 ### Steps to Contribute
 
-1. Fork the repository.
-2. Create a new feature branch (`git checkout -b feature-branch`).
-3. Commit your changes (`git commit -m 'Add some feature'`).
-4. Push to the branch (`git push origin feature-branch`).
-5. Create a new Pull Request.
+1. Describe the proposed contribution through the collaboration page without including proprietary code or sensitive information.
+2. Obtain a written agreement covering the permitted work and rights in the contribution.
+3. Follow the development and submission workflow authorized in that agreement.
 
 ## License
 
-Orion Platform is licensed under the [MIT License](LICENSE).
+**Proprietary — all rights reserved.** This repository exposes one module of the Orion platform; it is not the complete platform. Full operation requires all other necessary Orion modules, services, data sources, configuration, credentials, and authorizations supplied or obtained separately.
+
+Public visibility does not grant permission for private, personal, internal-business, commercial, noncommercial, research, or evaluation use. Installation, execution, modification, redistribution, mirroring, resale, and hosted or white-label offerings require a separate written agreement signed by the Rights Holder. This is not an open-source license.
+
+The [proprietary license terms](LICENSE) preserve applicable GitHub platform permissions, non-waivable legal rights, third-party licenses, and rights validly granted for earlier copies. Those exceptions are not a general permission to use or redistribute this module.
 
 ## Disclaimer
 
-This project is intended for research purposes only. The authors of Orion Platform do not support or endorse illegal
+Any separately authorized use must remain within the scope of the applicable written agreement. No research-use permission is granted by this documentation. The authors of Orion Platform do not support or endorse illegal
 activities, and users of this project are responsible for ensuring their actions comply with the law.
 
 ## Security

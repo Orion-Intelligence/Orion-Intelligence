@@ -16,6 +16,7 @@
     "serve:watch": "node --disable-warning=DEP0060 ./node_modules/@angular/cli/bin/ng serve"
   },
   "private": true,
+  "license": "UNLICENSED",
   "dependencies": {
     "@angular/animations": "22.1.2",
     "@angular/cdk": "22.1.2",
