@@ -1273,3 +1273,213 @@ body.light-theme .manage-profile-logo-tile {
 .manage-profile-logo-tile[data-platform='snapchat'] {
   --manage-profile-logo-color: #fffc00;
 }
+
+/* Chat result tables keep their columns while fitting inside narrow replies. */
+.orion-chat-table {
+  --chat-table-border: rgb(139 164 190 / 50%);
+  --chat-table-header: #edf3f9;
+  --chat-table-surface: #fff;
+  --chat-table-row-alt: #f7faff;
+  --chat-table-divider: #dfe8f2;
+
+  width: 100%;
+  max-width: 100%;
+  margin: 16px 0 8px;
+  overflow-x: auto;
+  border: 1px solid var(--chat-table-border);
+  border-radius: 12px;
+  background: var(--chat-table-surface);
+  color: var(--color-text2);
+  scrollbar-color: var(--chat-table-border) transparent;
+  scrollbar-width: thin;
+}
+
+.dark-theme .orion-chat-table {
+  --chat-table-border: rgb(113 137 165 / 50%);
+  --chat-table-header: #1d2b40;
+  --chat-table-surface: #172337;
+  --chat-table-row-alt: #1a2940;
+  --chat-table-divider: #324259;
+}
+
+.orion-chat-table:focus-visible {
+  outline: 2px solid var(--color-blue-640);
+  outline-offset: 3px;
+}
+
+.orion-chat-table table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  text-align: left;
+}
+
+.orion-chat-table-wide table {
+  min-width: 690px;
+}
+
+.orion-chat-table th {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--chat-table-border);
+  background: var(--chat-table-header);
+  color: var(--color-text4);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.035em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  vertical-align: bottom;
+}
+
+.orion-chat-table tbody tr:nth-child(even) {
+  background: var(--chat-table-row-alt);
+}
+
+.orion-chat-table tbody tr:hover {
+  background: var(--ui-table-row-hover);
+}
+
+.orion-chat-table td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--chat-table-divider);
+  vertical-align: top;
+  color: var(--color-text2);
+  overflow-wrap: anywhere;
+  transition: background-color 150ms ease;
+}
+
+.orion-chat-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.orion-chat-table tbody td:first-child {
+  color: var(--color-text1);
+}
+
+.orion-chat-table-value {
+  display: inline;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.orion-chat-table strong {
+  font-weight: 650;
+}
+
+.orion-chat-table em,
+.orion-chat-table-empty {
+  color: var(--color-text4);
+  font-size: 12px;
+}
+
+.orion-chat-table code {
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--color-blue-640) 8%, transparent);
+  color: var(--color-text1);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: inherit;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.orion-chat-table a {
+  color: var(--color-blue-640);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.orion-chat-table-risk-note {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-height: 22px;
+  margin-left: 4px;
+  padding: 0 7px;
+  border: 1px solid var(--chat-table-divider);
+  border-radius: 5px;
+  background: var(--chat-table-header);
+  color: var(--color-text3);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+  vertical-align: middle;
+}
+
+.orion-sev {
+  --severity-color: #175cd3;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid color-mix(in srgb, var(--severity-color) 28%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--severity-color) 10%, transparent);
+  color: var(--severity-color);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.orion-sev::before {
+  width: 5px;
+  height: 5px;
+  flex: 0 0 5px;
+  border-radius: 50%;
+  background: currentcolor;
+  content: '';
+}
+
+.orion-sev-critical,
+.orion-sev-compromised {
+  --severity-color: #b42318;
+}
+
+.orion-sev-high {
+  --severity-color: #b54708;
+}
+
+.orion-sev-medium,
+.orion-sev-exposed {
+  --severity-color: #854d0e;
+}
+
+.orion-sev-low {
+  --severity-color: #067647;
+}
+
+.dark-theme .orion-sev {
+  --severity-color: #93c5fd;
+}
+
+.dark-theme .orion-sev-critical,
+.dark-theme .orion-sev-compromised {
+  --severity-color: #fda4af;
+}
+
+.dark-theme .orion-sev-high {
+  --severity-color: #fdba74;
+}
+
+.dark-theme .orion-sev-medium,
+.dark-theme .orion-sev-exposed {
+  --severity-color: #fde047;
+}
+
+.dark-theme .orion-sev-low {
+  --severity-color: #86efac;
+}
+
+@media (width <= 640px) {
+  .orion-chat-table th,
+  .orion-chat-table td {
+    padding: 11px 13px;
+  }
+}

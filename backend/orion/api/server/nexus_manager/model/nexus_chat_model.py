@@ -3,7 +3,7 @@ from typing import Literal
 from pydantic import BaseModel, Field, field_validator
 
 
-MAX_CHAT_MESSAGE_LENGTH = 500
+MAX_CHAT_MESSAGE_LENGTH = 20000
 
 
 class ReportChatRequest(BaseModel):
