@@ -82,6 +82,7 @@ jobs:
             backend/workspace/resource/case_artifacts \
             backend/workspace/parser/parser_files
           chmod -R a+rwX \
+            backend/static \
             backend/workspace/resource \
             backend/workspace/parser/parser_files
 
@@ -111,6 +112,8 @@ jobs:
           SKIP_BACKEND_TESTS=1 ./run.sh build -t
           docker compose -p trusted-search -f docker-compose-testing.yml exec -T web sh -lc '
             for path in \
+              /app/static \
+              /app/backups \
               /app/workspace/resource/profile \
               /app/workspace/resource/tenant \
               /app/workspace/resource/system \
