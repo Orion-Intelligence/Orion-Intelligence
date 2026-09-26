@@ -66,7 +66,8 @@ class social_profile_job:
                 personas = {persona.persona_id: persona for persona in record.personas}
                 for profile in record.profiles:
                     try:
-                        if not profile.assigned_persona_id:
+                        has_posting = SocialProfilePurpose.POSTING in (profile.purposes or [])
+                        if has_posting and not profile.assigned_persona_id:
                             skipped_profile_count += 1
                             continue
                         if not profile.session_id:
@@ -76,8 +77,8 @@ class social_profile_job:
                             skipped_profile_count += 1
                             continue
     
-                        persona = personas.get(profile.assigned_persona_id)
-                        if persona is None:
+                        persona = personas.get(profile.assigned_persona_id) if profile.assigned_persona_id else None
+                        if has_posting and persona is None:
                             skipped_profile_count += 1
                             continue
     

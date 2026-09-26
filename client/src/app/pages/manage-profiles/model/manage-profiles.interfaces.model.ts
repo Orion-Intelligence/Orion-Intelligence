@@ -30,6 +30,7 @@ export interface ManageProfilePostRow extends SocialHateSpeechDetectedPost {
   dateTime: string;
   source: ManageProfilePostSource;
   imageUrl: string;
+  isManual: boolean;
 }
 
 export interface ManageProfileResultRow {

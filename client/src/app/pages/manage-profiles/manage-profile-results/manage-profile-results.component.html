@@ -57,7 +57,7 @@
                 <span class="rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-2 py-0.5 text-[10px] font-semibold text-emerald-300">{{ (row.activity === 'posting' ? 'Published' : 'Completed') | translate }}</span>
               }
             </div>
-            <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ row.profileLabel }}@if (personaName(row.profileId); as pn) { · <span class="text-[var(--color-text3)]">{{ pn }}</span>} · {{ row.dateTime | date: 'medium' }}</p>
+            <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ row.profileLabel }}@if (personaName(row.profileId); as pn) { · <span class="text-[var(--color-text3)]">{{ pn }}</span>} · {{ parseUtcDate(row.dateTime) | date: 'medium' }}</p>
             @if (row.running && row.step) {
               <p class="mb-0 mt-1 truncate text-[11px] text-[var(--color-text3)]">{{ row.step }}</p>
             }
@@ -148,8 +148,13 @@
               @if (post.label) {
                 <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-text3)] [body.light-theme_&]:bg-[#eef4fb]">{{ post.label }}</span>
               }
+              @if (post.isManual) {
+                <span class="rounded-full border border-sky-400/20 bg-sky-400/[0.08] px-2 py-0.5 text-[10px] font-semibold text-sky-500">{{ 'Manual' | translate }}</span>
+              } @else {
+                <span class="rounded-full border border-violet-400/20 bg-violet-400/[0.08] px-2 py-0.5 text-[10px] font-semibold text-violet-500">{{ 'Automate' | translate }}</span>
+              }
             </div>
-            <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ post.profileLabel }}@if (personaName(post.profileId); as pn) { · <span class="text-[var(--color-text3)]">{{ pn }}</span>} · {{ post.dateTime | date: 'medium' }}</p>
+            <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ post.profileLabel }}@if (personaName(post.profileId); as pn) { · <span class="text-[var(--color-text3)]">{{ pn }}</span>} · {{ parseUtcDate(post.dateTime) | date: 'medium' }}</p>
             @if (post.url) {
               <a [href]="post.url" target="_blank" rel="noopener noreferrer" class="mt-1 inline-flex max-w-full items-center gap-1 text-[11px] font-medium text-[var(--color-blue-640)] hover:underline"><span class="truncate">{{ post.url }}</span></a>
             }

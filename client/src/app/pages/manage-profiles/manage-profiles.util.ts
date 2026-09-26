@@ -152,7 +152,7 @@ export function flattenPostRows(rows: ManageProfileResultRow[], profiles: Social
       return;
     }
     seen.add(dedupeKey);
-    posts.push({ ...post, key: `${row.key}-${posts.length}`, profileId: row.profileId, platform: row.platform, profileLabel: row.profileLabel, dateTime: String(post.detected_at || row.dateTime), source, imageUrl });
+    posts.push({ ...post, key: `${row.key}-${posts.length}`, profileId: row.profileId, platform: row.platform, profileLabel: row.profileLabel, dateTime: String(post.detected_at || row.dateTime), source, imageUrl, isManual: row.isManual });
   };
   for (const row of rows) {
     if (row.running || row.error) {
