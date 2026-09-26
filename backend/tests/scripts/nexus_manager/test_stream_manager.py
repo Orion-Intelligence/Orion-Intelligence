@@ -6,6 +6,7 @@ import json
 import pytest
 
 from orion.api.server.nexus_manager.stream_manager import ActiveNexusStream, NexusStreamManager
+from orion.api.server.nexus_manager.model.nexus_chat_model import MAX_CHAT_MESSAGE_LENGTH
 from orion.api.server.nexus_manager.model.rpc_payload_model import NexusRpcPayloadModel
 from tests.scripts.nexus_manager.fakes import (
     FakeHTTPError,
@@ -64,13 +65,13 @@ async def test_store_turn_truncates_and_sends_triggers():
     client = FakeStreamClient(post_responses=[FakePostResponse()])
     triggers = [{"name": "t"}]
     await manager._store_turn(
-        client, "p" * 1000, "r" * 1000, "user-1", "sess-1", triggers=triggers
+        client, "p" * (MAX_CHAT_MESSAGE_LENGTH + 500), "r" * (MAX_CHAT_MESSAGE_LENGTH + 500), "user-1", "sess-1", triggers=triggers
     )
     sent = client.posts[0]
     assert sent["url"].endswith("/v1/chats/sess-1/messages")
     assert sent["headers"]["X-User-Id"] == "user-1"
-    assert len(sent["json"]["text"]) == 500
-    assert len(sent["json"]["response"]) == 500
+    assert len(sent["json"]["text"]) == MAX_CHAT_MESSAGE_LENGTH
+    assert len(sent["json"]["response"]) == MAX_CHAT_MESSAGE_LENGTH
     assert sent["json"]["triggers"] == triggers
 
 
