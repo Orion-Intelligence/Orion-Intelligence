@@ -19,6 +19,8 @@ from orion.services.mongo_manager.shared_model.db_social_profile_management_mode
 from orion.services.mongo_manager.shared_model.db_social_automation_result_model import db_social_automation_result_model
 from orion.services.mongo_manager.shared_model.db_alert_connector_model import db_alert_connector_model
 from orion.services.mongo_manager.shared_model.db_cronjob_status_model import db_cronjob_status_model
+from orion.services.mongo_manager.shared_model.db_job_model import db_job_application_model, db_job_post_model, db_job_view_model
+from orion.services.mongo_manager.shared_model.db_public_profile_model import db_public_profile_model
 from orion.services.mongo_manager.shared_model.db_takedown_request_model import db_takedown_request_model
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role
@@ -82,6 +84,24 @@ class mongo_controller:
         await self.__engine.get_collection(db_social_automation_result_model).create_index([("user_id", 1)], unique=True, name="unique_social_automation_result_user")
         await self.__engine.get_collection(db_alert_connector_model).create_index([("connector_type", 1), ("provider", 1), ("tenant_id", 1)], unique=True, name="unique_alert_connector_scope")
         await self.__engine.get_collection(db_cronjob_status_model).create_index("job_name", unique=True)
+
+        job_post_collection = self.__engine.get_collection(db_job_post_model)
+        await job_post_collection.create_index([("jobId", 1)], unique=True, name="unique_job_post_id")
+        await job_post_collection.create_index([("tenant_id", 1), ("createdAt", -1)])
+        await job_post_collection.create_index([("status", 1), ("publishedAt", -1)])
+
+        job_application_collection = self.__engine.get_collection(db_job_application_model)
+        await job_application_collection.create_index([("applicationId", 1)], unique=True, name="unique_job_application_id")
+        await job_application_collection.create_index([("jobId", 1), ("applicant_user_id", 1)], unique=True, name="unique_application_per_job_user")
+        await job_application_collection.create_index([("tenant_id", 1), ("status", 1), ("submittedAt", -1)])
+        await job_application_collection.create_index([("applicant_user_id", 1), ("submittedAt", -1)])
+
+        job_view_collection = self.__engine.get_collection(db_job_view_model)
+        await job_view_collection.create_index([("jobId", 1), ("user_id", 1)], unique=True, name="unique_job_view_per_user")
+        await job_view_collection.create_index([("user_id", 1), ("viewedAt", -1)])
+
+        await self.__engine.get_collection(db_public_profile_model).create_index([("user_id", 1)], unique=True, name="unique_public_profile_user")
+
         feeder_collection = self.__engine.get_collection(db_feeder_script_model)
         try:
             await feeder_collection.drop_index("name_1")
