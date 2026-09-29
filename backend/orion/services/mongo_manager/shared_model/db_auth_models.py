@@ -22,6 +22,7 @@ class user_role(str, Enum):
     MEMBER = "member"
     ANALYST = "analyst"
     DEMO = "demo"
+    APPLICANT = "applicant"
 
 
 class UserStatus(str, Enum):
@@ -79,7 +80,7 @@ class db_user_account(Model):
     def validate_username(cls, value: str, info: FieldValidationInfo) -> str:
         value = value.strip()
         role = info.data.get("role")
-        if role == user_role.MEMBER:
+        if role in (user_role.MEMBER, user_role.APPLICANT):
             username_pattern = r"^[A-Za-z][A-Za-z0-9_-]{7,19}$"
             if not re.match(username_pattern, value):
                 raise ValueError("Username already exist")

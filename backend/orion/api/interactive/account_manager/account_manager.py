@@ -60,7 +60,7 @@ class AccountManager:
             tenant_id = current_user.tenant_id
             users = await self._engine.find(
                 db_user_account,
-                (db_user_account.tenant_id == tenant_id) & (db_user_account.role != user_role.CRAWLER))
+                (db_user_account.tenant_id == tenant_id) & (db_user_account.role != user_role.CRAWLER) & (db_user_account.role != user_role.APPLICANT))
             return [user_param_model(**u.dict()) for u in users]
         return []
 
@@ -179,7 +179,7 @@ class AccountManager:
         if not user:
             raise HTTPException(status_code=401, detail="User not found")
 
-        if user.role in ["admin"]:
+        if user.role in ["admin", user_role.APPLICANT.value]:
             raise HTTPException(status_code=401, detail="This user type cannot be deleted")
 
         if LicenseName.MAINTAINER in (user.licenses or []):
@@ -227,7 +227,7 @@ class AccountManager:
                 str(user.tenant_id), str(current_user.id), "User update denied")
             raise HTTPException(status_code=401, detail="You are not allowed to manage this user")
 
-        if user.role in ["admin", "crawl"]:
+        if user.role in ["admin", "crawl", user_role.APPLICANT.value]:
             await AuditLogManager.get_instance().register(
                 str(user.tenant_id), str(current_user.id), "User update denied")
             raise HTTPException(status_code=401, detail="This user type cannot be updated")

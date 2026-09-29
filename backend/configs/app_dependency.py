@@ -156,6 +156,19 @@ async def case_management_required(current_user=Depends(get_current_user)):
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Case management permission required")
 
 
+async def job_posting_required(current_user=Depends(get_current_user)):
+    role = _enum_value(getattr(current_user, "role", None))
+    licenses = {_enum_value(license_name) for license_name in (current_user.licenses or [])}
+    if role == user_role.ADMIN.value or LicenseName.MAINTAINER.value in licenses:
+        return True
+
+    permissions = [_enum_value(permission) for permission in (current_user.permissions or [])]
+    if role in (user_role.ANALYST.value, user_role.MEMBER.value) and UserPermission.JOB_POSTING.value in permissions:
+        return True
+
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Job posting permission required")
+
+
 async def dismiss_result_required(current_user=Depends(get_current_user)):
     role = _enum_value(getattr(current_user, "role", None))
     licenses = {_enum_value(license_name) for license_name in (current_user.licenses or [])}

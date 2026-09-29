@@ -6,3 +6,4 @@ class UserPermission(str, Enum):
     ORION_MAIL = "orion_mail"
     DISMISS_RESULT = "dismiss_result"
     MONITORING = "monitoring"
+    JOB_POSTING = "job_posting"
