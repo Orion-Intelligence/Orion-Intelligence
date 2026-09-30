@@ -20,7 +20,6 @@ from orion.services.mongo_manager.shared_model.db_social_automation_result_model
 from orion.services.mongo_manager.shared_model.db_alert_connector_model import db_alert_connector_model
 from orion.services.mongo_manager.shared_model.db_cronjob_status_model import db_cronjob_status_model
 from orion.services.mongo_manager.shared_model.db_job_model import db_job_application_model, db_job_post_model, db_job_view_model
-from orion.services.mongo_manager.shared_model.db_public_profile_model import db_public_profile_model
 from orion.services.mongo_manager.shared_model.db_takedown_request_model import db_takedown_request_model
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role
@@ -99,8 +98,6 @@ class mongo_controller:
         job_view_collection = self.__engine.get_collection(db_job_view_model)
         await job_view_collection.create_index([("jobId", 1), ("user_id", 1)], unique=True, name="unique_job_view_per_user")
         await job_view_collection.create_index([("user_id", 1), ("viewedAt", -1)])
-
-        await self.__engine.get_collection(db_public_profile_model).create_index([("user_id", 1)], unique=True, name="unique_public_profile_user")
 
         feeder_collection = self.__engine.get_collection(db_feeder_script_model)
         try:

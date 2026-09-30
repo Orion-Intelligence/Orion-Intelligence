@@ -10,8 +10,6 @@ from odmantic import EmbeddedModel
 from odmantic import Field
 from odmantic import Model
 
-from orion.services.mongo_manager.shared_model.db_public_profile_model import CredentialDocument
-
 
 def utc_now() -> datetime:
     return datetime.now(timezone.utc)
@@ -130,6 +128,17 @@ class JobAudience(str, Enum):
     OPEN = "open"
 
 
+class CredentialDocumentType(str, Enum):
+    CERTIFICATION = "certification"
+    DEGREE = "degree"
+    TRANSCRIPT = "transcript"
+    LICENSE = "license"
+    TRAINING = "training"
+    EMPLOYMENT_LETTER = "employment_letter"
+    REFERENCE = "reference"
+    OTHER = "other"
+
+
 class ScreeningAnswerType(str, Enum):
     SHORT_TEXT = "short_text"
     LONG_TEXT = "long_text"
@@ -154,6 +163,9 @@ APPLICATION_TERMINAL_STATUSES = {
     ApplicationStatus.REJECTED,
     ApplicationStatus.WITHDRAWN,
 }
+
+MAX_CREDENTIAL_DOCUMENTS = 10
+MAX_SCREENING_QUESTIONS = 20
 
 APPLICATION_STATUS_FLOW = [
     ApplicationStatus.SUBMITTED,
@@ -182,6 +194,22 @@ class ScreeningAnswer(EmbeddedModel):
 
 class JobFile(EmbeddedModel):
     fileId: str
+    fileName: str = ""
+    fileType: str = ""
+    fileSize: int = 0
+    fileResourceId: str = ""
+    fileHash: str = ""
+    uploadedAt: datetime = Field(default_factory=utc_now)
+
+
+class CredentialDocument(EmbeddedModel):
+    documentId: str
+    documentType: CredentialDocumentType = Field(default=CredentialDocumentType.OTHER)
+    documentTypeOtherValue: str = ""
+    title: str = ""
+    issuer: str = ""
+    issuedAt: Optional[datetime] = None
+    expiresAt: Optional[datetime] = None
     fileName: str = ""
     fileType: str = ""
     fileSize: int = 0

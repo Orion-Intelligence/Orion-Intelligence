@@ -15,6 +15,11 @@ from orion.services.permission_manager.permission_models import UserPermission
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+VERIFICATION_CODE_LENGTH = 6
+VERIFICATION_CODE_TTL_SECONDS = 900
+VERIFICATION_MAX_ATTEMPTS = 5
+VERIFICATION_RESEND_COOLDOWN_SECONDS = 60
+
 
 class user_role(str, Enum):
     ADMIN = "admin"
@@ -62,6 +67,8 @@ class db_user_account(Model):
     password_reset_required: bool = Field(default=False)
 
     account_verify_at: Optional[datetime] = Field(default=None)
+    verification_attempts: int = Field(default=0)
+    verified_email: str = Field(default="")
     subscription: bool = Field(default=False)
     preferences: Optional[Dict[str, Any]] = {}
     current_session_id: Optional[str] = Field(default=None)
