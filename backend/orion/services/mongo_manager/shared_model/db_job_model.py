@@ -281,15 +281,12 @@ class db_job_application_model(Model):
     applicant_user_id: str = Field(index=True)
     applicantUsername: str = ""
     applicantVerified: bool = False
-    fullName: str = ""
     email: str = ""
-    phone: str = ""
-    location: str = ""
     linkedinUrl: str = ""
     githubUrl: str = ""
     coverLetter: str = ""
     screeningAnswers: List[ScreeningAnswer] = Field(default_factory=list)
-    resume: Optional[JobFile] = None
+    resume: JobFile
     credentialDocuments: List[CredentialDocument] = Field(default_factory=list)
     submittedAt: datetime = Field(default_factory=utc_now)
     status: ApplicationStatus = Field(default=ApplicationStatus.SUBMITTED, index=True)

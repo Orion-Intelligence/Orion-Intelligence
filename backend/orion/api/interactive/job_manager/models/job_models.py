@@ -222,7 +222,6 @@ class ApplicationListItem(BaseModel):
     status: ApplicationStatus
     submittedAt: datetime
     firstViewedAt: Optional[datetime] = None
-    hasResume: bool = False
     credentialDocumentCount: int = 0
 
 
@@ -240,16 +239,12 @@ class ApplicationDetailResponse(BaseModel):
 
     applicantUsername: str = ""
     applicantVerified: bool = False
-    fullName: str = ""
     email: str = ""
-    phone: str = ""
-    location: str = ""
     linkedinUrl: str = ""
     githubUrl: str = ""
     coverLetter: str = ""
 
     screeningAnswers: List[ScreeningAnswerResponse] = Field(default_factory=list)
-    hasResume: bool = False
     resumeFileName: str = ""
     credentialDocuments: List[CredentialDocumentResponse] = Field(default_factory=list)
 
