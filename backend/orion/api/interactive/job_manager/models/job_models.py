@@ -79,8 +79,6 @@ class JobPostMutationRequest(JobRequestModel):
     salaryPeriod: SalaryPeriod = Field(default=SalaryPeriod.YEARLY)
     salaryUndisclosed: bool = False
 
-    screeningQuestions: List[ScreeningQuestionModel] = Field(default_factory=list)
-
     audience: JobAudience = Field(default=JobAudience.OPEN)
     expiresAt: Optional[datetime] = None
 
@@ -101,10 +99,11 @@ class JobPostMutationRequest(JobRequestModel):
         if self.salaryMax and self.salaryMin > self.salaryMax:
             raise ValueError("Salary minimum cannot exceed salary maximum")
 
-        if len(self.screeningQuestions) > MAX_SCREENING_QUESTIONS:
+        questions = self.screeningQuestions or []
+        if len(questions) > MAX_SCREENING_QUESTIONS:
             raise ValueError(f"Maximum {MAX_SCREENING_QUESTIONS} screening questions are allowed")
 
-        supplied_ids = [question.questionId for question in self.screeningQuestions if question.questionId]
+        supplied_ids = [question.questionId for question in questions if question.questionId]
         if len(supplied_ids) != len(set(supplied_ids)):
             raise ValueError("Screening question identifiers must be unique")
 
@@ -112,11 +111,11 @@ class JobPostMutationRequest(JobRequestModel):
 
 
 class CreateJobPostRequest(JobPostMutationRequest):
-    pass
+    screeningQuestions: List[ScreeningQuestionModel] = Field(default_factory=list)
 
 
 class UpdateJobPostRequest(JobPostMutationRequest):
-    pass
+    screeningQuestions: Optional[List[ScreeningQuestionModel]] = None
 
 
 class ScreeningQuestionResponse(BaseModel):
