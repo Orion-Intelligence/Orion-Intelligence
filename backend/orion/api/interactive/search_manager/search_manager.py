@@ -42,6 +42,14 @@ class search_manager:
             search_manager.__instance = self
 
     @staticmethod
+    async def _mock_scam_classifier(text: str) -> bool:
+        if not text:
+            return False
+        scam_keywords = ["scam", "phishing", "fraud", "urgent", "win", "prize", "free money", "lottery"]
+        text_lower = text.lower()
+        return any(keyword in text_lower for keyword in scam_keywords)
+
+    @staticmethod
     async def dynamic_search(model, api, user_id: str = "system"):
         try:
             async with httpx.AsyncClient() as client:
@@ -55,6 +63,25 @@ class search_manager:
         except Exception:
             return JSONResponse(
                 status_code=500, content={"detail": "Something happened while calling parse/" + api})
+
+    @staticmethod
+    async def extract_ioc_from_url(url: str, user_id: str = "0"):
+        micros_url = env_handler.get_instance().env("TRUSTED_MICROS_API_BASE")
+        if not micros_url:
+            return {}
+        ioc_endpoint = f"{micros_url}/ioc/extract/text/{user_id}"
+        try:
+            async with httpx.AsyncClient() as m_client:
+                m_resp = await m_client.post(ioc_endpoint, json={"url": url}, timeout=30.0)
+                if m_resp.status_code == 200:
+                    result = m_resp.json()
+                    extracted_text = result.get("extracted_text", "")
+                    if extracted_text:
+                        result["is_scam"] = await search_manager._mock_scam_classifier(extracted_text)
+                    return result
+        except Exception as e:
+            print(f"[SearchManager] Error extracting IOC from {url}: {e}", flush=True)
+        return {}
 
     @staticmethod
     async def search_wanted_list(model):

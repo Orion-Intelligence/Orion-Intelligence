@@ -1204,3 +1204,16 @@ async def phone_universal_search_proxy(payload: dict = Body(...), current_user=D
 )
 async def dkim_check_proxy(payload: dict = Body(...), current_user=Depends(get_current_user)):
     return await _forward_micros_post("dkim/check", payload, current_user, "DKIM lookup")
+
+@api_routes.post(
+    "/api/ioc/extract/url",
+    summary="Extract IOCs from URL",
+    tags=["Entity Scans"],
+    dependencies=SCANNING_DEPS,
+)
+async def extract_ioc_url_proxy(payload: dict = Body(...), current_user=Depends(get_current_user)):
+    url = payload.get("url")
+    if not url:
+        return {}
+    return await search_manager.getInstance().extract_ioc_from_url(url, str(current_user.id))
+

@@ -1,6 +1,6 @@
 import { Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe, KeyValuePipe, NgClass } from '@angular/common';
 import { Subscription, finalize, interval } from 'rxjs';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { ManageProfilesService } from '../manage-profiles.service';
@@ -16,7 +16,7 @@ import { SocialIconComponent } from '../../../shared/partials/social-icon/social
 @Component({
   selector: 'app-manage-profile-results',
   standalone: true,
-  imports: [DatePipe, NgClass, TranslatePipe, UiDropdownComponent, ConfirmationPopupComponent, SocialIconComponent],
+  imports: [DatePipe, KeyValuePipe, NgClass, TranslatePipe, UiDropdownComponent, ConfirmationPopupComponent, SocialIconComponent],
   templateUrl: './manage-profile-results.component.html',
 })
 export class ManageProfileResultsComponent implements OnInit {
@@ -97,6 +97,10 @@ export class ManageProfileResultsComponent implements OnInit {
 
   selectView(view: string | null): void {
     this.view.set(view === 'posts' || view === 'hate_speech' ? view : RESULTS_DEFAULT_VIEW);
+  }
+
+  formatIocKey(key: string): string {
+    return key.replace(/^m_/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }
 
   selectedProfileLabel(): string {

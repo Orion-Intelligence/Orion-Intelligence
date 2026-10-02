@@ -221,39 +221,36 @@ class social_profile_job:
         user_id = str(payload.get("user_id") or "")
         run_id = await self._begin_run(key, payload)
 
-        try:
-            while time.monotonic() < deadline:
-                if await self._is_cancelled(user_id, run_id):
-                    log.g().i(f"Social automation job for {key} stopped on request")
-                    await self._record_failure(run_id, key, payload, "Stopped from the dashboard")
-                    return None
+        while time.monotonic() < deadline:
+            if await self._is_cancelled(user_id, run_id):
+                log.g().i(f"Social automation job for {key} stopped on request")
+                await self._record_failure(run_id, key, payload, "Stopped from the dashboard")
+                return None
 
-                status_code, body = await social_manager.getInstance().social_request(payload, key, headers)
+            status_code, body = await social_manager.getInstance().social_request(payload, key, headers)
 
-                if status_code != 200 or not isinstance(body, dict):
-                    log.g().e(f"Social automation request failed for {key}: {status_code} {body}")
-                    await self._record_failure(run_id, key, payload, f"Automation service request failed ({status_code})")
-                    return None
+            if status_code != 200 or not isinstance(body, dict):
+                log.g().e(f"Social automation request failed for {key}: {status_code} {body}")
+                await self._record_failure(run_id, key, payload, f"Automation service request failed ({status_code})")
+                return None
 
-                if body.get("status") == "error":
-                    log.g().e(f"Social automation job failed for {key}: {body.get('message')}")
-                    await self._record_failure(run_id, key, payload, str(body.get("message") or "Automation service reported an error"))
-                    return None
+            if body.get("status") == "error":
+                log.g().e(f"Social automation job failed for {key}: {body.get('message')}")
+                await self._record_failure(run_id, key, payload, str(body.get("message") or "Automation service reported an error"))
+                return None
 
-                if "result" in body:
-                    log.g().i(f"Social automation job {body.get('job_id')} finished")
-                    return body.get("result")
+            if "result" in body:
+                log.g().i(f"Social automation job {body.get('job_id')} finished")
+                await self._set_step(user_id, run_id, "processing results")
+                return body.get("result")
 
-                log.g().i(f"Social automation job {body.get('job_id')} pending: {body.get('step', '')}")
-                await self._set_step(user_id, run_id, str(body.get("step") or ""))
-                await asyncio.sleep(self.POLL_INTERVAL_SECONDS)
+            log.g().i(f"Social automation job {body.get('job_id')} pending: {body.get('step', '')}")
+            await self._set_step(user_id, run_id, str(body.get("step") or ""))
+            await asyncio.sleep(self.POLL_INTERVAL_SECONDS)
 
-            log.g().w(f"Social automation job for {key} timed out after {timeout_seconds}s")
-            await self._record_failure(run_id, key, payload, f"Timed out after {timeout_seconds}s")
-            return None
-        finally:
-            await self._end_run(user_id, run_id)
-
+        log.g().w(f"Social automation job for {key} timed out after {timeout_seconds}s")
+        await self._record_failure(run_id, key, payload, f"Timed out after {timeout_seconds}s")
+        return None
     async def _store_result(self, result: Any):
         if not isinstance(result, dict):
             return
@@ -372,7 +369,8 @@ class social_profile_job:
 
         except Exception as e:
             log.g().e(f"Failed to run posting for profile {profile.profile_id}: {e}")
-
+        finally:
+            await self._end_run(user_id, run_id)
     async def run_ad_monitoring(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], run_id: str, user_id: str = "", is_manual: bool = False):
 
         log.g().i(f"Running ad monitoring for profile {profile.profile_id} on {profile.platform}")
@@ -400,7 +398,8 @@ class social_profile_job:
                 
         except Exception as e:
             log.g().e(f"Failed to run ad monitoring for profile {profile.profile_id}: {e}")
-
+        finally:
+            await self._end_run(user_id, run_id)
     async def run_hate_speech_monitoring(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], run_id: str, user_id: str = "", is_manual: bool = False):
         log.g().i(f"Running hate speech monitoring for profile {profile.profile_id} on {profile.platform}")
         
@@ -429,3 +428,5 @@ class social_profile_job:
 
         except Exception as e:
             log.g().e(f"Failed to run hate speech monitoring for profile {profile.profile_id}: {e}")
+        finally:
+            await self._end_run(user_id, run_id)

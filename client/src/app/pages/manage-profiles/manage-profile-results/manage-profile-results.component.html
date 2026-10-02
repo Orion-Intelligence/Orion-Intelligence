@@ -90,12 +90,26 @@
                   @if (ad.topic) {
                     <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-text3)] [body.light-theme_&]:bg-[#eef4fb]">{{ ad.topic }}</span>
                   }
+                  @if (ad.is_scam) {
+                    <span class="rounded-full border border-red-500/20 bg-red-500/10 px-2 py-0.5 text-[10px] font-medium text-red-400 [body.light-theme_&]:border-red-200 [body.light-theme_&]:bg-red-50 [body.light-theme_&]:text-red-600">{{ 'Scam' | translate }}</span>
+                  }
                   <a [href]="ad.url" target="_blank" rel="noopener noreferrer" class="truncate text-[11px] font-medium text-[var(--color-blue-640)] hover:underline">{{ ad.url }}</a>
                 </div>
                 @if (ad.content_text) {
                   <p class="mb-0 mt-1 line-clamp-2 text-[11px] text-[var(--color-text3)]">{{ ad.content_text }}</p>
                 }
                 <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ 'Likes' | translate }}: {{ ad.likes || '-' }} · {{ 'Shares' | translate }}: {{ ad.shares || '-' }} · {{ 'Views' | translate }}: {{ ad.views || '-' }}</p>
+                @if (ad.iocs && ad.iocs.length) {
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    @for (ioc of ad.iocs; track $index) {
+                      @for (kv of ioc | keyvalue; track kv.key) {
+                        <span class="rounded border border-[var(--color-border)] bg-[var(--ui-table-row-even)] px-1.5 py-0.5 text-[10px] text-[var(--color-text2)]">
+                          <span class="font-medium opacity-70">{{ formatIocKey(kv.key) }}:</span> {{ kv.value }}
+                        </span>
+                      }
+                    }
+                  </div>
+                }
               </div>
             }
             @for (post of row.posts; track post.url) {

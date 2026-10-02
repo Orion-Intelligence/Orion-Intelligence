@@ -605,6 +605,25 @@ class ProfileManager:
             session_expired = result.session_expired
         elif data.result_type == "ad_detection" and data.ad_detection_result is not None:
             result = data.ad_detection_result
+            
+            try:
+                from orion.api.interactive.search_manager.search_manager import search_manager
+                for ad in result.ads:
+                    if ad.url:
+                        try:
+                            m_json = await search_manager.getInstance().extract_ioc_from_url(ad.url, data.user_id)
+                            if isinstance(m_json, dict):
+                                if "is_scam" in m_json:
+                                    ad.is_scam = m_json["is_scam"]
+                                if "iocs" in m_json:
+                                    ad.iocs = m_json["iocs"]
+                                elif isinstance(m_json.get("result"), dict) and "iocs" in m_json["result"]:
+                                    ad.iocs = m_json["result"]["iocs"]
+                        except Exception as e:
+                            print(f"[ProfileManager] Error extracting IOCs for ad url {ad.url}: {e}", flush=True)
+            except Exception as e:
+                print(f"[ProfileManager] Setup error for IOC extraction: {e}", flush=True)
+
             record.ad_detection_results.append(SocialAdDetectionResult(
                 profile_id=result.profile_id,
                 date_time=result.date_time or now,
@@ -618,6 +637,8 @@ class ProfileManager:
                     shares=ad.shares,
                     views=ad.views,
                     topic=ad.topic,
+                    iocs=ad.iocs,
+                    is_scam=ad.is_scam,
                     detected_at=ad.detected_at or now,
                 ) for ad in result.ads],
                 error=result.error,

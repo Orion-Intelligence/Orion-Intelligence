@@ -109,6 +109,7 @@ export interface SocialDetectedAd {
   views: string;
   topic?: string;
   detected_at: string;
+  iocs?: Record<string, any>[];
 }
 
 export interface SocialAdDetectionResult {
