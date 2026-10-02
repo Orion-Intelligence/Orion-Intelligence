@@ -17,6 +17,16 @@ describe('Orion Intelligence - Report Takedown UI Flow', () => {
     acceptTakedownFromList();
     assertReportShowsAcceptedTakedown();
   });
+
+  it('shows activation warning and disables acceptance when tenant mail account is unconfigured', () => {
+    registerTakedownIntercepts('pending', { mailConfigured: false });
+    cy.loginAsAdmin();
+    openTakedownReviewList();
+    cy.get(takedownSelector('tenant-mail-activation-banner')).should('be.visible');
+    cy.get(takedownSelector('takedown-row')).first().within(() => {
+      cy.get(takedownSelector('takedown-accept-button')).should('be.visible').and('be.disabled');
+    });
+  });
 });
 
 describe('Report Takedown - Multi-Tenant Permissions', () => {

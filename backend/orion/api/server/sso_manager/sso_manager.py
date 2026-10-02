@@ -15,7 +15,7 @@ from orion.api.server.sso_manager.constants.sso_constants import SSO_CONSTANTS
 from orion.api.server.sso_manager.model.sso_model import SSOCodeExchangeRequest, SSOMailPassphraseRequest, SSOSessionRequest
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account
+from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account, LicenseName, user_role
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
@@ -78,9 +78,9 @@ class sso_manager:
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == tenant_object_id)
         return str(getattr(tenant, "slug", "") or "") if tenant else ""
 
-    async def _trusted_redirect_uri(self, user: db_user_account, redirect_uri: str) -> str:
+    async def _trusted_redirect_uri(self, user: db_user_account, redirect_uri: str, tenant_slug: str | None = None) -> str:
         trusted = set(SSO_CONSTANTS.S_ALLOWED_REDIRECT_URIS)
-        slug = await self._tenant_slug(user.tenant_id)
+        slug = tenant_slug or await self._tenant_slug(user.tenant_id)
         if slug:
             trusted.add(SSO_CONSTANTS.S_TENANT_REDIRECT_URI_TEMPLATE.format(slug=slug))
         for uri in trusted:
@@ -96,6 +96,19 @@ class sso_manager:
             "username": str(user.username),
             "email": str(user.email or "").strip().lower(),
             "full_name": str(user.username),
+            "session": hashlib.sha256(str(user.current_session_id or "").encode("utf-8")).hexdigest() if user.current_session_id else "",
+        }
+
+    async def _identity_for_report(self, tenant: db_tenant_model, user: db_user_account) -> dict[str, str]:
+        slug = str(getattr(tenant, "slug", "") or "")
+        mailbox_address = getattr(tenant, "report_mailbox_address", None) or f"{slug}_report@mail.orionintelligence.org"
+        return {
+            "user_id": f"tenant_report_{tenant.id}",
+            "tenant_id": str(tenant.id),
+            "tenant_slug": slug,
+            "username": f"{slug}_report",
+            "email": mailbox_address,
+            "full_name": f"{slug} Report",
             "session": hashlib.sha256(str(user.current_session_id or "").encode("utf-8")).hexdigest() if user.current_session_id else "",
         }
 
@@ -124,17 +137,29 @@ class sso_manager:
             return None
 
     async def _active_user(self, record: dict) -> db_user_account | None:
-        user_id = str(record.get("user_id") or "")
+        auth_user_id = str(record.get("auth_user_id") or record.get("user_id") or "")
         session_id = str(record.get("session_id") or "")
-        if not ObjectId.is_valid(user_id) or not session_id:
+        if not ObjectId.is_valid(auth_user_id) or not session_id:
             return None
-        user = await self._engine.find_one(db_user_account, db_user_account.id == ObjectId(user_id))
+        user = await self._engine.find_one(db_user_account, db_user_account.id == ObjectId(auth_user_id))
         if user is None or user.status != UserStatus.ACTIVE or user.password_reset_required or str(user.current_session_id or "") != session_id:
             return None
-        active_session_id = await self._redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [f"session:{user_id}", None, None])
-        return user if active_session_id == session_id else None
+        active_session_id = await self._redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [f"session:{auth_user_id}", None, None])
+        if active_session_id != session_id:
+            return None
 
-    async def authorize(self, request: Request, redirect_uri: str, state: str):
+        target_tenant_id = record.get("target_tenant_id")
+        if target_tenant_id:
+            user_tid = str(getattr(user, "tenant_id", "") or "")
+            if not user_tid or user_tid != str(target_tenant_id):
+                return None
+            is_admin = getattr(user, "role", "") == user_role.ADMIN
+            is_maintainer = LicenseName.MAINTAINER in (getattr(user, "licenses", None) or [])
+            if not (is_admin or is_maintainer):
+                return None
+        return user
+
+    async def authorize(self, request: Request, redirect_uri: str, state: str, tenant_id: str | None = None):
         redirect_uri = self._validate_redirect_uri(redirect_uri)
         state = self._validate_state(state)
         try:
@@ -142,16 +167,42 @@ class sso_manager:
             if not isinstance(user, db_user_account):
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         except HTTPException:
-            authorize_path = request.url.path + "?" + urlencode({"redirect_uri": redirect_uri, "state": state})
+            params = {"redirect_uri": redirect_uri, "state": state}
+            if tenant_id:
+                params["tenant_id"] = tenant_id
+            authorize_path = request.url.path + "?" + urlencode(params)
             return RedirectResponse("/login?" + urlencode({"redirect": authorize_path}), status_code=status.HTTP_302_FOUND)
+
         if user.password_reset_required:
             return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
         session_id = str(user.current_session_id or "")
         if not session_id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Orion Intelligence session is unavailable")
-        redirect_uri = await self._trusted_redirect_uri(user, redirect_uri)
+
+        target_tenant = None
+        if tenant_id and tenant_id.strip():
+            tid = tenant_id.strip()
+            if not ObjectId.is_valid(tid):
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid tenant ID")
+            target_tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tid))
+            if not target_tenant:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found")
+            user_tid = str(getattr(user, "tenant_id", "") or "")
+            if not user_tid or user_tid != str(target_tenant.id):
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to access this tenant report mailbox")
+            is_admin = getattr(user, "role", "") == user_role.ADMIN
+            is_maintainer = LicenseName.MAINTAINER in (getattr(user, "licenses", None) or [])
+            if not (is_admin or is_maintainer):
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to access this tenant report mailbox")
+
+        redirect_uri = await self._trusted_redirect_uri(user, redirect_uri, tenant_slug=getattr(target_tenant, "slug", None))
         code = secrets.token_urlsafe(48)
-        record = {**(await self._identity_for_user(user)), "session_id": session_id, "redirect_uri": redirect_uri}
+        if target_tenant:
+            identity = await self._identity_for_report(target_tenant, user)
+        else:
+            identity = await self._identity_for_user(user)
+
+        record = {**identity, "auth_user_id": str(user.id), "session_id": session_id, "redirect_uri": redirect_uri, "target_tenant_id": str(target_tenant.id) if target_tenant else None}
         await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [self._code_key(code), json.dumps(record), SSO_CONSTANTS.S_CODE_TTL_SECONDS])
         return RedirectResponse(redirect_uri + "?" + urlencode({"code": code, "state": state}), status_code=status.HTTP_302_FOUND)
 
@@ -164,16 +215,33 @@ class sso_manager:
         user = await self._active_user(record)
         if user is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Orion Intelligence session has expired")
+
+        target_tenant_id = record.get("target_tenant_id")
+        if target_tenant_id:
+            target_tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(target_tenant_id))
+            if not target_tenant:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Tenant no longer exists")
+            identity = await self._identity_for_report(target_tenant, user)
+        else:
+            identity = await self._identity_for_user(user)
+
         session_token = secrets.token_urlsafe(64)
-        session_record = {**(await self._identity_for_user(user)), "session_id": str(user.current_session_id)}
+        session_record = {**identity, "auth_user_id": str(user.id), "session_id": str(user.current_session_id),"target_tenant_id": target_tenant_id}
         await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [self._session_key(session_token), json.dumps(session_record), SSO_CONSTANTS.S_SESSION_TTL_SECONDS])
-        return {"session_token": session_token, "expires_in": SSO_CONSTANTS.S_SESSION_TTL_SECONDS, "identity": await self._identity_for_user(user)}
+        return {"session_token": session_token, "expires_in": SSO_CONSTANTS.S_SESSION_TTL_SECONDS, "identity": identity}
 
     async def verify(self, request: Request, payload: SSOSessionRequest):
         self._require_client(request)
-        user = await self._active_user(await self._session_record(payload.session_token) or {})
+        session_record = await self._session_record(payload.session_token) or {}
+        user = await self._active_user(session_record)
         if user is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired Orion Mail session")
+        target_tenant_id = session_record.get("target_tenant_id")
+        if target_tenant_id:
+            target_tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(target_tenant_id))
+            if not target_tenant:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Tenant no longer exists")
+            return await self._identity_for_report(target_tenant, user)
         return await self._identity_for_user(user)
 
     async def revoke(self, request: Request, payload: SSOSessionRequest):
@@ -186,9 +254,11 @@ class sso_manager:
 
     async def set_mail_passphrase(self, request: Request, payload: SSOMailPassphraseRequest):
         self._require_client(request)
-        user = await self._active_user(await self._session_record(payload.session_token) or {})
+        session_record = await self._session_record(payload.session_token) or {}
+        user = await self._active_user(session_record)
         if user is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired Orion Mail session")
-        user.mail_passphrase = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(payload.verifier) if payload.verifier else None
-        await self._engine.save(user)
+        if not session_record.get("target_tenant_id"):
+            user.mail_passphrase = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(payload.verifier) if payload.verifier else None
+            await self._engine.save(user)
         return {"mail_passphrase_set": user.mail_passphrase is not None}

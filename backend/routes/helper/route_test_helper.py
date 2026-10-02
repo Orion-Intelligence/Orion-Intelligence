@@ -350,6 +350,22 @@ class TestRouteHelper:
             daterange=daterange,
         )
 
+    TAKEDOWN_MAIL_CONFIGURED: bool = True
+    TAKEDOWN_UNREAD_MAILS_COUNT: int = 0
+
+    @classmethod
+    async def get_test_unread_mails_count(cls):
+        return {"unread_count": cls.TAKEDOWN_UNREAD_MAILS_COUNT}
+
+    @classmethod
+    async def get_test_mail_account_status(cls):
+        return {
+            "configured": cls.TAKEDOWN_MAIL_CONFIGURED,
+            "mailbox_address": f"{cls.TAKEDOWN_TEST_TENANT_NAME}_report@mail.orionintelligence.org",
+            "mailbox_exists": True,
+            "is_active": True,
+        }
+
     @staticmethod
     def require_testing_enabled():
         if env_handler.get_instance().env("TESTING_ENABLED", "0") != "1":

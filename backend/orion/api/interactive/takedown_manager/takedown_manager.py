@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import asyncio
 from datetime import datetime, time, timezone
+import html
+import os
 from typing import Any, Dict, Optional
 from urllib.parse import urlparse
 
@@ -414,16 +416,32 @@ class TakedownManager:
         if not abuse_email:
             raise HTTPException(status_code=400, detail="No abuse email found in captured evidence")
 
-        await mail_manager.get_instance().send_takedown_mail(
+        target_tenant_id = record.operator_tenant_id or str(getattr(current_user, "tenant_id", "") or "")
+        mail_status = await self.get_tenant_mail_status_by_id(target_tenant_id)
+        if not mail_status.get("configured"):
+            raise HTTPException(
+                status_code=400,
+                detail="Tenant mail account is not activated. Please activate your tenant mail account and configure passwords/keys before accepting takedown requests."
+            )
+
+        custom_message = str((record.evidence or {}).get("custom_message") or "").strip()
+        rendered_html = self._render_takedown_html(record.target_domain, custom_message)
+        rendered_text = self._render_takedown_text(record.target_domain, custom_message)
+
+        from orion.services.orion_mail_client.orion_mail_client import orion_mail_client
+        await orion_mail_client.get_instance().send_takedown_mail(
+            tenant_id=target_tenant_id,
             to_email=abuse_email,
+            subject=f"Urgent: Takedown Request for {record.target_domain} [TD-{record.id}]",
             target_domain=record.target_domain,
+            custom_message=custom_message,
+            html_content=str(evidence.get("html_content") or ""),
+            screenshot_base64=str(evidence.get("screenshot_base64") or ""),
             screenshot_filename=str(evidence.get("screenshot_path") or ""),
             html_filename=str(evidence.get("html_path") or ""),
-            tenant_id=record.operator_tenant_id,
-            screenshot_base64=str(evidence.get("screenshot_base64") or ""),
-            html_content=str(evidence.get("html_content") or ""),
-            screenshot_mime_type=str(evidence.get("screenshot_mime_type") or "image/png"),
-            custom_message=str((record.evidence or {}).get("custom_message") or ""),
+            takedown_id=str(record.id),
+            body_html=rendered_html,
+            body_text=rendered_text,
         )
 
         now = datetime.now(timezone.utc)
@@ -449,3 +467,93 @@ class TakedownManager:
         await self._engine.save(record)
         await self._update_elastic_status(record)
         return self._serialize_record(record)
+
+    async def get_unread_takedown_count(self, current_user) -> int:
+        from orion.services.orion_mail_client.orion_mail_client import orion_mail_client
+        root_tenant_id = await self._root_tenant_id()
+        reviewer_tenant_id = await self._reviewer_tenant_id(current_user, root_tenant_id)
+        tenant_id = reviewer_tenant_id or str(getattr(current_user, "tenant_id", "") or "")
+        if not tenant_id:
+            return 0
+        return await orion_mail_client.get_instance().get_unread_takedown_count(tenant_id)
+
+    async def get_tenant_mail_status_by_id(self, tenant_id: str) -> Dict[str, Any]:
+        from orion.services.orion_mail_client.orion_mail_client import orion_mail_client
+        if not tenant_id:
+            return {"configured": False, "mailbox_address": "", "mailbox_exists": False, "is_active": False}
+        mail_status = await orion_mail_client.get_instance().get_tenant_mailbox_status(tenant_id)
+        configured = bool(mail_status.get("keys_configured"))
+        return {
+            "configured": configured,
+            "mailbox_address": mail_status.get("mailbox_address") or "",
+            "mailbox_exists": bool(mail_status.get("mailbox_exists")),
+            "is_active": bool(mail_status.get("is_active")),
+        }
+
+    async def get_tenant_mail_status(self, current_user) -> Dict[str, Any]:
+        root_tenant_id = await self._root_tenant_id()
+        reviewer_tenant_id = await self._reviewer_tenant_id(current_user, root_tenant_id)
+        tenant_id = reviewer_tenant_id or str(getattr(current_user, "tenant_id", "") or "")
+        return await self.get_tenant_mail_status_by_id(tenant_id)
+
+    @classmethod
+    def _render_takedown_html(cls, target_domain: str, custom_message: str = "") -> str:
+        candidates = [
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "build", "assets", "data", "mail_template_data", "takedown_template.html")),
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "build", "assets", "data", "mail_template_data", "takedown_template.html")),
+            "/app/build/assets/data/mail_template_data/takedown_template.html",
+            "/app/workspace/build/assets/data/mail_template_data/takedown_template.html",
+        ]
+        template_content = ""
+        for path in candidates:
+            if os.path.exists(path):
+                try:
+                    with open(path, "r", encoding="utf-8") as f:
+                        template_content = f.read()
+                        break
+                except Exception:
+                    pass
+        if not template_content:
+            template_content = (
+                "<!DOCTYPE html><html><body>"
+                "<p><strong>Dear Abuse & Security Team,</strong></p>"
+                "<p>Our automated threat intelligence systems have detected confirmed malicious activity.</p>"
+                "<p>Target Domain: <strong>{{domain}}</strong></p>"
+                "<p>Please review the attached evidence and suspend the domain immediately.</p>"
+                "{{custom_message}}"
+                "</body></html>"
+            )
+
+        template_content = template_content.replace("{{domain}}", html.escape(target_domain))
+        template_content = template_content.replace("appname", "Orion Intelligence")
+
+        if custom_message and custom_message.strip():
+            note_html = (
+                f'<div style="margin-top: 24px; padding: 16px; background-color: #f8fafc; '
+                f'border-left: 4px solid #0284c7; border-radius: 4px;">'
+                f'<strong style="color: #0f172a; display: block; margin-bottom: 8px;">Additional Analyst Note:</strong>'
+                f'<span style="color: #334155; white-space: pre-wrap; font-family: inherit;">{html.escape(custom_message.strip())}</span>'
+                f'</div>'
+            )
+            template_content = template_content.replace("{{custom_message}}", note_html)
+        else:
+            template_content = template_content.replace("{{custom_message}}", "")
+
+        return template_content
+
+    @classmethod
+    def _render_takedown_text(cls, target_domain: str, custom_message: str = "") -> str:
+        text = (
+            f"URGENT: Takedown Evidence & Abuse Report\n\n"
+            f"Dear Abuse & Security Team,\n\n"
+            f"Our automated threat intelligence systems at Orion Intelligence have detected confirmed malicious activity hosted on your network infrastructure.\n\n"
+            f"Target Domain: {target_domain}\n\n"
+            f"Please review the attached evidence (screenshot and HTML source) and suspend the domain immediately to prevent further harm.\n"
+        )
+        if custom_message and custom_message.strip():
+            text += f"\nAdditional Analyst Note:\n{custom_message.strip()}\n"
+        text += "\n--\nOrion Intelligence Security Team"
+        return text
+
+
+

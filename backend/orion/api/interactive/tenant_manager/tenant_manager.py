@@ -457,14 +457,21 @@ class TenantManager:
             raise HTTPException(status_code=400, detail="This domain tenant already exists")
 
     async def create_tenant(self, data: db_tenant_model):
+        from orion.services.orion_mail_client.orion_mail_client import orion_mail_client
         data.slug = self.build_tenant_slug(data.email)
         await self.assert_slug_available(data.slug)
         try:
             data.privileged_ioc = False
             if not data.iocs and data.email:
                 data.iocs = self.build_privileged_iocs(data.email)
+            plain_name = data.name or data.slug
             await self.encrypt_tenant(data)
             data.status = TenantStatus.ONBOARDING
+
+            mailbox_data = await orion_mail_client.get_instance().create_tenant_mailbox(tenant_id=str(data.id), tenant_slug=data.slug, tenant_name=plain_name)
+            data.report_mailbox_address = mailbox_data.get("mailbox_address")
+            data.report_mailbox_id = mailbox_data.get("mailbox_id")
+
             await self._engine.save(data)
             await self.copy_default_system_settings(data)
         except Exception as _:
@@ -502,6 +509,8 @@ class TenantManager:
             privileged_ioc=getattr(tenant, "privileged_ioc", False),
             alert_run_time=getattr(tenant, "alert_run_time", None),
             allowed_alert_categories=getattr(tenant, "allowed_alert_categories", None),
+            report_mailbox_address=getattr(tenant, "report_mailbox_address", None),
+            report_mailbox_id=getattr(tenant, "report_mailbox_id", None),
             accounts_mail_password=None,
             accounts_mail="",
             accounts_smtp_server="",

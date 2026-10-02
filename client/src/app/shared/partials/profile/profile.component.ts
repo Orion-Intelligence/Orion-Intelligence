@@ -221,6 +221,43 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
     this.languageDropdownOpen.set(false);
   }
 
+  canAccessTenantReportMail(): boolean {
+    return (this.isAdmin() || this.licenseService.isMaintainer()) && !!this.appService.userSessionData()?.tenant?.id;
+  }
+
+  openTenantReportMail(): void {
+    const mailUrl = this.appService.getConfig().appSettings.orion_mail_url.trim();
+    if (!mailUrl) {
+      return;
+    }
+    const tenantId = this.appService.userSessionData()?.tenant?.id ?? '';
+    if (!tenantId) {
+      return;
+    }
+    const login = new URL('/api/auth/login', mailUrl);
+    const mailHost = login.hostname;
+    const isDefaultTenant = this.appService.userSessionData()?.tenant?.isDefault;
+    if (!isDefaultTenant && mailHost.startsWith('mail.')) {
+      const parent = mailHost.slice('mail.'.length);
+      const intelHost = window.location.hostname;
+      if (intelHost !== parent && intelHost.endsWith(`.${parent}`)) {
+        const slug = intelHost.slice(0, intelHost.length - parent.length - 1);
+        if (slug && !slug.includes('.')) {
+          login.hostname = `${slug}${mailHost}`;
+        }
+      }
+    }
+    const params: Record<string, string> = {
+      origin: login.origin,
+      orion_origin: window.location.origin,
+      tenant_id: tenantId,
+    };
+    login.search = new URLSearchParams(params).toString();
+    window.open(login.toString(), '_blank', 'noopener,noreferrer');
+    this.dropdownOpen.set(false);
+    this.languageDropdownOpen.set(false);
+  }
+
   logout() {
     this.scanNotificationService.stopAll();
     this.dashboardService.resetParams();

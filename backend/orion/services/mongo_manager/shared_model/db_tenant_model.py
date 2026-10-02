@@ -81,6 +81,8 @@ class db_tenant_model(Model):
     alert_run_time: Optional[str] = None
     allowed_alert_categories: Optional[List[str]] = None
     case_status_tracking_board: Optional[dict[str, Any]] = None
+    report_mailbox_address: Optional[str] = None
+    report_mailbox_id: Optional[str] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -130,6 +132,8 @@ class TenantRequest(BaseModel):
     accounts_smtp_server: Optional[str] = None
     accounts_smtp_port: Optional[str] = None
     case_status_tracking_board: Optional[dict[str, Any]] = None
+    report_mailbox_address: Optional[str] = None
+    report_mailbox_id: Optional[str] = None
 
     @field_validator("alert_run_time", mode="before")
     @classmethod

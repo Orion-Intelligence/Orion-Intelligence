@@ -1,5 +1,5 @@
 import { AsyncPipe, DatePipe, NgClass, NgOptimizedImage } from '@angular/common';
-import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -39,6 +39,9 @@ export class TakedownRequestsComponent implements OnInit, AfterViewInit {
   actionId = '';
   error = '';
   rejectionTarget: TakedownRequestItem | null = null;
+  unreadMailsCount = 0;
+  mailAccountStatus: { configured: boolean; mailbox_address?: string; mailbox_exists?: boolean } | null = null;
+  checkingMailStatus = false;
 
   constructor(private apiService: ApiService, public sidebarService: SidebarService, private dashboardService: DashboardService, private licenseService: LicenseService, private appService: AppService, private router: Router) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
@@ -52,6 +55,72 @@ export class TakedownRequestsComponent implements OnInit, AfterViewInit {
 
     this.dashboardService.selectedFilters.set({});
     this.load();
+    this.loadUnreadMailsCount();
+    this.loadMailAccountStatus();
+  }
+
+  @HostListener('window:focus')
+  onWindowFocus(): void {
+    if (this.mailAccountStatus && !this.mailAccountStatus.configured) {
+      this.loadMailAccountStatus();
+      this.loadUnreadMailsCount();
+    }
+  }
+
+  loadMailAccountStatus(): void {
+    this.checkingMailStatus = true;
+    this.apiService.get<{ configured: boolean; mailbox_address?: string; mailbox_exists?: boolean }>('takedowns/mail-account-status').subscribe({
+      next: res => {
+        this.mailAccountStatus = res;
+        this.checkingMailStatus = false;
+      },
+      error: () => {
+        this.mailAccountStatus = { configured: false };
+        this.checkingMailStatus = false;
+      }
+    });
+  }
+
+  loadUnreadMailsCount(): void {
+    this.apiService.get<{ unread_count: number }>('takedowns/unread-mails-count').subscribe({
+      next: res => {
+        this.unreadMailsCount = res?.unread_count ?? 0;
+      },
+      error: () => {
+        this.unreadMailsCount = 0;
+      }
+    });
+  }
+
+  openTakedownMailbox(): void {
+    const mailUrl = this.appService.getConfig().appSettings.orion_mail_url.trim();
+    if (!mailUrl) {
+      return;
+    }
+    const tenantId = this.appService.userSessionData()?.tenant?.id ?? '';
+    const login = new URL('/api/auth/login', mailUrl);
+    const mailHost = login.hostname;
+    const isDefaultTenant = this.appService.userSessionData()?.tenant?.isDefault;
+    if (!isDefaultTenant && mailHost.startsWith('mail.')) {
+      const parent = mailHost.slice('mail.'.length);
+      const intelHost = window.location.hostname;
+      if (intelHost !== parent && intelHost.endsWith(`.${parent}`)) {
+        const slug = intelHost.slice(0, intelHost.length - parent.length - 1);
+        if (slug && !slug.includes('.')) {
+          login.hostname = `${slug}${mailHost}`;
+        }
+      }
+    }
+    const params: Record<string, string> = {
+      origin: login.origin,
+      orion_origin: window.location.origin,
+      return_to: '/inbox'
+    };
+    if (tenantId) {
+      params.tenant_id = tenantId;
+    }
+    login.search = new URLSearchParams(params).toString();
+    window.open(login.toString(), '_blank', 'noopener,noreferrer');
   }
 
   ngAfterViewInit(): void {
@@ -116,6 +185,10 @@ export class TakedownRequestsComponent implements OnInit, AfterViewInit {
 
   accept(item: TakedownRequestItem): void {
     if (!item?.id || this.actionId) {
+      return;
+    }
+    if (this.mailAccountStatus && !this.mailAccountStatus.configured) {
+      this.error = 'Please activate your tenant mail account and configure passwords/keys before accepting takedown requests.';
       return;
     }
     this.actionId = item.id;

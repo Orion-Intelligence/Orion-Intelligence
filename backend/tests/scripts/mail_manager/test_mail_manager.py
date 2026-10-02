@@ -122,57 +122,6 @@ def test_prepare_verification_message_builds_msg(monkeypatch):
     assert msg["Subject"] == "Subject"
 
 
-def test_send_takedown_mail_inline_attachments(monkeypatch):
-    manager = get_manager()
-    patch_config(monkeypatch, FakeConfigController(app_name="Acme"))
-    patch_env(monkeypatch, {"PRODUCTION": "0"})
-    patch_inline_to_thread(monkeypatch)
-    sent = {}
-
-    def send_sync_email(sender_email, password, to, msg, smtp_server, smtp_port):
-        sent["msg"] = msg
-
-    monkeypatch.setattr(mail_manager, "_send_sync_email", staticmethod(send_sync_email))
-    _run(
-        manager.send_takedown_mail(
-            to_email="victim@example.com",
-            target_domain="evil.com",
-            screenshot_filename="shot.png",
-            html_filename="page.html",
-            config=dict(VALID_CONFIG),
-            screenshot_base64="data:image/png;base64," + _PNG_B64,
-            html_content="<html>x</html>",
-            custom_message="Please act",
-        )
-    )
-    payload = sent["msg"].as_string()
-    assert payload.count("evil.com") >= 1
-
-
-def test_send_takedown_mail_fetches_via_urllib(monkeypatch):
-    manager = get_manager()
-    patch_config(monkeypatch, FakeConfigController(app_name="Acme"))
-    patch_env(monkeypatch, {"PRODUCTION": "0", "TRUSTED_MICROS_API_BASE": "http://micros:8010"})
-    patch_inline_to_thread(monkeypatch)
-    monkeypatch.setattr(
-        mm_module.urllib.request,
-        "urlopen",
-        lambda req, timeout=None: FakeUrlResponse(_PNG_BYTES),
-    )
-    sent = {}
-    monkeypatch.setattr(mail_manager, "_send_sync_email", staticmethod(lambda *a: sent.setdefault("done", True)))
-    _run(
-        manager.send_takedown_mail(
-            to_email="victim@example.com",
-            target_domain="evil.com",
-            screenshot_filename="shot.png",
-            html_filename="page.html",
-            config=dict(VALID_CONFIG),
-        )
-    )
-    assert sent["done"] is True
-
-
 def test_send_verification_mail_list(monkeypatch):
     manager = get_manager()
     patch_config(monkeypatch, FakeConfigController(meta_info=json.dumps(VALID_CONFIG)))

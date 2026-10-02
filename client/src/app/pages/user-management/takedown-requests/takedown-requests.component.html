@@ -8,6 +8,20 @@
           <p class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Review takedown evidence requests and approve or deny abuse reports.' | translate }}</p>
         </div>
         <div class="flex items-center gap-2">
+          <!-- @if (unreadMailsCount > 0) { -->
+            <button data-testid="unread-takedown-mails-indicator" type="button" (click)="openTakedownMailbox()" class="inline-flex h-10 items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 text-[13px] font-medium text-amber-400 hover:bg-amber-500/20 transition cursor-pointer [body.light-theme_&]:border-amber-600/30 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800" [title]="'Open takedown emails in Orion Mail' | translate">
+              <i class="bi bi-envelope-exclamation-fill text-amber-400 [body.light-theme_&]:text-amber-800"></i>
+              @if (mailAccountStatus && !mailAccountStatus.configured) {
+                <span>{{ 'Mailbox Needs Activation' | translate }}</span>
+              }
+              @else if (unreadMailsCount > 0) {
+                <span>{{ unreadMailsCount }} {{ (unreadMailsCount === 1 ? 'new takedown mail' : 'new takedown mails') | translate }}</span>
+              }
+              @else {
+                <span>{{ 'No new takedown mails' | translate }}</span>
+              }
+            </button>
+          <!-- } -->
           <div class="relative">
             <i class="bi bi-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[14px] text-[var(--color-text4)]"></i>
             <input data-testid="takedown-search" type="text" [(ngModel)]="query" (keyup.enter)="search()" [placeholder]="'Search target, email, user, report' | translate" class="h-10 w-[280px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] py-[6px] pl-9 pr-3 font-[Inter] text-[14px] text-[var(--color-text1)] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-out focus:border-sky-400/35 focus:bg-[var(--color-blue-720)] focus:ring-2 focus:ring-sky-400/20 max-[1024px]:w-[220px] max-[760px]:w-full placeholder:text-[var(--color-text4)]" />
@@ -27,6 +41,28 @@
           }
         </div>
       </div>
+
+      @if (mailAccountStatus && !mailAccountStatus.configured) {
+        <div class="mt-4 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 [body.light-theme_&]:border-amber-600/30 [body.light-theme_&]:bg-amber-50" data-testid="tenant-mail-activation-banner">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-start gap-3">
+              <i class="bi bi-shield-lock-fill text-[24px] text-amber-400 [body.light-theme_&]:text-amber-700 mt-0.5"></i>
+              <div>
+                <h3 class="text-[15px] font-semibold text-[var(--color-text1)] [body.light-theme_&]:text-amber-900">
+                  {{ 'Please activate your tenant mail account first' | translate }}
+                </h3>
+                <p class="mt-0.5 text-[13px] text-[var(--color-text6)] [body.light-theme_&]:text-amber-800">
+                  {{ 'Your tenant report mailbox has not set its security passwords or encryption keys. You must activate your mailbox and configure your credentials before you can dispatch takedown requests or access the mailbox.' | translate }}
+                </p>
+              </div>
+            </div>
+            <button type="button" (click)="openTakedownMailbox()" class="inline-flex h-9 items-center gap-2 rounded-lg bg-amber-500 px-4 text-xs font-semibold text-white shadow-sm hover:bg-amber-600 transition cursor-pointer [body.light-theme_&]:bg-amber-600 [body.light-theme_&]:hover:bg-amber-700" data-testid="activate-tenant-mailbox-btn">
+              <i class="bi bi-key-fill"></i>
+              <span>{{ 'Activate Tenant Mailbox' | translate }}</span>
+            </button>
+          </div>
+        </div>
+      }
 
       @if (error) {
         <div class="mt-4 rounded-[8px] border border-[rgba(220,53,69,0.35)] bg-[rgba(220,53,69,0.08)] px-4 py-3 text-[13px] text-[var(--color-text1)] [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800">{{ error }}</div>
@@ -97,7 +133,7 @@
                         </button>
                       }
                       @if (canDecide(item) && item.status === 'pending') {
-                        <button data-testid="takedown-accept-button" type="button" (click)="accept(item)" [disabled]="!!actionId" class="inline-flex h-8 items-center gap-2 rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-3 text-[12px] font-semibold text-white transition hover:bg-[rgba(87,165,235,0.9)] disabled:cursor-not-allowed disabled:opacity-50 [body.light-theme_&]:border-sky-700 [body.light-theme_&]:bg-sky-700 [body.light-theme_&]:hover:bg-sky-800 [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-500/30">
+                        <button data-testid="takedown-accept-button" type="button" (click)="accept(item)" [disabled]="!!actionId || (mailAccountStatus && !mailAccountStatus.configured)" class="inline-flex h-8 items-center gap-2 rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-3 text-[12px] font-semibold text-white transition hover:bg-[rgba(87,165,235,0.9)] disabled:cursor-not-allowed disabled:opacity-50 [body.light-theme_&]:border-sky-700 [body.light-theme_&]:bg-sky-700 [body.light-theme_&]:hover:bg-sky-800 [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-500/30" [title]="(mailAccountStatus && !mailAccountStatus.configured) ? ('Tenant mail account must be activated first' | translate) : ('Accept' | translate)">
                           <i class="bi bi-check2 text-[14px] leading-none"></i>
                           {{ 'Accept' | translate }}
                         </button>

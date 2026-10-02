@@ -392,7 +392,28 @@ def test_accept_request_success(monkeypatch):
     result = _run(manager.accept_request(ROOT_ID, _admin_user()))
     assert result["status"] == "accepted"
     assert mail.takedowns[0]["to_email"] == "a@evil.test"
+    assert "evil.test" in mail.takedowns[0]["body_html"]
+    assert "please remove" in mail.takedowns[0]["body_html"]
+    assert "evil.test" in mail.takedowns[0]["body_text"]
+    assert "please remove" in mail.takedowns[0]["body_text"]
     assert record.status == TakedownRequestStatus.ACCEPTED
+
+
+def test_accept_request_fails_when_mail_account_not_activated(monkeypatch):
+    record = _record(
+        status=TakedownRequestStatus.PENDING,
+        abuse_email="a@evil.test",
+        evidence={"result": {"screenshot_path": "/s.png", "html_path": "/h.html"}, "custom_message": "please remove"},
+    )
+    manager = _make_manager(FakeMongoEngine(find_one_results=[_tenant(), record]))
+    mail = FakeMailManager()
+    _use_mail(monkeypatch, mail, mail_status={"keys_configured": False, "mailbox_exists": True})
+    _use_elastic(monkeypatch, FakeElasticConnection())
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.accept_request(ROOT_ID, _admin_user()))
+    assert exc.value.status_code == 400
+    assert "Tenant mail account is not activated" in exc.value.detail
+
 
 
 def test_accept_request_denied_conflict():

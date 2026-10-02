@@ -1081,6 +1081,28 @@ async def reject_takedown_request(request_id: str, decision: Optional[TakedownDe
         current_user,
     )
 
+
+@api_routes.get(
+    "/api/takedowns/unread-mails-count",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])), Depends(license_required("maintainer", bypass_roles=[user_role.ADMIN]))],
+)
+async def get_unread_takedown_mails_count(current_user=Depends(get_current_user)):
+    takedown_manager = TakedownManager.get_instance()
+    count = await takedown_manager.get_unread_takedown_count(current_user)
+    return {"unread_count": count}
+
+
+@api_routes.get(
+    "/api/takedowns/mail-account-status",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])), Depends(license_required("maintainer", bypass_roles=[user_role.ADMIN]))],
+)
+async def get_takedown_mail_account_status(current_user=Depends(get_current_user)):
+    takedown_manager = TakedownManager.get_instance()
+    return await takedown_manager.get_tenant_mail_status(current_user)
+
+
 @api_routes.post(
     "/api/scan-jobs/create",
     include_in_schema=False,

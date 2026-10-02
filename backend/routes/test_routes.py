@@ -139,6 +139,35 @@ async def test_list_takedown_requests(
     )
 
 
+@test_routes.get(
+    "/api/takedowns/unread-mails-count",
+    include_in_schema=False,
+)
+async def test_unread_mails_count():
+    return await TestRouteHelper.get_test_unread_mails_count()
+
+
+@test_routes.get(
+    "/api/takedowns/mail-account-status",
+    include_in_schema=False,
+)
+async def test_mail_account_status():
+    return await TestRouteHelper.get_test_mail_account_status()
+
+
+@test_routes.post(
+    "/api/test/takedown-mail/configure",
+    include_in_schema=False,
+)
+async def test_configure_takedown_mail(configured: bool = Query(True), unread_count: int = Query(0)):
+    TestRouteHelper.TAKEDOWN_MAIL_CONFIGURED = configured
+    TestRouteHelper.TAKEDOWN_UNREAD_MAILS_COUNT = unread_count
+    return {
+        "configured": TestRouteHelper.TAKEDOWN_MAIL_CONFIGURED,
+        "unread_count": TestRouteHelper.TAKEDOWN_UNREAD_MAILS_COUNT,
+    }
+
+
 @test_routes.post(
     "/api/dynamic/user",
     dependencies=SCAN_DEPS,

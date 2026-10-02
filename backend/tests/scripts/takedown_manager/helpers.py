@@ -60,8 +60,27 @@ def _use_http_client(monkeypatch, responses=None, exc=None):
     return posts
 
 
-def _use_mail(monkeypatch, mail):
+def _use_mail(monkeypatch, mail, mail_status=None):
     monkeypatch.setattr(tm.mail_manager, "get_instance", staticmethod(lambda: mail))
+    status = {"keys_configured": True, "mailbox_exists": True} if mail_status is None else mail_status
+    class _FakeMailClient:
+        def __init__(self, target_mail):
+            self.target_mail = target_mail
+
+        async def get_tenant_mailbox_status(self, tid):
+            return status
+
+        async def send_takedown_mail(self, **kw):
+            if self.target_mail is not None:
+                self.target_mail.takedowns.append(kw)
+            return {"status": "sent"}
+
+        async def get_unread_takedown_count(self, tid):
+            return 0
+
+    fake_client = _FakeMailClient(mail)
+    import orion.services.orion_mail_client.orion_mail_client as omc
+    monkeypatch.setattr(omc.orion_mail_client, "get_instance", staticmethod(lambda: fake_client))
 
 
 def _use_elastic(monkeypatch, connection):

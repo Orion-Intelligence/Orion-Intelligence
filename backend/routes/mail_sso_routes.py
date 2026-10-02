@@ -8,8 +8,8 @@ mail_sso_routes = APIRouter(prefix="/api/sso/mail", tags=["Orion Mail SSO"])
 
 
 @mail_sso_routes.get("/authorize")
-async def authorize_mail(request: Request, redirect_uri: str, state: str):
-    return await sso_manager.get_instance().authorize(request, redirect_uri, state)
+async def authorize_mail(request: Request, redirect_uri: str, state: str, tenant_id: str | None = None):
+    return await sso_manager.get_instance().authorize(request, redirect_uri, state, tenant_id=tenant_id)
 
 
 @mail_sso_routes.post("/exchange")

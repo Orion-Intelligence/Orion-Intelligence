@@ -69,7 +69,10 @@ function reportBody(currentRecord: TakedownRecord | null) {
   };
 }
 
-export function registerTakedownIntercepts(seedStatus: TakedownStatus | null = null) {
+export function registerTakedownIntercepts(
+  seedStatus: TakedownStatus | null = null,
+  options: { mailConfigured?: boolean } = { mailConfigured: true }
+) {
   let currentRecord: TakedownRecord | null = seedStatus ? takedownRecord(seedStatus) : null;
 
   void cy.intercept('GET', `**/api/search/defacement/${REPORT_HASH}*`, req => {
@@ -79,7 +82,28 @@ export function registerTakedownIntercepts(seedStatus: TakedownStatus | null = n
     });
   }).as('loadTakedownReport');
 
-  void cy.intercept('GET', '**/api/takedowns*', req => {
+  void cy.intercept('GET', '**/api/takedowns/mail-account-status*', req => {
+    req.reply({
+      statusCode: 200,
+      body: {
+        configured: options.mailConfigured ?? true,
+        mailbox_address: 'admin_report@mail.orionintelligence.org',
+        mailbox_exists: true,
+        is_active: true,
+      },
+    });
+  }).as('loadTakedownMailAccountStatus');
+
+  void cy.intercept('GET', '**/api/takedowns/unread-mails-count*', req => {
+    req.reply({
+      statusCode: 200,
+      body: {
+        unread_count: 0,
+      },
+    });
+  }).as('loadTakedownUnreadMailsCount');
+
+  void cy.intercept('GET', '**/api/takedowns?*', req => {
     const items = currentRecord ? [currentRecord] : [];
     req.reply({
       statusCode: 200,
@@ -91,6 +115,19 @@ export function registerTakedownIntercepts(seedStatus: TakedownStatus | null = n
       },
     });
   }).as('loadTakedowns');
+
+  void cy.intercept('GET', '**/api/takedowns', req => {
+    const items = currentRecord ? [currentRecord] : [];
+    req.reply({
+      statusCode: 200,
+      body: {
+        items,
+        page: 1,
+        limit: 100,
+        total: items.length,
+      },
+    });
+  }).as('loadTakedownsExact');
 
   void cy.intercept('POST', '**/api/takedowns', req => {
     expect(req.body).to.deep.equal({
