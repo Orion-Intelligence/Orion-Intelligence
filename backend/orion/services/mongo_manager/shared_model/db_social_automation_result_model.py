@@ -19,6 +19,8 @@ class SocialDetectedAd(EmbeddedModel):
     shares: str = ""
     views: str = ""
     topic: str = ""
+    iocs: list | None = None
+    is_scam: bool = False
     detected_at: datetime = Field(default_factory=utc_now)
 
 

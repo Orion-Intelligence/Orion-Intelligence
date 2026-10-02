@@ -125,6 +125,8 @@ class SocialAutomationDetectedAdModel(BaseModel):
     shares: str = ""
     views: str = ""
     topic: str = ""
+    iocs: list = Field(default_factory=list)
+    is_scam: bool = False
     detected_at: datetime | None = None
 
 
