@@ -468,9 +468,10 @@ class TenantManager:
             await self.encrypt_tenant(data)
             data.status = TenantStatus.ONBOARDING
 
-            mailbox_data = await orion_mail_client.get_instance().create_tenant_mailbox(tenant_id=str(data.id), tenant_slug=data.slug, tenant_name=plain_name)
-            data.report_mailbox_address = mailbox_data.get("mailbox_address")
-            data.report_mailbox_id = mailbox_data.get("mailbox_id")
+            if env_handler.get_instance().env("TESTING_ENABLED", "0") == "0":
+                mailbox_data = await orion_mail_client.get_instance().create_tenant_mailbox(tenant_id=str(data.id), tenant_slug=data.slug, tenant_name=plain_name)
+                data.report_mailbox_address = mailbox_data.get("mailbox_address")
+                data.report_mailbox_id = mailbox_data.get("mailbox_id")
 
             await self._engine.save(data)
             await self.copy_default_system_settings(data)
